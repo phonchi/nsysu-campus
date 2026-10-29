@@ -38,6 +38,7 @@ export class RideRig {
   private distance=0;
   private valid=false;
   private groundRestore?: Map<T.Object3D,{position:T.Vector3;quaternion:T.Quaternion;scale:T.Vector3}>;
+  private groundBodyOffset=0;
   private baseWheel=new Map<T.Object3D,T.Quaternion>();
   diagnostics:RideDiagnostics={ready:false,phase:0,pitch:0,grips:[],pedals:[],saddleError:0,wheels:[]};
   constructor(private model:T.Object3D,private bike:T.Object3D,private root:T.Object3D){
@@ -57,7 +58,7 @@ export class RideRig {
     this.valid=this.bones.size===14&&this.markers.size===8&&this.handEnds.size===2;this.diagnostics.ready=this.valid;
   }
   releaseGround(){if(!this.groundRestore)return;for(const[o,b]of this.groundRestore){o.position.copy(b.position);o.quaternion.copy(b.quaternion);o.scale.copy(b.scale);}this.groundRestore=undefined;}
-  groundFeet(surface:(x:number,z:number,referenceY:number)=>number|undefined,referenceY:number,idle:boolean){
+  groundFeet(surface:(x:number,z:number,referenceY:number)=>number|undefined,referenceY:number,idle:boolean,dt:number){
     if(!this.valid)return;
     this.root.updateMatrixWorld(true);
     const solePoints=new Map<string,T.Vector3[]>();
@@ -80,9 +81,10 @@ export class RideRig {
       const plane=(p:T.Vector3)=>h+dx*(p.x-centre.x)+dz*(p.z-centre.z);
       return [{side,points,centre,normal,plane,gap:Math.min(...points.map(p=>p.y-plane(p)))}];
     });
-    let active=patches.filter(p=>idle||p.gap<.002);
-    if(!idle&&!active.length){const support=patches.filter(p=>p.gap>.025&&p.gap<.3).sort((a,b)=>a.gap-b.gap)[0];if(support)active=[support];}
-    if(!active.length)return;
+    // A raised swing foot is part of the walk clip, not a missing support contact.
+    // Pulling the torso down to it makes the entire character snap between strides.
+    const active=patches.filter(p=>idle||p.gap+this.groundBodyOffset<.002);
+    if(!active.length&&Math.abs(this.groundBodyOffset)<1e-5){this.groundBodyOffset=0;return;}
     this.groundRestore=new Map();this.model.traverse(o=>this.groundRestore!.set(o,{position:o.position.clone(),quaternion:o.quaternion.clone(),scale:o.scale.clone()}));
     const targets=active.map(p=>{
       const foot=this.bones.get('Foot.'+p.side)!,footAt=pos(foot),rotation=foot.getWorldQuaternion(new T.Quaternion());
@@ -95,8 +97,15 @@ export class RideRig {
       const dy=Math.max(...rotated.map(point=>p.plane(point)-point.y))+.002;
       return {side:p.side,foot,goal:footAt.clone().add(new T.Vector3(0,dy,0)),dy};
     });
-    const body=this.bones.get('Body')!,down=Math.min(0,...targets.map(t=>t.dy))-.001;
-    worldPosition(body,pos(body).add(new T.Vector3(0,down,0)));
+    // Idle can settle onto an inclined stance; walking keeps the authored torso motion
+    // and only corrects feet that would penetrate the ground.
+    const down=idle?Math.min(0,...targets.map(t=>t.dy))-.001:0;
+    // Releasing movement starts the Idle crossfade while a foot may still be raised.
+    // Limit the stance adjustment in both directions instead of snapping the body
+    // down on stop or snapping it back up on the next step.
+    this.groundBodyOffset+=T.MathUtils.clamp(down-this.groundBodyOffset,-.6*dt,.6*dt);
+    const body=this.bones.get('Body')!;
+    worldPosition(body,pos(body).add(new T.Vector3(0,this.groundBodyOffset,0)));
     for(const t of targets){
       const end=this.ankles.get(t.side)!,pole=this.root.localToWorld(new T.Vector3(this.signs.get(t.side)!*.20,.35,-.7));
       solveLimb(this.bones.get('UpperLeg.'+t.side)!,this.bones.get('LowerLeg.'+t.side)!,end,t.goal,pole);
@@ -105,7 +114,7 @@ export class RideRig {
     this.root.updateMatrixWorld(true);
   }
   get ready(){return this.valid;}
-  reset(){this.releaseGround();for(const [o,b]of this.base){o.position.copy(b.position);o.quaternion.copy(b.quaternion);o.scale.copy(b.scale);}this.previous=undefined;this.root.rotation.x=0;this.model.updateWorldMatrix(true,true);}
+  reset(){this.releaseGround();this.groundBodyOffset=0;for(const [o,b]of this.base){o.position.copy(b.position);o.quaternion.copy(b.quaternion);o.scale.copy(b.scale);}this.previous=undefined;this.root.rotation.x=0;this.model.updateWorldMatrix(true,true);}
   apply(foot:T.Vector3,contacts?:{front:number;rear:number}){
     if(!this.valid)return false;
     if(this.previous)this.distance+=Math.hypot(foot.x-this.previous.x,foot.z-this.previous.z);this.previous=foot.clone();

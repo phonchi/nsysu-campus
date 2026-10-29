@@ -51,3 +51,16 @@ it('removes actual terrain triangles protruding through the east tunnel wall, in
  }
  geometry.dispose();(mesh.material as T.Material).dispose();
 });
+
+it('keeps ground beside the east portal when walking diagonally away from the bore',async()=>{
+ const {buildRuntimeWorld}=await import('./world-fixture');const {world,terrain}=buildRuntimeWorld();const c=new RapierController(world.collision);
+ try{
+  expect(c.safeTeleport(new T.Vector3(285,terrain.heightAt(285,224)+.025,224),3)).toBe(true);
+  for(let i=0;i<20;i++)c.step(new T.Vector3(),1/60,false);
+  const heading=new T.Vector3(-Math.sin(7*Math.PI/4),0,-Math.cos(7*Math.PI/4));
+  for(let i=0;i<180;i++){
+   c.step(heading,1/60,false,3.6);
+   expect(c.position.y,`fell through the portal shoulder at frame ${i}: ${c.position.toArray()}`).toBeGreaterThan(terrain.heightAt(c.position.x,c.position.z)-.4);
+  }
+ }finally{c.dispose();}
+},30000);

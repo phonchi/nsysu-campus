@@ -36,17 +36,16 @@ export function fullTunnelGeometry(profile:TunnelProfile){
  return{floor:surfaceGeometry(floor),shell:surfaceGeometry(shell)};
 }
 /** Carve only low ground actually occupying the bore near either opening; leave mountain soil above the roof. */
-export function tunnelGroundCuts(profile:TunnelProfile,ground?:(x:number,z:number)=>number,terrainCell=4):P2[][]{
+export function tunnelGroundCuts(profile:TunnelProfile,ground?:(x:number,z:number)=>number):P2[][]{
  const out:P2[][]=[];
  for(let i=1;i<profile.sections.length;i++){
   const a=profile.sections[i-1],b=profile.sections[i];if(b.distance < -2 || a.distance > profile.length+2)continue;const mid=a.position.clone().lerp(b.position,.5),side=a.right.clone().add(b.right).normalize();
   const low=ground?Array.from({length:11},(_,i)=>i-5).some(x=>ground(mid.x+side.x*x,mid.z+side.z*x)<mid.y+profile.height+1):a.distance<25||b.distance>profile.length-25;
   if(!low)continue;
-  const pad=3,dir=b.position.clone().sub(a.position).setY(0).normalize(),p=a.position.clone().addScaledVector(dir,-pad),q=b.position.clone().addScaledVector(dir,pad);
-  // Terrain.mesh removes whole cells by their centre. Include the cell half-diagonal so
-  // no surviving corner triangle can enter the bore. The current Terrain grid is 4 m.
-  const r=profile.halfWidth+terrainCell/Math.SQRT2+.25;
-  out.push([[p.x+side.x*r,p.z+side.z*r],[q.x+side.x*r,q.z+side.z*r],[q.x-side.x*r,q.z-side.z*r],[p.x-side.x*r,p.z-side.z*r]]);
+  // The terrain now clips triangles exactly. Remove only the actual floor footprint,
+  // preserving adjacent soil instead of deleting a whole grid cell around the opening.
+  const r=profile.halfWidth,p=a.position,q=b.position;
+  out.push([[p.x+a.right.x*r,p.z+a.right.z*r],[q.x+b.right.x*r,q.z+b.right.z*r],[q.x-b.right.x*r,q.z-b.right.z*r],[p.x-a.right.x*r,p.z-a.right.z*r]]);
  }
  return out;
 }

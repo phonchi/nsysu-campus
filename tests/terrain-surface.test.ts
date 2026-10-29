@@ -24,6 +24,17 @@ describe('roads share actual terrain planes',()=>{
   const t=synthetic();t.carves=[[[4,4],[8,4],[8,8],[4,8]]];expect(t.surfaceAt(6,6)).toBeUndefined();const src=roadRibbon([[1,6],[11,6]],2),g=projectRoadGeometry(src,t),p=g.attributes.position;
   for(let k=0;k<p.count;k+=3){const x=(p.getX(k)+p.getX(k+1)+p.getX(k+2))/3,z=(p.getZ(k)+p.getZ(k+1)+p.getZ(k+2))/3;expect(x>4.00001&&x<7.99999&&z>4.00001&&z<7.99999).toBe(false);}src.dispose();g.dispose();
  });
+ it('retains partial-cell soil shoulders and clips roads at the same exact opening',()=>{
+  const t=synthetic();t.carves=[[[5,4],[7,4],[7,8],[5,8]]];
+  const terrain=new Mesh(t.mesh([0,0,12,12]),new MeshBasicMaterial({side:DoubleSide})),src=roadRibbon([[1,6],[11,6]],2),road=new Mesh(projectRoadGeometry(src,t),new MeshBasicMaterial({side:DoubleSide}));
+  terrain.updateMatrixWorld(true);road.updateMatrixWorld(true);
+  for(const x of [4.5,7.5]){
+   const ray=new Raycaster(new Vector3(x,30,6),new Vector3(0,-1,0));
+   expect(t.surfaceAt(x,6)).toBeDefined();expect(ray.intersectObject(terrain)[0]?.point.y).toBeCloseTo(t.heightAt(x,6),5);expect(ray.intersectObject(road)[0]?.point.y).toBeCloseTo(t.heightAt(x,6)+.012,5);
+  }
+  const removed=new Raycaster(new Vector3(6,30,6),new Vector3(0,-1,0));expect(t.surfaceAt(6,6)).toBeUndefined();expect(removed.intersectObject(terrain)).toHaveLength(0);expect(removed.intersectObject(road)).toHaveLength(0);
+  terrain.geometry.dispose();road.geometry.dispose();src.dispose();(terrain.material as MeshBasicMaterial).dispose();(road.material as MeshBasicMaterial).dispose();
+ });
  it('subtracts buildings and stops incoming lane markings at same-level road crossings',()=>{
   const t=synthetic(),layers=buildRoadLayers([{id:'a',kind:'service',width:2,points:[[0,6],[12,6]]},{id:'b',kind:'service',width:2,points:[[6,0],[6,12]]}],t,[0,0,12,12],[[[9,5],[11,5],[11,7],[9,7]]]);
   for(const layer of layers){for(const g of [layer.base,layer.markings].filter(Boolean) as import('three').BufferGeometry[]){expect(maxError(g,t,g===layer.base ? .006:.012)).toBeLessThan(1e-5);const p=g.attributes.position;for(let k=0;k<p.count;k+=3){const x=(p.getX(k)+p.getX(k+1)+p.getX(k+2))/3,z=(p.getZ(k)+p.getZ(k+1)+p.getZ(k+2))/3;expect(x>9.0001&&x<10.9999&&z>5.0001&&z<6.9999).toBe(false);if(g===layer.markings)expect(x>5.0001&&x<6.9999&&z>5.0001&&z<6.9999).toBe(false);}g.dispose();}}

@@ -1,7 +1,8 @@
 import * as T from 'three';
-import { Terrain, type TerrainSurface } from './terrain';
+import type { Terrain, TerrainSurface } from './terrain';
 export type Point2=[number,number];
-type Vertex={x:number;z:number;u:number;v:number};
+export type SurfaceVertex={x:number;z:number;u:number;v:number;y?:number};
+type Vertex=SurfaceVertex;
 const cross=(a:Vertex,b:Vertex,c:Vertex)=>(b.x-a.x)*(c.z-a.z)-(b.z-a.z)*(c.x-a.x);
 function clip(poly:Vertex[],a:Vertex,b:Vertex,sign:number,keepInside=true):Vertex[]{
  const out:Vertex[]=[];if(!poly.length)return out;
@@ -9,7 +10,7 @@ function clip(poly:Vertex[],a:Vertex,b:Vertex,sign:number,keepInside=true):Verte
  for(let i=0;i<poly.length;i++){
   const p=poly[i],q=poly[(i+1)%poly.length],dp=d(p),dq=d(q),pi=dp>=-1e-8,qi=dq>=-1e-8;
   if(pi)out.push(p);
-  if(pi!==qi){const t=dp/(dp-dq);out.push({x:p.x+(q.x-p.x)*t,z:p.z+(q.z-p.z)*t,u:p.u+(q.u-p.u)*t,v:p.v+(q.v-p.v)*t});}
+  if(pi!==qi){const t=dp/(dp-dq);out.push({x:p.x+(q.x-p.x)*t,z:p.z+(q.z-p.z)*t,u:p.u+(q.u-p.u)*t,v:p.v+(q.v-p.v)*t,...(p.y!==undefined&&q.y!==undefined?{y:p.y+(q.y-p.y)*t}:{})});}
  }
  return out;
 }
@@ -22,7 +23,7 @@ export function surfaceCutters(polys:readonly Point2[][]):Cutter[]{
  return polys.flatMap(poly=>{if(poly.length<3)return [];const contour=poly.map(([x,z])=>new T.Vector2(x,z));return T.ShapeUtils.triangulateShape(contour,[]).map(ix=>{const tri=ix.map(i=>toVertex(poly[i]));return {tri,bounds:bounds(tri)};});});
 }
 /** Convex subtraction retains outside fragments, never bridges across a cut-out. */
-function subtract(poly:Vertex[],cutter:Cutter):Vertex[][]{
+export function subtractSurfacePolygon(poly:Vertex[],cutter:Cutter):Vertex[][]{
  if(!overlap(bounds(poly),cutter.bounds))return [poly];
  let inside=poly;const outside:Vertex[][]=[],sign=Math.sign(cross(...cutter.tri as [Vertex,Vertex,Vertex]))||1;
  for(let i=0;i<3&&inside.length;i++){const a=cutter.tri[i],b=cutter.tri[(i+1)%3],part=clip(inside,a,b,sign,false);if(part.length>=3)outside.push(part);inside=clip(inside,a,b,sign);}
@@ -33,18 +34,18 @@ export interface ProjectOptions{offset?:number;exclude?:readonly Point2[][];cutt
  * exactly one supporting terrain plane; this is a visual overlay, never another collider. */
 export function projectRoadGeometry(source:T.BufferGeometry,terrain:Terrain,options:ProjectOptions={}):T.BufferGeometry{
  const positions:number[]=[],uvs:number[]=[],src=source.attributes.position,uv=source.attributes.uv,index=source.index;
- const {origin,cell,cols,rows}=terrain.meta,offset=Math.min(.02,Math.max(0,options.offset??.012)),cutters=options.cutters??surfaceCutters(options.exclude??[]);
+ const {origin,cell,cols,rows}=terrain.meta,offset=Math.min(.02,Math.max(0,options.offset??.012)),cutters=[...surfaceCutters(terrain.carves),...(options.cutters??surfaceCutters(options.exclude??[]))];
  const count=index?.count??src.count;
  for(let k=0;k<count;k+=3){
   const base=[0,1,2].map(j=>{const n=index?index.getX(k+j):k+j;return {x:src.getX(n),z:src.getZ(n),u:uv?.getX(n)??0,v:uv?.getY(n)??0};});
   if(Math.abs(cross(...base as [Vertex,Vertex,Vertex]))<1e-9)continue;
   const box=bounds(base),relevant=cutters.filter(c=>overlap(box,c.bounds)),i0=Math.max(0,Math.floor((box[0]-origin[0])/cell)),i1=Math.min(cols-2,Math.floor((box[2]-origin[0])/cell)),j0=Math.max(0,Math.floor((box[1]-origin[1])/cell)),j1=Math.min(rows-2,Math.floor((box[3]-origin[1])/cell));
   for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){
-   if(terrain.cellCarved(i,j)||options.cellFilter&&!options.cellFilter(i,j))continue;
+   if(options.cellFilter&&!options.cellFilter(i,j))continue;
    const x=origin[0]+i*cell,z=origin[1]+j*cell,a=toVertex([x,z]),b=toVertex([x+cell,z]),c=toVertex([x,z+cell]),d=toVertex([x+cell,z+cell]);
    for(const tri of [[a,c,b],[b,c,d]]){
     const poly=intersect(base,tri);if(poly.length<3)continue;let pieces=[poly];const polyBox=bounds(poly);
-    for(const cutter of relevant){if(overlap(polyBox,cutter.bounds))pieces=pieces.flatMap(p=>subtract(p,cutter));if(!pieces.length)break;}
+    for(const cutter of relevant){if(overlap(polyBox,cutter.bounds))pieces=pieces.flatMap(p=>subtractSurfacePolygon(p,cutter));if(!pieces.length)break;}
     for(const p of pieces)for(let n=1;n<p.length-1;n++){
      let points=[p[0],p[n],p[n+1]];const area=cross(...points as [Vertex,Vertex,Vertex]);if(Math.abs(area)<1e-8)continue;
      const cx=points.reduce((s,p)=>s+p.x,0)/3,cz=points.reduce((s,p)=>s+p.z,0)/3;if(options.accept&&!options.accept(cx,cz))continue;

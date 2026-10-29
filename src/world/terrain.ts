@@ -1,4 +1,5 @@
 import * as T from 'three';
+import {surfaceCutters,subtractSurfacePolygon,type SurfaceVertex} from './road-surface';
 
 type Point2 = [number, number];
 export interface TerrainSurface { id:string; height:number; normal:T.Vector3; kind:'terrain'; layer:'ground' }
@@ -31,7 +32,7 @@ export class Terrain {
   private heightDigest?: string;
   get surfaceVersion() {
     if(!this.heightDigest){let h=2166136261;for(const byte of new Uint8Array(this.heights.buffer,this.heights.byteOffset,this.heights.byteLength)){h=Math.imul(h^byte,16777619);}this.heightDigest=(h>>>0).toString(16);}
-    let holes=2166136261;for(const ch of JSON.stringify({grid:[this.meta.origin,this.meta.cell,this.meta.cols,this.meta.rows],carves:this.carves}))holes=Math.imul(holes^ch.charCodeAt(0),16777619);
+    let holes=2166136261;for(const ch of JSON.stringify({clipping:'exact-triangle-polygons-v1',grid:[this.meta.origin,this.meta.cell,this.meta.cols,this.meta.rows],carves:this.carves}))holes=Math.imul(holes^ch.charCodeAt(0),16777619);
     return `terrain-triangles-v2:${this.heightDigest}:${(holes>>>0).toString(16)}`;
   }
 
@@ -51,15 +52,10 @@ export class Terrain {
     const {i,j,u,v}=this.cellAt(x,z),a=this.vertexHeight(i,j),b=this.vertexHeight(i+1,j),c=this.vertexHeight(i,j+1),d=this.vertexHeight(i+1,j+1);
     return u+v<=1?a*(1-u-v)+b*u+c*v:b*(1-v)+c*(1-u)+d*(u+v-1);
   }
-  /** The mesh removes complete cells by their centre; queries use the identical rule. */
-  cellCarved(i:number,j:number,step=1) {
-    const {origin,cell}=this.meta,x=origin[0]+(i+step/2)*cell,z=origin[1]+(j+step/2)*cell;
-    return this.carves.some(p=>inPolygon([x,z],p));
-  }
   surfaceAt(x:number,z:number):TerrainSurface|undefined {
     const {origin,cell,cols,rows}=this.meta;
     if(!Number.isFinite(x)||!Number.isFinite(z)||x<origin[0]||z<origin[1]||x>origin[0]+cell*(cols-1)||z>origin[1]+cell*(rows-1))return;
-    const {i,j,u,v}=this.cellAt(x,z);if(this.cellCarved(i,j))return;
+    const {i,j,u,v}=this.cellAt(x,z);if(this.carves.some(p=>inPolygon([x,z],p)))return;
     const a=this.vertexHeight(i,j),b=this.vertexHeight(i+1,j),c=this.vertexHeight(i,j+1),d=this.vertexHeight(i+1,j+1);
     const dx=u+v<=1?(b-a)/cell:(d-c)/cell,dz=u+v<=1?(c-a)/cell:(d-b)/cell;
     return {id:`terrain:${i}:${j}:${u+v<=1?0:1}`,height:this.heightAt(x,z),normal:new T.Vector3(-dx,1,-dz).normalize(),kind:'terrain',layer:'ground'};
@@ -87,7 +83,7 @@ export class Terrain {
     const { origin, cell, cols, rows } = this.meta, c = cell * step;
     const i0 = Math.max(0, Math.floor((bounds[0] - origin[0]) / cell)), i1 = Math.min(cols - 1, Math.ceil((bounds[2] - origin[0]) / cell));
     const j0 = Math.max(0, Math.floor((bounds[1] - origin[1]) / cell)), j1 = Math.min(rows - 1, Math.ceil((bounds[3] - origin[1]) / cell));
-    const pos: number[] = [], idx: number[] = [], vid = new Map<number, number>();
+    const pos: number[] = [], idx: number[] = [], vid = new Map<number, number>(),cutters=surfaceCutters(this.carves);
     const vert = (i: number, j: number) => {
       const k = j * cols + i; let n = vid.get(k);
       if (n === undefined) {
@@ -101,9 +97,20 @@ export class Terrain {
     for (let j = j0; j + step <= j1; j += step) for (let i = i0; i + step <= i1; i += step) {
       const x = origin[0] + i * cell, z = origin[1] + j * cell;
       if (exclude && exclude(x, z) && exclude(x + c, z) && exclude(x, z + c) && exclude(x + c, z + c)) continue;
-      if (this.cellCarved(i,j,step)) continue;
       const a = vert(i, j), b = vert(i + step, j), d = vert(i, j + step), e = vert(i + step, j + step);
-      idx.push(a, d, b, b, d, e);
+      const relevant=cutters.filter(cut=>cut.bounds[0]<x+c&&cut.bounds[2]>x&&cut.bounds[1]<z+c&&cut.bounds[3]>z);
+      if(!relevant.length){idx.push(a,d,b,b,d,e);continue;}
+      // Keep the original terrain plane outside each exact opening. Whole-cell removal
+      // would create unsupported shoulders outside the narrower replacement tunnel floor.
+      const point=(n:number):SurfaceVertex=>({x:pos[n*3],y:pos[n*3+1],z:pos[n*3+2],u:0,v:0});
+      for(const triangle of [[a,d,b],[b,d,e]]){
+        let pieces=[triangle.map(point)];for(const cutter of relevant){pieces=pieces.flatMap(p=>subtractSurfacePolygon(p,cutter));if(!pieces.length)break;}
+        for(const polygon of pieces)for(let k=1;k<polygon.length-1;k++){
+          const tri=[polygon[0],polygon[k],polygon[k+1]];
+          if(Math.abs((tri[1].x-tri[0].x)*(tri[2].z-tri[0].z)-(tri[1].z-tri[0].z)*(tri[2].x-tri[0].x))<1e-8)continue;
+          for(const p of tri){idx.push(pos.length/3);pos.push(p.x,p.y!,p.z);}
+        }
+      }
     }
     const g = new T.BufferGeometry();
     g.setAttribute('position', new T.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals(); g.userData.surfaceVersion=this.surfaceVersion;

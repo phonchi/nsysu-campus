@@ -127,8 +127,12 @@ export class Avatar {
     this.rideRig?.releaseGround();
     this.lastFrame=f;
     // Visual height: follows the feet closely, but filters millimetre contact noise and stair-step pops.
-    if (this.visualY === undefined || !f.onGround || Math.abs(f.foot.y - this.visualY) > .6) this.visualY = f.foot.y;
-    else this.visualY += (f.foot.y - this.visualY) * damp(30, dt);
+    // The grounded capsule can retain a small collision offset above its support.
+    // Place the visible feet on that support instead of pulling the animated torso
+    // down separately on whichever swing foot happens to be lowest this frame.
+    const targetY=f.onGround&&f.surfaceHeight!==undefined&&Math.abs(f.foot.y-f.surfaceHeight)<.15?f.surfaceHeight:f.foot.y;
+    if (this.visualY === undefined || !f.onGround || Math.abs(targetY - this.visualY) > .6) this.visualY = targetY;
+    else this.visualY += (targetY - this.visualY) * damp(30, dt);
     if(f.surfaceHeight!==undefined&&f.onGround)this.visualY=Math.max(this.visualY,f.surfaceHeight);
     this.root.position.set(f.foot.x, this.visualY, f.foot.z);
 
@@ -175,7 +179,7 @@ export class Avatar {
     if (walk) walk.timeScale = T.MathUtils.clamp(this.animSpeed / 3.6, .7, 1.5);
     if (run) run.timeScale = T.MathUtils.clamp(this.animSpeed / f.runSpeed, .8, 1.3);
     this.mixer?.update(dt);
-    if(f.onGround&&f.supportAt)this.rideRig?.groundFeet(f.supportAt,f.foot.y,!moving);
+    if(f.onGround&&f.supportAt)this.rideRig?.groundFeet(f.supportAt,f.foot.y,!moving,dt);
   }
 
   /** Attach the bike (shown only while riding); wheels named /wheel/i spin with speed. */
