@@ -1,6 +1,5 @@
 網站：[山海之間 · 中山校園導覽](https://phonchi.github.io/nsysu-campus/)
 
-> 公開快照的內容範圍、建置與驗證說明請見 [PUBLICATION.md](PUBLICATION.md)。完整本機驗證輸出未上傳。
 
 # 山海之間 · 中山校園導覽
 
@@ -13,13 +12,13 @@
 
 ## v6 接地、騎乘與校園手帳
 
-v6 修正道路／標線與地形不同高、坡下隱形平板、洞內植被、導航線、騎姿握把／踏板及坡面鞋底；導航已依新版表面重建。實際數值、畫面、覆蓋限制與原始失敗見 `artifacts/v6/verification.md`。
+v6 修正道路／標線與地形不同高、坡下隱形平板、洞內植被、導航線、騎姿握把／踏板及坡面鞋底；導航已依新版表面重建。
 
 按 **J** 或 Esc 選單開啟校園手帳：接受／追蹤 12 條支線，查看事件經過與人物見聞；G 前往目前追蹤目標，靠近按 E 互動；重疊目標可按 R 或點選提示切換，提示與 E 共用同一目標。拍照任務需用 P 開啟相機、Space 真正拍照，快門當刻須符合任務地點與時段。任務、選擇與紀念章保存在本機瀏覽器。
 
 六類隨機偶遇包含猴子搶點心、偷帽子、風吹傳單、滾球、臨時合奏與合照。可參與或放棄；猴子只搶事件專用物品，不扣既有收藏。偶遇不在主線對話、手帳、遊戲或自動帶路期間插入。
 
-重開主線保留收藏和手帳；清除全部進度另需確認。實作範圍見 `docs/spec-v5.md`，初版驗證見 `artifacts/v5/verification.md`；Fable／Opus 審查後的修正、實際驗證與限制見 `artifacts/v5-fixes/verification.md`。
+重開主線保留收藏和手帳；清除全部進度另需確認。
 
 地標可從首頁搜尋「校碑」或「行政大樓」，進入 3D 後可用資訊卡「查看全貌」辨識完整模型。隧道到達時會面向入口，可沿洞內通道走至另一端。
 
@@ -73,7 +72,6 @@ npm run build      # 資料完整性、步行資料、故事資料、tsc、Vite
 | `src/audio/` | WebAudio 合成環境音與音效 |
 | `src/walk-*.ts` | 世界建構（樓層、樓梯、電梯、門）、美術裝飾、LOD、天空 |
 
-規格與決策：`docs/spec-v4.md`（含 GPT-6 審查修正 §15）、`docs/tickets-v4/`；v3：`docs/spec-v3.md`、`docs/tickets-v3/`。v4 美術方向與 NPC 名單：`docs/reference/art-direction-v4.md`、`npc-cast-v4.md`；參考研究：`docs/reference/v4-research-gemini.md`。美術與故事：`docs/reference/art-direction-v3.md`、`story-draft-v3.md`；校史查證表：`docs/reference/nsysu-history-v3.md`；地標照片研究：`docs/reference/landmarks/`。
 
 ## 資料管線
 

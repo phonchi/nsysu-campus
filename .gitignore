@@ -11,3 +11,8 @@ __pycache__/
 *.blend1
 .env
 .env.*
+
+# Internal project documents remain local.
+docs/*
+!docs/licenses.md
+PUBLICATION.md
