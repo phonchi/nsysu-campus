@@ -12,6 +12,7 @@ import { wouldEnterDoor } from '../walk-door';
 import type { CampusStructure, WalkBuilding, WalkDestination } from '../walk-types';
 import { RapierController, initPhysics } from './controller';
 import { doorConstraint, animateDoors } from './doors';
+import { shoreConstraint } from './shore-constraint';
 import { CameraRig } from './camera-rig';
 import { Avatar } from './avatar';
 import { surfaceRouteSegments } from './surface-route';
@@ -208,7 +209,9 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     physics = new RapierController(world.collision);
     const obstacles = (world.display.userData.obstacles ?? []) as Obstacle[];
     physics.addObstacles(obstacles); obstacleField.add(obstacles);
-    physics.constrain = doorConstraint(world.doors);
+    const doors = doorConstraint(world.doors);
+    const shore = shoreConstraint(terrain, (x,z,y)=>physics.supportAt(x,z,y));
+    physics.constrain = (position,velocity,h)=>{ doors(position,velocity,h); shore(position,velocity,h); };
     physics.teleport(world.spawn);
     terrainRef = terrain;
     void addCampusProps(world, url => new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync(url), asset, () => alive, (x,z,y)=>physics.supportAt(x,z,y))
