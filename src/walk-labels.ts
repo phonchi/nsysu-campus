@@ -3,12 +3,15 @@ import * as T from 'three';
 import { FACULTY, BUILDING_FACULTY } from './walk-materials';
 
 export interface CampusLabel {id:string;name:string;sub?:string;position:T.Vector3;priority:number;faculty?:string;}
+export function prioritizeCampusLabels<T extends {l:CampusLabel;d:number}>(candidates:readonly T[],focused?:string):T[]{return [...candidates].sort((a,b)=>Number(b.l.id===focused)-Number(a.l.id===focused)||a.l.priority-b.l.priority||a.d-b.d);}
 const safe=(s:string)=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 
 export class LabelLayer {
  readonly root:HTMLDivElement;
  private readonly nodes=new Map<string,HTMLButtonElement>();
  private readonly v=new T.Vector3();
+ private focused?:string;
+ setFocused(id?:string){this.focused=id;}
  constructor(host:HTMLElement,private readonly labels:CampusLabel[],onSelect:(id:string)=>void){
   this.root=document.createElement('div');this.root.className='walk-labels';this.root.setAttribute('aria-label','建築名牌');host.append(this.root);
   for(const l of labels){
@@ -28,7 +31,7 @@ export class LabelLayer {
  }
  update(camera:T.PerspectiveCamera,width:number,height:number,overview:boolean,avoid:DOMRect[]=[],now=performance.now()){
   const max=overview?(width<700?8:14):(width<700?3:5),limit=overview?2600:140,placed:{x0:number;y0:number;x1:number;y1:number}[]=avoid.map(r=>({x0:r.left,y0:r.top,x1:r.right,y1:r.bottom}));
-  const order=this.labels.map(l=>({l,d:camera.position.distanceTo(l.position)})).filter(o=>o.d<(overview?limit:limit*.6)).sort((a,b)=>a.l.priority-b.l.priority||a.d-b.d);
+  const order=prioritizeCampusLabels(this.labels.map(l=>({l,d:camera.position.distanceTo(l.position)})).filter(o=>o.d<(overview?limit:limit*.6)),this.focused);
   if(overview)this.occluded.clear();else if(now-this.lastOcclusion>150){this.lastOcclusion=now;this.refreshOcclusion(camera,order.slice(0,10).map(o=>o.l));}
   const shown=new Set<string>();
   for(const {l,d} of order){

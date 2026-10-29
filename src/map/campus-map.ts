@@ -1,15 +1,15 @@
 import './map.css';
 import { normalizeProgress } from '../story/engine';
+import { withGateMapBuilding, type MapBuilding } from './map-landmarks';
 
 type P = [number, number];
-interface MapBuilding { id: string; name: string; kind: string; walkable: boolean; polygon: P[]; storeys?: number }
 interface MapData {
   spawn: P; buildings: MapBuilding[]; background: P[][];
   roads: { kind: string; width: number; points: P[] }[];
   water: { kind: string; points: P[] }[];
   sport: { kind: string; polygon: P[] }[];
   base?: { url: string; bounds: [number, number, number, number] };
-  landmarks?: Record<string, { centroid: P; note?: string }>;
+  landmarks?: Record<string, { centroid: P; yaw?:number; note?: string }>;
 }
 interface Card { name: string; college?: string; summary?: string; facts?: string[]; links?: { label: string; url: string }[] }
 interface Chapter { id: string; title: string; objective: string }
@@ -51,11 +51,15 @@ export async function mountCampusMap(root: HTMLElement, base: string, hooks: Map
 </aside></div>`;
   const svg = root.querySelector<SVGSVGElement>('.cm-svg')!;
   const card = root.querySelector<HTMLElement>('.cm-card')!;
-  const [data, info, story] = await Promise.all([
+  const [rawData, info, story] = await Promise.all([
     fetch(asset('data/campus-map.json')).then(r => r.json() as Promise<MapData>),
     fetch(asset('data/campus-info.json')).then(r => r.json() as Promise<{ buildings: Record<string, Card> }>).catch(() => ({ buildings: {} as Record<string, Card> })),
     fetch(asset('data/chapters.json')).then(r => r.json() as Promise<{ chapters: Chapter[] }>).catch(() => ({ chapters: [] as Chapter[] })),
   ]);
+
+  const data=withGateMapBuilding(rawData);
+  info.buildings.GATE ??= {name:'校門・校碑',summary:'校碑位於校門海側，警衛亭在山側。可在3D校園前往附近觀看。'};
+  const mapPois=POIS.filter(p=>p.id!=='gate'||!data.buildings.some(b=>b.id==='GATE'));
 
   // ---- chapters progress -------------------------------------------------------------------
   const progress = readStory();
@@ -66,7 +70,7 @@ export async function mountCampusMap(root: HTMLElement, base: string, hooks: Map
   if (progress.done.length || progress.active) root.querySelector<HTMLElement>('[data-go=story]')!.textContent = progress.done.length === story.chapters.length ? '再玩一次導覽' : '繼續導覽';
 
   // ---- geometry ----------------------------------------------------------------------------
-  const pts = [...data.buildings.flatMap(b => b.polygon), ...POIS.flatMap(p => data.landmarks?.[p.id] ? [data.landmarks[p.id].centroid] : [])];
+  const pts = [...data.buildings.flatMap(b => b.polygon), ...mapPois.flatMap(p => data.landmarks?.[p.id] ? [data.landmarks[p.id].centroid] : [])];
   const minX = Math.min(...pts.map(p => p[0])) - 160, maxX = Math.max(...pts.map(p => p[0])) + 160;
   const minZ = Math.min(...pts.map(p => p[1])) - 140, maxZ = Math.max(...pts.map(p => p[1])) + 140;
   const full = { x: minX, y: minZ, w: maxX - minX, h: maxZ - minZ };
@@ -76,7 +80,7 @@ export async function mountCampusMap(root: HTMLElement, base: string, hooks: Map
   const centroid = (p: P[]) => { let a = 0, cx = 0, cz = 0; for (let i = 0; i < p.length; i++) { const [x0, z0] = p[i], [x1, z1] = p[(i + 1) % p.length], f = x0 * z1 - x1 * z0; a += f; cx += (x0 + x1) * f; cz += (z0 + z1) * f; } return a ? [cx / (3 * a), cz / (3 * a)] as P : p[0]; };
   const area = (p: P[]) => Math.abs(p.reduce((s, [x0, z0], i) => { const [x1, z1] = p[(i + 1) % p.length]; return s + x0 * z1 - x1 * z0; }, 0)) / 2;
   // Label priority: hand-modelled landmarks, then walkable buildings, then the rest.
-  const LANDMARK_OSM = ['AD', 'IL', 'YH', 'SPORT', 'ACTIVITY', 'ME', 'BEACH'];
+  const LANDMARK_OSM = ['AD', 'IL', 'YH', 'SPORT', 'ACTIVITY', 'ME', 'BEACH','GATE'];
   const rank = (b: MapBuilding) => LANDMARK_OSM.includes(b.id) ? 2 : b.walkable ? 1 : 0;
   const roadW: Record<string, number> = { tertiary: 9, unclassified: 7, residential: 6, living_street: 5, service: 4.5, footway: 2.4, path: 2, steps: 2.4 };
   svg.innerHTML = `<defs>
@@ -89,9 +93,9 @@ ${data.base ? `<image href="${asset(data.base.url)}" x="${data.base.bounds[0]}" 
 <g class="cm-sport">${data.sport.map(s => `<path d="${path(s.polygon)}" class="${s.kind}"/>`).join('')}</g>
 <g class="cm-roads">${data.roads.map(r => `<path d="${path(r.points, false)}" class="${r.kind}" stroke-width="${roadW[r.kind] ?? 3}"/>`).join('')}</g>
 <g class="cm-bg">${data.background.map(p => `<path d="${path(p)}"/>`).join('')}</g>
-<g class="cm-buildings">${data.buildings.map(b => `<g class="cm-b" data-id="${esc(b.id)}" data-kind="${b.kind}" tabindex="0" role="button" aria-label="${esc(b.name)}"><path d="${path(b.polygon)}" style="--k:${KINDS[b.kind]?.color ?? '#c75f4a'}"/>${b.walkable ? `<path d="${path(b.polygon)}" class="cm-walk"/>` : ''}</g>`).join('')}</g>
-<g class="cm-labels">${[...data.buildings].sort((a, b) => rank(b) - rank(a) || area(b.polygon) - area(a.polygon)).map(b => { const [x, z] = centroid(b.polygon); return `<g class="cm-l" data-id="${esc(b.id)}" transform="translate(${x} ${z})"><text>${esc(b.name.replace(/（.*?）/g, ''))}</text></g>`; }).join('')}</g>
-${POIS.filter(p => data.landmarks?.[p.id]).map(p => { const [x, z] = data.landmarks![p.id].centroid; return `<g class="cm-poi" data-poi="${p.id}" transform="translate(${x} ${z})"><path d="M0 0l-7-12a8 8 0 1 1 14 0z"/><text y="-26">${esc(p.label)}</text></g>`; }).join('')}
+<g class="cm-buildings">${data.buildings.map(b => `<g class="cm-b" data-id="${esc(b.id)}" data-kind="${b.kind}" tabindex="0" role="button" aria-label="${esc(b.name)}"><path d="${b.id==='GATE'?'M0 0l-7-12a8 8 0 1 1 14 0z':path(b.polygon)}" ${b.id==='GATE'?`transform="translate(${centroid(b.polygon).join(' ')})"`:''} style="--k:${KINDS[b.kind]?.color ?? '#c75f4a'}"/>${b.walkable ? `<path d="${path(b.polygon)}" class="cm-walk"/>` : ''}</g>`).join('')}</g>
+<g class="cm-labels">${[...data.buildings].sort((a, b) => rank(b) - rank(a) || area(b.polygon) - area(a.polygon)).map(b => { const [x, z] = centroid(b.polygon); return `<g class="cm-l" data-id="${esc(b.id)}" transform="translate(${x} ${b.id==='GATE'?z-26:z})"><text>${esc(b.name.replace(/（.*?）/g, ''))}</text></g>`; }).join('')}</g>
+${mapPois.filter(p => data.landmarks?.[p.id]).map(p => { const [x, z] = data.landmarks![p.id].centroid; return `<g class="cm-poi" data-poi="${p.id}" transform="translate(${x} ${z})"><path d="M0 0l-7-12a8 8 0 1 1 14 0z"/><text y="-26">${esc(p.label)}</text></g>`; }).join('')}
 <g class="cm-you" transform="translate(${data.spawn[0]} ${data.spawn[1]})"><circle r="9"/><text y="-14">起點・理工長廊</text></g>`;
 
   // ---- pan / zoom --------------------------------------------------------------------------

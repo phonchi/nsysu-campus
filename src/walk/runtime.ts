@@ -31,6 +31,7 @@ import { GrowableSurfaceField, campusVegetationVolumes } from '../world/growable
 import { gateBarrierObstacles } from '../world/gate-barriers';
 import { loadPlacements, landmarkCarves, landmarkTransforms, loadLandmarks, REPLACES } from '../world/landmarks';
 import { OutdoorRoutes } from './route';
+import { fullTunnelProfile, tunnelBores } from '../world/tunnel-surface';
 import { Campus, clearCampus, type Body } from '../story/collection';
 import { clearProgress } from '../story/engine';
 import { GrassTufts, type GroundMask } from '../render/ground';
@@ -160,7 +161,10 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   const featureStatus: Record<string,string> = { props:'loading', legacyProps:'loading', quests:'loading', encounters:'loading', landmarks:'loading', bike:'loading' };
   let failEncounterScene = false;
   let terrainRef: Terrain | undefined, replacedOsm = new Set<string>(), landmarksReady = false;
-  let campusData: WalkBuilding[] = [], structure: CampusStructure, campusInfo: CampusInfo | undefined;
+  let campusData: WalkBuilding[] = [], structure: CampusStructure, uiStructure: CampusStructure, campusInfo: CampusInfo | undefined;
+  let uiPlacements: Awaited<ReturnType<typeof loadPlacements>> | undefined;
+  const landmarkBounds = new Map<string,T.Box3>(), landmarkAnchors: Record<string,T.Vector3> = {};
+  let refreshLandmarkUi = () => {};
   try {
     const nav = await import('../walk-nav');
     const [buildings, access, s, terrain] = await Promise.all([
@@ -171,8 +175,9 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       initPhysics(),
     ]);
     const placements = await loadPlacements(asset).catch(() => undefined);
+    uiPlacements = placements; uiStructure = s;
     if (placements) {
-      terrain.carves = landmarkCarves(placements);
+      terrain.carves = landmarkCarves(placements, (x,z)=>terrain.heightAt(x,z));
       // OSM blocks that a hand-modelled landmark replaces are never built (display or collision).
       const gone = new Set(Object.keys(placements).map(id => REPLACES[id]).filter(Boolean));
       replacedOsm = gone;
@@ -182,13 +187,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     for (const b of campusData) for (const f of b.floors) f.access = access.floors[f.id];
     world = buildWalkWorld(campusData, structure, terrain);
     world.display.userData.roadExclusions = s.context.landmarks.filter(l => replacedOsm.has(l.id)).map(l => l.polygon);
-    if (placements?.tunnel) {
-      const placement = placements.tunnel;
-      world.display.userData.treeBores = [{
-        inverse: landmarkTransforms('tunnel', placement, (x, z) => terrain.heightAt(x, z))[0].clone().invert(),
-        bounds: new T.Box3(new T.Vector3(-3.9, -.3, -(placement.walkableLength ?? 20) - 2), new T.Vector3(3.9, 6.8, 2)),
-      }];
-    }
+    if (placements?.tunnel) world.display.userData.treeBores = tunnelBores(fullTunnelProfile(placements.tunnel, (x,z)=>terrain.heightAt(x,z)));
     decorateCampus(world, structure, terrain, TIERS[tier].detail.leaf);
     lod = new CampusLod(world, structure);
     scene.add(world.display);
@@ -222,6 +221,18 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       // Hand-modelled landmarks replace the OSM blocks and the v2 procedural features at those sites.
       world.display.traverse(o => { if (o.name.startsWith('Landmark features')) o.visible = false; });
       scene.add(lm.display); physics.addStatic(lm.collision);
+      lm.display.traverse(object => {
+        const landmarkId = object.userData.landmarkId as string | undefined;
+        if (!landmarkId || (object.userData.portal && object.userData.portal !== 'west')) return;
+        const id = REPLACES[landmarkId] ?? ({gate:'GATE',tunnel:'TUNNEL'} as Record<string,string>)[landmarkId] ?? landmarkId;
+        const bounds = new T.Box3().setFromObject(object);
+        if (bounds.isEmpty()) return;
+        landmarkBounds.set(id,bounds);
+        const anchor = bounds.getCenter(new T.Vector3()); anchor.y = bounds.max.y + 2;
+        if (id === 'GATE') anchor.x = (uiPlacements?.gate?.centroid[0] ?? anchor.x) - 7.5;
+        landmarkAnchors[id] = anchor;
+      });
+      refreshLandmarkUi();
       // Gate boom arms live in the merged visual GLB. Register their actual asset
       // bounds before announcing landmark readiness or validating outdoor routes.
       const barriers = gateBarrierObstacles(lm.display);
@@ -343,9 +354,12 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   };
   /** Auto-walk along the outdoor path network to a named anchor (non-walkable landmarks, story places). */
   function walkOutdoor(anchor: string) {
+    anchor = ({AD:'admin',IL:'library',GATE:'gate',TUNNEL:'tunnel-west'} as Record<string,string>)[anchor] ?? anchor;
     if(!routesValidated) { say('場景碰撞與步道仍在準備，請稍候再開始帶路。');return; }
     routes?.avoid.splice(0);
-    const p = routes?.path(physics.position, anchor) ?? [];
+    const tunnel = uiPlacements?.tunnel && terrainRef ? fullTunnelProfile(uiPlacements.tunnel,(x,z)=>terrainRef!.heightAt(x,z)) : undefined;
+    const goal = anchor==='tunnel-east' ? tunnel?.east : anchor==='tunnel-west' ? tunnel?.west : routes?.anchor(anchor) ?? npcs?.anchorPoint(anchor);
+    const p = goal ? planRoute(goal) : [];
     if (!p.length) { say('找不到通往這裡的步道；請從地圖查看位置。', 5000); return; }
     clearAuto(); autoPath = p; pathIndex = 0; replans = 0; progressTime = performance.now(); progressPosition.copy(physics.position);
     autoDestination = { id: anchor, label: routes!.label(anchor), position: p[p.length - 1].toArray() as [number, number, number], buildingId: anchor, floorId: 'outdoor' } as WalkDestination;
@@ -403,6 +417,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     if(door) add(`door:${door.id}`,`${door.target?'關門':'開門'}・${door.label}`,50,door.position,()=>{
       const r=toggleDoor(world,p);if(r.kind==='blocked')say('請先離開門口，再關門。');else if(r.kind!=='none')say(`${r.kind==='opened'?'打開':'關上'} ${r.door.label}｜室內配置為示意`,3000);
     });
+    const nearbyLandmark=campusUi?.nearbyLandmark(p);
+    if(nearbyLandmark) add(`landmark:${nearbyLandmark.id}`,`${nearbyLandmark.name}資訊`,40,nearbyLandmark.position,()=>campusUi?.openCard(nearbyLandmark.id));
     if(campusUi?.nearStory) add('history','校園故事',45,p,()=>{campusUi.interact(p);});
     return out;
   }
@@ -581,11 +597,22 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   floorOptions();
   buildingSelect.addEventListener('change', () => { inspectedBuilding = buildingSelect.value; floorOptions(); chooseMode(true); });
   floorSelect.addEventListener('change', () => { if (!overview) chooseMode(true); });
-  const campusUi = campusInfo ? new CampusUi(host, scene, world, structure, campusData, campusInfo, {
-    goToBuilding: id => { const d = world.destinations.find(d => d.id === `${id}-1F-entrance`); if (d) { chooseMode(false); goTo(d); } },
+  const campusUi = campusInfo ? new CampusUi(host, scene, world, uiStructure, campusData, campusInfo, {
+    goToBuilding: id => { const d = world.destinations.find(d => d.id === `${id}-1F-entrance`); if (d) { chooseMode(false); goTo(d); } else { chooseMode(false); walkOutdoor(({AD:'admin',IL:'library',GATE:'gate'} as Record<string,string>)[id] ?? id); } },
     inspectBuilding: id => { chooseMode(true); buildingSelect.value = id; buildingSelect.dispatchEvent(new Event('change')); },
+    focusLandmark: id => {
+      const bounds = landmarkBounds.get(id);
+      if (!bounds) { say('地標模型仍在載入，請稍候再查看。'); return; }
+      clearAuto(); chooseMode(true);
+      const center = bounds.getCenter(new T.Vector3()), size = bounds.getSize(new T.Vector3());
+      const distance = Math.max(size.y, size.x / camera.aspect, size.z) / (2 * Math.tan(camera.fov * Math.PI / 360)) * 1.6;
+      orbit.target.copy(center); const view=id==='AD'?new T.Vector3(0,.28,1):new T.Vector3(-.55,.30,1); camera.position.copy(center).add(view.normalize().multiplyScalar(distance)); orbit.update();campusUi?.focusLandmarkLabel(id);
+      say(`查看全貌：${campusInfo?.buildings[id]?.name ?? (id==='GATE'?'校門校碑':id)}（拖曳旋轉，滾輪遠近）`,6000);
+    },
     say,
-  }) : undefined;
+  }, {ground:(x,z)=>terrainRef?.heightAt(x,z) ?? -.055,placements:uiPlacements,anchors:landmarkAnchors}) : undefined;
+  refreshLandmarkUi = () => campusUi?.updateLandmarkAnchors(landmarkAnchors);
+  refreshLandmarkUi();
   const resize = () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); applyTier(tier); };
   window.addEventListener('resize', resize);
 
@@ -968,7 +995,12 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       const step = followRoute(autoPath, pathIndex, physics.position, direction);
       pathIndex = step.index;
       if (step.arrived) {
+        const arrivalId=autoDestination?.id;
         const label = autoDestination?.label, indoor = !['quest', 'outdoor'].includes(autoDestination?.floorId ?? ''); clearAuto(); direction.set(0, 0, 0);
+        if ((arrivalId==='tunnel-west'||arrivalId==='TUNNEL'||arrivalId==='tunnel-east') && uiPlacements?.tunnel && terrainRef) {
+          const profile=fullTunnelProfile(uiPlacements.tunnel,(x,z)=>terrainRef!.heightAt(x,z));
+          rig.yaw=arrivalId==='tunnel-east'?profile.eastYaw:profile.westYaw;rig.pitch=-.08;rig.distance=4.6;rig.snap(physics.position);
+        }
         say(indoor ? `已抵達 ${label ?? '目的地'} 門口，按 E 開門後可走入。` : `已抵達：${label ?? '目的地'}`, 6000);
       }
       if (autoPath.length && time - progressTime > 3500) {
@@ -1138,6 +1170,9 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     get navReady() { return !!navigation && routesValidated; },
     get worldReady() { return routesValidated; },
     get featureStatus() { return {...featureStatus}; },
+    get landmarkUi() { return QA ? campusUi?.landmarkDiagnostics : undefined; },
+    get tunnelProfile() { if (!QA || !uiPlacements?.tunnel || !terrainRef) return undefined; const p=fullTunnelProfile(uiPlacements.tunnel,(x,z)=>terrainRef!.heightAt(x,z)); return {length:p.length,sections:p.sections.map(s=>({position:s.position.toArray(),tangent:s.tangent.toArray(),right:s.right.toArray(),distance:s.distance}))}; },
+    get tunnel() { if (!QA || !uiPlacements?.tunnel || !terrainRef) return undefined; const p=fullTunnelProfile(uiPlacements.tunnel,(x,z)=>terrainRef!.heightAt(x,z)); return {length:p.length,west:p.west.toArray(),east:p.east.toArray(),westYaw:p.westYaw,eastYaw:p.eastYaw}; },
     get readiness() { return {...featureStatus,worldReady:routesValidated,routesValidated,propsReady,legacyPropsReady,bikeStandReady,landmarksReady,vegetationReady:growable?.ready ?? false,rideReady:avatar.rideReady}; },
     get renderStats() { return { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, geometries: renderer.info.memory.geometries }; },
     /** Visible drawables grouped by their nearest named ancestor, for draw-call budgeting. */

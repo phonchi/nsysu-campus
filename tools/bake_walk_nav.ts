@@ -84,6 +84,8 @@ try {
  for(const d of world.destinations)box.expandByPoint(new Vector3(...d.position));
  // Story places the auto-walk must reach on the navmesh (gate and seawall stay on the outdoor path network).
  const zones=JSON.parse(await readFile(resolve(root,'public/data/story-zones.json'),'utf8')) as {zones:Record<string,{p:[number,number]}>};
+ const tunnelPlacement=JSON.parse(await readFile(resolve(root,'public/models/landmarks/placements.json'),'utf8')).tunnel;
+ for(const p of tunnelPlacement?.centerline??[])box.expandByPoint(new Vector3(p[0],-2,p[1])).expandByPoint(new Vector3(p[0],8,p[1]));
  for(const id of ['tunnel-west','tunnel-inside','admin','library','arcade'])if(zones.zones[id]){const [x,z]=zones.zones[id].p;box.expandByPoint(new Vector3(x-20,-1,z-20)).expandByPoint(new Vector3(x+20,4,z+20));}
  box.min.add(new Vector3(-12,-1,-12));box.max.add(new Vector3(12,5,12));
  const bounds:[[number,number,number],[number,number,number]]=[box.min.toArray(),box.max.toArray()];

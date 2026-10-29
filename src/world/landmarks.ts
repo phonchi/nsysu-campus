@@ -5,11 +5,11 @@ import { toonify } from '../render/toon';
 import { addOutlines } from '../render/outline';
 import { NIGHT_MATERIALS } from '../walk-materials';
 import type { Terrain } from './terrain';
+import { fullTunnelProfile,fullTunnelGeometry,tunnelGroundCuts,tunnelVegetationVolumes } from './tunnel-surface';
 
 type P2 = [number, number];
-export interface Placement { osmId?: number | null; centroid: P2; yaw: number; elevation?: number | null; path?: P2[]; moduleLength?: number; parts?: string[]; walkableLength?: number; seaOffset?: number }
+export interface Placement { osmId?: number | null; centroid: P2; yaw: number; elevation?: number | null; path?: P2[]; moduleLength?: number; parts?: string[]; walkableLength?: number; seaOffset?: number; centerline?: P2[]; eastPortal?: P2 }
 export interface Box { center: [number, number, number]; size: [number, number, number]; yaw: number; walkable?: boolean }
-const TUNNEL_APRON: Box = { center: [0, -.15, 1.5], size: [10, .3, 7], yaw: 0, walkable: true };
 
 /** Hand-modelled landmarks (T4, tools/create_landmarks.py) and the OSM blocks / v2 features they replace. */
 export const LANDMARK_IDS = ['admin', 'library', 'liberal-arts', 'tunnel', 'gate', 'seawall', 'yatsen-hall', 'gym', 'marine', 'activity-center', 'beach-house'] as const;
@@ -22,13 +22,9 @@ export async function loadPlacements(asset: (p: string) => string) {
 }
 
 /** Ground cut-outs so walkable landmark geometry is not buried in the DEM (the tunnel mouth). */
-export function landmarkCarves(placements: Record<string, Placement>): P2[][] {
-  const t = placements.tunnel;
-  if (!t) return [];
-  // Local -Z points into the bore; carve the first walkable stretch plus the portal apron, 10 m wide.
-  const len = (t.walkableLength ?? 20) + 2, half = 5, c = Math.cos(t.yaw), s = Math.sin(t.yaw);
-  const local: P2[] = [[-half, 2], [half, 2], [half, -len], [-half, -len]];
-  return [local.map(([x, z]) => [t.centroid[0] + x * c + z * s, t.centroid[1] - x * s + z * c] as P2)];
+export function landmarkCarves(placements: Record<string, Placement>,ground?:(x:number,z:number)=>number): P2[][] {
+ const t=placements.tunnel;if(!t)return [];
+ return tunnelGroundCuts(fullTunnelProfile(t,ground??(()=>0)),ground);
 }
 
 function boxesToMeshes(boxes: Box[], into: T.Group, matrix: T.Matrix4) {
@@ -48,11 +44,11 @@ export function landmarkVegetationVolumes(placements: Record<string, Placement>,
   for (const id of LANDMARK_IDS) {
     const placement = placements[id], data = collisions[id];
     if (!placement || !data) continue;
-    const local = [...data.boxes, ...(id === 'tunnel' ? [TUNNEL_APRON] : [])].map(b => {
+    const local = data.boxes.map(b => {
       const o = new T.Object3D(); o.position.set(...b.center); o.rotation.y = b.yaw; o.updateMatrix();
       return new T.Box3(new T.Vector3(...b.size).multiplyScalar(-.5), new T.Vector3(...b.size).multiplyScalar(.5)).applyMatrix4(o.matrix);
     });
-    if (id === 'tunnel') local.push(new T.Box3(new T.Vector3(-3.9, -.3, -(placement.walkableLength ?? 20) - 2), new T.Vector3(3.9, 6.8, 2)));
+
     for (const transform of landmarkTransforms(id, placement, ground)) {
       if (id === 'tunnel' || placement.path) volumes.push(...local.map(b => {
         const box = b.clone().applyMatrix4(transform);
@@ -69,6 +65,7 @@ export function landmarkVegetationVolumes(placements: Record<string, Placement>,
       }
     }
   }
+  if(placements.tunnel) volumes.push(...tunnelVegetationVolumes(fullTunnelProfile(placements.tunnel,ground)));
   return volumes;
 }
 
@@ -93,6 +90,7 @@ export function landmarkTransforms(id: string, p: Placement, ground: (x: number,
     }
     return out;
   }
+  if(id==='tunnel'&&p.centerline){const tunnel=fullTunnelProfile(p,ground);put(tunnel.west.x,tunnel.west.y,tunnel.west.z,tunnel.westYaw);put(tunnel.east.x,tunnel.east.y,tunnel.east.z,tunnel.eastYaw);return out;}
   const [x, z] = p.centroid;
   // The tunnel floor must meet the road in front of the portal (local +Z), not the hill above the mouth.
   const front = id === 'tunnel' ? [x + Math.sin(p.yaw) * 4, z + Math.cos(p.yaw) * 4] : undefined;
@@ -108,10 +106,10 @@ export function landmarkCollision(placements: Record<string, Placement>, collisi
   for (const id of LANDMARK_IDS) {
     const p = placements[id], col = collisions[id];
     if (!p || !col) continue;
-    // The terrain carve starts 2 m outside the portal; an apron slab bridges it so nobody drops through the mouth.
-    const extra: Box[] = id === 'tunnel' ? [TUNNEL_APRON] : [];
+    const extra: Box[] = [];
     for (const m of landmarkTransforms(id, p, ground)) boxesToMeshes([...col.boxes, ...extra], group, m);
   }
+  if(placements.tunnel){const profile=fullTunnelProfile(placements.tunnel,ground),geometry=fullTunnelGeometry(profile);for(const [kind,g]of Object.entries(geometry)){const mesh=new T.Mesh(g,new T.MeshBasicMaterial());mesh.name=`Tunnel ${kind} collision`;mesh.userData.surfaceKind='tunnel';group.add(mesh);}}
   group.updateMatrixWorld(true);
   return group;
 }
@@ -131,7 +129,7 @@ export async function loadLandmarks(asset: (p: string) => string, placements: Re
       fetch(asset(`models/landmarks/${id}.collision.json`)).then(r => r.ok ? r.json() as Promise<{ boxes: Box[] }> : { boxes: [] }).catch(() => ({ boxes: [] as Box[] })),
     ]);
     collisions[id] = col;
-    const root = gltf.scene;
+    const root = gltf.scene;root.userData.landmarkId=id;
     // Name the window glow so the toon shader switches windows per bay/storey at night like the procedural facades.
     root.traverse(o => { if (o instanceof T.Mesh) for (const m of [o.material].flat() as T.MeshStandardMaterial[]) if (m.emissiveMap) m.emissiveMap.name = `${id} night windows`; });
     toonify(root);
@@ -146,14 +144,14 @@ export async function loadLandmarks(asset: (p: string) => string, placements: Re
       const part = root.getObjectByName(p.parts[0]) ?? root.children[0];
       for (const m of transforms) { const module = new T.Group(); module.add(part.clone()); m.decompose(module.position, module.quaternion, module.scale); display.add(module); }
     } else {
-      transforms[0].decompose(root.position, root.quaternion, root.scale);
-      display.add(root);
+      for(let i=0;i<transforms.length;i++){const portal=i===0?root:root.clone(true);transforms[i].decompose(portal.position,portal.quaternion,portal.scale);portal.userData.landmarkId=id;if(id==='tunnel')portal.userData.portal=i?'east':'west';display.add(portal);}
       // The rendered asset can extend beyond its simplified collision (porches, plinths).
       // Tunnel walls/hills have separate finite-volume exclusions from their collision kit.
       if (id !== 'tunnel') { const box = new T.Box3().setFromObject(root); box.min.y = -Infinity; visualVolumes.push(box); }
     }
     if (REPLACES[id]) replaced.push(REPLACES[id]);
   }));
+  if(placements.tunnel){const geometry=fullTunnelGeometry(fullTunnelProfile(placements.tunnel,ground));const corridor=new T.Group();corridor.name='Full Sisihwan tunnel';corridor.userData.landmarkId='tunnel';corridor.userData.portal='interior';for(const [kind,g]of Object.entries(geometry)){const material=new T.MeshStandardMaterial({color:kind==='floor'?0x96918b:0xd0ccc1,roughness:.95,side:T.DoubleSide,emissive:kind==='floor'?0x171716:0x242421,emissiveIntensity:.45});const mesh=new T.Mesh(g,material);mesh.name=`Full tunnel ${kind}`;mesh.receiveShadow=true;corridor.add(mesh);}toonify(corridor);display.add(corridor);}
   addOutlines(display, 'landmark');
   display.updateMatrixWorld(true);
   return { display, collision: landmarkCollision(placements, collisions, ground), replacedOsm: replaced,

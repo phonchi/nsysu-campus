@@ -17,11 +17,11 @@ export function buildRuntimeWorld() {
   const structure: CampusStructure = { ...raw, context: { ...raw.context, landmarks: raw.context.landmarks.filter(l => !gone.has(l.id)) } };
   const data = WALK_BUILDING_IDS.map(id => { const b = JSON.parse(fs.readFileSync(`public/data/walkthrough/${id}.json`, 'utf8')) as WalkBuilding; for (const f of b.floors) f.access = access.floors[f.id]; return b; });
   const terrain = loadTerrain();
-  terrain.carves = landmarkCarves(placements);
+  terrain.carves = landmarkCarves(placements,(x,z)=>terrain.heightAt(x,z));
   const world = buildWalkWorld(data, structure, terrain);
   world.collision.add(landmarkCollision(placements, collisions, (x, z) => terrain.heightAt(x, z)));
   return { world, structure, data, terrain, placements };
 }
 
 /** Inputs the runtime world depends on (hashed by the navmesh bake). */
-export const RUNTIME_WORLD_INPUTS = ['public/models/landmarks/placements.json', ...LANDMARK_IDS.map(id => `public/models/landmarks/${id}.collision.json`), 'src/world/landmarks.ts', 'tests/world-fixture.ts'];
+export const RUNTIME_WORLD_INPUTS = ['public/models/landmarks/placements.json', ...LANDMARK_IDS.map(id => `public/models/landmarks/${id}.collision.json`), 'src/world/landmarks.ts', 'src/world/tunnel-surface.ts', 'tests/world-fixture.ts'];

@@ -16,7 +16,7 @@ scope=meta.get('scope')
 if scope not in ['prototype-SC-1F-2F','campus-science-engineering-v2']:errors.append('unknown nav scope')
 prototype=scope=='prototype-SC-1F-2F'
 selected=['SC'] if prototype else ids
-required={f'public/data/walkthrough/{bid}.json' for bid in selected}|{'public/data/walkthrough/access-plan.json','src/walk-world.ts','src/walk-types.ts','src/walk-nav.ts','tools/bake_walk_nav.ts','public/data/terrain/terrain.json','public/data/terrain/terrain.bin','src/world/terrain.ts','src/world/road-surface.ts','public/data/story-zones.json','public/models/landmarks/placements.json','src/world/landmarks.ts','tests/world-fixture.ts'}
+required={f'public/data/walkthrough/{bid}.json' for bid in selected}|{'public/data/walkthrough/access-plan.json','src/walk-world.ts','src/walk-types.ts','src/walk-nav.ts','tools/bake_walk_nav.ts','public/data/terrain/terrain.json','public/data/terrain/terrain.bin','src/world/terrain.ts','src/world/road-surface.ts','public/data/story-zones.json','public/models/landmarks/placements.json','src/world/landmarks.ts','src/world/tunnel-surface.ts','tests/world-fixture.ts'}
 if not prototype:required.add('public/data/walkthrough/index.json')
 for report in (root/'public/data/walkthrough').glob('*source-review*.json'):required.add(str(report.relative_to(root)))
 access=load('public/data/walkthrough/access-plan.json')
