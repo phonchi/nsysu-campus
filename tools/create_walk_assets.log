@@ -1,0 +1,238 @@
+INFO Draco mesh compression is available, use library at /home/phonchi/.local/opt/blender-4.5.14-linux-x64/4.5/scripts/addons_core/io_scene_gltf2/libextern_draco.so
+15:38:48 | INFO: Starting glTF 2.0 export
+15:38:48 | INFO: Extracting primitive: Cube.016
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.017
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.019
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.018
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.009
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.015
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Sphere.002
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Sphere.005
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Sphere.003
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Sphere.006
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Sphere
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Sphere.001
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.003
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.007
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.008
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.006
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.013
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.014
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.012
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cylinder
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Sphere.008
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.002
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.001
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.005
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Sphere.004
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.004
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.011
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Sphere.007
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.010
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Finished glTF 2.0 export in 0.09327435493469238 s
+
+EXPORTED student.glb 122892
+15:38:48 | INFO: Starting glTF 2.0 export
+15:38:48 | INFO: Extracting primitive: Cube.025
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.026
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.027
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cylinder.004
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cylinder.008
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cylinder.001
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cylinder.002
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cylinder.005
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cylinder.006
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cylinder.003
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cylinder.007
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.020
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.021
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.022
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.023
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.024
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Finished glTF 2.0 export in 0.015290260314941406 s
+
+EXPORTED bench.glb 45316
+15:38:48 | INFO: Starting glTF 2.0 export
+15:38:48 | INFO: Extracting primitive: Cylinder.012
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cylinder.011
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.029
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cylinder.009
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cylinder.010
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.028
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Finished glTF 2.0 export in 0.008208751678466797 s
+
+EXPORTED lamp.glb 20128
+15:38:48 | INFO: Starting glTF 2.0 export
+15:38:48 | INFO: Extracting primitive: Cube.033
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cylinder.022
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cylinder.025
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cylinder.020
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cylinder.021
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cylinder.023
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cylinder.024
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.032
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.031
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cylinder.019
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cylinder.013
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cylinder.014
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cylinder.016
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cylinder.017
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cylinder.015
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cylinder.018
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Extracting primitive: Cube.030
+15:38:48 | INFO: Primitives created: 1
+15:38:48 | INFO: Finished glTF 2.0 export in 0.016403675079345703 s
+
+EXPORTED desk-chair.glb 49036
+Blender 4.5.14 LTS (hash 62c1db4208e8 built 2026-09-15 01:31:19)
+Fra:1 Mem:17.68M (Peak 17.68M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | shirt.torso
+Fra:1 Mem:17.68M (Peak 17.68M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | neck
+Fra:1 Mem:17.68M (Peak 17.68M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | hair.crown
+Fra:1 Mem:17.69M (Peak 17.69M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | hair.fringe
+Fra:1 Mem:17.69M (Peak 17.69M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | eye.L
+Fra:1 Mem:17.70M (Peak 17.70M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sleeve.L
+Fra:1 Mem:17.70M (Peak 17.70M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | arm.skin.L
+Fra:1 Mem:17.71M (Peak 17.71M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | shoe.upper.L
+Fra:1 Mem:17.71M (Peak 17.71M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | backpack.strap.L
+Fra:1 Mem:17.71M (Peak 17.72M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | eye.R
+Fra:1 Mem:17.72M (Peak 17.72M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | trouser.R
+Fra:1 Mem:17.72M (Peak 17.72M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | shoe.upper.R
+Fra:1 Mem:17.73M (Peak 17.73M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | nose
+Fra:1 Mem:17.73M (Peak 17.73M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | backpack.front_pocket
+Fra:1 Mem:17.74M (Peak 17.74M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | backpack.handle
+Fra:1 Mem:17.74M (Peak 17.74M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | seat.slat.0
+Fra:1 Mem:17.75M (Peak 17.75M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | seat.slat.2
+Fra:1 Mem:17.76M (Peak 17.76M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | seat.slat.3
+Fra:1 Mem:17.80M (Peak 17.80M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | seat.slat.4
+Fra:1 Mem:17.80M (Peak 17.80M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | back.slat.2
+Fra:1 Mem:17.82M (Peak 17.82M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | frame.leg.001
+Fra:1 Mem:17.86M (Peak 17.86M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | frame.seat
+Fra:1 Mem:17.87M (Peak 17.87M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | frame.back
+Fra:1 Mem:17.87M (Peak 17.87M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | frame.leg.002
+Fra:1 Mem:17.85M (Peak 17.87M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | frame.seat.001
+Fra:1 Mem:17.85M (Peak 17.87M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | diffuser
+Fra:1 Mem:17.86M (Peak 17.87M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | desk.top
+Fra:1 Mem:17.85M (Peak 17.87M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | desk.edge
+Fra:1 Mem:17.86M (Peak 17.87M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | desk.leg.002
+Fra:1 Mem:17.87M (Peak 17.87M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | desk.leg.003
+Fra:1 Mem:17.90M (Peak 17.90M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | desk.sidebrace.001
+Fra:1 Mem:17.88M (Peak 17.90M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | chair.leg
+Fra:1 Mem:17.88M (Peak 17.90M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | chair.backpost
+Fra:1 Mem:17.88M (Peak 17.90M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | chair.leg.003
+Fra:1 Mem:17.88M (Peak 17.90M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | chair.backpost.001
+Fra:1 Mem:17.88M (Peak 17.90M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | chair.back
+Fra:1 Mem:17.90M (Peak 17.90M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | Area
+Fra:1 Mem:17.97M (Peak 17.97M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Initializing
+Fra:1 Mem:14.89M (Peak 17.97M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Waiting for render to start
+Fra:1 Mem:14.89M (Peak 17.97M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Updating Scene
+Fra:1 Mem:14.89M (Peak 17.97M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Updating Shaders
+Fra:1 Mem:14.89M (Peak 17.97M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Loading render kernels (may take a few minutes the first time)
+Fra:1 Mem:14.98M (Peak 17.97M) | Time:00:00.01 | Mem:0.01M, Peak:0.01M | Scene, ViewLayer | Updating Procedurals
+Fra:1 Mem:14.98M (Peak 17.97M) | Time:00:00.01 | Mem:0.01M, Peak:0.01M | Scene, ViewLayer | Updating Background
+Fra:1 Mem:14.98M (Peak 17.97M) | Time:00:00.01 | Mem:0.01M, Peak:0.01M | Scene, ViewLayer | Updating Camera
+Fra:1 Mem:14.98M (Peak 17.97M) | Time:00:00.01 | Mem:0.01M, Peak:0.01M | Scene, ViewLayer | Updating Meshes Flags
+Fra:1 Mem:14.98M (Peak 17.97M) | Time:00:00.01 | Mem:0.01M, Peak:0.01M | Scene, ViewLayer | Updating Objects
+Fra:1 Mem:14.98M (Peak 17.97M) | Time:00:00.01 | Mem:0.01M, Peak:0.01M | Scene, ViewLayer | Updating Objects | Copying Transformations to device
+Fra:1 Mem:15.00M (Peak 17.97M) | Time:00:00.01 | Mem:0.03M, Peak:0.03M | Scene, ViewLayer | Updating Particle Systems
+Fra:1 Mem:15.00M (Peak 17.97M) | Time:00:00.01 | Mem:0.03M, Peak:0.03M | Scene, ViewLayer | Updating Particle Systems | Copying Particles to device
+Fra:1 Mem:15.00M (Peak 17.97M) | Time:00:00.01 | Mem:0.03M, Peak:0.03M | Scene, ViewLayer | Updating Meshes
+Fra:1 Mem:15.00M (Peak 17.97M) | Time:00:00.01 | Mem:0.03M, Peak:0.03M | Scene, ViewLayer | Updating Objects | Applying Static Transformations
+Fra:1 Mem:15.00M (Peak 17.97M) | Time:00:00.01 | Mem:0.03M, Peak:0.03M | Scene, ViewLayer | Updating Mesh | Computing attributes
+Fra:1 Mem:15.06M (Peak 17.97M) | Time:00:00.01 | Mem:0.03M, Peak:0.03M | Scene, ViewLayer | Updating Mesh | Copying Attributes to device
+Fra:1 Mem:15.05M (Peak 17.97M) | Time:00:00.01 | Mem:0.08M, Peak:0.08M | Scene, ViewLayer | Updating Scene BVH | Building
+Fra:1 Mem:15.05M (Peak 17.97M) | Time:00:00.01 | Mem:0.08M, Peak:0.08M | Scene, ViewLayer | Updating Scene BVH | Building BVH
+Fra:1 Mem:15.05M (Peak 17.97M) | Time:00:00.01 | Mem:0.17M, Peak:0.17M | Scene, ViewLayer | Updating Scene BVH | Building BVH 0%
+Fra:1 Mem:15.05M (Peak 17.97M) | Time:00:00.02 | Mem:0.27M, Peak:0.37M | Scene, ViewLayer | Updating Scene BVH | Copying BVH to device
+Fra:1 Mem:15.05M (Peak 17.97M) | Time:00:00.02 | Mem:0.27M, Peak:0.37M | Scene, ViewLayer | Updating Mesh | Computing normals
+Fra:1 Mem:15.19M (Peak 17.97M) | Time:00:00.02 | Mem:0.27M, Peak:0.37M | Scene, ViewLayer | Updating Mesh | Copying Mesh to device
+Fra:1 Mem:15.19M (Peak 17.97M) | Time:00:00.02 | Mem:0.41M, Peak:0.41M | Scene, ViewLayer | Updating Objects Flags
+Fra:1 Mem:15.19M (Peak 17.97M) | Time:00:00.02 | Mem:0.41M, Peak:0.41M | Scene, ViewLayer | Updating Primitive Offsets
+Fra:1 Mem:15.19M (Peak 17.97M) | Time:00:00.02 | Mem:0.41M, Peak:0.41M | Scene, ViewLayer | Updating Images
+Fra:1 Mem:15.19M (Peak 17.97M) | Time:00:00.02 | Mem:0.41M, Peak:0.41M | Scene, ViewLayer | Updating Camera Volume
+Fra:1 Mem:15.19M (Peak 17.97M) | Time:00:00.02 | Mem:0.41M, Peak:0.41M | Scene, ViewLayer | Updating Lookup Tables
+Fra:1 Mem:15.19M (Peak 17.97M) | Time:00:00.02 | Mem:0.50M, Peak:0.50M | Scene, ViewLayer | Updating Lights
+Fra:1 Mem:15.19M (Peak 17.97M) | Time:00:00.02 | Mem:0.50M, Peak:0.50M | Scene, ViewLayer | Updating Lights | Computing tree
+Fra:1 Mem:15.19M (Peak 17.97M) | Time:00:00.02 | Mem:0.50M, Peak:0.50M | Scene, ViewLayer | Updating Integrator
+Fra:1 Mem:15.19M (Peak 17.97M) | Time:00:00.02 | Mem:0.50M, Peak:0.50M | Scene, ViewLayer | Updating Film
+Fra:1 Mem:15.20M (Peak 17.97M) | Time:00:00.02 | Mem:0.42M, Peak:0.50M | Scene, ViewLayer | Updating Lookup Tables
+Fra:1 Mem:15.20M (Peak 17.97M) | Time:00:00.02 | Mem:0.50M, Peak:0.50M | Scene, ViewLayer | Updating Baking
+Fra:1 Mem:15.20M (Peak 17.97M) | Time:00:00.02 | Mem:0.50M, Peak:0.50M | Scene, ViewLayer | Updating Device | Writing constant memory
+Fra:1 Mem:15.20M (Peak 17.97M) | Time:00:00.02 | Mem:0.50M, Peak:0.50M | Scene, ViewLayer | Loading denoising kernels (may take a few minutes the first time)
+Fra:1 Mem:15.20M (Peak 17.97M) | Time:00:00.02 | Mem:0.50M, Peak:0.50M | Scene, ViewLayer | Sample 0/24
+Fra:1 Mem:66.54M (Peak 66.54M) | Time:00:00.04 | Remaining:00:00.60 | Mem:51.53M, Peak:51.53M | Scene, ViewLayer | Sample 1/24
+Fra:1 Mem:88.03M (Peak 120.26M) | Time:00:01.55 | Mem:51.53M, Peak:51.53M | Scene, ViewLayer | Sample 24/24
+Fra:1 Mem:88.03M (Peak 120.26M) | Time:00:01.55 | Mem:51.53M, Peak:51.53M | Scene, ViewLayer | Finished
+Saved: '/home/phonchi/habbit/public/models/walk/asset-overview.png'
+Time: 00:01.64 (Saving: 00:00.09)
+
+Info: Saved as "walk-assets.blend"
+ALL_ASSETS_COMPLETE
+
+Blender quit

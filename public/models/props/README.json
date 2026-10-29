@@ -1,0 +1,102 @@
+{
+ "generator": "tools/create_props_v4.py",
+ "license": "authored in this repo (see docs/licenses.md)",
+ "props": [
+  {
+   "name": "lamp",
+   "tris": 124
+  },
+  {
+   "name": "garden_lamp",
+   "tris": 84
+  },
+  {
+   "name": "bench",
+   "tris": 108
+  },
+  {
+   "name": "bins",
+   "tris": 168
+  },
+  {
+   "name": "notice_board",
+   "tris": 128
+  },
+  {
+   "name": "a_board",
+   "tris": 48
+  },
+  {
+   "name": "planter",
+   "tris": 664
+  },
+  {
+   "name": "vending",
+   "tris": 188
+  },
+  {
+   "name": "booth",
+   "tris": 264
+  },
+  {
+   "name": "barrier",
+   "tris": 156
+  },
+  {
+   "name": "bus_stop",
+   "tris": 96
+  },
+  {
+   "name": "coffee_cart",
+   "tris": 444
+  },
+  {
+   "name": "stall",
+   "tris": 108
+  },
+  {
+   "name": "monkey_sign",
+   "tris": 296
+  },
+  {
+   "name": "tetrapod",
+   "tris": 144
+  },
+  {
+   "name": "railing",
+   "tris": 168
+  },
+  {
+   "name": "lifebuoy",
+   "tris": 160
+  },
+  {
+   "name": "umbrella_set",
+   "tris": 104
+  },
+  {
+   "name": "parasol_table",
+   "tris": 224
+  },
+  {
+   "name": "return_box",
+   "tris": 112
+  },
+  {
+   "name": "flagpole",
+   "tris": 156
+  },
+  {
+   "name": "bollard",
+   "tris": 156
+  },
+  {
+   "name": "wall_lamp",
+   "tris": 56
+  },
+  {
+   "name": "motorbike",
+   "tris": 400
+  }
+ ]
+}

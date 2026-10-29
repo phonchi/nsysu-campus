@@ -1,0 +1,15 @@
+Characters in this folder (ahai, lan, tuo, wan, np1..np6)
+  Base meshes, skeleton and the Idle/Walk/Run/Jump/Sit motion data:
+    Quaternius "Animated Men Pack" and "Animated Women Pack"
+    https://quaternius.com/packs/animatedmen.html
+    https://quaternius.com/packs/animatedwomen.html
+    License: CC0 1.0 Universal (public domain dedication)
+    https://creativecommons.org/publicdomain/zero/1.0/
+  Recolouring, 256 px atlases, face marks, accessories, head proportions, the Wave and Talk
+  clips and all re-timing were made in this repository (tools/create_characters_v3.py).
+
+monkey.glb
+  Authored from scratch in tools/create_characters_v3.py (no third-party data).
+
+Provenance (URLs, SHA256, licence evidence): data/sources/characters/provenance.json
+Overview: docs/licenses.md

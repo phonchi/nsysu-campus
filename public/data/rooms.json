@@ -1,0 +1,1498 @@
+[
+  {
+    "id": "oaa-02Room_COS_1-p1-0",
+    "buildingId": "SC",
+    "floorId": "SC-1F",
+    "code": "SC1014",
+    "x": 0.56588,
+    "y": 0.175483,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.542648,
+      0.1557,
+      0.046465,
+      0.039561
+    ],
+    "floorLabel": "1F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-1",
+    "buildingId": "SC",
+    "floorId": "SC-1F",
+    "code": "SC1013",
+    "x": 0.567045,
+    "y": 0.328089,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.543812,
+      0.308306,
+      0.046465,
+      0.039561
+    ],
+    "floorLabel": "1F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-2",
+    "buildingId": "SC",
+    "floorId": "SC-1F",
+    "code": "SC1012",
+    "x": 0.584168,
+    "y": 0.457106,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.560935,
+      0.437328,
+      0.046465,
+      0.039561
+    ],
+    "floorLabel": "1F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-3",
+    "buildingId": "SC",
+    "floorId": "SC-1F",
+    "code": "SC1008",
+    "x": 0.682175,
+    "y": 0.231894,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.662815,
+      0.215411,
+      0.03872,
+      0.032967
+    ],
+    "floorLabel": "1F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-4",
+    "buildingId": "SC",
+    "floorId": "SC-1F",
+    "code": "SC1009",
+    "x": 0.682175,
+    "y": 0.441822,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.662815,
+      0.425339,
+      0.03872,
+      0.032967
+    ],
+    "floorLabel": "1F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-5",
+    "buildingId": "SC",
+    "floorId": "SC-1F",
+    "code": "SC1005",
+    "x": 0.796489,
+    "y": 0.1772,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.773257,
+      0.157422,
+      0.046465,
+      0.039561
+    ],
+    "floorLabel": "1F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-6",
+    "buildingId": "SC",
+    "floorId": "SC-1F",
+    "code": "SC1004",
+    "x": 0.92532,
+    "y": 0.238456,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.905958,
+      0.221972,
+      0.03872,
+      0.032967
+    ],
+    "floorLabel": "1F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-7",
+    "buildingId": "SC",
+    "floorId": "SC-1F",
+    "code": "SC1003",
+    "x": 0.926175,
+    "y": 0.415583,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.906815,
+      0.3991,
+      0.03872,
+      0.032967
+    ],
+    "floorLabel": "1F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-8",
+    "buildingId": "SC",
+    "floorId": "SC-1F",
+    "code": "SC1001",
+    "x": 0.939465,
+    "y": 0.691089,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.916232,
+      0.671311,
+      0.046465,
+      0.039561
+    ],
+    "floorLabel": "1F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-9",
+    "buildingId": "SC",
+    "floorId": "SC-1F",
+    "code": "SC1011",
+    "x": 0.645165,
+    "y": 0.691111,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.622577,
+      0.674628,
+      0.045174,
+      0.032967
+    ],
+    "floorLabel": "1F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-10",
+    "buildingId": "SC",
+    "floorId": "SC-1F",
+    "code": "SC1015",
+    "x": 0.51266,
+    "y": 0.708606,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.4933,
+      0.692122,
+      0.03872,
+      0.032967
+    ],
+    "floorLabel": "1F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-11",
+    "buildingId": "SC",
+    "floorId": "SC-2F",
+    "code": "SC2002-1",
+    "x": 0.901462,
+    "y": 0.498903,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.883391,
+      0.486315,
+      0.03614,
+      0.025176
+    ],
+    "floorLabel": "2F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-12",
+    "buildingId": "SC",
+    "floorId": "SC-2F",
+    "code": "SC2002-2",
+    "x": 0.9009,
+    "y": 0.446024,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.882831,
+      0.433436,
+      0.03614,
+      0.025176
+    ],
+    "floorLabel": "2F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-13",
+    "buildingId": "SC",
+    "floorId": "SC-2F",
+    "code": "SC2002-3",
+    "x": 0.900045,
+    "y": 0.391158,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.881975,
+      0.378576,
+      0.036138,
+      0.025176
+    ],
+    "floorLabel": "2F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-14",
+    "buildingId": "SC",
+    "floorId": "SC-2F",
+    "code": "SC2002-4",
+    "x": 0.9009,
+    "y": 0.333909,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.882831,
+      0.321321,
+      0.03614,
+      0.025176
+    ],
+    "floorLabel": "2F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-15",
+    "buildingId": "SC",
+    "floorId": "SC-2F",
+    "code": "SC2002-5",
+    "x": 0.9009,
+    "y": 0.279042,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.882831,
+      0.266455,
+      0.03614,
+      0.025176
+    ],
+    "floorLabel": "2F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-16",
+    "buildingId": "SC",
+    "floorId": "SC-2F",
+    "code": "SC2002-6",
+    "x": 0.9009,
+    "y": 0.221788,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.882831,
+      0.2092,
+      0.03614,
+      0.025176
+    ],
+    "floorLabel": "2F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-17",
+    "buildingId": "SC",
+    "floorId": "SC-2F",
+    "code": "SC2002-7",
+    "x": 0.9009,
+    "y": 0.166921,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.882831,
+      0.154333,
+      0.03614,
+      0.025176
+    ],
+    "floorLabel": "2F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-18",
+    "buildingId": "SC",
+    "floorId": "SC-2F",
+    "code": "SC2004",
+    "x": 0.770358,
+    "y": 0.1542,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.750998,
+      0.136218,
+      0.03872,
+      0.035964
+    ],
+    "floorLabel": "2F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-19",
+    "buildingId": "SC",
+    "floorId": "SC-2F",
+    "code": "SC2003",
+    "x": 0.830946,
+    "y": 0.1542,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.80836,
+      0.136218,
+      0.045174,
+      0.035964
+    ],
+    "floorLabel": "2F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-20",
+    "buildingId": "SC",
+    "floorId": "SC-2F",
+    "code": "SC2005",
+    "x": 0.720703,
+    "y": 0.1542,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.701342,
+      0.136218,
+      0.03872,
+      0.035964
+    ],
+    "floorLabel": "2F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-21",
+    "buildingId": "SC",
+    "floorId": "SC-2F",
+    "code": "SC2007",
+    "x": 0.662485,
+    "y": 0.218612,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.643125,
+      0.20063,
+      0.03872,
+      0.035964
+    ],
+    "floorLabel": "2F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-22",
+    "buildingId": "SC",
+    "floorId": "SC-2F",
+    "code": "SC2006",
+    "x": 0.661629,
+    "y": 0.371285,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.642269,
+      0.353303,
+      0.03872,
+      0.035964
+    ],
+    "floorLabel": "2F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-23",
+    "buildingId": "SC",
+    "floorId": "SC-2F",
+    "code": "SC2011",
+    "x": 0.551634,
+    "y": 0.166097,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.528402,
+      0.144521,
+      0.046465,
+      0.043158
+    ],
+    "floorLabel": "2F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-24",
+    "buildingId": "SC",
+    "floorId": "SC-2F",
+    "code": "SC2010",
+    "x": 0.554203,
+    "y": 0.311618,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.530971,
+      0.290036,
+      0.046465,
+      0.043158
+    ],
+    "floorLabel": "2F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-25",
+    "buildingId": "SC",
+    "floorId": "SC-2F",
+    "code": "SC2009",
+    "x": 0.554203,
+    "y": 0.457133,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.530971,
+      0.435558,
+      0.046465,
+      0.043158
+    ],
+    "floorLabel": "2F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-26",
+    "buildingId": "SC",
+    "floorId": "SC-2F",
+    "code": "SC2008",
+    "x": 0.627383,
+    "y": 0.700491,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.608023,
+      0.682509,
+      0.03872,
+      0.035964
+    ],
+    "floorLabel": "2F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-27",
+    "buildingId": "SC",
+    "floorId": "SC-2F",
+    "code": "SC2012",
+    "x": 0.497251,
+    "y": 0.705261,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.477889,
+      0.687279,
+      0.03872,
+      0.035964
+    ],
+    "floorLabel": "2F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-28",
+    "buildingId": "SC",
+    "floorId": "SC-2F",
+    "code": "SC2001",
+    "x": 0.918062,
+    "y": 0.729091,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.894829,
+      0.707509,
+      0.046465,
+      0.043158
+    ],
+    "floorLabel": "2F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-29",
+    "buildingId": "SC",
+    "floorId": "SC-3F",
+    "code": "SC3002-1",
+    "x": 0.908606,
+    "y": 0.484903,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.890535,
+      0.472315,
+      0.03614,
+      0.025176
+    ],
+    "floorLabel": "3F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-30",
+    "buildingId": "SC",
+    "floorId": "SC-3F",
+    "code": "SC3002-2",
+    "x": 0.906894,
+    "y": 0.427655,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.888823,
+      0.415067,
+      0.03614,
+      0.025176
+    ],
+    "floorLabel": "3F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-31",
+    "buildingId": "SC",
+    "floorId": "SC-3F",
+    "code": "SC3002-3",
+    "x": 0.906894,
+    "y": 0.372782,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.888823,
+      0.360194,
+      0.03614,
+      0.025176
+    ],
+    "floorLabel": "3F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-32",
+    "buildingId": "SC",
+    "floorId": "SC-3F",
+    "code": "SC3002-4",
+    "x": 0.906892,
+    "y": 0.315527,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.888823,
+      0.302939,
+      0.03614,
+      0.025176
+    ],
+    "floorLabel": "3F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-33",
+    "buildingId": "SC",
+    "floorId": "SC-3F",
+    "code": "SC3002-5",
+    "x": 0.907749,
+    "y": 0.258273,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.88968,
+      0.245685,
+      0.03614,
+      0.025176
+    ],
+    "floorLabel": "3F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-34",
+    "buildingId": "SC",
+    "floorId": "SC-3F",
+    "code": "SC3002-6",
+    "x": 0.907749,
+    "y": 0.201018,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.88968,
+      0.18843,
+      0.03614,
+      0.025176
+    ],
+    "floorLabel": "3F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-35",
+    "buildingId": "SC",
+    "floorId": "SC-3F",
+    "code": "SC3002-7",
+    "x": 0.907749,
+    "y": 0.14377,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.88968,
+      0.131182,
+      0.03614,
+      0.025176
+    ],
+    "floorLabel": "3F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-36",
+    "buildingId": "SC",
+    "floorId": "SC-3F",
+    "code": "SC3003",
+    "x": 0.826863,
+    "y": 0.142982,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.807503,
+      0.125,
+      0.03872,
+      0.035964
+    ],
+    "floorLabel": "3F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-37",
+    "buildingId": "SC",
+    "floorId": "SC-3F",
+    "code": "SC3003-2",
+    "x": 0.775955,
+    "y": 0.142982,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.750142,
+      0.125,
+      0.051628,
+      0.035964
+    ],
+    "floorLabel": "3F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-38",
+    "buildingId": "SC",
+    "floorId": "SC-3F",
+    "code": "SC3004",
+    "x": 0.723258,
+    "y": 0.142982,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.703898,
+      0.125,
+      0.03872,
+      0.035964
+    ],
+    "floorLabel": "3F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-39",
+    "buildingId": "SC",
+    "floorId": "SC-3F",
+    "code": "SC3005-1",
+    "x": 0.662063,
+    "y": 0.197679,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.638831,
+      0.181497,
+      0.046465,
+      0.03237
+    ],
+    "floorLabel": "3F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-40",
+    "buildingId": "SC",
+    "floorId": "SC-3F",
+    "code": "SC3005",
+    "x": 0.663105,
+    "y": 0.359897,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.64568,
+      0.343715,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "3F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-41",
+    "buildingId": "SC",
+    "floorId": "SC-3F",
+    "code": "SC3007",
+    "x": 0.632112,
+    "y": 0.722642,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.60888,
+      0.701061,
+      0.046465,
+      0.043158
+    ],
+    "floorLabel": "3F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-42",
+    "buildingId": "SC",
+    "floorId": "SC-3F",
+    "code": "SC3008",
+    "x": 0.540505,
+    "y": 0.441145,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.517272,
+      0.41957,
+      0.046465,
+      0.043158
+    ],
+    "floorLabel": "3F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-43",
+    "buildingId": "SC",
+    "floorId": "SC-3F",
+    "code": "SC3009",
+    "x": 0.539648,
+    "y": 0.307558,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.516415,
+      0.285976,
+      0.046465,
+      0.043158
+    ],
+    "floorLabel": "3F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-44",
+    "buildingId": "SC",
+    "floorId": "SC-3F",
+    "code": "SC3010",
+    "x": 0.539648,
+    "y": 0.145339,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.516415,
+      0.123758,
+      0.046465,
+      0.043158
+    ],
+    "floorLabel": "3F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-45",
+    "buildingId": "SC",
+    "floorId": "SC-3F",
+    "code": "SC3011",
+    "x": 0.406946,
+    "y": 0.6964,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.383714,
+      0.674824,
+      0.046465,
+      0.043158
+    ],
+    "floorLabel": "3F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-46",
+    "buildingId": "SC",
+    "floorId": "SC-3F",
+    "code": "SC3001",
+    "x": 0.922343,
+    "y": 0.710715,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.899111,
+      0.689133,
+      0.046465,
+      0.043158
+    ],
+    "floorLabel": "3F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-47",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4001",
+    "x": 0.911934,
+    "y": 0.735291,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.890638,
+      0.715509,
+      0.042592,
+      0.039558
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-48",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4002",
+    "x": 0.898543,
+    "y": 0.489424,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.881118,
+      0.473242,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-49",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4003",
+    "x": 0.898543,
+    "y": 0.429788,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.881118,
+      0.413606,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-50",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4004",
+    "x": 0.897686,
+    "y": 0.374921,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.880262,
+      0.358733,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-51",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4005",
+    "x": 0.897686,
+    "y": 0.322436,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.880262,
+      0.306255,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-52",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4006",
+    "x": 0.897686,
+    "y": 0.2628,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.880262,
+      0.246612,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-53",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4007",
+    "x": 0.897686,
+    "y": 0.205545,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.880262,
+      0.189358,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-54",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4008",
+    "x": 0.897686,
+    "y": 0.153061,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.880262,
+      0.136879,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-55",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4010",
+    "x": 0.839469,
+    "y": 0.382073,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.822045,
+      0.365891,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-56",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4009",
+    "x": 0.789405,
+    "y": 0.150648,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.768108,
+      0.130867,
+      0.042592,
+      0.039558
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-57",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4012",
+    "x": 0.655397,
+    "y": 0.143527,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.637972,
+      0.127339,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-58",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4011",
+    "x": 0.738892,
+    "y": 0.389206,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.717595,
+      0.369424,
+      0.042592,
+      0.039558
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-59",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4013",
+    "x": 0.655398,
+    "y": 0.2294,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.637974,
+      0.213218,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-60",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4014",
+    "x": 0.654543,
+    "y": 0.320048,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.637118,
+      0.303867,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-61",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4015",
+    "x": 0.654543,
+    "y": 0.377303,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.637118,
+      0.361121,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-62",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4016",
+    "x": 0.654543,
+    "y": 0.43217,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.637118,
+      0.415988,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-63",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4017",
+    "x": 0.653686,
+    "y": 0.489424,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.636263,
+      0.473242,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-64",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4019",
+    "x": 0.624169,
+    "y": 0.718412,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.602872,
+      0.69863,
+      0.042592,
+      0.039558
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-65",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4022",
+    "x": 0.51972,
+    "y": 0.150648,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.498425,
+      0.130873,
+      0.042592,
+      0.039558
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-66",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4021",
+    "x": 0.520577,
+    "y": 0.298558,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.49928,
+      0.278776,
+      0.042592,
+      0.039558
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-67",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4020",
+    "x": 0.520577,
+    "y": 0.441685,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.49928,
+      0.421909,
+      0.042592,
+      0.039558
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-68",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4023",
+    "x": 0.574066,
+    "y": 0.887812,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.556642,
+      0.87163,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-69",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4024",
+    "x": 0.549238,
+    "y": 0.9236,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.531814,
+      0.907412,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-70",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4025",
+    "x": 0.528691,
+    "y": 0.8902,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.511266,
+      0.874018,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-71",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4026",
+    "x": 0.502771,
+    "y": 0.921212,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.485346,
+      0.90503,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-72",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4027",
+    "x": 0.490368,
+    "y": 0.694473,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.472943,
+      0.678291,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-73",
+    "buildingId": "SC",
+    "floorId": "SC-2F",
+    "code": "SC2013",
+    "x": 0.455317,
+    "y": 0.742952,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.435957,
+      0.72497,
+      0.03872,
+      0.035964
+    ],
+    "floorLabel": "2F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-74",
+    "buildingId": "SC",
+    "floorId": "SC-2F",
+    "code": "SC2016",
+    "x": 0.053492,
+    "y": 0.739909,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.034131,
+      0.721927,
+      0.03872,
+      0.035964
+    ],
+    "floorLabel": "2F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-75",
+    "buildingId": "SC",
+    "floorId": "SC-3F",
+    "code": "SC3012",
+    "x": 0.402409,
+    "y": 0.785806,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.379177,
+      0.76423,
+      0.046465,
+      0.043158
+    ],
+    "floorLabel": "3F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-76",
+    "buildingId": "SC",
+    "floorId": "SC-3F",
+    "code": "SC3014",
+    "x": 0.267012,
+    "y": 0.700618,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.24378,
+      0.679042,
+      0.046465,
+      0.043158
+    ],
+    "floorLabel": "3F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-77",
+    "buildingId": "SC",
+    "floorId": "SC-3F",
+    "code": "SC3018",
+    "x": 0.200677,
+    "y": 0.840727,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.183252,
+      0.824539,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "3F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-78",
+    "buildingId": "SC",
+    "floorId": "SC-3F",
+    "code": "SC3017",
+    "x": 0.221688,
+    "y": 0.885006,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.204263,
+      0.868824,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "3F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-79",
+    "buildingId": "SC",
+    "floorId": "SC-3F",
+    "code": "SC3016",
+    "x": 0.243335,
+    "y": 0.83937,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.225911,
+      0.823182,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "3F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-80",
+    "buildingId": "SC",
+    "floorId": "SC-3F",
+    "code": "SC3015",
+    "x": 0.263112,
+    "y": 0.884364,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.245688,
+      0.868176,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "3F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-81",
+    "buildingId": "SC",
+    "floorId": "SC-3F",
+    "code": "SC3019",
+    "x": 0.097765,
+    "y": 0.700618,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.074532,
+      0.679042,
+      0.046465,
+      0.043158
+    ],
+    "floorLabel": "3F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-82",
+    "buildingId": "SC",
+    "floorId": "SC-3F",
+    "code": "SC3020",
+    "x": 0.087248,
+    "y": 0.797345,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.064014,
+      0.77577,
+      0.046465,
+      0.043158
+    ],
+    "floorLabel": "3F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-83",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4029",
+    "x": 0.426435,
+    "y": 0.733218,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.409012,
+      0.717036,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-84",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4030",
+    "x": 0.37658,
+    "y": 0.732273,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.359155,
+      0.716091,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-85",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4031",
+    "x": 0.271863,
+    "y": 0.733745,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.254438,
+      0.717564,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-86",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4032",
+    "x": 0.213698,
+    "y": 0.734588,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.196275,
+      0.7184,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "4F"
+  },
+  {
+    "id": "oaa-02Room_COS_1-p1-87",
+    "buildingId": "SC",
+    "floorId": "SC-4F",
+    "code": "SC4033",
+    "x": 0.059803,
+    "y": 0.788661,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "text-extracted",
+    "bbox": [
+      0.04238,
+      0.772479,
+      0.034849,
+      0.03237
+    ],
+    "floorLabel": "4F"
+  }
+]

@@ -1,0 +1,21 @@
+{
+  "license": "CC0-1.0",
+  "source": "tools/create_walk_assets.py",
+  "generator": "Blender 4.5.14 LTS, local CPU, original procedural meshes",
+  "units": "metres",
+  "gltf_up": "+Y",
+  "gltf_forward": "-Z",
+  "student_height": 1.7,
+  "animation_clips": [
+    "Idle",
+    "Walk"
+  ],
+  "animation_fps": 24,
+  "note": "Student uses object hierarchy, not a skinned skeleton. Foot level Y=0 at rest. Bench seat 0.465m; lamp top 3.175m; desk top 0.7525m.",
+  "files": {
+    "bench.glb": 45316,
+    "desk-chair.glb": 49036,
+    "lamp.glb": 20128,
+    "student.glb": 122892
+  }
+}

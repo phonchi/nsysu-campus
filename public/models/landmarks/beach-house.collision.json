@@ -1,0 +1,289 @@
+{
+ "id": "beach-house",
+ "title": "西子灣沙灘會館",
+ "units": "m",
+ "frame": "local three.js: x east, y up, z south; origin = footprint centroid at grade",
+ "boxSchema": "center [x,y,z], size [sx,sy,sz] full extents, yaw radians about +Y; walkable = may stand on top",
+ "boxes": [
+  {
+   "center": [
+    -16.961,
+    4.6,
+    29.669
+   ],
+   "size": [
+    4.0,
+    9.2,
+    2.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -15.961,
+    4.6,
+    27.669
+   ],
+   "size": [
+    10.0,
+    9.2,
+    2.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -14.961,
+    4.6,
+    25.669
+   ],
+   "size": [
+    16.0,
+    9.2,
+    2.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -13.961,
+    4.6,
+    23.669
+   ],
+   "size": [
+    22.0,
+    9.2,
+    2.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -12.961,
+    4.6,
+    21.669
+   ],
+   "size": [
+    28.0,
+    9.2,
+    2.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -10.961,
+    4.6,
+    19.669
+   ],
+   "size": [
+    32.0,
+    9.2,
+    2.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -8.961,
+    4.6,
+    17.669
+   ],
+   "size": [
+    36.0,
+    9.2,
+    2.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -6.961,
+    4.6,
+    15.669
+   ],
+   "size": [
+    40.0,
+    9.2,
+    2.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -5.961,
+    4.6,
+    13.669
+   ],
+   "size": [
+    42.0,
+    9.2,
+    2.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -3.961,
+    4.6,
+    11.669
+   ],
+   "size": [
+    46.0,
+    9.2,
+    2.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -4.961,
+    4.6,
+    9.669
+   ],
+   "size": [
+    44.0,
+    9.2,
+    2.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -3.961,
+    4.6,
+    7.669
+   ],
+   "size": [
+    38.0,
+    9.2,
+    2.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -1.961,
+    4.6,
+    5.669
+   ],
+   "size": [
+    34.0,
+    9.2,
+    2.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    1.039,
+    4.6,
+    3.669
+   ],
+   "size": [
+    28.0,
+    9.2,
+    2.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    4.039,
+    4.6,
+    1.669
+   ],
+   "size": [
+    26.0,
+    9.2,
+    2.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    7.039,
+    4.6,
+    -15.331
+   ],
+   "size": [
+    24.0,
+    9.2,
+    32.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    12.6,
+    11.7,
+    7.02
+   ],
+   "size": [
+    10,
+    7,
+    10
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    25.2,
+    1.8,
+    -12.18
+   ],
+   "size": [
+    0.5,
+    3.6,
+    0.5
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    25.2,
+    1.8,
+    -19.78
+   ],
+   "size": [
+    0.5,
+    3.6,
+    0.5
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -31.4,
+    3.0,
+    -7.98
+   ],
+   "size": [
+    7,
+    6,
+    7
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  }
+ ]
+}

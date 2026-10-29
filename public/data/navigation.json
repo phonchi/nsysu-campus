@@ -1,0 +1,1174 @@
+{
+  "nodes": [
+    {
+      "id": "gate",
+      "label": "校門口圖示起點",
+      "x": 0.64,
+      "y": 0.93,
+      "kind": "campus",
+      "layoutX": 294,
+      "layoutY": 560
+    },
+    {
+      "id": "south-road",
+      "label": "南側校道",
+      "x": 0.66,
+      "y": 0.846,
+      "kind": "campus",
+      "layoutX": 294,
+      "layoutY": 520
+    },
+    {
+      "id": "sports-road",
+      "label": "運動區校道",
+      "x": 0.666,
+      "y": 0.755,
+      "kind": "campus",
+      "layoutX": 294,
+      "layoutY": 460
+    },
+    {
+      "id": "gym-road",
+      "label": "體育館旁校道",
+      "x": 0.664,
+      "y": 0.663,
+      "kind": "campus",
+      "layoutX": 294,
+      "layoutY": 405
+    },
+    {
+      "id": "admin-road",
+      "label": "行政區東側校道",
+      "x": 0.666,
+      "y": 0.604,
+      "kind": "campus",
+      "layoutX": 295,
+      "layoutY": 365
+    },
+    {
+      "id": "gym-west-south",
+      "label": "體育館西南側圖示通道",
+      "x": 0.655,
+      "y": 0.663,
+      "kind": "campus",
+      "layoutX": 284,
+      "layoutY": 405
+    },
+    {
+      "id": "gym-west-north",
+      "label": "體育館西北側圖示通道",
+      "x": 0.655,
+      "y": 0.604,
+      "kind": "campus",
+      "layoutX": 284,
+      "layoutY": 365
+    },
+    {
+      "id": "science-road",
+      "label": "理學院東南側校道",
+      "x": 0.674,
+      "y": 0.554,
+      "kind": "campus",
+      "layoutX": 295,
+      "layoutY": 337
+    },
+    {
+      "id": "science-north",
+      "label": "理工大道中段",
+      "x": 0.672,
+      "y": 0.484,
+      "kind": "campus",
+      "layoutX": 295,
+      "layoutY": 292
+    },
+    {
+      "id": "court-road",
+      "label": "中庭廣場東側校道",
+      "x": 0.668,
+      "y": 0.4,
+      "kind": "campus",
+      "layoutX": 295,
+      "layoutY": 245
+    },
+    {
+      "id": "north-road",
+      "label": "電資區校道",
+      "x": 0.682,
+      "y": 0.322,
+      "kind": "campus",
+      "layoutX": 315,
+      "layoutY": 198
+    },
+    {
+      "id": "library-road",
+      "label": "圖資南側校道",
+      "x": 0.6,
+      "y": 0.4,
+      "kind": "campus",
+      "layoutX": 239,
+      "layoutY": 198
+    },
+    {
+      "id": "west-road",
+      "label": "西側教學區校道",
+      "x": 0.49,
+      "y": 0.38,
+      "kind": "campus",
+      "layoutX": 181,
+      "layoutY": 198
+    },
+    {
+      "id": "coast-road",
+      "label": "西側沿海校道",
+      "x": 0.421,
+      "y": 0.41,
+      "kind": "campus",
+      "layoutX": 173,
+      "layoutY": 282
+    },
+    {
+      "id": "west-general-road",
+      "label": "綜合大樓旁校道",
+      "x": 0.377,
+      "y": 0.34,
+      "kind": "campus",
+      "layoutX": 160,
+      "layoutY": 185
+    },
+    {
+      "id": "approach-SC",
+      "label": "理學院附近",
+      "x": 0.674,
+      "y": 0.566,
+      "kind": "approach",
+      "buildingId": "SC",
+      "layoutX": 295,
+      "layoutY": 337
+    },
+    {
+      "id": "approach-BI",
+      "label": "生科館附近",
+      "x": 0.685,
+      "y": 0.49,
+      "kind": "approach",
+      "buildingId": "BI",
+      "layoutX": 320,
+      "layoutY": 315
+    },
+    {
+      "id": "approach-PH",
+      "label": "物理館附近",
+      "x": 0.685,
+      "y": 0.442,
+      "kind": "approach",
+      "buildingId": "PH",
+      "layoutX": 320,
+      "layoutY": 270
+    },
+    {
+      "id": "approach-CH",
+      "label": "化學館附近",
+      "x": 0.685,
+      "y": 0.404,
+      "kind": "approach",
+      "buildingId": "CH",
+      "layoutX": 320,
+      "layoutY": 231
+    },
+    {
+      "id": "approach-EN",
+      "label": "工學院附近",
+      "x": 0.674,
+      "y": 0.464,
+      "kind": "approach",
+      "buildingId": "EN",
+      "layoutX": 295,
+      "layoutY": 249
+    },
+    {
+      "id": "approach-EC",
+      "label": "電資大樓附近",
+      "x": 0.686,
+      "y": 0.322,
+      "kind": "approach",
+      "buildingId": "EC",
+      "layoutX": 338,
+      "layoutY": 162
+    },
+    {
+      "id": "approach-MS",
+      "label": "材料大樓附近",
+      "x": 0.684,
+      "y": 0.358,
+      "kind": "approach",
+      "buildingId": "MS",
+      "layoutX": 337,
+      "layoutY": 196
+    },
+    {
+      "id": "approach-EV",
+      "label": "環工大樓附近",
+      "x": 0.627,
+      "y": 0.36,
+      "kind": "approach",
+      "buildingId": "EV",
+      "layoutX": 310,
+      "layoutY": 190
+    },
+    {
+      "id": "ev-path",
+      "label": "環工旁通道",
+      "x": 0.615,
+      "y": 0.36,
+      "kind": "campus",
+      "layoutX": 310,
+      "layoutY": 195
+    },
+    {
+      "id": "approach-CM",
+      "label": "管理學院附近",
+      "x": 0.566,
+      "y": 0.48,
+      "kind": "approach",
+      "buildingId": "CM",
+      "layoutX": 183,
+      "layoutY": 245
+    },
+    {
+      "id": "cm-path",
+      "label": "管理學院旁圖示通道",
+      "x": 0.575,
+      "y": 0.43,
+      "kind": "campus",
+      "layoutX": 183,
+      "layoutY": 215
+    },
+    {
+      "id": "approach-SS",
+      "label": "社會科學院附近",
+      "x": 0.62,
+      "y": 0.56,
+      "kind": "approach",
+      "buildingId": "SS",
+      "layoutX": 183,
+      "layoutY": 321
+    },
+    {
+      "id": "ss-path",
+      "label": "社科區西側圖示通道",
+      "x": 0.49,
+      "y": 0.604,
+      "kind": "campus",
+      "layoutX": 183,
+      "layoutY": 365
+    },
+    {
+      "id": "approach-IL",
+      "label": "圖資大樓附近",
+      "x": 0.579,
+      "y": 0.382,
+      "kind": "approach",
+      "buildingId": "IL",
+      "layoutX": 239,
+      "layoutY": 195
+    },
+    {
+      "id": "approach-SW",
+      "label": "西綜合大樓附近",
+      "x": 0.367,
+      "y": 0.3,
+      "kind": "approach",
+      "buildingId": "SW",
+      "layoutX": 150,
+      "layoutY": 172
+    },
+    {
+      "id": "approach-IR",
+      "label": "國際研究大樓附近",
+      "x": 0.668,
+      "y": 0.735,
+      "kind": "approach",
+      "buildingId": "IR",
+      "layoutX": 292,
+      "layoutY": 470
+    },
+    {
+      "id": "approach-AD",
+      "label": "行政大樓附近",
+      "x": 0.618,
+      "y": 0.615,
+      "kind": "approach",
+      "buildingId": "AD",
+      "layoutX": 239,
+      "layoutY": 341
+    },
+    {
+      "id": "admin-south-path",
+      "label": "行政區南側圖示通道",
+      "x": 0.618,
+      "y": 0.604,
+      "kind": "campus",
+      "layoutX": 239,
+      "layoutY": 365
+    },
+    {
+      "id": "approach-ACTIVITY",
+      "label": "學生活動中心附近",
+      "x": 0.48,
+      "y": 0.355,
+      "kind": "approach",
+      "buildingId": "ACTIVITY",
+      "layoutX": 198,
+      "layoutY": 170
+    },
+    {
+      "id": "approach-YH",
+      "label": "逸仙館附近",
+      "x": 0.61,
+      "y": 0.681,
+      "kind": "approach",
+      "buildingId": "YH",
+      "layoutX": 247,
+      "layoutY": 402
+    },
+    {
+      "id": "approach-SPORT",
+      "label": "體育館附近",
+      "x": 0.662,
+      "y": 0.664,
+      "kind": "approach",
+      "buildingId": "SPORT",
+      "layoutX": 284,
+      "layoutY": 395
+    },
+    {
+      "id": "sc-1-south",
+      "label": "SC 1F 南側開放廊道",
+      "x": 0.826,
+      "y": 0.833,
+      "kind": "entrance",
+      "floorId": "SC-1F",
+      "buildingId": "SC"
+    },
+    {
+      "id": "sc-1-hall",
+      "label": "1F 中央開放廳",
+      "x": 0.78,
+      "y": 0.69,
+      "kind": "corridor",
+      "floorId": "SC-1F",
+      "buildingId": "SC"
+    },
+    {
+      "id": "sc-1-center",
+      "label": "1F 中央廊道",
+      "x": 0.78,
+      "y": 0.6,
+      "kind": "corridor",
+      "floorId": "SC-1F",
+      "buildingId": "SC"
+    },
+    {
+      "id": "sc-1-right-a",
+      "label": "1F 東側廊道",
+      "x": 0.86,
+      "y": 0.69,
+      "kind": "corridor",
+      "floorId": "SC-1F",
+      "buildingId": "SC"
+    },
+    {
+      "id": "sc-1-right-b",
+      "label": "1F 東側門前通道",
+      "x": 0.86,
+      "y": 0.603,
+      "kind": "corridor",
+      "floorId": "SC-1F",
+      "buildingId": "SC"
+    },
+    {
+      "id": "sc-1-west-a",
+      "label": "1F 西向廊道",
+      "x": 0.62,
+      "y": 0.6,
+      "kind": "corridor",
+      "floorId": "SC-1F",
+      "buildingId": "SC"
+    },
+    {
+      "id": "sc-1-west-b",
+      "label": "1F SC1015前通道",
+      "x": 0.529,
+      "y": 0.6,
+      "kind": "corridor",
+      "floorId": "SC-1F",
+      "buildingId": "SC"
+    },
+    {
+      "id": "sc-1-north-a",
+      "label": "1F 北向通道",
+      "x": 0.775,
+      "y": 0.49,
+      "kind": "corridor",
+      "floorId": "SC-1F",
+      "buildingId": "SC"
+    },
+    {
+      "id": "sc-1-north-b",
+      "label": "1F SC1005前通道",
+      "x": 0.775,
+      "y": 0.29,
+      "kind": "corridor",
+      "floorId": "SC-1F",
+      "buildingId": "SC"
+    },
+    {
+      "id": "sc-1-stair-a",
+      "label": "1F 中央樓梯北側",
+      "x": 0.825,
+      "y": 0.285,
+      "kind": "corridor",
+      "floorId": "SC-1F",
+      "buildingId": "SC"
+    },
+    {
+      "id": "sc-1-stair",
+      "label": "中央樓梯 1F",
+      "x": 0.825,
+      "y": 0.306,
+      "kind": "stairs",
+      "floorId": "SC-1F",
+      "buildingId": "SC",
+      "stairGroupId": "sc-central"
+    },
+    {
+      "id": "sc-2-stair",
+      "label": "中央樓梯 2F",
+      "x": 0.803,
+      "y": 0.294,
+      "kind": "stairs",
+      "floorId": "SC-2F",
+      "buildingId": "SC",
+      "stairGroupId": "sc-central"
+    },
+    {
+      "id": "sc-2-stair-a",
+      "label": "2F 中央樓梯北側",
+      "x": 0.803,
+      "y": 0.275,
+      "kind": "corridor",
+      "floorId": "SC-2F",
+      "buildingId": "SC"
+    },
+    {
+      "id": "sc-2-north-east",
+      "label": "2F 樓梯東北側通道",
+      "x": 0.871,
+      "y": 0.275,
+      "kind": "corridor",
+      "floorId": "SC-2F",
+      "buildingId": "SC"
+    },
+    {
+      "id": "sc-2-hall",
+      "label": "2F 樓梯東側通道",
+      "x": 0.871,
+      "y": 0.6,
+      "kind": "corridor",
+      "floorId": "SC-2F",
+      "buildingId": "SC"
+    },
+    {
+      "id": "sc-2-east-a",
+      "label": "2F 東側通道",
+      "x": 0.871,
+      "y": 0.63,
+      "kind": "corridor",
+      "floorId": "SC-2F",
+      "buildingId": "SC"
+    },
+    {
+      "id": "sc-2-east-b",
+      "label": "2F SC2001前通道",
+      "x": 0.871,
+      "y": 0.663,
+      "kind": "corridor",
+      "floorId": "SC-2F",
+      "buildingId": "SC"
+    },
+    {
+      "id": "door-SC1001",
+      "label": "SC1001 門口",
+      "x": 0.908,
+      "y": 0.603,
+      "kind": "door",
+      "floorId": "SC-1F",
+      "buildingId": "SC",
+      "roomId": "oaa-02Room_COS_1-p1-8"
+    },
+    {
+      "id": "door-SC1005",
+      "label": "SC1005 門口",
+      "x": 0.726,
+      "y": 0.255,
+      "kind": "door",
+      "floorId": "SC-1F",
+      "buildingId": "SC",
+      "roomId": "oaa-02Room_COS_1-p1-5"
+    },
+    {
+      "id": "door-SC1015",
+      "label": "SC1015 門口",
+      "x": 0.529,
+      "y": 0.633,
+      "kind": "door",
+      "floorId": "SC-1F",
+      "buildingId": "SC",
+      "roomId": "oaa-02Room_COS_1-p1-10"
+    },
+    {
+      "id": "door-SC2001",
+      "label": "SC2001 門口",
+      "x": 0.883,
+      "y": 0.663,
+      "kind": "door",
+      "floorId": "SC-2F",
+      "buildingId": "SC",
+      "roomId": "oaa-02Room_COS_1-p1-28"
+    }
+  ],
+  "edges": [
+    {
+      "from": "gate",
+      "to": "south-road",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "south-road",
+      "to": "sports-road",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "sports-road",
+      "to": "gym-road",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "gym-road",
+      "to": "gym-west-south",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "gym-west-south",
+      "to": "gym-west-north",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "gym-west-north",
+      "to": "admin-road",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "admin-road",
+      "to": "science-road",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "science-road",
+      "to": "science-north",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "science-north",
+      "to": "court-road",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "court-road",
+      "to": "north-road",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "north-road",
+      "to": "library-road",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "library-road",
+      "to": "west-road",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "west-road",
+      "to": "coast-road",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "coast-road",
+      "to": "west-general-road",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "science-road",
+      "to": "approach-SC",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "science-north",
+      "to": "approach-BI",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "science-north",
+      "to": "approach-PH",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "court-road",
+      "to": "approach-CH",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "science-north",
+      "to": "approach-EN",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "north-road",
+      "to": "approach-EC",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "north-road",
+      "to": "approach-MS",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "library-road",
+      "to": "ev-path",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "ev-path",
+      "to": "approach-EV",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "west-road",
+      "to": "cm-path",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "cm-path",
+      "to": "approach-CM",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "coast-road",
+      "to": "ss-path",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "ss-path",
+      "to": "approach-SS",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "library-road",
+      "to": "approach-IL",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "west-general-road",
+      "to": "approach-SW",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "sports-road",
+      "to": "approach-IR",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "admin-road",
+      "to": "admin-south-path",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "admin-south-path",
+      "to": "approach-AD",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "west-road",
+      "to": "approach-ACTIVITY",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "gym-road",
+      "to": "approach-YH",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "gym-road",
+      "to": "approach-SPORT",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "campus-2022",
+        "page": 1,
+        "note": "依2022年9月校園圖描繪圖示校道；非現場量測"
+      }
+    },
+    {
+      "from": "sc-1-right-b",
+      "to": "door-SC1001",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "oaa-02Room_COS_1",
+        "page": 1,
+        "note": "人工以原PDF高解析裁圖核對門洞與灰色廊道；中央樓梯從北側開口進出，南側窗牆不通行；Astra以原PDF6倍核對2F東側外廊位於x .864與SC2002牆x .878之間，取x .871；2026-10-19，僅圖面核對，未經現地。"
+      }
+    },
+    {
+      "from": "sc-1-north-b",
+      "to": "door-SC1005",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "oaa-02Room_COS_1",
+        "page": 1,
+        "note": "人工以原PDF高解析裁圖核對門洞與灰色廊道；中央樓梯從北側開口進出，南側窗牆不通行；Astra以原PDF6倍核對2F東側外廊位於x .864與SC2002牆x .878之間，取x .871；2026-10-19，僅圖面核對，未經現地。"
+      }
+    },
+    {
+      "from": "sc-1-west-b",
+      "to": "door-SC1015",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "oaa-02Room_COS_1",
+        "page": 1,
+        "note": "人工以原PDF高解析裁圖核對門洞與灰色廊道；中央樓梯從北側開口進出，南側窗牆不通行；Astra以原PDF6倍核對2F東側外廊位於x .864與SC2002牆x .878之間，取x .871；2026-10-19，僅圖面核對，未經現地。"
+      }
+    },
+    {
+      "from": "sc-2-east-b",
+      "to": "door-SC2001",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "oaa-02Room_COS_1",
+        "page": 1,
+        "note": "人工以原PDF高解析裁圖核對門洞與灰色廊道；中央樓梯從北側開口進出，南側窗牆不通行；Astra以原PDF6倍核對2F東側外廊位於x .864與SC2002牆x .878之間，取x .871；2026-10-19，僅圖面核對，未經現地。"
+      }
+    },
+    {
+      "from": "sc-1-south",
+      "to": "sc-1-hall",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "oaa-02Room_COS_1",
+        "page": 1,
+        "note": "人工以原PDF高解析裁圖核對門洞與灰色廊道；中央樓梯從北側開口進出，南側窗牆不通行；Astra以原PDF6倍核對2F東側外廊位於x .864與SC2002牆x .878之間，取x .871；2026-10-19，僅圖面核對，未經現地。"
+      }
+    },
+    {
+      "from": "sc-1-hall",
+      "to": "sc-1-center",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "oaa-02Room_COS_1",
+        "page": 1,
+        "note": "人工以原PDF高解析裁圖核對門洞與灰色廊道；中央樓梯從北側開口進出，南側窗牆不通行；Astra以原PDF6倍核對2F東側外廊位於x .864與SC2002牆x .878之間，取x .871；2026-10-19，僅圖面核對，未經現地。"
+      }
+    },
+    {
+      "from": "sc-1-hall",
+      "to": "sc-1-right-a",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "oaa-02Room_COS_1",
+        "page": 1,
+        "note": "人工以原PDF高解析裁圖核對門洞與灰色廊道；中央樓梯從北側開口進出，南側窗牆不通行；Astra以原PDF6倍核對2F東側外廊位於x .864與SC2002牆x .878之間，取x .871；2026-10-19，僅圖面核對，未經現地。"
+      }
+    },
+    {
+      "from": "sc-1-right-a",
+      "to": "sc-1-right-b",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "oaa-02Room_COS_1",
+        "page": 1,
+        "note": "人工以原PDF高解析裁圖核對門洞與灰色廊道；中央樓梯從北側開口進出，南側窗牆不通行；Astra以原PDF6倍核對2F東側外廊位於x .864與SC2002牆x .878之間，取x .871；2026-10-19，僅圖面核對，未經現地。"
+      }
+    },
+    {
+      "from": "sc-1-center",
+      "to": "sc-1-west-a",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "oaa-02Room_COS_1",
+        "page": 1,
+        "note": "人工以原PDF高解析裁圖核對門洞與灰色廊道；中央樓梯從北側開口進出，南側窗牆不通行；Astra以原PDF6倍核對2F東側外廊位於x .864與SC2002牆x .878之間，取x .871；2026-10-19，僅圖面核對，未經現地。"
+      }
+    },
+    {
+      "from": "sc-1-west-a",
+      "to": "sc-1-west-b",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "oaa-02Room_COS_1",
+        "page": 1,
+        "note": "人工以原PDF高解析裁圖核對門洞與灰色廊道；中央樓梯從北側開口進出，南側窗牆不通行；Astra以原PDF6倍核對2F東側外廊位於x .864與SC2002牆x .878之間，取x .871；2026-10-19，僅圖面核對，未經現地。"
+      }
+    },
+    {
+      "from": "sc-1-center",
+      "to": "sc-1-north-a",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "oaa-02Room_COS_1",
+        "page": 1,
+        "note": "人工以原PDF高解析裁圖核對門洞與灰色廊道；中央樓梯從北側開口進出，南側窗牆不通行；Astra以原PDF6倍核對2F東側外廊位於x .864與SC2002牆x .878之間，取x .871；2026-10-19，僅圖面核對，未經現地。"
+      }
+    },
+    {
+      "from": "sc-1-north-a",
+      "to": "sc-1-north-b",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "oaa-02Room_COS_1",
+        "page": 1,
+        "note": "人工以原PDF高解析裁圖核對門洞與灰色廊道；中央樓梯從北側開口進出，南側窗牆不通行；Astra以原PDF6倍核對2F東側外廊位於x .864與SC2002牆x .878之間，取x .871；2026-10-19，僅圖面核對，未經現地。"
+      }
+    },
+    {
+      "from": "sc-1-north-b",
+      "to": "sc-1-stair-a",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "oaa-02Room_COS_1",
+        "page": 1,
+        "note": "人工以原PDF高解析裁圖核對門洞與灰色廊道；中央樓梯從北側開口進出，南側窗牆不通行；Astra以原PDF6倍核對2F東側外廊位於x .864與SC2002牆x .878之間，取x .871；2026-10-19，僅圖面核對，未經現地。"
+      }
+    },
+    {
+      "from": "sc-1-stair-a",
+      "to": "sc-1-stair",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "oaa-02Room_COS_1",
+        "page": 1,
+        "note": "人工以原PDF高解析裁圖核對門洞與灰色廊道；中央樓梯從北側開口進出，南側窗牆不通行；Astra以原PDF6倍核對2F東側外廊位於x .864與SC2002牆x .878之間，取x .871；2026-10-19，僅圖面核對，未經現地。"
+      }
+    },
+    {
+      "from": "sc-1-stair",
+      "to": "sc-2-stair",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "oaa-02Room_COS_1",
+        "page": 1,
+        "note": "人工以原PDF高解析裁圖核對門洞與灰色廊道；中央樓梯從北側開口進出，南側窗牆不通行；Astra以原PDF6倍核對2F東側外廊位於x .864與SC2002牆x .878之間，取x .871；2026-10-19，僅圖面核對，未經現地。"
+      }
+    },
+    {
+      "from": "sc-2-stair",
+      "to": "sc-2-stair-a",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "oaa-02Room_COS_1",
+        "page": 1,
+        "note": "人工以原PDF高解析裁圖核對門洞與灰色廊道；中央樓梯從北側開口進出，南側窗牆不通行；Astra以原PDF6倍核對2F東側外廊位於x .864與SC2002牆x .878之間，取x .871；2026-10-19，僅圖面核對，未經現地。"
+      }
+    },
+    {
+      "from": "sc-2-stair-a",
+      "to": "sc-2-north-east",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "oaa-02Room_COS_1",
+        "page": 1,
+        "note": "人工以原PDF高解析裁圖核對門洞與灰色廊道；中央樓梯從北側開口進出，南側窗牆不通行；Astra以原PDF6倍核對2F東側外廊位於x .864與SC2002牆x .878之間，取x .871；2026-10-19，僅圖面核對，未經現地。"
+      }
+    },
+    {
+      "from": "sc-2-north-east",
+      "to": "sc-2-hall",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "oaa-02Room_COS_1",
+        "page": 1,
+        "note": "人工以原PDF高解析裁圖核對門洞與灰色廊道；中央樓梯從北側開口進出，南側窗牆不通行；Astra以原PDF6倍核對2F東側外廊位於x .864與SC2002牆x .878之間，取x .871；2026-10-19，僅圖面核對，未經現地。"
+      }
+    },
+    {
+      "from": "sc-2-hall",
+      "to": "sc-2-east-a",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "oaa-02Room_COS_1",
+        "page": 1,
+        "note": "人工以原PDF高解析裁圖核對門洞與灰色廊道；中央樓梯從北側開口進出，南側窗牆不通行；Astra以原PDF6倍核對2F東側外廊位於x .864與SC2002牆x .878之間，取x .871；2026-10-19，僅圖面核對，未經現地。"
+      }
+    },
+    {
+      "from": "sc-2-east-a",
+      "to": "sc-2-east-b",
+      "cost": 1,
+      "enabled": true,
+      "evidence": {
+        "sourceId": "oaa-02Room_COS_1",
+        "page": 1,
+        "note": "人工以原PDF高解析裁圖核對門洞與灰色廊道；中央樓梯從北側開口進出，南側窗牆不通行；Astra以原PDF6倍核對2F東側外廊位於x .864與SC2002牆x .878之間，取x .871；2026-10-19，僅圖面核對，未經現地。"
+      }
+    },
+    {
+      "from": "approach-SC",
+      "to": "sc-1-south",
+      "cost": 1,
+      "enabled": false,
+      "evidence": {
+        "sourceId": "oaa-02Room_COS_1",
+        "page": 1,
+        "note": "待核對：樓層圖與校園圖的方向及實際入口對應，禁止自動銜接"
+      }
+    }
+  ],
+  "metadata": {
+    "version": 2,
+    "generatedBy": "tools/build_navigation.py",
+    "campusMapDate": "2022-09",
+    "layoutSource": {
+      "path": "src/world-layout.json",
+      "url": "https://science.nsysu.edu.tw/static/file/20/1020/pictures/928/m/mczh-tw700x700_large169939_850927118763.jpg",
+      "width": 495,
+      "height": 700,
+      "scale": 0.75,
+      "note": "3D canonical 像素座標；核心依新理工教學區參考圖人工描繪，外圍僅2022校園圖相對方位示意；非測繪尺度、非現地確認。道路與戶外導航共用同一配置；近點不是入口。"
+    },
+    "fieldVerified": false,
+    "roomDoors": 4,
+    "notes": "四個室內門點依圖面人工標註。戶外3D依world-layout示意，2D保留2022原圖座標；近點不代表入口。戶外與SC室內方向/入口銜接尚待核對，跨圖邊停用。"
+  }
+}

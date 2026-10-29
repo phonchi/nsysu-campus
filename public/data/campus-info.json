@@ -1,0 +1,364 @@
+{
+ "note": "建築與故事文字摘自 docs/reference/visual-reference.md 的有來源段落；位置為示意。",
+ "buildings": {
+  "SC": {
+   "name": "理學院（含東綜合大樓）",
+   "college": "science",
+   "summary": "理學院本館與東綜合大樓，B1 至 4F；與北側工學院機電大樓相連成一條南北長樓，東綜合大樓與本館各層走廊相通。",
+   "facts": [
+    "外牆紅磚面磚配米白水平樑帶",
+    "理工長廊沿中庭東側串連各館"
+   ],
+   "links": [
+    {
+     "label": "教務處・各學院教室平面圖",
+     "url": "https://oaa.nsysu.edu.tw/p/412-1003-27076.php?Lang=zh-tw"
+    },
+    {
+     "label": "總務處校安組・建築物各樓層平面圖",
+     "url": "https://safety-oga.nsysu.edu.tw/p/405-1296-286323,c18978.php"
+    }
+   ]
+  },
+  "EN": {
+   "name": "工學院（機電大樓）",
+   "college": "engineering",
+   "summary": "機電大樓 B1 至 4F，位於理學院北側，與東、西綜合大樓相鄰；1F 以理工長廊連通，上層設有跨棟廊道。",
+   "facts": [
+    "理工長廊北段經此通往圖資大樓東側"
+   ],
+   "links": [
+    {
+     "label": "教務處・各學院教室平面圖",
+     "url": "https://oaa.nsysu.edu.tw/p/412-1003-27076.php?Lang=zh-tw"
+    },
+    {
+     "label": "總務處校安組・建築物各樓層平面圖",
+     "url": "https://safety-oga.nsysu.edu.tw/p/405-1296-286323,c18978.php"
+    }
+   ]
+  },
+  "CH": {
+   "name": "化學館",
+   "college": "science",
+   "summary": "理工實驗大樓 C 棟，地上 6 層加屋頂，位於理學院東側山坡，與物理館、生科館相連。",
+   "facts": [
+    "實驗室立面有密集的垂直排氣風管"
+   ],
+   "links": [
+    {
+     "label": "教務處・各學院教室平面圖",
+     "url": "https://oaa.nsysu.edu.tw/p/412-1003-27076.php?Lang=zh-tw"
+    },
+    {
+     "label": "總務處校安組・建築物各樓層平面圖",
+     "url": "https://safety-oga.nsysu.edu.tw/p/405-1296-286323,c18978.php"
+    }
+   ]
+  },
+  "PH": {
+   "name": "物理館",
+   "college": "science",
+   "summary": "理工實驗大樓 D 棟，地上 7 層加屋頂，與生科館連棟成階梯狀的實驗大樓群。",
+   "facts": [],
+   "links": [
+    {
+     "label": "教務處・各學院教室平面圖",
+     "url": "https://oaa.nsysu.edu.tw/p/412-1003-27076.php?Lang=zh-tw"
+    },
+    {
+     "label": "總務處校安組・建築物各樓層平面圖",
+     "url": "https://safety-oga.nsysu.edu.tw/p/405-1296-286323,c18978.php"
+    }
+   ]
+  },
+  "BI": {
+   "name": "生科館",
+   "college": "science",
+   "summary": "理工實驗大樓 E 棟，地上 6 至 7 層，背倚壽山森林邊坡，常見台灣獼猴在外牆管線間活動。",
+   "facts": [
+    "與物理館連棟"
+   ],
+   "links": [
+    {
+     "label": "教務處・各學院教室平面圖",
+     "url": "https://oaa.nsysu.edu.tw/p/412-1003-27076.php?Lang=zh-tw"
+    },
+    {
+     "label": "總務處校安組・建築物各樓層平面圖",
+     "url": "https://safety-oga.nsysu.edu.tw/p/405-1296-286323,c18978.php"
+    }
+   ]
+  },
+  "MS": {
+   "name": "材料大樓",
+   "college": "engineering",
+   "summary": "地上 6 層，位於機電大樓與化學館東側，矩形厚實量體，1F 有重型實驗設備進出口。",
+   "facts": [],
+   "links": [
+    {
+     "label": "教務處・各學院教室平面圖",
+     "url": "https://oaa.nsysu.edu.tw/p/412-1003-27076.php?Lang=zh-tw"
+    },
+    {
+     "label": "總務處校安組・建築物各樓層平面圖",
+     "url": "https://safety-oga.nsysu.edu.tw/p/405-1296-286323,c18978.php"
+    }
+   ]
+  },
+  "EV": {
+   "name": "環工大樓",
+   "college": "engineering",
+   "summary": "地上 6 層，位於理工區北側；平面圖取自校安組向量圖，未標樓梯位置，本站樓梯為示意。",
+   "facts": [
+    "本棟未設示意電梯，請走樓梯"
+   ],
+   "links": [
+    {
+     "label": "教務處・各學院教室平面圖",
+     "url": "https://oaa.nsysu.edu.tw/p/412-1003-27076.php?Lang=zh-tw"
+    },
+    {
+     "label": "總務處校安組・建築物各樓層平面圖",
+     "url": "https://safety-oga.nsysu.edu.tw/p/405-1296-286323,c18978.php"
+    }
+   ]
+  },
+  "EC": {
+   "name": "電資大樓",
+   "college": "engineering",
+   "summary": "地下 1 層、地上 9 層，是東側理工區最高、最龐大的量體，位於理工一道、二道盡頭。",
+   "facts": [],
+   "links": [
+    {
+     "label": "教務處・各學院教室平面圖",
+     "url": "https://oaa.nsysu.edu.tw/p/412-1003-27076.php?Lang=zh-tw"
+    },
+    {
+     "label": "總務處校安組・建築物各樓層平面圖",
+     "url": "https://safety-oga.nsysu.edu.tw/p/405-1296-286323,c18978.php"
+    }
+   ]
+  },
+  "AD": {
+   "name": "行政大樓",
+   "college": "admin",
+   "summary": "B1 至 7F，1984 年竣工；正門階梯前有雕塑家據傳由陳志慈塑造的兩尊青銅雄獅，北側直通中庭廣場。",
+   "facts": [],
+   "links": [
+    {
+     "label": "中山新聞・中山銅獅點亮西灣（2024-12-23）",
+     "url": "https://news.nsysu.edu.tw/p/404-1120-346875.php?Lang=zh-tw"
+    },
+    {
+     "label": "總務處校安組・建築物各樓層平面圖",
+     "url": "https://safety-oga.nsysu.edu.tw/p/405-1296-286323,c18978.php"
+    }
+   ]
+  },
+  "IL": {
+   "name": "圖資大樓",
+   "college": "admin",
+   "summary": "1989 年開館，陳其寬參與設計；頂部多角斜頂「皇冠」是西子灣天際線地標。",
+   "facts": [
+    "余光中〈高樓對海〉：「長窗向西，一軸山海經的巨幅手卷」"
+   ],
+   "links": [
+    {
+     "label": "圖書與資訊處・樓層介紹",
+     "url": "https://lis.nsysu.edu.tw/p/412-1001-1175.php?Lang=zh-tw"
+    },
+    {
+     "label": "文化部典藏網・圖書館資訊大樓新建工程",
+     "url": "https://collections.culture.tw/Object?SYSUID=31&RNO=Q0NDSzI2MTIzMDQ1"
+    }
+   ]
+  },
+  "YH": {
+   "name": "逸仙館",
+   "college": "admin",
+   "summary": "B1 至 3F 的大型禮堂與劇場，1,370 席，四周環繞半戶外外迴廊，正面大階梯直達二樓大廳。",
+   "facts": [],
+   "links": [
+    {
+     "label": "藝文中心・逸仙館場地介紹",
+     "url": "https://artcenter.nsysu.edu.tw/p/412-1008-359.php?Lang=zh-tw"
+    }
+   ]
+  },
+  "CMSS": {
+   "name": "管理學院・社會科學院",
+   "college": "management",
+   "summary": "中庭西側的長樓，社管長廊串連社會科學院與管理學院，至圖資大樓西側；本站僅外觀。",
+   "facts": [],
+   "links": [
+    {
+     "label": "教務處・各學院教室平面圖",
+     "url": "https://oaa.nsysu.edu.tw/p/412-1003-27076.php?Lang=zh-tw"
+    },
+    {
+     "label": "總務處校安組・建築物各樓層平面圖",
+     "url": "https://safety-oga.nsysu.edu.tw/p/405-1296-286323,c18978.php"
+    }
+   ]
+  },
+  "ACTIVITY": {
+   "name": "學生活動中心",
+   "college": "admin",
+   "summary": "B1 至 6F 的雙翼建築群，位於圖資大樓西側；本站僅外觀。",
+   "facts": [],
+   "links": [
+    {
+     "label": "教務處・各學院教室平面圖",
+     "url": "https://oaa.nsysu.edu.tw/p/412-1003-27076.php?Lang=zh-tw"
+    },
+    {
+     "label": "總務處校安組・建築物各樓層平面圖",
+     "url": "https://safety-oga.nsysu.edu.tw/p/405-1296-286323,c18978.php"
+    }
+   ]
+  },
+  "GALLERY": {
+   "name": "西子灣行館（360 藝文空間）",
+   "college": "admin",
+   "summary": "原為 1935 年臺灣博覽會興建的高雄觀光館（溫浴館），1980 年移交中山大學管理；本站僅外觀。",
+   "facts": [],
+   "links": [
+    {
+     "label": "藝文中心・360 藝文空間",
+     "url": "https://artcenter.nsysu.edu.tw/p/412-1008-26424.php?Lang=zh-tw"
+    }
+   ]
+  }
+ },
+ "stories": [
+  {
+   "id": "lions",
+   "title": "行政大樓銅獅",
+   "pos": [
+    -70,
+    96
+   ],
+   "text": "行政大樓正門階梯前的兩尊青銅雄獅，據傳由雕塑家陳志慈塑造，四十多年來守著中庭廣場。每年十二月，校方會替銅獅戴上聖誕帽、點亮燈飾。",
+   "sources": [
+    {
+     "label": "中山新聞（2024-12-23）",
+     "url": "https://news.nsysu.edu.tw/p/404-1120-346875.php?Lang=zh-tw"
+    }
+   ]
+  },
+  {
+   "id": "tunnel",
+   "title": "西子灣隧道「壽山洞」",
+   "pos": [
+    24,
+    150
+   ],
+   "text": "連接哈瑪星與校園的西子灣隧道，日治時期開鑿、1928 年完工，洞口保留仿石砌拱圈，是穿過壽山走進校園的門戶。",
+   "sources": [
+    {
+     "label": "高雄旅遊網・西子灣隧道",
+     "url": "https://khh.travel/zh-tw/attractions/detail/167/"
+    },
+    {
+     "label": "國家文化記憶庫",
+     "url": "https://tcmb.culture.tw/zh-tw/detail?indexCode=Culture_Place&id=622460"
+    }
+   ]
+  },
+  {
+   "id": "gallery",
+   "title": "從溫浴館到行館",
+   "pos": [
+    -181,
+    -70
+   ],
+   "text": "西子灣行館（原高雄觀光館）建於 1935 年臺灣博覽會，展期後轉為溫浴場；1999 年起由中山大學活化為藝文空間，2023 年 12 月完成古蹟修復並復原溫浴池遺構。",
+   "sources": [
+    {
+     "label": "藝文中心・360 藝文空間沿革",
+     "url": "https://artcenter.nsysu.edu.tw/p/412-1008-26424.php?Lang=zh-tw"
+    }
+   ]
+  },
+  {
+   "id": "bodhi",
+   "title": "菩提樹廣場的公投",
+   "pos": [
+    -67,
+    -27
+   ],
+   "text": "中庭曾同時佇立孫中山與蔣中正兩座銅像。2018 年全校網路公投決議「孫不動、蔣遷移」，蔣公銅像移到逸仙館旁；被颱風吹倒的老菩提樹頭則留在原地培育新枝。",
+   "sources": [
+    {
+     "label": "中山新聞（2018-04-21）",
+     "url": "https://news.nsysu.edu.tw/p/404-1120-184678.php?Lang=zh-tw"
+    },
+    {
+     "label": "中山新聞（2019-09-19）",
+     "url": "https://news.nsysu.edu.tw/p/404-1120-214657.php?Lang=zh-tw"
+    }
+   ]
+  },
+  {
+   "id": "library",
+   "title": "戴著皇冠的知識燈塔",
+   "pos": [
+    -66,
+    -60
+   ],
+   "text": "1989 年開館的圖資大樓，頂部多角斜頂遠看像一頂皇冠。詩人余光中曾以〈高樓對海〉寫下從高樓遠眺海峽的景色。",
+   "sources": [
+    {
+     "label": "文化部典藏網",
+     "url": "https://collections.culture.tw/Object?SYSUID=31&RNO=Q0NDSzI2MTIzMDQ1"
+    }
+   ]
+  },
+  {
+   "id": "sunset",
+   "title": "蘿蔔坑看夕陽",
+   "pos": [
+    -226,
+    178
+   ],
+   "text": "校門旁標高 21.2 公尺的紅磚校碑緊鄰西子灣海堤。海堤女兒牆每隔一段就有一個內凹垛口，剛好坐得下兩個人，學生暱稱為「蘿蔔坑」，黃昏時最適合看西子夕照。",
+   "sources": [
+    {
+     "label": "中山新聞（2020-09-01）",
+     "url": "https://news.nsysu.edu.tw/p/404-1120-242198.php?Lang=zh-tw"
+    }
+   ]
+  },
+  {
+   "id": "monkeys",
+   "title": "壽山的「猴學長」",
+   "pos": [
+    82,
+    62
+   ],
+   "text": "校園緊鄰壽山國家自然公園，台灣獼猴常在生科館外牆與翠亨道一帶活動。「食物不外露、隨手關防猴紗窗」是新生的第一堂必修課。",
+   "sources": [
+    {
+     "label": "學務處・菩提樹廣場周邊場地管理要點",
+     "url": "https://ag-osa.nsysu.edu.tw/var/file/87/1087/img/1887/212266680.pdf"
+    }
+   ]
+  },
+  {
+   "id": "zoo",
+   "title": "西子灣的動物園",
+   "pos": [
+    -20,
+    120
+   ],
+   "text": "高雄市壽山動物園 1978 年在西子灣創立，1986 年才遷往壽山現址；中山大學則在 1980 年於西子灣復校。",
+   "sources": [
+    {
+     "label": "高雄市壽山動物園・園區簡介",
+     "url": "https://zoo.kcg.gov.tw/en/intro/"
+    }
+   ]
+  }
+ ]
+}

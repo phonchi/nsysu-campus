@@ -1,0 +1,62 @@
+{
+  "license": "CC0-1.0",
+  "source": "tools/create_campus_assets.py",
+  "generator": "Blender 4.5 LTS, original procedural meshes",
+  "characters": {
+    "ahai": "阿海",
+    "lan": "小嵐",
+    "tuo": "阿拓"
+  },
+  "clips": [
+    "Idle",
+    "Walk",
+    "Run",
+    "Jump"
+  ],
+  "fps": 24,
+  "height_m": 1.46,
+  "files": {
+    "bicycle.glb": 15507,
+    "char-ahai.glb": 137344,
+    "char-lan.glb": 144484,
+    "char-tuo.glb": 145000,
+    "cone.glb": 10564,
+    "monkey.glb": 45876,
+    "sailboat.glb": 12048,
+    "bicycle.glb.bin": 5352,
+    "bicycle-v6.bin": 1944,
+    "bicycle-v6-stem.bin": 1440
+  },
+  "rideV6": {
+    "generator": "tools/upgrade_bicycle_v6.mjs",
+    "sourceSha256": "77b2b2de05eb74fc260e4c4b3b2770e5ff530baebae491d0b07cd995927d3614",
+    "contacts": [
+      "grip.L",
+      "grip.R",
+      "saddle",
+      "crank",
+      "pedal.L",
+      "pedal.R",
+      "wheel.front.contact",
+      "wheel.rear.contact"
+    ],
+    "files": {
+      "bicycle.glb": {
+        "bytes": 15507,
+        "sha256": "8f8cd5ccd53b6221464207cd83cc08ac004e54c6a2c1a0194f84e343b5549c25"
+      },
+      "bicycle.glb.bin": {
+        "bytes": 5352,
+        "sha256": "dcf0dc0d40b94983ee0e22eebd8f5a28c5a6cb8c91f5bb04c500db18f93fdba9"
+      },
+      "bicycle-v6.bin": {
+        "bytes": 1944,
+        "sha256": "f2c2edfa04770ad9021bef5ac9f0f19a7767d16b3f845581e31e03caa1b7b7a6"
+      },
+      "bicycle-v6-stem.bin": {
+        "bytes": 1440,
+        "sha256": "ac44ba70e1beb947646352dd7a9730400c35ca6a86f5afe6fdf0e40b280cfea2"
+      }
+    }
+  }
+}

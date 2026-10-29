@@ -1,0 +1,424 @@
+{
+  "scope": "Only CH3-region013 and CH4-region016 source shapes and outside approach",
+  "createdAt": "2026-10-19T09:27:18.644768+00:00",
+  "sourceBuildingSHA256": {
+    "CH": "48856224cd8e84715d071db93a5f7256204f7c2b862be5668740a3198ef79ba4"
+  },
+  "inputSHA256": {
+    "public/data/walkthrough/CH.json": "48856224cd8e84715d071db93a5f7256204f7c2b862be5668740a3198ef79ba4",
+    "public/data/walkthrough/access-plan.json": "42df43f1ca9e918a89f5864cde0cc967b5fef648c1fc6806f87552b72c4821db",
+    "src/walk-world.ts": "ccd42326755f43cf6be30cff2e39faf53df01c1db67c9ffa6c1527e1c60274b4",
+    "artifacts/door-collision-audit.json": "413d797d2229faa4dff634e84516d4fea6799e6141e6bcee023173c5e93b5c47"
+  },
+  "entries": [
+    {
+      "floorId": "CH-3F",
+      "roomId": "CH-3F-region-013",
+      "code": "CH3020",
+      "decision": "retain-current-geometry-and-door",
+      "sourceId": "oaa-02Room_COS_4",
+      "page": 1,
+      "crop": {
+        "x": 238.406005859375,
+        "y": 1617.82078125,
+        "width": 1025.1458251953125,
+        "height": 539.2735937500001
+      },
+      "imageUrl": "/data/walkthrough/CH-3F.webp",
+      "sourceRegionPixels": [
+        [
+          579.0,
+          126.0
+        ],
+        [
+          578.0,
+          220.0
+        ],
+        [
+          581.0,
+          221.0
+        ],
+        [
+          581.0,
+          216.0
+        ],
+        [
+          585.0,
+          215.0
+        ],
+        [
+          597.0,
+          222.0
+        ],
+        [
+          642.0,
+          221.0
+        ],
+        [
+          642.0,
+          126.0
+        ]
+      ],
+      "registeredPolygon": [
+        [
+          -13.1127,
+          -2.9917
+        ],
+        [
+          -13.1658,
+          1.9769
+        ],
+        [
+          -13.0074,
+          2.029
+        ],
+        [
+          -13.0074,
+          1.7652
+        ],
+        [
+          -12.7957,
+          1.712
+        ],
+        [
+          -12.1617,
+          2.0822
+        ],
+        [
+          -9.7832,
+          2.029
+        ],
+        [
+          -9.7832,
+          -2.9917
+        ]
+      ],
+      "selectedPortal": {
+        "id": "CH-3F-portal-011",
+        "position": [
+          -9.7832,
+          -0.48135
+        ],
+        "width": 1.2,
+        "roomIds": [
+          "CH-3F-region-013"
+        ],
+        "nodeIds": [
+          "CH-3F-region-013",
+          "@free-000"
+        ],
+        "basis": "schematic",
+        "gap": 0.0,
+        "sharedSpan": 5.0207,
+        "tangent": [
+          0.0,
+          -1.0
+        ],
+        "insideClearanceChecks": {
+          "CH-3F-region-013": {
+            "passed": true,
+            "insidePosition": [
+              -10.1432,
+              -0.48135
+            ],
+            "inwardNormal": [
+              -1.0,
+              -0.0
+            ],
+            "distanceToRoomCore": 0.36,
+            "normalProbeCoreGap": 0.0,
+            "coreRadius": 0.36
+          }
+        },
+        "clearancePositions": {
+          "CH-3F-region-013": [
+            -10.1432,
+            -0.48135
+          ],
+          "@free-000": [
+            -9.3632,
+            -0.48135
+          ]
+        },
+        "perRoomPosition": {
+          "CH-3F-region-013": [
+            -9.7832,
+            -0.48135
+          ]
+        }
+      },
+      "selectedPortalImagePixel": [
+        642.0006001407617,
+        173.49357946183065
+      ],
+      "sourceObservation": {
+        "printedCode": "CH3020",
+        "sourceDoor": "原圖南側左角可見門弧，東側是長直牆；目前east primary portal屬示意。",
+        "visibleDoorGlyphPixels": [
+          578,
+          214,
+          599,
+          225
+        ],
+        "outsidePath": "現portal位於東側房牆x=-9.7832，與東側候選region015西界x=-8.9376的模型中心線間距約0.8456m。扣兩側各0.08m牆厚，名義淨距約0.6856m；此僅模型算術，未含柱、門板或voxel量化，非實測。真膠囊能穿過，不應因粗Recast斷路擴門。",
+        "wallCenterlineGap": 0.8456,
+        "nominalWallThickness": 0.16,
+        "nominalGap": 0.6856
+      },
+      "recommendation": "本輪不改source/plan/world，不擴門、不改房型。保留已真膠囊通過的門帶，先由Astra exact診斷及更細Recast cs.07處理外側node/轉角連通與量化差異。"
+    },
+    {
+      "floorId": "CH-4F",
+      "roomId": "CH-4F-region-016",
+      "code": null,
+      "decision": "retain-current-geometry-and-door",
+      "sourceId": "oaa-02Room_COS_4",
+      "page": 1,
+      "crop": {
+        "x": 1287.392431640625,
+        "y": 1617.82078125,
+        "width": 1001.3052246093748,
+        "height": 539.2735937500001
+      },
+      "imageUrl": "/data/walkthrough/CH-4F.webp",
+      "sourceRegionPixels": [
+        [
+          692.0,
+          374.0
+        ],
+        [
+          726.0,
+          374.0
+        ],
+        [
+          726.0,
+          332.0
+        ],
+        [
+          717.0,
+          329.0
+        ],
+        [
+          710.0,
+          318.0
+        ],
+        [
+          712.0,
+          313.0
+        ],
+        [
+          692.0,
+          313.0
+        ],
+        [
+          692.0,
+          353.0
+        ],
+        [
+          698.0,
+          355.0
+        ],
+        [
+          700.0,
+          359.0
+        ],
+        [
+          702.0,
+          358.0
+        ],
+        [
+          707.0,
+          366.0
+        ],
+        [
+          707.0,
+          371.0
+        ],
+        [
+          692.0,
+          372.0
+        ]
+      ],
+      "registeredPolygon": [
+        [
+          -5.5927,
+          9.6984
+        ],
+        [
+          -3.7131,
+          9.6984
+        ],
+        [
+          -3.7131,
+          7.3779
+        ],
+        [
+          -4.2104,
+          7.2118
+        ],
+        [
+          -4.598,
+          6.6037
+        ],
+        [
+          -4.4873,
+          6.3279
+        ],
+        [
+          -5.5927,
+          6.3279
+        ],
+        [
+          -5.5927,
+          8.5376
+        ],
+        [
+          -5.2604,
+          8.6484
+        ],
+        [
+          -5.1507,
+          8.8699
+        ],
+        [
+          -5.04,
+          8.8145
+        ],
+        [
+          -4.7631,
+          9.2564
+        ],
+        [
+          -4.7631,
+          9.5333
+        ],
+        [
+          -5.5927,
+          9.5876
+        ]
+      ],
+      "selectedPortal": {
+        "id": "CH-4F-portal-013",
+        "position": [
+          -4.36058,
+          9.80915
+        ],
+        "width": 1.2,
+        "roomIds": [
+          "CH-4F-region-015",
+          "CH-4F-region-016"
+        ],
+        "nodeIds": [
+          "CH-4F-region-015",
+          "CH-4F-region-016"
+        ],
+        "basis": "schematic",
+        "gap": 0.2215,
+        "sharedSpan": 1.8796,
+        "tangent": [
+          1.0,
+          0.0
+        ],
+        "insideClearanceChecks": {
+          "CH-4F-region-015": {
+            "passed": true,
+            "insidePosition": [
+              -4.36058,
+              10.2799
+            ],
+            "inwardNormal": [
+              -0.0,
+              1.0
+            ],
+            "distanceToRoomCore": 0.36,
+            "normalProbeCoreGap": 0.0,
+            "coreRadius": 0.36
+          },
+          "CH-4F-region-016": {
+            "passed": true,
+            "insidePosition": [
+              -4.36058,
+              9.3384
+            ],
+            "inwardNormal": [
+              0.0,
+              -1.0
+            ],
+            "distanceToRoomCore": 0.36,
+            "normalProbeCoreGap": 0.0,
+            "coreRadius": 0.36
+          }
+        },
+        "clearancePositions": {
+          "CH-4F-region-015": [
+            -4.36058,
+            10.2799
+          ],
+          "CH-4F-region-016": [
+            -4.36058,
+            9.3384
+          ]
+        },
+        "perRoomPosition": {
+          "CH-4F-region-015": [
+            -4.36058,
+            9.9199
+          ],
+          "CH-4F-region-016": [
+            -4.36058,
+            9.6984
+          ]
+        }
+      },
+      "selectedPortalImagePixel": [
+        714.2904112465196,
+        373.995721875787
+      ],
+      "sourceObservation": {
+        "sourceDoor": "原圖小圍合空間有北側及西南角兩個門弧，周界被門扇弧描成碎邊；現南側共享門是示意。",
+        "visibleDoorGlyphPixels": [
+          [
+            710,
+            313,
+            726,
+            332
+          ],
+          [
+            692,
+            353,
+            707,
+            373
+          ]
+        ],
+        "outsidePath": "目前portal連接CH4005候選region015的南側分葉與region016；parent015原輪廓多轉角/分葉。門外node與遠端公共區的連通不能僅用同房id推定；root回報Astra已真膠囊走過該窄轉角。"
+      },
+      "recommendation": "本輪不改source/plan/world，不擴門、不改房型。保留已真膠囊通過的門帶，先由Astra exact診斷及更細Recast cs.07處理外側node/轉角連通與量化差異。"
+    }
+  ],
+  "physicalEvidence": {
+    "artifact": "artifacts/door-collision-audit.json",
+    "total": 889,
+    "counts": {
+      "crossed": 889
+    },
+    "validSnapshotDuringAudit": true,
+    "currentAuditInputsMatch": true,
+    "astraDiagnostic": [
+      {
+        "path": "artifacts/final-ch-portal-diagnostic.json",
+        "sha256": "af90e1cb39529a7ba41acc29575424776d8789f81ac5adaceb86db3093c755a1"
+      },
+      {
+        "path": "artifacts/final-ch-portal-diagnostic.log",
+        "sha256": "ea48d3b250d2b88d557a84d63c0542916c0167aa2ddaf3d83eaae9b63900eed0"
+      }
+    ],
+    "rootReported": "Astra已真膠囊通過兩門及窄轉角；本代理未另重跑物理測試。這是虛擬模型驗證，非現地通行確認。"
+  },
+  "geometryModified": false,
+  "sourceJSONModified": false,
+  "planModified": false,
+  "worldModified": false,
+  "freeze": true,
+  "note": "來源候選階段：CH3020是原圖明確文字，另一小間亦有可見門弧。不能為指標改善移除真空間；現有門跨越物理已通，本報告不要求擴門。凍結後不再修改source/report，供正式cs.07 bake記錄hash。"
+}

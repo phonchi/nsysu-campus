@@ -1,0 +1,41 @@
+{
+ "origin": [
+  -900,
+  -1100
+ ],
+ "cell": 4.0,
+ "cols": 451,
+ "rows": 451,
+ "layout": "Float32 LE, row-major: index = row*cols+col, x = origin[0]+col*cell, z = origin[1]+row*cell (vertex grid)",
+ "minY": -2.0,
+ "maxY": 189.054,
+ "seaLevel": -0.6,
+ "seabed": -2.0,
+ "zeroDatum": {
+  "twvd2001_m": 5.454,
+  "method": "median DTM under SC+EN placement footprints"
+ },
+ "pad": {
+  "shape": "convex hull of the 8 placement footprints + buffer, plus spawn disc",
+  "buffer_m": 6.0,
+  "blend_m": "clamp(2.5*|h|, 12.0, 40.0)",
+  "spawn": [
+   -69.0,
+   119.0
+  ],
+  "spawnRadius": 25.0,
+  "height": 0.0
+ },
+ "source": {
+  "name": "內政部20公尺網格數值地形模型資料 (MOI 20 m DTM), 分幅_高雄市DEM",
+  "dataset": "https://data.gov.tw/dataset/35430",
+  "url": "https://www.tgos.tw/MDE/VirtualDir_TC/Product/da7e1694-b0ea-4f67-bc97-a319f8807e2b/分幅_高雄市DEM.zip",
+  "archiveSha256": "c48b523832ebd6db4342dec8125f7ec5696dce96cc836d477442120a8dbc1e0f",
+  "retrievedAt": "2026-10-19T14:10:30+00:00",
+  "crs": "TWD97 / TM2 zone 121 (EPSG:3826), heights TWVD2001 metres; ASCII 'E N H' per line, 20 m spacing, -999 = no data (sea)"
+ },
+ "license": "政府資料開放授權條款－第1版 (Open Government Data License, Taiwan, v1.0); attribution: 內政部",
+ "sha256": "bc9a8003c40e8b86ab6b23b1a7d2df6f81bfc6d62e648408540210b9f6fe6e9c",
+ "bytes": 813604,
+ "note": "Relative heights (science/engineering ground = 0). Sea = DTM no-data minus OSM roads/buildings, set to seabed. Lowland below 0 is vertically compressed by 0.110 so real sea level sits at seaLevel (true MSL is -5.45 relative). Hills unchanged; the 4 m grid resamples a 20 m DTM (bare earth). Road flattening not applied."
+}

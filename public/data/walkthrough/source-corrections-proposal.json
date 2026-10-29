@@ -1,0 +1,35 @@
+{
+  "issues": [
+    {
+      "type": "misclassified-building",
+      "sourceId": "oaa-04Room_COM",
+      "oldBuildingId": "SC",
+      "proposedBuildingId": "CM"
+    },
+    {
+      "type": "misclassified-building",
+      "sourceId": "safety-pta_174551_7300210_04269",
+      "oldBuildingId": "SC",
+      "proposedBuildingId": "CM"
+    },
+    {
+      "type": "shared-source",
+      "sourceId": "safety-pta_174544_4720186_04268",
+      "oldBuildingId": "BI",
+      "proposedBuildingIds": [
+        "PH",
+        "BI"
+      ],
+      "note": "每頁左PH右BI；必須分棟裁切，不能整頁視為BI。"
+    },
+    {
+      "type": "missing-bi-roof-plan",
+      "buildingId": "BI",
+      "floor": "RF",
+      "sourceId": "safety-pta_174544_4720186_04268",
+      "page": 8,
+      "note": "合冊第8頁正文只畫D棟物理館RF，沒有生科館屋頂；先前將合冊RF視為兩棟都有屋頂圖不正確。現BI-RF為沿7F輪廓的schematic屋頂。"
+    }
+  ],
+  "note": "僅提案，不修改原sources/floors/integrity lock。"
+}

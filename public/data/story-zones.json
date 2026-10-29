@@ -1,0 +1,127 @@
+{
+ "note": "Story anchors in world metres (x east, z south). Positions come from outdoor-graph anchors (tools/build_outdoor_graph.py, T3 alignment). r = zone radius. library moved south of the hand-modelled pavilion (it extends ~12 m beyond the OSM footprint). A zone may give `y` when its floor is not the terrain (tunnel-inside: the bore floor, under the hill).",
+ "zones": {
+  "gate": {
+   "label": "校門・蓮海路",
+   "sub": "GATE",
+   "p": [
+    -84.2,
+    596.2
+   ],
+   "r": 22
+  },
+  "tunnel-west": {
+   "label": "西子灣隧道",
+   "sub": "SIZIHWAN TUNNEL",
+   "p": [
+    19.9,
+    148.5
+   ],
+   "r": 14,
+   "y": 1.0
+  },
+  "tunnel-inside": {
+   "label": "西子灣隧道",
+   "sub": "隧道內",
+   "p": [
+    28.6,
+    151.0
+   ],
+   "r": 5,
+   "y": 1.0
+  },
+  "admin": {
+   "label": "行政大樓",
+   "sub": "ADMINISTRATION",
+   "p": [
+    -70.02,
+    94.39
+   ],
+   "r": 16
+  },
+  "library": {
+   "label": "圖資大樓",
+   "sub": "LIBRARY",
+   "p": [
+    -63.0,
+    -35.0
+   ],
+   "r": 16
+  },
+  "arcade": {
+   "label": "理工長廊",
+   "sub": "SCIENCE & ENGINEERING",
+   "p": [
+    -69.0,
+    119.0
+   ],
+   "r": 18
+  },
+  "seawall": {
+   "label": "西子灣海堤",
+   "sub": "SUNSET",
+   "p": [
+    -308.0,
+    468.7
+   ],
+   "r": 20
+  }
+ },
+ "npcs": {
+  "guide": {
+   "model": "npc-guide",
+   "at": "gate",
+   "offset": [
+    3,
+    -2
+   ]
+  },
+  "s1": {
+   "model": "npc-student-1",
+   "at": "gate",
+   "offset": [
+    -4,
+    1
+   ],
+   "activity": "Talk"
+  },
+  "s2": {
+   "model": "npc-desk",
+   "at": "admin",
+   "offset": [
+    2,
+    3
+   ],
+   "activity": "Idle"
+  },
+  "s3": {
+   "model": "npc-desk",
+   "at": "library",
+   "offset": [
+    -3,
+    2
+   ],
+   "activity": "Idle"
+  },
+  "m1": {
+   "model": "monkey",
+   "at": "arcade",
+   "offset": [
+    10,
+    -8
+   ],
+   "activity": "Sit"
+  }
+ },
+ "ambient": {
+  "students": [
+   "npc-student-1",
+   "npc-student-2",
+   "npc-student-3",
+   "npc-student-4",
+   "npc-student-5",
+   "npc-student-6"
+  ],
+  "monkeys": 3
+ }
+}

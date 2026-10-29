@@ -1,0 +1,289 @@
+{
+ "id": "liberal-arts",
+ "title": "文學院",
+ "units": "m",
+ "frame": "local three.js: x east, y up, z south; origin = footprint centroid at grade",
+ "boxSchema": "center [x,y,z], size [sx,sy,sz] full extents, yaw radians about +Y; walkable = may stand on top",
+ "boxes": [
+  {
+   "center": [
+    0.0,
+    9.7,
+    -0.0
+   ],
+   "size": [
+    64.0,
+    19.4,
+    18.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    23.0,
+    9.4,
+    -27.5
+   ],
+   "size": [
+    18,
+    18.8,
+    37
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    0.0,
+    0.45,
+    13.5
+   ],
+   "size": [
+    66,
+    0.9,
+    9
+   ],
+   "yaw": 0.0,
+   "walkable": true
+  },
+  {
+   "center": [
+    -27.1,
+    4.55,
+    15.0
+   ],
+   "size": [
+    1.0,
+    7.3,
+    1.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -22.5,
+    4.55,
+    15.0
+   ],
+   "size": [
+    1.0,
+    7.3,
+    1.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -17.9,
+    4.55,
+    15.0
+   ],
+   "size": [
+    1.0,
+    7.3,
+    1.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -13.3,
+    4.55,
+    15.0
+   ],
+   "size": [
+    1.0,
+    7.3,
+    1.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -8.7,
+    4.55,
+    15.0
+   ],
+   "size": [
+    1.0,
+    7.3,
+    1.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -4.1,
+    4.55,
+    15.0
+   ],
+   "size": [
+    1.0,
+    7.3,
+    1.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    0.5,
+    4.55,
+    15.0
+   ],
+   "size": [
+    1.0,
+    7.3,
+    1.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    5.1,
+    4.55,
+    15.0
+   ],
+   "size": [
+    1.0,
+    7.3,
+    1.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    9.7,
+    4.55,
+    15.0
+   ],
+   "size": [
+    1.0,
+    7.3,
+    1.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    14.3,
+    4.55,
+    15.0
+   ],
+   "size": [
+    1.0,
+    7.3,
+    1.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    18.9,
+    4.55,
+    15.0
+   ],
+   "size": [
+    1.0,
+    7.3,
+    1.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    23.5,
+    4.55,
+    15.0
+   ],
+   "size": [
+    1.0,
+    7.3,
+    1.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    0.0,
+    0.112,
+    23.65
+   ],
+   "size": [
+    20,
+    0.225,
+    0.7
+   ],
+   "yaw": 0.0,
+   "walkable": true
+  },
+  {
+   "center": [
+    0.0,
+    0.225,
+    22.95
+   ],
+   "size": [
+    20,
+    0.45,
+    0.7
+   ],
+   "yaw": 0.0,
+   "walkable": true
+  },
+  {
+   "center": [
+    0.0,
+    0.338,
+    22.25
+   ],
+   "size": [
+    20,
+    0.675,
+    0.7
+   ],
+   "yaw": 0.0,
+   "walkable": true
+  },
+  {
+   "center": [
+    0.0,
+    0.45,
+    21.55
+   ],
+   "size": [
+    20,
+    0.9,
+    0.7
+   ],
+   "yaw": 0.0,
+   "walkable": true
+  },
+  {
+   "center": [
+    -34.0,
+    11.5,
+    -4.0
+   ],
+   "size": [
+    7,
+    23,
+    7
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  }
+ ]
+}

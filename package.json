@@ -1,0 +1,38 @@
+{
+  "name": "nsysu-mountain-sea-campus",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "python3 -B tools/verify_walk_data.py && python3 -B tools/verify_chapters.py && tsc --noEmit && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "vitest run",
+    "data:ingest": "python3 tools/ingest_maps.py",
+    "data:verify": "python3 -B tools/verify_walk_data.py && python3 -B tools/verify_chapters.py",
+    "data:navigation": "python3 tools/build_navigation.py",
+    "qa": "python3 tools/walk_feel_qa.py",
+    "walk:bake": "tsx tools/bake_walk_nav.ts",
+    "walk:verify": "python3 -B tools/verify_walk_data.py",
+    "walk:qa": "python3 tools/walkthrough_qa.py",
+    "map:build": "tsx tools/build_campus_map.ts",
+    "data:verify:internal": "python3 -B tools/verify_data.py"
+  },
+  "dependencies": {
+    "@dimforge/rapier3d-compat": "0.21.0",
+    "recast-navigation": "^0.43.1",
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "@gltf-transform/cli": "^4.5.1",
+    "@types/node": "^26.6.5",
+    "@types/three": "^0.186.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.5"
+  },
+  "engines": {
+    "node": ">=22.12"
+  }
+}

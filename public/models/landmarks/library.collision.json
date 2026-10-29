@@ -1,0 +1,275 @@
+{
+ "id": "library",
+ "title": "圖資大樓",
+ "units": "m",
+ "frame": "local three.js: x east, y up, z south; origin = footprint centroid at grade",
+ "boxSchema": "center [x,y,z], size [sx,sy,sz] full extents, yaw radians about +Y; walkable = may stand on top",
+ "boxes": [
+  {
+   "center": [
+    -0.318,
+    4.55,
+    3.139
+   ],
+   "size": [
+    38.0,
+    9.1,
+    68.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    0.682,
+    4.55,
+    -33.861
+   ],
+   "size": [
+    36.0,
+    9.1,
+    6.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    0.0,
+    22.5,
+    13.139
+   ],
+   "size": [
+    30.0,
+    45,
+    40.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    7.989,
+    4.6,
+    46.043
+   ],
+   "size": [
+    1.1,
+    6.8,
+    1.1
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    4.937,
+    4.6,
+    41.843
+   ],
+   "size": [
+    1.1,
+    6.8,
+    1.1
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    0.0,
+    4.6,
+    40.239
+   ],
+   "size": [
+    1.1,
+    6.8,
+    1.1
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -4.937,
+    4.6,
+    41.843
+   ],
+   "size": [
+    1.1,
+    6.8,
+    1.1
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -7.989,
+    4.6,
+    46.043
+   ],
+   "size": [
+    1.1,
+    6.8,
+    1.1
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -7.989,
+    4.6,
+    51.235
+   ],
+   "size": [
+    1.1,
+    6.8,
+    1.1
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -4.937,
+    4.6,
+    55.435
+   ],
+   "size": [
+    1.1,
+    6.8,
+    1.1
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -0.0,
+    4.6,
+    57.039
+   ],
+   "size": [
+    1.1,
+    6.8,
+    1.1
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    4.937,
+    4.6,
+    55.435
+   ],
+   "size": [
+    1.1,
+    6.8,
+    1.1
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    7.989,
+    4.6,
+    51.235
+   ],
+   "size": [
+    1.1,
+    6.8,
+    1.1
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    0.0,
+    0.2,
+    48.639
+   ],
+   "size": [
+    21.493,
+    0.4,
+    21.493
+   ],
+   "yaw": 0.0,
+   "walkable": true
+  },
+  {
+   "center": [
+    0.0,
+    0.2,
+    48.639
+   ],
+   "size": [
+    21.493,
+    0.4,
+    21.493
+   ],
+   "yaw": 0.7854,
+   "walkable": true
+  },
+  {
+   "center": [
+    0.0,
+    0.4,
+    48.639
+   ],
+   "size": [
+    18.665,
+    0.8,
+    18.665
+   ],
+   "yaw": 0.0,
+   "walkable": true
+  },
+  {
+   "center": [
+    0.0,
+    0.4,
+    48.639
+   ],
+   "size": [
+    18.665,
+    0.8,
+    18.665
+   ],
+   "yaw": 0.7854,
+   "walkable": true
+  },
+  {
+   "center": [
+    0.0,
+    0.6,
+    48.639
+   ],
+   "size": [
+    15.554,
+    1.2,
+    15.554
+   ],
+   "yaw": 0.0,
+   "walkable": true
+  },
+  {
+   "center": [
+    0.0,
+    0.6,
+    48.639
+   ],
+   "size": [
+    15.554,
+    1.2,
+    15.554
+   ],
+   "yaw": 0.7854,
+   "walkable": true
+  }
+ ]
+}

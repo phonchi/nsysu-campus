@@ -1,0 +1,21 @@
+{
+  "status": "ready",
+  "scope": "campus-science-engineering-v2",
+  "createdAt": "2026-10-29T11:21:55.168Z",
+  "validationPassed": true,
+  "binaryBytes": 25929616,
+  "binarySha256": "ec7ba57f1e1f9c38b37fb1320121bc5fbdf74728c476a8fc2db0bd69953a58f9",
+  "surfaceVersion": "terrain-triangles-v2:c0aecf0d:1ded5cc2",
+  "coverage": {
+    "total": 937,
+    "reachable": 937,
+    "allDestinationsReachable": true,
+    "insideTotal": 877,
+    "insideReachable": 877,
+    "insideReturnReachable": 877,
+    "allInteriorsReachable": true,
+    "buildings": 8,
+    "floors": 60,
+    "reachableFloors": 60
+  }
+}

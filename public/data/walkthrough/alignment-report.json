@@ -1,0 +1,1115 @@
+{
+  "buildings": [
+    {
+      "buildingId": "SC",
+      "registeredBounds": [
+        -88.999,
+        -11.438,
+        16.127,
+        27.878
+      ],
+      "serviceStair": {
+        "id": "sc-virtual-service",
+        "position": [
+          20.627,
+          0.0
+        ],
+        "footprint": [
+          [
+            18.377,
+            -2.5
+          ],
+          [
+            22.877,
+            -2.5
+          ],
+          [
+            22.877,
+            2.5
+          ],
+          [
+            18.377,
+            2.5
+          ]
+        ],
+        "width": 4.5,
+        "depth": 5,
+        "basis": "schematic",
+        "note": "所有樓層共用的外接虛擬服務樓梯位置；足跡位於建築東側輪廓外，未穿任何圖面房間。"
+      },
+      "alignments": [
+        {
+          "floorId": "SC-B1",
+          "method": "schematic-basement-roof-registration",
+          "basis": "schematic",
+          "scale": 1.0137395010290648,
+          "translation": [
+            -35.913562672556594,
+            -6.678015461071232
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "SC-1F",
+          "method": "frozen-checked-central-stair",
+          "basis": "map-derived",
+          "scale": 1,
+          "translation": [
+            0,
+            0
+          ],
+          "changed": false
+        },
+        {
+          "floorId": "SC-2F",
+          "method": "frozen-checked-central-stair",
+          "basis": "map-derived",
+          "scale": 1,
+          "translation": [
+            0,
+            0
+          ],
+          "changed": false
+        },
+        {
+          "floorId": "SC-3F",
+          "method": "main-science-stair-colour-correspondence",
+          "basis": "schematic",
+          "scale": 1.0,
+          "translation": [
+            -33.74325406577769,
+            8.747395460484466
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "SC-4F",
+          "method": "main-science-stair-colour-correspondence",
+          "basis": "schematic",
+          "scale": 1.0,
+          "translation": [
+            -32.72969798456524,
+            8.504034149357643
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "SC-RF",
+          "method": "schematic-basement-roof-registration",
+          "basis": "schematic",
+          "scale": 1.0313945148110315,
+          "translation": [
+            -36.288351123595504,
+            -3.346841573033709
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        }
+      ],
+      "coverage": {
+        "floors": 6,
+        "sourcePlans": 6,
+        "schematicRoofCount": 0,
+        "roomPolygons": 156,
+        "circulationPolygons": 7,
+        "complete": false
+      },
+      "firstFloorReview": "已人工查看官方首層輪廓、可辨房號及主要灰色廊道；候選未逐間升級map-checked。"
+    },
+    {
+      "buildingId": "EN",
+      "registeredBounds": [
+        -86.7359,
+        -32.9409,
+        24.4981,
+        13.6713
+      ],
+      "serviceStair": {
+        "id": "en-virtual-service",
+        "position": [
+          28.998,
+          0.0
+        ],
+        "footprint": [
+          [
+            26.748,
+            -2.5
+          ],
+          [
+            31.248,
+            -2.5
+          ],
+          [
+            31.248,
+            2.5
+          ],
+          [
+            26.748,
+            2.5
+          ]
+        ],
+        "width": 4.5,
+        "depth": 5,
+        "basis": "schematic",
+        "note": "所有樓層共用的外接虛擬服務樓梯位置；足跡位於建築東側輪廓外，未穿任何圖面房間。"
+      },
+      "alignments": [
+        {
+          "floorId": "EN-B1",
+          "method": "schematic-basement-roof-registration",
+          "basis": "schematic",
+          "scale": 1.0245458729768413,
+          "translation": [
+            -30.326540846786784,
+            -15.955702375272628
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "EN-1F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.0,
+          "translation": [
+            -30.42749525809714,
+            -10.654586033375816
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "EN-2F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.0191353649893693,
+          "translation": [
+            -30.41862070142619,
+            -12.886279657967771
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "EN-3F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.0286123032904149,
+          "translation": [
+            -31.096733191958226,
+            -11.558411893304127
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "EN-4F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.0249465431218816,
+          "translation": [
+            -32.80323489488065,
+            -11.286963094768849
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "EN-RF",
+          "method": "schematic-basement-roof-registration",
+          "basis": "schematic",
+          "scale": 1.0290617776511193,
+          "translation": [
+            -28.56470918232933,
+            -15.889244996229506
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        }
+      ],
+      "coverage": {
+        "floors": 6,
+        "sourcePlans": 6,
+        "schematicRoofCount": 0,
+        "roomPolygons": 144,
+        "circulationPolygons": 8,
+        "complete": false
+      },
+      "firstFloorReview": "已人工查看官方首層輪廓、可辨房號及主要灰色廊道；候選未逐間升級map-checked。"
+    },
+    {
+      "buildingId": "BI",
+      "registeredBounds": [
+        -36.4919,
+        -17.9676,
+        15.7448,
+        10.7023
+      ],
+      "serviceStair": {
+        "id": "bi-virtual-service",
+        "position": [
+          20.245,
+          0.0
+        ],
+        "footprint": [
+          [
+            17.995,
+            -2.5
+          ],
+          [
+            22.495,
+            -2.5
+          ],
+          [
+            22.495,
+            2.5
+          ],
+          [
+            17.995,
+            2.5
+          ]
+        ],
+        "width": 4.5,
+        "depth": 5,
+        "basis": "schematic",
+        "note": "所有樓層共用的外接虛擬服務樓梯位置；足跡位於建築東側輪廓外，未穿任何圖面房間。"
+      },
+      "alignments": [
+        {
+          "floorId": "BI-1F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.0,
+          "translation": [
+            -5.213303384176904,
+            -2.934405379720426
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "BI-2F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.111688794787006,
+          "translation": [
+            -11.149884719424781,
+            -4.224220281706276
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "BI-3F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.0351239669421488,
+          "translation": [
+            -12.956272939999018,
+            -1.3396627725371
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "BI-4F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.0610528662459826,
+          "translation": [
+            -11.737551999488916,
+            -2.3457747654570706
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "BI-5F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.0682302771855012,
+          "translation": [
+            -12.662024385241132,
+            -2.542404233394758
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "BI-6F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.1033122376680509,
+          "translation": [
+            -16.619381024247687,
+            -2.679014315357917
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "BI-7F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.031925849639547,
+          "translation": [
+            -12.194476872402246,
+            -1.5966584523744225
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "BI-RF",
+          "method": "schematic-roof-from-BI7F",
+          "basis": "schematic",
+          "scale": 1.0002652304844353,
+          "translation": [
+            -5.207733544003762,
+            17.20691833074638
+          ],
+          "changed": true,
+          "sourceStatus": "missing-bi-roof-plan"
+        }
+      ],
+      "coverage": {
+        "floors": 8,
+        "sourcePlans": 7,
+        "schematicRoofCount": 1,
+        "roomPolygons": 74,
+        "circulationPolygons": 0,
+        "complete": false
+      },
+      "firstFloorReview": "已人工查看官方首層輪廓、可辨房號及主要灰色廊道；候選未逐間升級map-checked。"
+    },
+    {
+      "buildingId": "PH",
+      "registeredBounds": [
+        -32.1285,
+        -20.7423,
+        16.2685,
+        13.6647
+      ],
+      "serviceStair": {
+        "id": "ph-virtual-service",
+        "position": [
+          20.768,
+          0.0
+        ],
+        "footprint": [
+          [
+            18.518,
+            -2.5
+          ],
+          [
+            23.018,
+            -2.5
+          ],
+          [
+            23.018,
+            2.5
+          ],
+          [
+            18.518,
+            2.5
+          ]
+        ],
+        "width": 4.5,
+        "depth": 5,
+        "basis": "schematic",
+        "note": "所有樓層共用的外接虛擬服務樓梯位置；足跡位於建築東側輪廓外，未穿任何圖面房間。"
+      },
+      "alignments": [
+        {
+          "floorId": "PH-1F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.0,
+          "translation": [
+            -6.685667907275961,
+            -1.3782111761511395
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "PH-2F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.312390613052009,
+          "translation": [
+            -3.0634372389642284,
+            -1.8546386187476847
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "PH-3F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.2796934865900382,
+          "translation": [
+            -9.151400971997909,
+            -2.1722597593829165
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "PH-4F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.3174512452360145,
+          "translation": [
+            -3.2803286441694763,
+            -3.7509697450630837
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "PH-5F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.2879177377892033,
+          "translation": [
+            -9.643059155620291,
+            -3.1303493984306225
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "PH-6F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.3208467381361073,
+          "translation": [
+            -3.2619349514863285,
+            -4.984772819726955
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "PH-7F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.291237113402062,
+          "translation": [
+            -10.038528201848194,
+            -3.9672940951589424
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "PH-RF",
+          "method": "schematic-basement-roof-registration",
+          "basis": "schematic",
+          "scale": 1.2703371367379341,
+          "translation": [
+            -10.989399809213246,
+            4.421299383080253
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        }
+      ],
+      "coverage": {
+        "floors": 8,
+        "sourcePlans": 8,
+        "schematicRoofCount": 0,
+        "roomPolygons": 78,
+        "circulationPolygons": 1,
+        "complete": false
+      },
+      "firstFloorReview": "已人工查看官方首層輪廓、可辨房號及主要灰色廊道；候選未逐間升級map-checked。"
+    },
+    {
+      "buildingId": "CH",
+      "registeredBounds": [
+        -42.126,
+        -12.4674,
+        13.7642,
+        22.0872
+      ],
+      "serviceStair": {
+        "id": "ch-virtual-service",
+        "position": [
+          18.264,
+          0.0
+        ],
+        "footprint": [
+          [
+            16.014,
+            -2.5
+          ],
+          [
+            20.514,
+            -2.5
+          ],
+          [
+            20.514,
+            2.5
+          ],
+          [
+            16.014,
+            2.5
+          ]
+        ],
+        "width": 4.5,
+        "depth": 5,
+        "basis": "schematic",
+        "note": "所有樓層共用的外接虛擬服務樓梯位置；足跡位於建築東側輪廓外，未穿任何圖面房間。"
+      },
+      "alignments": [
+        {
+          "floorId": "CH-1F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.0,
+          "translation": [
+            -12.185160289126234,
+            5.298788959602431
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "CH-2F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.1323794025032414,
+          "translation": [
+            -12.576438671489866,
+            5.162487980294613
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "CH-3F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.0427263479145474,
+          "translation": [
+            -16.600588774371523,
+            4.645219036866918
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "CH-4F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.0649185019285805,
+          "translation": [
+            -16.14812398349249,
+            3.978684957094844
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "CH-5F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.0800842992623816,
+          "translation": [
+            -17.763976809108378,
+            4.653792851817638
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "CH-6F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.0857086679098324,
+          "translation": [
+            -15.291059717020676,
+            4.913002023947442
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "CH-RF",
+          "method": "schematic-basement-roof-registration",
+          "basis": "schematic",
+          "scale": 1.5,
+          "translation": [
+            -5.9660035999018675,
+            -11.051424592671452
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        }
+      ],
+      "coverage": {
+        "floors": 7,
+        "sourcePlans": 7,
+        "schematicRoofCount": 0,
+        "roomPolygons": 75,
+        "circulationPolygons": 3,
+        "complete": false
+      },
+      "firstFloorReview": "已人工查看官方首層輪廓、可辨房號及主要灰色廊道；候選未逐間升級map-checked。"
+    },
+    {
+      "buildingId": "EC",
+      "registeredBounds": [
+        -49.0585,
+        -25.8201,
+        35.5165,
+        26.0581
+      ],
+      "serviceStair": {
+        "id": "ec-virtual-service",
+        "position": [
+          40.017,
+          0.0
+        ],
+        "footprint": [
+          [
+            37.767,
+            -2.5
+          ],
+          [
+            42.267,
+            -2.5
+          ],
+          [
+            42.267,
+            2.5
+          ],
+          [
+            37.767,
+            2.5
+          ]
+        ],
+        "width": 4.5,
+        "depth": 5,
+        "basis": "schematic",
+        "note": "所有樓層共用的外接虛擬服務樓梯位置；足跡位於建築東側輪廓外，未穿任何圖面房間。"
+      },
+      "alignments": [
+        {
+          "floorId": "EC-B1",
+          "method": "schematic-basement-roof-registration",
+          "basis": "schematic",
+          "scale": 1.0442879878172748,
+          "translation": [
+            -4.546005140230783,
+            -7.273210553078309
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "EC-1F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.0,
+          "translation": [
+            -6.884591799058804,
+            4.437003615814562
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "EC-2F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.0533827613063735,
+          "translation": [
+            -5.902334469429407,
+            -2.256391757096638
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "EC-3F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.0643127364438842,
+          "translation": [
+            -6.974031216116902,
+            -2.965999909312693
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "EC-4F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.1223700454221563,
+          "translation": [
+            -5.8434182585166345,
+            -2.7322730248346256
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "EC-5F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.1178807947019869,
+          "translation": [
+            -7.303268349592489,
+            -4.330568550178911
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "EC-6F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.1111743342458755,
+          "translation": [
+            -6.15106425127017,
+            -3.183813133290663
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "EC-7F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 0.9836829836829838,
+          "translation": [
+            -7.251969836394433,
+            -3.7276828256103722
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "EC-8F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.0219745597077892,
+          "translation": [
+            -6.248016482550952,
+            -3.323716336648871
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "EC-9F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 0.994110718492344,
+          "translation": [
+            -7.275605401948468,
+            -2.9449635610854275
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "EC-RF",
+          "method": "schematic-basement-roof-registration",
+          "basis": "schematic",
+          "scale": 1.0442879878172748,
+          "translation": [
+            -6.125278967960732,
+            4.083626237509087
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        }
+      ],
+      "coverage": {
+        "floors": 11,
+        "sourcePlans": 11,
+        "schematicRoofCount": 0,
+        "roomPolygons": 164,
+        "circulationPolygons": 0,
+        "complete": false
+      },
+      "firstFloorReview": "已人工查看官方首層輪廓、可辨房號及主要灰色廊道；候選未逐間升級map-checked。"
+    },
+    {
+      "buildingId": "MS",
+      "registeredBounds": [
+        -43.7379,
+        -21.5293,
+        14.2293,
+        13.4207
+      ],
+      "serviceStair": {
+        "id": "ms-virtual-service",
+        "position": [
+          18.729,
+          0.0
+        ],
+        "footprint": [
+          [
+            16.479,
+            -2.5
+          ],
+          [
+            20.979,
+            -2.5
+          ],
+          [
+            20.979,
+            2.5
+          ],
+          [
+            16.479,
+            2.5
+          ]
+        ],
+        "width": 4.5,
+        "depth": 5,
+        "basis": "schematic",
+        "note": "所有樓層共用的外接虛擬服務樓梯位置；足跡位於建築東側輪廓外，未穿任何圖面房間。"
+      },
+      "alignments": [
+        {
+          "floorId": "MS-1F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.0,
+          "translation": [
+            -10.230373467289182,
+            -4.027734135196204
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "MS-2F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.0023282920637238,
+          "translation": [
+            -14.330763745187879,
+            -4.541941624905267
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "MS-3F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 0.9869283682649828,
+          "translation": [
+            -15.587869417305253,
+            -5.210867669444663
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "MS-4F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.0364542553149207,
+          "translation": [
+            -14.367190520657351,
+            -5.216035888864971
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "MS-5F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.0227332113927357,
+          "translation": [
+            -16.32417955247714,
+            -4.767500473068401
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "MS-6F",
+          "method": "repeated-stair-and-envelope-scale",
+          "basis": "schematic",
+          "scale": 1.0729858755928885,
+          "translation": [
+            -18.482656810048987,
+            -5.552543803368221
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "MS-RF",
+          "method": "schematic-basement-roof-registration",
+          "basis": "schematic",
+          "scale": 1.5,
+          "translation": [
+            -2.630685804613492,
+            -21.813493276008014
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        }
+      ],
+      "coverage": {
+        "floors": 7,
+        "sourcePlans": 7,
+        "schematicRoofCount": 0,
+        "roomPolygons": 96,
+        "circulationPolygons": 2,
+        "complete": false
+      },
+      "firstFloorReview": "已人工查看官方首層輪廓、可辨房號及主要灰色廊道；候選未逐間升級map-checked。"
+    },
+    {
+      "buildingId": "EV",
+      "registeredBounds": [
+        -27.312,
+        -8.8262,
+        19.3301,
+        16.0268
+      ],
+      "serviceStair": {
+        "id": "ev-virtual-service",
+        "position": [
+          23.83,
+          0.0
+        ],
+        "footprint": [
+          [
+            21.58,
+            -2.5
+          ],
+          [
+            26.08,
+            -2.5
+          ],
+          [
+            26.08,
+            2.5
+          ],
+          [
+            21.58,
+            2.5
+          ]
+        ],
+        "width": 4.5,
+        "depth": 5,
+        "basis": "schematic",
+        "note": "所有樓層共用的外接虛擬服務樓梯位置；足跡位於建築東側輪廓外，未穿任何圖面房間。"
+      },
+      "alignments": [
+        {
+          "floorId": "EV-1F",
+          "method": "repeated-lift-core",
+          "basis": "schematic",
+          "scale": 1.0,
+          "translation": [
+            2.166666666666667,
+            2.516961385781306
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "EV-2F",
+          "method": "repeated-lift-core",
+          "basis": "schematic",
+          "scale": 0.774395906709422,
+          "translation": [
+            -6.107402384248308,
+            1.9128844030909955
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "EV-3F",
+          "method": "repeated-lift-core",
+          "basis": "schematic",
+          "scale": 0.843663274745606,
+          "translation": [
+            -5.849398704902866,
+            2.416360007224288
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "EV-4F",
+          "method": "repeated-lift-core",
+          "basis": "schematic",
+          "scale": 0.8136610512749702,
+          "translation": [
+            -3.8784510110773587,
+            1.5867439933719958
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "EV-5F",
+          "method": "repeated-lift-core",
+          "basis": "schematic",
+          "scale": 0.8854368932038836,
+          "translation": [
+            -5.832077669902917,
+            3.3044913861667133
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "EV-6F",
+          "method": "repeated-lift-core",
+          "basis": "schematic",
+          "scale": 0.8674164360438872,
+          "translation": [
+            -7.667961294627964,
+            2.4433845610316203
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        },
+        {
+          "floorId": "EV-RF",
+          "method": "schematic-basement-roof-registration",
+          "basis": "schematic",
+          "scale": 1.1987716359575658,
+          "translation": [
+            7.177603704798507,
+            -1.5249639270573976
+          ],
+          "changed": true,
+          "sourceStatus": "source-plan-available"
+        }
+      ],
+      "coverage": {
+        "floors": 7,
+        "sourcePlans": 7,
+        "schematicRoofCount": 0,
+        "roomPolygons": 90,
+        "circulationPolygons": 7,
+        "complete": false
+      },
+      "firstFloorReview": "已人工查看官方首層輪廓、可辨房號及主要灰色廊道；候選未逐間升級map-checked。"
+    }
+  ],
+  "note": "來源候選877不是實際房間總數；EV1/6另兩井已依原圖更正。"
+}

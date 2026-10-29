@@ -1,0 +1,4359 @@
+{
+ "version": 1,
+ "notes": [
+  "SC（理學院）不是 route anchor，ta-lin 的 schedule 改放 arcade 偏東；SC2001 的指路台詞不變。",
+  "故事 NPC（guide/s1/s2/s3/m1）三時段皆不得為 null：s1 night 放 admin、s2 night 放 admin、m1 night 仍在 arcade；主線六章完成前位置由故事決定（spec §15.1）。s1「完成 c3 後搬到 admin」改以 chapterDone 分支台詞表達，不改 schedule。",
+  "guard-chung night 的 admin→seawall 巡邏、jogger-po 的環校道路、m2-mother 的 Carry 姿勢無法以固定點＋ Idle/Talk/Sit/Wave 表達：警衛 night 固定在 seawall，阿柏 day 在 admin、sunset 在 seawall，母猴用 Sit。",
+  "m2-mother 為 observe 型、無對話樹：原本的「拍一張就走」分支、item-photo-monkey 與隱藏章 macaque-family 一併刪除（隱藏章維持 10 枚：含追逐成功的 monkey-guard）。",
+  "side-usb、side-leaves 不是 chapters.json 的 sideQuests id，不新增：隨身碟支線改為 ta-lin 設旗標後向 coffee-kai 取得 item-usb 再交回；落葉支線改為對海伯重複選「撿了一堆落葉」累計 count gardener-hai.leaves ≥ 5。",
+  "小遊戲結果只有 win/lose：夕照的銅／金兩版合併為單一 photo 章（win 才給）；校史問答依 spec §15.5 改為答對 ≥ 4/5 過關，5/5 第二輪與 quiz.perfect 刪除；追逐成功後阿滿姐或大膽的 win 節點直接設 chase-done 旗標。",
+  "阿柏「30 秒內跟跑 5 m 內」改為每次選「一起跑？」計 count jogger-po.jog，三次給 three-laps 章與 runner 成就；Mia「跟隨到 SC2001」改為一句旁白帶過並設 intl-mia.escort。",
+  "成就 side-all（8 顆寶石）沒有可用的 rule，改為 all-games（三個小遊戲皆過關）；early-bird 以 count guide.tod ≥ 3 表達（三時段首次與阿灣交談各 +1）。",
+  "表情只有 neutral/smile/surprised/troubled：名單中的 (laugh) 一律改 smile。快閃小遊戲以外的事件（路人 ×8、哨聲動畫）不在資料模型內，events 只列實際 NPC id 與橫幅；ev-macaque-alert 拆成 day／sunset 兩筆。",
+  "chapters.json 的主線台詞不動；本檔的 guide/s1/s2/s3/m1 樹是主線之外的閒聊，以 chapterDone 與故事旗標 c1.talked 作門檻。",
+  "guard-chung night-q: wording no longer states a gate policy (Gemini fact-check 2026-10-20); players are pointed to official notices."
+ ],
+ "npcs": [
+  {
+   "id": "guide",
+   "name": "阿灣",
+   "role": "主線導覽・海科系大三",
+   "model": "npc-guide",
+   "look": {
+    "hair": "#2b2622",
+    "top": "#62c8d2",
+    "bottom": "#2f4a6a",
+    "bag": "#2a2c4a",
+    "shoes": "#f27a2c"
+   },
+   "portrait": {
+    "skin": "#f2c9a5",
+    "hair": "#2b2622",
+    "hairStyle": "ponytail",
+    "top": "#62c8d2",
+    "topStyle": "jacket"
+   },
+   "schedule": {
+    "day": {
+     "at": "seawall",
+     "offset": [
+      2,
+      1
+     ],
+     "activity": "Idle"
+    },
+    "sunset": {
+     "at": "seawall",
+     "offset": [
+      2,
+      1
+     ],
+     "activity": "Sit"
+    },
+    "night": {
+     "at": "seawall",
+     "offset": [
+      2,
+      1
+     ],
+     "activity": "Sit"
+    }
+   },
+   "talk": "guide"
+  },
+  {
+   "id": "s1",
+   "name": "小禾",
+   "role": "同梯新生",
+   "model": "npc-student-1",
+   "look": {
+    "hair": "#3a2a24",
+    "top": "#e04b3a",
+    "bottom": "#f3ebdb",
+    "bag": "#3c4a5c",
+    "shoes": "#fbf6ea"
+   },
+   "portrait": {
+    "skin": "#f6d3b3",
+    "hair": "#3a2a24",
+    "hairStyle": "bob",
+    "top": "#e04b3a",
+    "topStyle": "tee"
+   },
+   "schedule": {
+    "day": {
+     "at": "gate",
+     "offset": [
+      -4,
+      1
+     ],
+     "activity": "Talk"
+    },
+    "sunset": {
+     "at": "admin",
+     "offset": [
+      3,
+      5
+     ],
+     "activity": "Idle"
+    },
+    "night": {
+     "at": "admin",
+     "offset": [
+      3,
+      5
+     ],
+     "activity": "Sit"
+    }
+   },
+   "talk": "s1"
+  },
+  {
+   "id": "s2",
+   "name": "建宇學長",
+   "role": "行政大樓服務台",
+   "model": "npc-desk",
+   "look": {
+    "hair": "#1f1a18",
+    "top": "#2c7f91",
+    "bottom": "#3c4a5c",
+    "shoes": "#2a2c4a"
+   },
+   "portrait": {
+    "skin": "#e9bf98",
+    "hair": "#1f1a18",
+    "hairStyle": "short",
+    "top": "#2c7f91",
+    "topStyle": "vest",
+    "accessory": "glasses"
+   },
+   "schedule": {
+    "day": {
+     "at": "admin",
+     "offset": [
+      2,
+      3
+     ],
+     "activity": "Idle"
+    },
+    "sunset": {
+     "at": "admin",
+     "offset": [
+      2,
+      3
+     ],
+     "activity": "Idle"
+    },
+    "night": {
+     "at": "admin",
+     "offset": [
+      2,
+      3
+     ],
+     "activity": "Idle"
+    }
+   },
+   "talk": "s2"
+  },
+  {
+   "id": "s3",
+   "name": "佩蓉學姊",
+   "role": "圖資大樓櫃台",
+   "model": "npc-desk",
+   "look": {
+    "hair": "#2b2622",
+    "top": "#7b4a8f",
+    "bottom": "#6b6f78",
+    "shoes": "#fbf6ea"
+   },
+   "portrait": {
+    "skin": "#f2c9a5",
+    "hair": "#2b2622",
+    "hairStyle": "bun",
+    "top": "#7b4a8f",
+    "topStyle": "vest",
+    "accessory": "glasses"
+   },
+   "schedule": {
+    "day": {
+     "at": "library",
+     "offset": [
+      -3,
+      2
+     ],
+     "activity": "Idle"
+    },
+    "sunset": {
+     "at": "library",
+     "offset": [
+      -3,
+      2
+     ],
+     "activity": "Idle"
+    },
+    "night": {
+     "at": "library",
+     "offset": [
+      -3,
+      2
+     ],
+     "activity": "Idle"
+    }
+   },
+   "talk": "s3"
+  },
+  {
+   "id": "m1",
+   "name": "猴學長",
+   "role": "理工長廊的獼猴",
+   "model": "monkey",
+   "portrait": {
+    "kind": "monkey"
+   },
+   "schedule": {
+    "day": {
+     "at": "arcade",
+     "offset": [
+      10,
+      -8
+     ],
+     "activity": "Sit"
+    },
+    "sunset": {
+     "at": "arcade",
+     "offset": [
+      10,
+      -8
+     ],
+     "activity": "Sit"
+    },
+    "night": {
+     "at": "arcade",
+     "offset": [
+      10,
+      -8
+     ],
+     "activity": "Sit"
+    }
+   },
+   "talk": "m1"
+  },
+  {
+   "id": "guard-chung",
+   "name": "阿忠伯",
+   "role": "校門警衛",
+   "model": "npc-guard",
+   "look": {
+    "hair": "#c9c4bb",
+    "top": "#2a3a5c",
+    "bottom": "#2a3a5c",
+    "shoes": "#6b6f78"
+   },
+   "portrait": {
+    "skin": "#d9a77f",
+    "hair": "#c9c4bb",
+    "hairStyle": "grey",
+    "top": "#2a3a5c",
+    "topStyle": "uniform",
+    "accessory": "cap"
+   },
+   "schedule": {
+    "day": {
+     "at": "gate",
+     "offset": [
+      5,
+      -3
+     ],
+     "activity": "Idle"
+    },
+    "sunset": {
+     "at": "gate",
+     "offset": [
+      5,
+      -3
+     ],
+     "activity": "Idle"
+    },
+    "night": {
+     "at": "seawall",
+     "offset": [
+      -6,
+      4
+     ],
+     "activity": "Idle"
+    }
+   },
+   "talk": "guard-chung"
+  },
+  {
+   "id": "clerk-jie",
+   "name": "小潔",
+   "role": "海風小舖店員",
+   "model": "npc-clerk",
+   "look": {
+    "hair": "#4a2f22",
+    "top": "#e8b84a",
+    "bottom": "#3c4a5c",
+    "shoes": "#fbf6ea"
+   },
+   "portrait": {
+    "skin": "#f6d3b3",
+    "hair": "#4a2f22",
+    "hairStyle": "ponytail",
+    "top": "#e8b84a",
+    "topStyle": "apron",
+    "accessory": "cap"
+   },
+   "schedule": {
+    "day": {
+     "at": "ACTIVITY",
+     "offset": [
+      2,
+      2
+     ],
+     "activity": "Idle"
+    },
+    "sunset": {
+     "at": "ACTIVITY",
+     "offset": [
+      2,
+      2
+     ],
+     "activity": "Idle"
+    },
+    "night": {
+     "at": "ACTIVITY",
+     "offset": [
+      2,
+      2
+     ],
+     "activity": "Idle"
+    }
+   },
+   "talk": "clerk-jie"
+  },
+  {
+   "id": "coffee-kai",
+   "name": "阿凱",
+   "role": "長廊咖啡車",
+   "model": "npc-clerk",
+   "look": {
+    "hair": "#1f1a18",
+    "top": "#2a2c4a",
+    "bottom": "#6b6f78",
+    "shoes": "#2a2c4a"
+   },
+   "portrait": {
+    "skin": "#e9bf98",
+    "hair": "#1f1a18",
+    "hairStyle": "short",
+    "top": "#2a2c4a",
+    "topStyle": "apron",
+    "accessory": "headphones"
+   },
+   "schedule": {
+    "day": {
+     "at": "arcade",
+     "offset": [
+      6,
+      -4
+     ],
+     "activity": "Idle"
+    },
+    "sunset": {
+     "at": "arcade",
+     "offset": [
+      6,
+      -4
+     ],
+     "activity": "Idle"
+    },
+    "night": null
+   },
+   "talk": "coffee-kai"
+  },
+  {
+   "id": "photo-ju",
+   "name": "小橘",
+   "role": "攝影社社長",
+   "model": "npc-student-2",
+   "look": {
+    "hair": "#2b2622",
+    "top": "#f27a2c",
+    "bottom": "#2a2c4a",
+    "bag": "#3c4a5c",
+    "shoes": "#fbf6ea"
+   },
+   "portrait": {
+    "skin": "#f2c9a5",
+    "hair": "#2b2622",
+    "hairStyle": "short",
+    "top": "#f27a2c",
+    "topStyle": "jacket",
+    "accessory": "camera"
+   },
+   "schedule": {
+    "day": {
+     "at": "IL",
+     "offset": [
+      4,
+      6
+     ],
+     "activity": "Idle"
+    },
+    "sunset": {
+     "at": "seawall",
+     "offset": [
+      -3,
+      -2
+     ],
+     "activity": "Idle"
+    },
+    "night": {
+     "at": "seawall",
+     "offset": [
+      -3,
+      -2
+     ],
+     "activity": "Idle"
+    }
+   },
+   "talk": "photo-ju",
+   "minigame": "sunset-photo"
+  },
+  {
+   "id": "quiz-dian",
+   "name": "阿典",
+   "role": "校史迷",
+   "model": "npc-student-3",
+   "look": {
+    "hair": "#2b2622",
+    "top": "#a8614a",
+    "bottom": "#3c4a5c",
+    "bag": "#d9c5a0",
+    "shoes": "#6b6f78"
+   },
+   "portrait": {
+    "skin": "#f2c9a5",
+    "hair": "#2b2622",
+    "hairStyle": "messy",
+    "top": "#a8614a",
+    "topStyle": "shirt",
+    "accessory": "glasses"
+   },
+   "schedule": {
+    "day": {
+     "at": "library",
+     "offset": [
+      6,
+      5
+     ],
+     "activity": "Sit"
+    },
+    "sunset": {
+     "at": "library",
+     "offset": [
+      6,
+      5
+     ],
+     "activity": "Sit"
+    },
+    "night": {
+     "at": "IL",
+     "offset": [
+      2,
+      4
+     ],
+     "activity": "Idle"
+    }
+   },
+   "talk": "quiz-dian",
+   "minigame": "history-quiz"
+  },
+  {
+   "id": "monkey-volunteer-man",
+   "name": "阿滿姐",
+   "role": "防猴志工",
+   "model": "npc-volunteer",
+   "look": {
+    "hair": "#3a2a24",
+    "top": "#b7e04a",
+    "bottom": "#6b6f78",
+    "shoes": "#2a2c4a"
+   },
+   "portrait": {
+    "skin": "#c98f66",
+    "hair": "#3a2a24",
+    "hairStyle": "bun",
+    "top": "#b7e04a",
+    "topStyle": "vest",
+    "accessory": "whistle"
+   },
+   "schedule": {
+    "day": {
+     "at": [
+      82,
+      62
+     ],
+     "activity": "Idle"
+    },
+    "sunset": {
+     "at": [
+      82,
+      62
+     ],
+     "activity": "Idle"
+    },
+    "night": null
+   },
+   "talk": "monkey-volunteer-man",
+   "minigame": "monkey-chase"
+  },
+  {
+   "id": "m3-thief",
+   "name": "大膽",
+   "role": "會搶食的獼猴",
+   "model": "monkey",
+   "portrait": {
+    "kind": "monkey"
+   },
+   "schedule": {
+    "day": {
+     "at": [
+      82,
+      62
+     ],
+     "offset": [
+      4,
+      -6
+     ],
+     "activity": "Idle"
+    },
+    "sunset": {
+     "at": "seawall",
+     "offset": [
+      8,
+      -10
+     ],
+     "activity": "Idle"
+    },
+    "night": null
+   },
+   "talk": "m3-thief"
+  },
+  {
+   "id": "m2-mother",
+   "name": "母猴",
+   "role": "抱著小猴的獼猴",
+   "model": "monkey",
+   "portrait": {
+    "kind": "monkey"
+   },
+   "schedule": {
+    "day": {
+     "at": "tunnel-west",
+     "offset": [
+      6,
+      -8
+     ],
+     "activity": "Sit"
+    },
+    "sunset": {
+     "at": "tunnel-west",
+     "offset": [
+      6,
+      -8
+     ],
+     "activity": "Sit"
+    },
+    "night": null
+   },
+   "observe": true
+  },
+  {
+   "id": "jogger-po",
+   "name": "阿柏",
+   "role": "跑步的學生",
+   "model": "npc-student-4",
+   "look": {
+    "hair": "#1f1a18",
+    "top": "#3d7a4a",
+    "bottom": "#2a2c4a",
+    "shoes": "#fbf6ea"
+   },
+   "portrait": {
+    "skin": "#d9a77f",
+    "hair": "#1f1a18",
+    "hairStyle": "short",
+    "top": "#3d7a4a",
+    "topStyle": "tee"
+   },
+   "schedule": {
+    "day": {
+     "at": "admin",
+     "offset": [
+      -8,
+      10
+     ],
+     "activity": "Idle"
+    },
+    "sunset": {
+     "at": "seawall",
+     "offset": [
+      10,
+      2
+     ],
+     "activity": "Idle"
+    },
+    "night": null
+   },
+   "talk": "jogger-po"
+  },
+  {
+   "id": "guitar-yun",
+   "name": "允哲",
+   "role": "吉他社",
+   "model": "npc-student-5",
+   "look": {
+    "hair": "#2b2622",
+    "top": "#6b6f78",
+    "bottom": "#2a2c4a",
+    "bag": "#1f1a18",
+    "shoes": "#2a2c4a"
+   },
+   "portrait": {
+    "skin": "#f2c9a5",
+    "hair": "#2b2622",
+    "hairStyle": "messy",
+    "top": "#6b6f78",
+    "topStyle": "hoodie",
+    "accessory": "guitar"
+   },
+   "schedule": {
+    "day": {
+     "at": "IL",
+     "offset": [
+      -5,
+      6
+     ],
+     "activity": "Sit"
+    },
+    "sunset": {
+     "at": "arcade",
+     "offset": [
+      -12,
+      8
+     ],
+     "activity": "Sit"
+    },
+    "night": {
+     "at": "arcade",
+     "offset": [
+      -12,
+      8
+     ],
+     "activity": "Sit"
+    }
+   },
+   "talk": "guitar-yun"
+  },
+  {
+   "id": "club-ocean-ting",
+   "name": "小婷",
+   "role": "海洋研究社擺攤",
+   "model": "npc-student-6",
+   "look": {
+    "hair": "#3a2a24",
+    "top": "#2c7f91",
+    "bottom": "#f3ebdb",
+    "shoes": "#fbf6ea"
+   },
+   "portrait": {
+    "skin": "#f6d3b3",
+    "hair": "#3a2a24",
+    "hairStyle": "ponytail",
+    "top": "#2c7f91",
+    "topStyle": "tee"
+   },
+   "schedule": {
+    "day": {
+     "at": "arcade",
+     "offset": [
+      0,
+      6
+     ],
+     "activity": "Wave"
+    },
+    "sunset": null,
+    "night": null
+   },
+   "talk": "club-ocean-ting"
+  },
+  {
+   "id": "ta-lin",
+   "name": "林老師",
+   "role": "理學院助教",
+   "model": "npc-teacher",
+   "look": {
+    "hair": "#2b2622",
+    "top": "#f4f1ea",
+    "bottom": "#6b6f78",
+    "shoes": "#2a2c4a"
+   },
+   "portrait": {
+    "skin": "#f2c9a5",
+    "hair": "#2b2622",
+    "hairStyle": "short",
+    "top": "#f4f1ea",
+    "topStyle": "labcoat",
+    "accessory": "nametag"
+   },
+   "schedule": {
+    "day": {
+     "at": "arcade",
+     "offset": [
+      14,
+      -2
+     ],
+     "activity": "Idle"
+    },
+    "sunset": {
+     "at": "arcade",
+     "offset": [
+      14,
+      -2
+     ],
+     "activity": "Idle"
+    },
+    "night": null
+   },
+   "talk": "ta-lin"
+  },
+  {
+   "id": "gardener-hai",
+   "name": "海伯",
+   "role": "園丁",
+   "model": "npc-volunteer",
+   "look": {
+    "hair": "#c9c4bb",
+    "top": "#b7e04a",
+    "bottom": "#6b6f78",
+    "shoes": "#2a2c4a"
+   },
+   "portrait": {
+    "skin": "#c98f66",
+    "hair": "#c9c4bb",
+    "hairStyle": "grey",
+    "top": "#b7e04a",
+    "topStyle": "vest"
+   },
+   "schedule": {
+    "day": {
+     "at": "admin",
+     "offset": [
+      -10,
+      -6
+     ],
+     "activity": "Idle"
+    },
+    "sunset": {
+     "at": [
+      -67,
+      -27
+     ],
+     "activity": "Sit"
+    },
+    "night": null
+   },
+   "talk": "gardener-hai"
+  },
+  {
+   "id": "poet-wen",
+   "name": "阿文",
+   "role": "文學院學長",
+   "model": "npc-student-3",
+   "look": {
+    "hair": "#2b2622",
+    "top": "#efe6d1",
+    "bottom": "#3c4a5c",
+    "shoes": "#6b6f78"
+   },
+   "portrait": {
+    "skin": "#f2c9a5",
+    "hair": "#2b2622",
+    "hairStyle": "long",
+    "top": "#efe6d1",
+    "topStyle": "shirt"
+   },
+   "schedule": {
+    "day": {
+     "at": "IL",
+     "offset": [
+      3,
+      -4
+     ],
+     "activity": "Idle"
+    },
+    "sunset": {
+     "at": "seawall",
+     "offset": [
+      -8,
+      6
+     ],
+     "activity": "Sit"
+    },
+    "night": {
+     "at": "library",
+     "offset": [
+      2,
+      4
+     ],
+     "activity": "Idle"
+    }
+   },
+   "talk": "poet-wen"
+  },
+  {
+   "id": "intl-mia",
+   "name": "Mia",
+   "role": "國際生",
+   "model": "npc-student-4",
+   "look": {
+    "hair": "#5a3a2a",
+    "top": "#2f5fa8",
+    "bottom": "#3c4a5c",
+    "bag": "#e8b84a",
+    "shoes": "#fbf6ea"
+   },
+   "portrait": {
+    "skin": "#f6d3b3",
+    "hair": "#5a3a2a",
+    "hairStyle": "long",
+    "top": "#2f5fa8",
+    "topStyle": "hoodie"
+   },
+   "schedule": {
+    "day": {
+     "at": "library",
+     "offset": [
+      8,
+      6
+     ],
+     "activity": "Idle"
+    },
+    "sunset": {
+     "at": "arcade",
+     "offset": [
+      -4,
+      4
+     ],
+     "activity": "Idle"
+    },
+    "night": null
+   },
+   "talk": "intl-mia"
+  }
+ ],
+ "trees": {
+  "guide": {
+   "entries": [
+    {
+     "if": {
+      "all": [
+       {
+        "timeOfDay": "day"
+       },
+       {
+        "notFlag": "guide.met.day"
+       }
+      ]
+     },
+     "node": "greet-day"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "timeOfDay": "sunset"
+       },
+       {
+        "notFlag": "guide.met.sunset"
+       }
+      ]
+     },
+     "node": "greet-sunset"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "timeOfDay": "night"
+       },
+       {
+        "notFlag": "guide.met.night"
+       }
+      ]
+     },
+     "node": "greet-night"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "chapterDone": "c6-sunset"
+       },
+       {
+        "any": [
+         {
+          "flag": "m3-thief.chase-done"
+         },
+         {
+          "flag": "monkey-volunteer-man.chase-done"
+         }
+        ]
+       },
+       {
+        "notFlag": "guide.chase-remarked"
+       }
+      ]
+     },
+     "node": "free-chase"
+    },
+    {
+     "if": {
+      "chapterDone": "c6-sunset"
+     },
+     "node": "free"
+    },
+    {
+     "if": {
+      "chapterDone": "c4-library"
+     },
+     "node": "c4x"
+    },
+    {
+     "if": {
+      "chapterDone": "c3-admin"
+     },
+     "node": "c3x"
+    },
+    {
+     "if": {
+      "chapterDone": "c1-gate"
+     },
+     "node": "c1x"
+    },
+    {
+     "node": "before"
+    }
+   ],
+   "nodes": {
+    "greet-day": {
+     "lines": [
+      {
+       "who": "guide",
+       "face": "smile",
+       "text": "白天好，{player}。太陽大，傘借你。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "guide.met.day"
+      },
+      {
+       "count": "guide.tod"
+      }
+     ],
+     "next": "hub"
+    },
+    "greet-sunset": {
+     "lines": [
+      {
+       "who": "guide",
+       "face": "smile",
+       "text": "傍晚了。這個時段我最乖，不講冷笑話。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "guide.met.sunset"
+      },
+      {
+       "count": "guide.tod"
+      }
+     ],
+     "next": "hub"
+    },
+    "greet-night": {
+     "lines": [
+      {
+       "who": "guide",
+       "text": "晚上還在晃？我也是。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "guide.met.night"
+      },
+      {
+       "count": "guide.tod"
+      }
+     ],
+     "next": "hub"
+    },
+    "hub": {
+     "lines": [
+      {
+       "who": "guide",
+       "text": "有事就問，沒事就一起發呆。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「妳為什麼叫阿灣？」",
+       "next": "name"
+      },
+      {
+       "text": "「猴子真的那麼多？」",
+       "next": "monkeys"
+      },
+      {
+       "text": "「我叫 {player}。」",
+       "next": "intro"
+      },
+      {
+       "text": "「沒事，走了。」"
+      }
+     ]
+    },
+    "name": {
+     "lines": [
+      {
+       "who": "guide",
+       "text": "本名有個灣字，爸媽在這片海邊約會取的。"
+      },
+      {
+       "who": "guide",
+       "face": "troubled",
+       "text": "俗嗎？我也覺得。但懶得改。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "guide.name"
+      }
+     ]
+    },
+    "monkeys": {
+     "lines": [
+      {
+       "who": "guide",
+       "face": "troubled",
+       "text": "多。食物收好，牠們比你早畢業。"
+      },
+      {
+       "who": "guide",
+       "text": "長廊有志工阿滿姐，她比我會講。"
+      }
+     ]
+    },
+    "intro": {
+     "lines": [
+      {
+       "who": "guide",
+       "face": "smile",
+       "text": "{player}，好，記住了。這個我不會考。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "guide.introduced"
+      }
+     ]
+    },
+    "before": {
+     "lines": [
+      {
+       "who": "guide",
+       "text": "先報到，閒聊等等。校門那邊見。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「好。」"
+      },
+      {
+       "text": "「校門在哪？」",
+       "next": "where-gate"
+      }
+     ]
+    },
+    "where-gate": {
+     "lines": [
+      {
+       "who": "guide",
+       "text": "往南走，看到 21.2 公尺的校碑就是。"
+      }
+     ]
+    },
+    "c1x": {
+     "lines": [
+      {
+       "who": "guide",
+       "face": "smile",
+       "text": "還有問題？趁我還在這裡問。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「妳為什麼叫阿灣？」",
+       "next": "name"
+      },
+      {
+       "text": "「猴子真的那麼多？」",
+       "next": "monkeys"
+      },
+      {
+       "text": "「我叫 {player}。」",
+       "next": "intro"
+      },
+      {
+       "text": "「走吧。」",
+       "next": "c1-go"
+      }
+     ]
+    },
+    "c1-go": {
+     "lines": [
+      {
+       "who": "guide",
+       "text": "走吧，隧道口見。"
+      }
+     ]
+    },
+    "c3x": {
+     "lines": [
+      {
+       "who": "guide",
+       "text": "報到好了？再問一題就走。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「銅獅真的戴過帽子？」",
+       "next": "lions"
+      },
+      {
+       "text": "「報到還要做什麼？」",
+       "next": "todo"
+      },
+      {
+       "text": "「你怕猴子吧？」",
+       "next": "tease"
+      },
+      {
+       "text": "「沒了。」"
+      }
+     ]
+    },
+    "lions": {
+     "lines": [
+      {
+       "who": "guide",
+       "text": "真的，2024 年 12 月，紅白毛帽加圍巾。"
+      },
+      {
+       "who": "guide",
+       "face": "smile",
+       "text": "我有拍，照片不給你看。"
+      }
+     ]
+    },
+    "todo": {
+     "lines": [
+      {
+       "who": "guide",
+       "text": "學生證拍照存起來，學長說的。"
+      },
+      {
+       "who": "guide",
+       "text": "然後去圖資大樓借第一本書。"
+      }
+     ]
+    },
+    "tease": {
+     "lines": [
+      {
+       "who": "guide",
+       "face": "surprised",
+       "text": "誰說的！……傘是防曬。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "guide.monkey-tease"
+      }
+     ]
+    },
+    "c4x": {
+     "lines": [
+      {
+       "who": "guide",
+       "text": "書借到了？問吧。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「余光中特藏室在哪？」",
+       "next": "yu"
+      },
+      {
+       "text": "「圖書館以前在哪？」",
+       "next": "libhist"
+      },
+      {
+       "text": "「阿典是誰？」",
+       "if": {
+        "flag": "quiz-dian.met"
+       },
+       "next": "dian"
+      },
+      {
+       "text": "「你怕猴子吧？」",
+       "next": "tease"
+      }
+     ]
+    },
+    "yu": {
+     "lines": [
+      {
+       "who": "guide",
+       "text": "三樓，借還書也在三樓。"
+      },
+      {
+       "who": "guide",
+       "text": "想看就上去，不用問我。"
+      }
+     ]
+    },
+    "libhist": {
+     "lines": [
+      {
+       "who": "guide",
+       "text": "以前擠在行政大樓，後來先搬到這棟十樓。"
+      }
+     ]
+    },
+    "dian": {
+     "lines": [
+      {
+       "who": "guide",
+       "text": "校史迷。他問你問題不要亂猜，他會記仇。"
+      }
+     ]
+    },
+    "free-chase": {
+     "lines": [
+      {
+       "who": "guide",
+       "face": "smile",
+       "text": "聽說你追著大膽跑？阿滿姐都講了。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "guide.chase-remarked"
+      }
+     ],
+     "next": "free"
+    },
+    "free": {
+     "lines": [
+      {
+       "who": "guide",
+       "face": "smile",
+       "text": "{player}，又來發呆？坐。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「印章收齊了嗎？」",
+       "next": "notyet"
+      },
+      {
+       "text": "「十枚都蓋了！」",
+       "if": {
+        "stamps": 10
+       },
+       "next": "full"
+      },
+      {
+       "text": "「妳怕猴子吧？」",
+       "if": {
+        "flag": "guide.monkey-tease"
+       },
+       "next": "confess"
+      },
+      {
+       "text": "「要不要回去了？」",
+       "if": {
+        "timeOfDay": "night"
+       },
+       "next": "night-stay"
+      }
+     ]
+    },
+    "notyet": {
+     "lines": [
+      {
+       "who": "guide",
+       "text": "還差幾個，慢慢來。四年很長。"
+      }
+     ]
+    },
+    "full": {
+     "lines": [
+      {
+       "who": "guide",
+       "face": "smile",
+       "text": "全收？你比我還熟。"
+      }
+     ]
+    },
+    "confess": {
+     "lines": [
+      {
+       "who": "guide",
+       "face": "troubled",
+       "text": "……好啦，怕。不要講出去。"
+      }
+     ],
+     "effects": [
+      {
+       "stamp": "secret-wan"
+      }
+     ]
+    },
+    "night-stay": {
+     "lines": [
+      {
+       "who": "guide",
+       "text": "再五分鐘。阿忠伯會來趕，到時再走。"
+      }
+     ]
+    }
+   }
+  },
+  "s1": {
+   "entries": [
+    {
+     "if": {
+      "all": [
+       {
+        "chapterDone": "c3-admin"
+       },
+       {
+        "flag": "s1.together"
+       }
+      ]
+     },
+     "node": "admin-together"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "chapterDone": "c3-admin"
+       },
+       {
+        "flag": "s1.solo"
+       }
+      ]
+     },
+     "node": "admin-solo"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "chapterDone": "c3-admin"
+       },
+       {
+        "flag": "s1.bread"
+       }
+      ]
+     },
+     "node": "admin-bread"
+    },
+    {
+     "if": {
+      "chapterDone": "c3-admin"
+     },
+     "node": "admin-plain"
+    },
+    {
+     "if": {
+      "flag": "c1.talked"
+     },
+     "node": "gate-root"
+    },
+    {
+     "node": "gate-shy"
+    }
+   ],
+   "nodes": {
+    "gate-shy": {
+     "lines": [
+      {
+       "who": "s1",
+       "text": "你也新生？我……我很熟，不用問。"
+      }
+     ]
+    },
+    "gate-root": {
+     "lines": [
+      {
+       "who": "s1",
+       "text": "報到……我知道在哪。大概。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「一起走吧。」",
+       "next": "together"
+      },
+      {
+       "text": "「報到在行政大樓，走隧道。」",
+       "next": "solo"
+      },
+      {
+       "text": "「你也怕猴子？」",
+       "next": "bread"
+      }
+     ]
+    },
+    "together": {
+     "lines": [
+      {
+       "who": "s1",
+       "face": "smile",
+       "text": "好！那你走前面，我負責看起來很熟。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "s1.together"
+      }
+     ]
+    },
+    "solo": {
+     "lines": [
+      {
+       "who": "s1",
+       "text": "我記下了。你先走，我拍張校碑再去。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "s1.solo"
+      }
+     ]
+    },
+    "bread": {
+     "lines": [
+      {
+       "who": "s1",
+       "face": "surprised",
+       "text": "誰不怕！……我帶了麵包，不行嗎？"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "s1.bread"
+      }
+     ]
+    },
+    "admin-together": {
+     "lines": [
+      {
+       "who": "s1",
+       "face": "smile",
+       "text": "{player}！我比你早到，厲害吧。"
+      },
+      {
+       "who": "s1",
+       "text": "其實是跟著指示牌。"
+      }
+     ],
+     "next": "admin-hub"
+    },
+    "admin-solo": {
+     "lines": [
+      {
+       "who": "s1",
+       "text": "校碑那張拍得不錯。你要看嗎？不給看。"
+      }
+     ],
+     "next": "admin-hub"
+    },
+    "admin-bread": {
+     "lines": [
+      {
+       "who": "s1",
+       "face": "troubled",
+       "text": "麵包被猴子盯上了，我丟了。"
+      },
+      {
+       "who": "s1",
+       "text": "阿滿姐說不可以餵，是牠自己拿的……"
+      }
+     ],
+     "next": "admin-hub"
+    },
+    "admin-plain": {
+     "lines": [
+      {
+       "who": "s1",
+       "text": "{player}？你也到了。階梯好多。"
+      }
+     ],
+     "next": "admin-hub"
+    },
+    "admin-hub": {
+     "lines": [
+      {
+       "who": "s1",
+       "text": "四年很長，先找到廁所比較重要。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「要一起去圖資大樓嗎？」",
+       "next": "dorm"
+      },
+      {
+       "text": "「有看到阿灣嗎？」",
+       "next": "wan"
+      },
+      {
+       "text": "「加個好友？」",
+       "if": {
+        "notFlag": "s1.friend"
+       },
+       "next": "friend"
+      }
+     ]
+    },
+    "dorm": {
+     "lines": [
+      {
+       "who": "s1",
+       "text": "不了，我要先找宿舍。晚點長廊見。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "s1.dorm"
+      }
+     ]
+    },
+    "wan": {
+     "lines": [
+      {
+       "who": "s1",
+       "text": "剛剛往圖資大樓走了，馬尾很好認。"
+      }
+     ]
+    },
+    "friend": {
+     "lines": [
+      {
+       "who": "s1",
+       "face": "smile",
+       "text": "好。你叫 {player} 對吧？我記得。"
+      }
+     ],
+     "effects": [
+      {
+       "giveItem": "item-sticker-he"
+      },
+      {
+       "stamp": "friend"
+      },
+      {
+       "setFlag": "s1.friend"
+      }
+     ]
+    }
+   }
+  },
+  "s2": {
+   "entries": [
+    {
+     "if": {
+      "all": [
+       {
+        "chapterDone": "c3-admin"
+       },
+       {
+        "flag": "s2.met"
+       }
+      ]
+     },
+     "node": "again"
+    },
+    {
+     "if": {
+      "chapterDone": "c3-admin"
+     },
+     "node": "root"
+    },
+    {
+     "node": "busy"
+    }
+   ],
+   "nodes": {
+    "busy": {
+     "lines": [
+      {
+       "who": "s2",
+       "text": "報到先排隊。阿灣會帶你。"
+      }
+     ]
+    },
+    "again": {
+     "lines": [
+      {
+       "who": "s2",
+       "text": "名字我記得了，{player}。學生證別弄丟。"
+      }
+     ],
+     "next": "root"
+    },
+    "root": {
+     "lines": [
+      {
+       "who": "s2",
+       "text": "還有事？排隊的人不多，問吧。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "s2.met"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「學生證掉了怎麼辦？」",
+       "next": "lost"
+      },
+      {
+       "text": "「校訓是什麼？」",
+       "next": "motto"
+      },
+      {
+       "text": "「校慶什麼時候？」",
+       "next": "anniv"
+      },
+      {
+       "text": "「你每天都在這？」",
+       "next": "daily"
+      }
+     ]
+    },
+    "lost": {
+     "lines": [
+      {
+       "who": "s2",
+       "text": "來這裡補辦。所以第一件事就是拍照存起來。"
+      },
+      {
+       "who": "s2",
+       "text": "我說過了，對，我會一直說。"
+      }
+     ]
+    },
+    "motto": {
+     "lines": [
+      {
+       "who": "s2",
+       "text": "博學、審問、慎思、明辨、篤行。"
+      },
+      {
+       "who": "s2",
+       "text": "考試不考，但阿典會考。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "s2.motto"
+      }
+     ]
+    },
+    "anniv": {
+     "lines": [
+      {
+       "who": "s2",
+       "text": "11 月 12 日。那天圖書館也有故事。"
+      },
+      {
+       "who": "s2",
+       "text": "問櫃台學姊。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "s2.anniv"
+      }
+     ]
+    },
+    "daily": {
+     "lines": [
+      {
+       "who": "s2",
+       "text": "服務學習時數。下次見面可能是期中考。"
+      },
+      {
+       "who": "s2",
+       "face": "smile",
+       "text": "或者你又把學生證弄丟。"
+      }
+     ]
+    }
+   }
+  },
+  "s3": {
+   "entries": [
+    {
+     "if": {
+      "all": [
+       {
+        "chapterDone": "c4-library"
+       },
+       {
+        "timeOfDay": "night"
+       }
+      ]
+     },
+     "node": "night"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "chapterDone": "c4-library"
+       },
+       {
+        "flag": "s3.recommend"
+       }
+      ]
+     },
+     "node": "again-rec"
+    },
+    {
+     "if": {
+      "chapterDone": "c4-library"
+     },
+     "node": "root"
+    },
+    {
+     "node": "busy"
+    }
+   ],
+   "nodes": {
+    "busy": {
+     "lines": [
+      {
+       "who": "s3",
+       "text": "借書先跟阿灣走流程，等等再聊。"
+      }
+     ]
+    },
+    "night": {
+     "lines": [
+      {
+       "who": "s3",
+       "text": "快閉館了，書先還不還都行，但別留在海邊。"
+      }
+     ],
+     "next": "root"
+    },
+    "again-rec": {
+     "lines": [
+      {
+       "who": "s3",
+       "face": "smile",
+       "text": "選好了嗎？沒有？那就再逛一圈。"
+      }
+     ],
+     "next": "root"
+    },
+    "root": {
+     "lines": [
+      {
+       "who": "s3",
+       "text": "書拿好了？還想問什麼？"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「余光中特藏室可以進去嗎？」",
+       "next": "yu"
+      },
+      {
+       "text": "「圖書館什麼時候搬來的？」",
+       "next": "move"
+      },
+      {
+       "text": "「推薦一本書？」",
+       "next": "rec"
+      },
+      {
+       "text": "「沒事，我先走。」",
+       "next": "due"
+      }
+     ]
+    },
+    "yu": {
+     "lines": [
+      {
+       "who": "s3",
+       "text": "三樓，可以參觀。"
+      },
+      {
+       "who": "s3",
+       "text": "他當過文學院院長，特藏室放的是相關資料。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "s3.yu"
+      },
+      {
+       "stamp": "library-3f"
+      }
+     ]
+    },
+    "move": {
+     "lines": [
+      {
+       "who": "s3",
+       "text": "以前在行政大樓。民國 77 年 8 月先搬到這棟十樓。"
+      },
+      {
+       "who": "s3",
+       "text": "78 年 11 月 12 日全面開館。對，校慶那天。"
+      }
+     ]
+    },
+    "rec": {
+     "lines": [
+      {
+       "who": "s3",
+       "face": "smile",
+       "text": "第一本自己選，比較有意思。"
+      },
+      {
+       "who": "s3",
+       "text": "選完告訴我，我會記得。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "s3.recommend"
+      }
+     ]
+    },
+    "due": {
+     "lines": [
+      {
+       "who": "s3",
+       "text": "到期前記得還。"
+      }
+     ]
+    }
+   }
+  },
+  "m1": {
+   "entries": [
+    {
+     "if": {
+      "chapterDone": "c5-arcade"
+     },
+     "node": "root"
+    },
+    {
+     "node": "nap"
+    }
+   ],
+   "nodes": {
+    "nap": {
+     "lines": [
+      {
+       "who": "m1",
+       "text": "（牠在打盹。別吵牠。）"
+      }
+     ]
+    },
+    "root": {
+     "lines": [
+      {
+       "who": "m1",
+       "text": "（猴學長抓了抓頭，繼續盯著你的背包。）"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「慢慢後退。」",
+       "next": "retreat"
+      },
+      {
+       "text": "「對牠揮手。」",
+       "next": "wave"
+      },
+      {
+       "text": "「拿出麵包。」",
+       "if": {
+        "hasItem": "item-bread"
+       },
+       "next": "tempted"
+      }
+     ]
+    },
+    "retreat": {
+     "lines": [
+      {
+       "who": "m1",
+       "text": "（牠沒有動。你安全離開了。）"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "m1.retreat"
+      },
+      {
+       "stamp": "monkey-rule"
+      }
+     ]
+    },
+    "wave": {
+     "lines": [
+      {
+       "who": "m1",
+       "face": "surprised",
+       "text": "（牠露出牙齒。）"
+      },
+      {
+       "who": "guide",
+       "face": "troubled",
+       "text": "不要對視！"
+      }
+     ],
+     "effects": [
+      {
+       "playSound": "monkey"
+      }
+     ]
+    },
+    "tempted": {
+     "lines": [
+      {
+       "who": "m1",
+       "face": "surprised",
+       "text": "（牠一瞬間站起來。你立刻把麵包塞回背包。）"
+      },
+      {
+       "who": "narrator",
+       "text": "不餵食、不外露食物。你記住了。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "m1.tempted"
+      }
+     ]
+    }
+   }
+  },
+  "guard-chung": {
+   "entries": [
+    {
+     "if": {
+      "all": [
+       {
+        "timeOfDay": "night"
+       },
+       {
+        "flag": "guard-chung.night-warned"
+       }
+      ]
+     },
+     "node": "night-warned"
+    },
+    {
+     "if": {
+      "timeOfDay": "night"
+     },
+     "node": "night-root"
+    },
+    {
+     "if": {
+      "flag": "guard-chung.met"
+     },
+     "node": "again"
+    },
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "root": {
+     "lines": [
+      {
+       "who": "guard-chung",
+       "text": "新生？報到往裡面走。別站路中間。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "guard-chung.met"
+      }
+     ],
+     "next": "menu"
+    },
+    "again": {
+     "lines": [
+      {
+       "who": "guard-chung",
+       "text": "去去去，報到要排隊的。……好啦，問。"
+      }
+     ],
+     "next": "menu"
+    },
+    "menu": {
+     "lines": [
+      {
+       "who": "guard-chung",
+       "text": "車會按喇叭，站旁邊講。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「校碑有多高？」",
+       "next": "height"
+      },
+      {
+       "text": "「隧道那邊有什麼？」",
+       "next": "tunnel"
+      },
+      {
+       "text": "「晚上校門會關嗎？」",
+       "next": "night-q"
+      },
+      {
+       "text": "「我去報到了。」"
+      }
+     ]
+    },
+    "height": {
+     "lines": [
+      {
+       "who": "guard-chung",
+       "text": "21.2 公尺。你問幾次我都答得出來。"
+      },
+      {
+       "who": "guard-chung",
+       "text": "迷路就找它。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "guard-chung.height"
+      }
+     ]
+    },
+    "tunnel": {
+     "lines": [
+      {
+       "who": "guard-chung",
+       "text": "隧道旁邊有坑道，戰時當防空用的。"
+      },
+      {
+       "who": "guard-chung",
+       "text": "以前都不開放，別亂鑽。"
+      }
+     ]
+    },
+    "night-q": {
+     "lines": [
+      {
+       "who": "guard-chung",
+       "text": "晚上有門禁管制，以學校公告為準。"
+      },
+      {
+       "who": "guard-chung",
+       "text": "我會巡，看到你在海堤發呆就叫你回去。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "guard-chung.night-warned"
+      }
+     ]
+    },
+    "night-warned": {
+     "lines": [
+      {
+       "who": "guard-chung",
+       "face": "troubled",
+       "text": "這麼晚還在外面。我說過我會叫你回去吧。"
+      }
+     ],
+     "next": "night-menu"
+    },
+    "night-root": {
+     "lines": [
+      {
+       "who": "guard-chung",
+       "face": "troubled",
+       "text": "這麼晚還在外面。"
+      }
+     ],
+     "next": "night-menu"
+    },
+    "night-menu": {
+     "lines": [
+      {
+       "who": "guard-chung",
+       "text": "巡到這裡，順便看看你。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「再看一下夜景。」",
+       "next": "owl"
+      },
+      {
+       "text": "「阿灣還在海堤。」",
+       "next": "wan"
+      },
+      {
+       "text": "「我回去了。」",
+       "next": "home"
+      }
+     ]
+    },
+    "owl": {
+     "lines": [
+      {
+       "who": "guard-chung",
+       "face": "smile",
+       "text": "好啦，十分鐘。猴子睡了，但我沒睡。"
+      }
+     ],
+     "effects": [
+      {
+       "stamp": "night-owl"
+      },
+      {
+       "achievement": "night-walk"
+      }
+     ]
+    },
+    "wan": {
+     "lines": [
+      {
+       "who": "guard-chung",
+       "text": "她喔，從大一坐到大三。你們兩個一起回去。"
+      }
+     ]
+    },
+    "home": {
+     "lines": [
+      {
+       "who": "guard-chung",
+       "face": "smile",
+       "text": "乖。路燈下面走。"
+      }
+     ]
+    }
+   }
+  },
+  "clerk-jie": {
+   "entries": [
+    {
+     "if": {
+      "all": [
+       {
+        "any": [
+         {
+          "flag": "m3-thief.chase-done"
+         },
+         {
+          "flag": "monkey-volunteer-man.chase-done"
+         }
+        ]
+       },
+       {
+        "notFlag": "clerk-jie.chase-remarked"
+       }
+      ]
+     },
+     "node": "after-chase"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "count": "clerk-jie.buy",
+        "gte": 3
+       },
+       {
+        "notFlag": "clerk-jie.regular"
+       }
+      ]
+     },
+     "node": "regular"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "timeOfDay": "night"
+       },
+       {
+        "flag": "clerk-jie.met"
+       }
+      ]
+     },
+     "node": "night"
+    },
+    {
+     "if": {
+      "flag": "clerk-jie.met"
+     },
+     "node": "again"
+    },
+    {
+     "node": "first"
+    }
+   ],
+   "nodes": {
+    "first": {
+     "lines": [
+      {
+       "who": "clerk-jie",
+       "face": "smile",
+       "text": "歡迎～新生？第一次來送你一張集點卡。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "clerk-jie.met"
+      },
+      {
+       "giveItem": "item-stamp-card"
+      }
+     ],
+     "next": "menu"
+    },
+    "again": {
+     "lines": [
+      {
+       "who": "clerk-jie",
+       "face": "smile",
+       "text": "又來了？今天要什麼？"
+      }
+     ],
+     "next": "menu"
+    },
+    "night": {
+     "lines": [
+      {
+       "who": "clerk-jie",
+       "text": "快打烊了，要買快。"
+      }
+     ],
+     "next": "menu"
+    },
+    "after-chase": {
+     "lines": [
+      {
+       "who": "clerk-jie",
+       "face": "smile",
+       "text": "聽說你被大膽追了？我說過要放包包裡。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "clerk-jie.chase-remarked"
+      }
+     ],
+     "next": "menu"
+    },
+    "regular": {
+     "lines": [
+      {
+       "who": "clerk-jie",
+       "face": "smile",
+       "text": "第三次了？常客章，蓋給你。"
+      }
+     ],
+     "effects": [
+      {
+       "stamp": "shop-regular"
+      },
+      {
+       "setFlag": "clerk-jie.regular"
+      },
+      {
+       "playSound": "stamp"
+      }
+     ],
+     "next": "menu"
+    },
+    "menu": {
+     "lines": [
+      {
+       "who": "clerk-jie",
+       "text": "要什麼？"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「買一瓶飲料。」",
+       "next": "drink"
+      },
+      {
+       "text": "「買麵包。」",
+       "next": "bread"
+      },
+      {
+       "text": "「這裡有賣什麼？」",
+       "next": "what"
+      },
+      {
+       "text": "「只是看看。」"
+      }
+     ]
+    },
+    "drink": {
+     "lines": [
+      {
+       "who": "clerk-jie",
+       "text": "冰的？好。拿去。"
+      }
+     ],
+     "effects": [
+      {
+       "giveItem": "item-drink"
+      },
+      {
+       "count": "clerk-jie.buy"
+      }
+     ]
+    },
+    "bread": {
+     "lines": [
+      {
+       "who": "clerk-jie",
+       "face": "smile",
+       "text": "麵包喔……長廊那邊猴子很多。"
+      },
+      {
+       "who": "clerk-jie",
+       "text": "你放包包裡再走。"
+      }
+     ],
+     "effects": [
+      {
+       "giveItem": "item-bread"
+      },
+      {
+       "setFlag": "clerk-jie.bread-bought"
+      },
+      {
+       "count": "clerk-jie.buy"
+      }
+     ]
+    },
+    "what": {
+     "lines": [
+      {
+       "who": "clerk-jie",
+       "text": "飲料、麵包、文具、雨衣。"
+      },
+      {
+       "who": "clerk-jie",
+       "text": "雨衣很重要，這裡的雨說來就來。"
+      }
+     ]
+    }
+   }
+  },
+  "coffee-kai": {
+   "entries": [
+    {
+     "if": {
+      "all": [
+       {
+        "flag": "ta-lin.usb-returned"
+       },
+       {
+        "notFlag": "coffee-kai.usb-latte"
+       }
+      ]
+     },
+     "node": "usb-latte"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "flag": "ta-lin.usb-asked"
+       },
+       {
+        "notFlag": "coffee-kai.usb-given"
+       }
+      ]
+     },
+     "node": "usb"
+    },
+    {
+     "if": {
+      "flag": "coffee-kai.met"
+     },
+     "node": "again"
+    },
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "root": {
+     "lines": [
+      {
+       "who": "coffee-kai",
+       "text": "今天美式、拿鐵。你看起來需要後者。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "coffee-kai.met"
+      }
+     ],
+     "next": "menu"
+    },
+    "again": {
+     "lines": [
+      {
+       "who": "coffee-kai",
+       "text": "第二杯要錢。"
+      }
+     ],
+     "next": "menu"
+    },
+    "usb-latte": {
+     "lines": [
+      {
+       "who": "coffee-kai",
+       "text": "助教說的那杯？拿去。"
+      }
+     ],
+     "effects": [
+      {
+       "giveItem": "item-latte"
+      },
+      {
+       "setFlag": "coffee-kai.usb-latte"
+      }
+     ],
+     "next": "menu"
+    },
+    "usb": {
+     "lines": [
+      {
+       "who": "coffee-kai",
+       "text": "藍色隨身碟？有人掉在車旁邊，拿去還助教。"
+      }
+     ],
+     "effects": [
+      {
+       "giveItem": "item-usb"
+      },
+      {
+       "setFlag": "coffee-kai.usb-given"
+      }
+     ],
+     "next": "menu"
+    },
+    "menu": {
+     "lines": [
+      {
+       "who": "coffee-kai",
+       "text": "要什麼？"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「一杯拿鐵。」",
+       "if": {
+        "notFlag": "coffee-kai.latte"
+       },
+       "next": "latte"
+      },
+      {
+       "text": "「長廊的猴子怎麼回事？」",
+       "next": "tip"
+      },
+      {
+       "text": "「你為什麼在這裡擺車？」",
+       "next": "why"
+      },
+      {
+       "text": "「有看到紅衣服的新生嗎？」",
+       "if": {
+        "flag": "s1.dorm"
+       },
+       "next": "saw-s1"
+      }
+     ]
+    },
+    "latte": {
+     "lines": [
+      {
+       "who": "coffee-kai",
+       "text": "來。第一杯算你的新生價——免費。"
+      }
+     ],
+     "effects": [
+      {
+       "giveItem": "item-latte"
+      },
+      {
+       "setFlag": "coffee-kai.latte"
+      }
+     ]
+    },
+    "tip": {
+     "lines": [
+      {
+       "who": "coffee-kai",
+       "text": "東邊那隻叫大膽，專搶塑膠袋。"
+      },
+      {
+       "who": "coffee-kai",
+       "text": "阿滿姐在那邊守，去找她，她缺幫手。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "coffee-kai.tip"
+      }
+     ]
+    },
+    "why": {
+     "lines": [
+      {
+       "who": "coffee-kai",
+       "text": "下雨不用傘、人多、有插座。長廊就是這樣。"
+      }
+     ]
+    },
+    "saw-s1": {
+     "lines": [
+      {
+       "who": "coffee-kai",
+       "text": "拿資料夾那個？往宿舍方向去了，走得很快。"
+      }
+     ]
+    }
+   }
+  },
+  "photo-ju": {
+   "entries": [
+    {
+     "if": {
+      "timeOfDay": "day"
+     },
+     "node": "day-root"
+    },
+    {
+     "if": {
+      "timeOfDay": "night"
+     },
+     "node": "night-root"
+    },
+    {
+     "node": "sunset-root"
+    }
+   ],
+   "nodes": {
+    "day-root": {
+     "lines": [
+      {
+       "who": "photo-ju",
+       "text": "等光。你要拍就傍晚來海堤，現在不值得。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「怎麼去海堤？」",
+       "next": "way"
+      },
+      {
+       "text": "「你在拍什麼？」",
+       "next": "crown"
+      },
+      {
+       "text": "「傍晚見。」",
+       "next": "later"
+      }
+     ]
+    },
+    "way": {
+     "lines": [
+      {
+       "who": "photo-ju",
+       "text": "往校門方向，校碑旁邊。看到消波塊就到了。"
+      }
+     ]
+    },
+    "crown": {
+     "lines": [
+      {
+       "who": "photo-ju",
+       "text": "皇冠。圖資大樓的屋頂，大家都這樣叫。"
+      }
+     ]
+    },
+    "later": {
+     "lines": [
+      {
+       "who": "photo-ju",
+       "text": "傍晚，海堤。別遲到。"
+      }
+     ]
+    },
+    "night-root": {
+     "lines": [
+      {
+       "who": "photo-ju",
+       "text": "夜景也可以，長曝光。但你沒腳架，先看看就好。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「夜景怎麼拍？」",
+       "next": "night-tip"
+      },
+      {
+       "text": "「明天傍晚再來。」",
+       "next": "later"
+      }
+     ]
+    },
+    "night-tip": {
+     "lines": [
+      {
+       "who": "photo-ju",
+       "face": "smile",
+       "text": "腳架、慢快門、不要呼吸。開玩笑的。"
+      }
+     ]
+    },
+    "sunset-root": {
+     "lines": [
+      {
+       "who": "photo-ju",
+       "face": "smile",
+       "text": "來了。今天雲不錯。要不要比一張？"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「比什麼？」",
+       "next": "rules"
+      },
+      {
+       "text": "「我用手機拍可以嗎？」",
+       "next": "phone"
+      },
+      {
+       "text": "「我先看你拍。」",
+       "next": "watch"
+      },
+      {
+       "text": "「今天不拍。」"
+      }
+     ]
+    },
+    "rules": {
+     "lines": [
+      {
+       "who": "photo-ju",
+       "text": "夕陽入鏡、海平線要平、人在三分之一線。"
+      },
+      {
+       "who": "photo-ju",
+       "text": "三張裡選一張。"
+      }
+     ],
+     "effects": [
+      {
+       "startMinigame": "sunset-photo",
+       "win": "photo-win",
+       "lose": "photo-lose"
+      }
+     ]
+    },
+    "phone": {
+     "lines": [
+      {
+       "who": "photo-ju",
+       "face": "troubled",
+       "text": "……可以。構圖比器材重要，我說服自己。"
+      }
+     ],
+     "effects": [
+      {
+       "startMinigame": "sunset-photo",
+       "win": "photo-win",
+       "lose": "photo-lose"
+      }
+     ]
+    },
+    "watch": {
+     "lines": [
+      {
+       "who": "narrator",
+       "text": "（她按下快門。）"
+      },
+      {
+       "who": "photo-ju",
+       "text": "就這樣。輪到你。"
+      }
+     ],
+     "effects": [
+      {
+       "startMinigame": "sunset-photo",
+       "win": "photo-win",
+       "lose": "photo-lose"
+      }
+     ]
+    },
+    "photo-win": {
+     "lines": [
+      {
+       "who": "photo-ju",
+       "face": "smile",
+       "text": "可以。社團下次活動你來。"
+      }
+     ],
+     "effects": [
+      {
+       "stamp": "photo"
+      },
+      {
+       "giveItem": "item-photo-print"
+      },
+      {
+       "achievement": "golden-hour"
+      },
+      {
+       "playSound": "shutter"
+      }
+     ]
+    },
+    "photo-lose": {
+     "lines": [
+      {
+       "who": "photo-ju",
+       "text": "海平線歪了，太陽也切掉。再來，不急。"
+      }
+     ]
+    }
+   }
+  },
+  "quiz-dian": {
+   "entries": [
+    {
+     "if": {
+      "flag": "quiz-dian.won"
+     },
+     "node": "again-won"
+    },
+    {
+     "if": {
+      "flag": "quiz-dian.met"
+     },
+     "node": "again"
+    },
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "root": {
+     "lines": [
+      {
+       "who": "quiz-dian",
+       "text": "新生？我是阿典。校史我有來源，想不想被考？"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "quiz-dian.met"
+      }
+     ],
+     "next": "menu"
+    },
+    "again": {
+     "lines": [
+      {
+       "who": "quiz-dian",
+       "text": "再考一次？答案都在路上。"
+      }
+     ],
+     "next": "menu"
+    },
+    "again-won": {
+     "lines": [
+      {
+       "who": "quiz-dian",
+       "face": "smile",
+       "text": "過關的人不多。再來一輪？"
+      }
+     ],
+     "next": "menu"
+    },
+    "menu": {
+     "lines": [
+      {
+       "who": "quiz-dian",
+       "text": "五題，四選一。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「來吧。」",
+       "next": "start"
+      },
+      {
+       "text": "「先給我提示。」",
+       "next": "hint"
+      },
+      {
+       "text": "「你為什麼這麼熟？」",
+       "next": "why"
+      },
+      {
+       "text": "「下次。」"
+      }
+     ]
+    },
+    "start": {
+     "lines": [
+      {
+       "who": "quiz-dian",
+       "text": "五題，答對四題給印章。"
+      },
+      {
+       "who": "quiz-dian",
+       "text": "沒答對也不會怎樣，只是我會記得。"
+      }
+     ],
+     "effects": [
+      {
+       "startMinigame": "history-quiz",
+       "win": "quiz-win",
+       "lose": "quiz-lose"
+      }
+     ]
+    },
+    "hint": {
+     "lines": [
+      {
+       "who": "quiz-dian",
+       "text": "服務台學長講過校訓、櫃台學姊講過開館日。"
+      },
+      {
+       "who": "quiz-dian",
+       "text": "去聽，再回來。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "quiz-dian.hinted"
+      }
+     ]
+    },
+    "why": {
+     "lines": [
+      {
+       "who": "quiz-dian",
+       "text": "因為每句都有出處。沒出處的我不說。"
+      }
+     ]
+    },
+    "quiz-win": {
+     "lines": [
+      {
+       "who": "quiz-dian",
+       "face": "smile",
+       "text": "可以。你有在聽。"
+      }
+     ],
+     "effects": [
+      {
+       "stamp": "quiz-master"
+      },
+      {
+       "giveItem": "item-history-card"
+      },
+      {
+       "achievement": "historian"
+      },
+      {
+       "setFlag": "quiz-dian.won"
+      },
+      {
+       "playSound": "fanfare"
+      }
+     ]
+    },
+    "quiz-lose": {
+     "lines": [
+      {
+       "who": "quiz-dian",
+       "text": "回去再走一遍，答案都在路上。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "quiz-dian.failed"
+      }
+     ]
+    }
+   }
+  },
+  "monkey-volunteer-man": {
+   "entries": [
+    {
+     "if": {
+      "flag": "monkey-volunteer-man.chase-done"
+     },
+     "node": "done"
+    },
+    {
+     "if": {
+      "flag": "monkey-volunteer-man.met"
+     },
+     "node": "again"
+    },
+    {
+     "if": {
+      "flag": "coffee-kai.tip"
+     },
+     "node": "kai-root"
+    },
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "root": {
+     "lines": [
+      {
+       "who": "monkey-volunteer-man",
+       "text": "新生！站住。食物收好了沒？"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "monkey-volunteer-man.met"
+      }
+     ],
+     "next": "menu"
+    },
+    "kai-root": {
+     "lines": [
+      {
+       "who": "monkey-volunteer-man",
+       "face": "smile",
+       "text": "阿凱叫你來的？好，缺人手。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "monkey-volunteer-man.met"
+      }
+     ],
+     "next": "menu"
+    },
+    "again": {
+     "lines": [
+      {
+       "who": "monkey-volunteer-man",
+       "text": "四不。你念一遍。"
+      }
+     ],
+     "next": "menu"
+    },
+    "done": {
+     "lines": [
+      {
+       "who": "monkey-volunteer-man",
+       "face": "smile",
+       "text": "袋子回收了，麵包牠吃了。記住，塑膠袋引牠來的。"
+      }
+     ],
+     "next": "menu"
+    },
+    "menu": {
+     "lines": [
+      {
+       "who": "monkey-volunteer-man",
+       "text": "有事？"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「收好了。」",
+       "next": "rule"
+      },
+      {
+       "text": "「牠們會攻擊人嗎？」",
+       "next": "attack"
+      },
+      {
+       "text": "「我可以幫忙嗎？」",
+       "if": {
+        "flag": "monkey-volunteer-man.rule-learned"
+       },
+       "next": "help"
+      },
+      {
+       "text": "「我走了。」"
+      }
+     ]
+    },
+    "rule": {
+     "lines": [
+      {
+       "who": "monkey-volunteer-man",
+       "text": "很好。四不：不外露食物、不餵食、不接觸、不攻擊。"
+      },
+      {
+       "who": "monkey-volunteer-man",
+       "text": "再講一次，你跟著念。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "monkey-volunteer-man.rule-learned"
+      },
+      {
+       "stamp": "monkey-rule"
+      }
+     ]
+    },
+    "attack": {
+     "lines": [
+      {
+       "who": "monkey-volunteer-man",
+       "text": "通常不會。牠兇你，就不要對看，慢慢走開。"
+      }
+     ]
+    },
+    "help": {
+     "lines": [
+      {
+       "who": "monkey-volunteer-man",
+       "text": "來。大膽剛搶了一袋麵包。"
+      },
+      {
+       "who": "monkey-volunteer-man",
+       "text": "你去把袋子撿回來，不要追到牠身上。"
+      }
+     ],
+     "effects": [
+      {
+       "startMinigame": "monkey-chase",
+       "win": "chase-win",
+       "lose": "chase-lose"
+      }
+     ]
+    },
+    "chase-win": {
+     "lines": [
+      {
+       "who": "monkey-volunteer-man",
+       "face": "smile",
+       "text": "撿回來了？好，袋子給我。"
+      },
+      {
+       "who": "monkey-volunteer-man",
+       "text": "記住，是你的塑膠袋引牠來的。"
+      }
+     ],
+     "effects": [
+      {
+       "stamp": "monkey-guard"
+      },
+      {
+       "stamp": "monkey-rule"
+      },
+      {
+       "achievement": "no-feeding"
+      },
+      {
+       "setFlag": "monkey-volunteer-man.chase-done"
+      }
+     ]
+    },
+    "chase-lose": {
+     "lines": [
+      {
+       "who": "monkey-volunteer-man",
+       "text": "追太近了。牠跑進山裡，袋子也沒了。再來一次。"
+      }
+     ]
+    }
+   }
+  },
+  "m3-thief": {
+   "entries": [
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "root": {
+     "lines": [
+      {
+       "who": "m3-thief",
+       "text": "（大膽盯著你的包包。尾巴缺一截，就是牠。）"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「退開。」",
+       "next": "back"
+      },
+      {
+       "text": "「拿出食物。」",
+       "if": {
+        "hasItem": "item-bread"
+       },
+       "next": "grab"
+      }
+     ]
+    },
+    "back": {
+     "lines": [
+      {
+       "who": "m3-thief",
+       "text": "（牠失去興趣，轉頭抓抓尾巴。）"
+      }
+     ]
+    },
+    "grab": {
+     "lines": [
+      {
+       "who": "m3-thief",
+       "face": "surprised",
+       "text": "（牠一把抓走袋子！阿滿姐的哨聲響起。）"
+      }
+     ],
+     "effects": [
+      {
+       "playSound": "monkey"
+      },
+      {
+       "startMinigame": "monkey-chase",
+       "win": "m3-win",
+       "lose": "m3-lose"
+      }
+     ]
+    },
+    "m3-win": {
+     "lines": [
+      {
+       "who": "m3-thief",
+       "text": "（袋子撿回來了。麵包已經沒了。）"
+      }
+     ],
+     "effects": [
+      {
+       "stamp": "monkey-guard"
+      },
+      {
+       "achievement": "no-feeding"
+      },
+      {
+       "setFlag": "m3-thief.chase-done"
+      }
+     ]
+    },
+    "m3-lose": {
+     "lines": [
+      {
+       "who": "m3-thief",
+       "text": "（牠跑進山裡，袋子也沒了。）"
+      }
+     ]
+    }
+   }
+  },
+  "jogger-po": {
+   "entries": [
+    {
+     "if": {
+      "all": [
+       {
+        "count": "jogger-po.jog",
+        "gte": 3
+       },
+       {
+        "notFlag": "jogger-po.laps"
+       }
+      ]
+     },
+     "node": "laps"
+    },
+    {
+     "if": {
+      "flag": "jogger-po.met"
+     },
+     "node": "again"
+    },
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "root": {
+     "lines": [
+      {
+       "who": "jogger-po",
+       "text": "呼——新生？別停，邊走邊講。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "jogger-po.met"
+      }
+     ],
+     "next": "menu"
+    },
+    "again": {
+     "lines": [
+      {
+       "who": "jogger-po",
+       "text": "跑了。有事海堤見。……好啦，講。"
+      }
+     ],
+     "next": "menu"
+    },
+    "laps": {
+     "lines": [
+      {
+       "who": "jogger-po",
+       "face": "smile",
+       "text": "三次了。不錯，有跟上。"
+      }
+     ],
+     "effects": [
+      {
+       "stamp": "three-laps"
+      },
+      {
+       "setFlag": "jogger-po.laps"
+      }
+     ],
+     "next": "menu"
+    },
+    "menu": {
+     "lines": [
+      {
+       "who": "jogger-po",
+       "text": "呼——說。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「行政大樓怎麼走？」",
+       "next": "way"
+      },
+      {
+       "text": "「你每天跑幾圈？」",
+       "next": "laps-q"
+      },
+      {
+       "text": "「一起跑？」",
+       "next": "join"
+      },
+      {
+       "text": "「不打擾了。」"
+      }
+     ]
+    },
+    "way": {
+     "lines": [
+      {
+       "who": "jogger-po",
+       "text": "隧道口往前，右手邊紅磚那棟，兩隻獅子。"
+      }
+     ]
+    },
+    "laps-q": {
+     "lines": [
+      {
+       "who": "jogger-po",
+       "text": "三圈。校門到海堤來回。"
+      },
+      {
+       "who": "jogger-po",
+       "face": "smile",
+       "text": "今天多一圈，因為你問。"
+      }
+     ]
+    },
+    "join": {
+     "lines": [
+      {
+       "who": "jogger-po",
+       "text": "跟得上就來。"
+      },
+      {
+       "who": "narrator",
+       "text": "（你跟著跑了一段，氣喘吁吁。）"
+      }
+     ],
+     "effects": [
+      {
+       "count": "jogger-po.jog"
+      }
+     ]
+    }
+   }
+  },
+  "guitar-yun": {
+   "entries": [
+    {
+     "if": {
+      "all": [
+       {
+        "timeOfDay": "night"
+       },
+       {
+        "flag": "guitar-yun.invited"
+       }
+      ]
+     },
+     "node": "night-invited"
+    },
+    {
+     "if": {
+      "timeOfDay": "night"
+     },
+     "node": "night-root"
+    },
+    {
+     "if": {
+      "timeOfDay": "sunset"
+     },
+     "node": "sunset-root"
+    },
+    {
+     "node": "day-root"
+    }
+   ],
+   "nodes": {
+    "day-root": {
+     "lines": [
+      {
+       "who": "guitar-yun",
+       "text": "……在調音。有事？"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「你晚上會表演？」",
+       "next": "invite"
+      },
+      {
+       "text": "「唱一段？」",
+       "next": "notnow"
+      }
+     ]
+    },
+    "sunset-root": {
+     "lines": [
+      {
+       "who": "guitar-yun",
+       "text": "快天黑了。等一下就開始。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「你晚上會表演？」",
+       "next": "invite"
+      },
+      {
+       "text": "「唱一段？」",
+       "next": "notnow"
+      }
+     ]
+    },
+    "invite": {
+     "lines": [
+      {
+       "who": "guitar-yun",
+       "text": "長廊，天黑以後。不是表演，是練習。"
+      },
+      {
+       "who": "guitar-yun",
+       "text": "有人聽就變表演了。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "guitar-yun.invited"
+      }
+     ]
+    },
+    "notnow": {
+     "lines": [
+      {
+       "who": "guitar-yun",
+       "face": "troubled",
+       "text": "現在不行。晚上。"
+      }
+     ]
+    },
+    "night-invited": {
+     "lines": [
+      {
+       "who": "guitar-yun",
+       "face": "smile",
+       "text": "你來了。坐。"
+      }
+     ],
+     "next": "night-menu"
+    },
+    "night-root": {
+     "lines": [
+      {
+       "who": "guitar-yun",
+       "text": "坐吧，反正也沒人。"
+      }
+     ],
+     "next": "night-menu"
+    },
+    "night-menu": {
+     "lines": [
+      {
+       "who": "guitar-yun",
+       "text": "要聽什麼？"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「點歌：海的歌。」",
+       "next": "sea"
+      },
+      {
+       "text": "「點歌：隧道的歌。」",
+       "next": "tunnel"
+      },
+      {
+       "text": "「安靜聽。」",
+       "next": "quiet"
+      }
+     ]
+    },
+    "sea": {
+     "lines": [
+      {
+       "who": "narrator",
+       "text": "（他唱了一段原創短歌。）"
+      },
+      {
+       "who": "guitar-yun",
+       "text": "山在後面，海在前面，路自己走。"
+      }
+     ],
+     "effects": [
+      {
+       "stamp": "night-song"
+      },
+      {
+       "achievement": "audience"
+      }
+     ]
+    },
+    "tunnel": {
+     "lines": [
+      {
+       "who": "narrator",
+       "text": "（他唱了一段關於回音的歌。）"
+      }
+     ],
+     "effects": [
+      {
+       "stamp": "night-song"
+      },
+      {
+       "achievement": "audience"
+      }
+     ]
+    },
+    "quiet": {
+     "lines": [
+      {
+       "who": "narrator",
+       "text": "（他點點頭，繼續彈。）"
+      }
+     ],
+     "effects": [
+      {
+       "achievement": "audience"
+      }
+     ]
+    }
+   }
+  },
+  "club-ocean-ting": {
+   "entries": [
+    {
+     "if": {
+      "hasItem": "item-flyer-ocean"
+     },
+     "node": "has-flyer"
+    },
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "has-flyer": {
+     "lines": [
+      {
+       "who": "club-ocean-ting",
+       "face": "smile",
+       "text": "傳單拿了就是社員了（不是）。"
+      }
+     ],
+     "next": "menu"
+    },
+    "root": {
+     "lines": [
+      {
+       "who": "club-ocean-ting",
+       "face": "smile",
+       "text": "海洋研究社！新生加入嗎？"
+      }
+     ],
+     "next": "menu"
+    },
+    "menu": {
+     "lines": [
+      {
+       "who": "club-ocean-ting",
+       "text": "加入嗎？"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「你們做什麼？」",
+       "next": "what"
+      },
+      {
+       "text": "「給我一張傳單。」",
+       "if": {
+        "notFlag": "club-ocean-ting.flyer"
+       },
+       "next": "flyer"
+      },
+      {
+       "text": "「我考慮一下。」",
+       "next": "consider"
+      }
+     ]
+    },
+    "what": {
+     "lines": [
+      {
+       "who": "club-ocean-ting",
+       "text": "浮潛、淨灘、看海。"
+      },
+      {
+       "who": "club-ocean-ting",
+       "text": "海科系的阿灣學姊也是社員，她沒說？"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "club-ocean-ting.wan"
+      }
+     ]
+    },
+    "flyer": {
+     "lines": [
+      {
+       "who": "club-ocean-ting",
+       "face": "smile",
+       "text": "拿去！上面的活動時間是原創的，別真的去等。"
+      }
+     ],
+     "effects": [
+      {
+       "giveItem": "item-flyer-ocean"
+      },
+      {
+       "stamp": "club-fair"
+      },
+      {
+       "setFlag": "club-ocean-ting.flyer"
+      }
+     ]
+    },
+    "consider": {
+     "lines": [
+      {
+       "who": "club-ocean-ting",
+       "text": "考慮就是加入的開始。"
+      }
+     ]
+    }
+   }
+  },
+  "ta-lin": {
+   "entries": [
+    {
+     "if": {
+      "all": [
+       {
+        "hasItem": "item-usb"
+       },
+       {
+        "notFlag": "ta-lin.usb-returned"
+       }
+      ]
+     },
+     "node": "usb-back"
+    },
+    {
+     "if": {
+      "flag": "ta-lin.usb-returned"
+     },
+     "node": "thanks-again"
+    },
+    {
+     "if": {
+      "flag": "ta-lin.met"
+     },
+     "node": "again"
+    },
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "root": {
+     "lines": [
+      {
+       "who": "ta-lin",
+       "text": "SC2001？就這間。你是來上課還是來找路？"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "ta-lin.met"
+      }
+     ],
+     "next": "menu"
+    },
+    "again": {
+     "lines": [
+      {
+       "who": "ta-lin",
+       "text": "考卷還沒改完。有事快問。"
+      }
+     ],
+     "next": "menu"
+    },
+    "thanks-again": {
+     "lines": [
+      {
+       "who": "ta-lin",
+       "face": "smile",
+       "text": "隨身碟救了我的成績單。有事快問。"
+      }
+     ],
+     "next": "menu"
+    },
+    "usb-back": {
+     "lines": [
+      {
+       "who": "ta-lin",
+       "face": "surprised",
+       "text": "是！謝謝。阿凱那邊一杯拿鐵，記我帳。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "ta-lin.usb-returned"
+      },
+      {
+       "stamp": "good-samaritan"
+      }
+     ],
+     "next": "menu"
+    },
+    "menu": {
+     "lines": [
+      {
+       "who": "ta-lin",
+       "text": "說吧。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「來找路。」",
+       "next": "way"
+      },
+      {
+       "text": "「你在找什麼？」",
+       "if": {
+        "notFlag": "ta-lin.usb-asked"
+       },
+       "next": "lost"
+      },
+      {
+       "text": "「這間在上什麼？」",
+       "next": "class"
+      },
+      {
+       "text": "「沒事了。」"
+      }
+     ]
+    },
+    "way": {
+     "lines": [
+      {
+       "who": "ta-lin",
+       "text": "理學院二樓，長廊走到底上樓。記住樓梯的位置。"
+      }
+     ]
+    },
+    "lost": {
+     "lines": [
+      {
+       "who": "ta-lin",
+       "face": "troubled",
+       "text": "隨身碟。藍色的，長廊某張長椅。"
+      },
+      {
+       "who": "ta-lin",
+       "text": "找到給我，我請咖啡。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "ta-lin.usb-asked"
+      }
+     ]
+    },
+    "class": {
+     "lines": [
+      {
+       "who": "ta-lin",
+       "text": "看你的課表，不是看我。下一堂是實驗。"
+      }
+     ]
+    }
+   }
+  },
+  "gardener-hai": {
+   "entries": [
+    {
+     "if": {
+      "timeOfDay": "sunset"
+     },
+     "node": "bodhi"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "count": "gardener-hai.leaves",
+        "gte": 5
+       },
+       {
+        "notFlag": "gardener-hai.leaves-done"
+       }
+      ]
+     },
+     "node": "done"
+    },
+    {
+     "if": {
+      "flag": "gardener-hai.leaves-done"
+     },
+     "node": "after-done"
+    },
+    {
+     "if": {
+      "flag": "gardener-hai.asked"
+     },
+     "node": "sweeping"
+    },
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "bodhi": {
+     "lines": [
+      {
+       "who": "gardener-hai",
+       "text": "這棵最老。大家在這裡開過會、吵過架、也睡過午覺。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「坐一下？」",
+       "next": "sit"
+      },
+      {
+       "text": "「這棵樹有故事？」",
+       "next": "story"
+      },
+      {
+       "text": "「我先走了。」"
+      }
+     ]
+    },
+    "sit": {
+     "lines": [
+      {
+       "who": "gardener-hai",
+       "face": "smile",
+       "text": "坐。樹下涼。"
+      }
+     ],
+     "effects": [
+      {
+       "achievement": "under-the-bodhi"
+      }
+     ]
+    },
+    "story": {
+     "lines": [
+      {
+       "who": "gardener-hai",
+       "text": "有。寶石卡上寫得比我清楚。"
+      }
+     ],
+     "effects": [
+      {
+       "unlockSideQuest": "story-bodhi"
+      }
+     ]
+    },
+    "root": {
+     "lines": [
+      {
+       "who": "gardener-hai",
+       "text": "掃不完。鳳凰木一開花就掉，榕樹一年四季都掉。"
+      }
+     ],
+     "next": "menu"
+    },
+    "sweeping": {
+     "lines": [
+      {
+       "who": "gardener-hai",
+       "text": "還在掃。撿了幾堆了？"
+      }
+     ],
+     "next": "menu"
+    },
+    "done": {
+     "lines": [
+      {
+       "who": "gardener-hai",
+       "face": "smile",
+       "text": "手腳快。這個給你，樹上掉的。"
+      }
+     ],
+     "effects": [
+      {
+       "giveItem": "item-seed-pod"
+      },
+      {
+       "stamp": "green-thumb"
+      },
+      {
+       "setFlag": "gardener-hai.leaves-done"
+      }
+     ],
+     "next": "menu"
+    },
+    "after-done": {
+     "lines": [
+      {
+       "who": "gardener-hai",
+       "text": "莢果別弄丟。樹記得你。"
+      }
+     ],
+     "next": "menu"
+    },
+    "menu": {
+     "lines": [
+      {
+       "who": "gardener-hai",
+       "text": "說。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「這些樹幾歲？」",
+       "next": "age"
+      },
+      {
+       "text": "「我幫你掃？」",
+       "if": {
+        "notFlag": "gardener-hai.asked"
+       },
+       "next": "help"
+      },
+      {
+       "text": "「撿了一堆落葉。」",
+       "if": {
+        "flag": "gardener-hai.asked"
+       },
+       "next": "pile"
+      },
+      {
+       "text": "「不打擾了。」"
+      }
+     ]
+    },
+    "age": {
+     "lines": [
+      {
+       "who": "gardener-hai",
+       "text": "比你老。多老我不說，說了你也不記得。"
+      }
+     ]
+    },
+    "help": {
+     "lines": [
+      {
+       "who": "gardener-hai",
+       "text": "好。中庭五堆落葉，撿回來給我。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "gardener-hai.asked"
+      }
+     ]
+    },
+    "pile": {
+     "lines": [
+      {
+       "who": "narrator",
+       "text": "（你把一堆落葉倒進推車。）"
+      },
+      {
+       "who": "gardener-hai",
+       "text": "嗯。還有。"
+      }
+     ],
+     "effects": [
+      {
+       "count": "gardener-hai.leaves"
+      }
+     ]
+    }
+   }
+  },
+  "poet-wen": {
+   "entries": [
+    {
+     "if": {
+      "timeOfDay": "sunset"
+     },
+     "node": "sea"
+    },
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "sea": {
+     "lines": [
+      {
+       "who": "poet-wen",
+       "text": "這個時候不要講話。看。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「……」",
+       "next": "silence"
+      },
+      {
+       "text": "「夕陽真美。」",
+       "next": "talked"
+      }
+     ]
+    },
+    "silence": {
+     "lines": [
+      {
+       "who": "narrator",
+       "text": "（你們一起看了一分鐘。）"
+      }
+     ],
+     "effects": [
+      {
+       "achievement": "silence"
+      }
+     ]
+    },
+    "talked": {
+     "lines": [
+      {
+       "who": "poet-wen",
+       "face": "troubled",
+       "text": "……你講話了。再一分鐘。"
+      }
+     ]
+    },
+    "root": {
+     "lines": [
+      {
+       "who": "poet-wen",
+       "text": "站這裡看中庭，整個校園在你腳下。"
+      },
+      {
+       "who": "poet-wen",
+       "face": "smile",
+       "text": "這句不是我寫的，是每個人都會說的。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「你在寫什麼？」",
+       "next": "write"
+      },
+      {
+       "text": "「余光中特藏室在這棟？」",
+       "next": "yu"
+      },
+      {
+       "text": "「為什麼不念別人的詩？」",
+       "next": "why"
+      }
+     ]
+    },
+    "write": {
+     "lines": [
+      {
+       "who": "poet-wen",
+       "text": "短句。海、山、長廊。"
+      },
+      {
+       "who": "poet-wen",
+       "text": "念一句：「紅磚記得每一場雨。」"
+      }
+     ],
+     "effects": [
+      {
+       "stamp": "poem"
+      }
+     ]
+    },
+    "yu": {
+     "lines": [
+      {
+       "who": "poet-wen",
+       "text": "三樓。他當過文學院院長，我們院的。"
+      },
+      {
+       "who": "poet-wen",
+       "text": "我不念他的詩，你自己上去看。"
+      }
+     ]
+    },
+    "why": {
+     "lines": [
+      {
+       "who": "poet-wen",
+       "text": "念了就不是我的了。"
+      }
+     ]
+    }
+   }
+  },
+  "intl-mia": {
+   "entries": [
+    {
+     "if": {
+      "all": [
+       {
+        "timeOfDay": "sunset"
+       },
+       {
+        "flag": "intl-mia.escort"
+       }
+      ]
+     },
+     "node": "sunset-thanks"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "timeOfDay": "sunset"
+       },
+       {
+        "flag": "intl-mia.told"
+       }
+      ]
+     },
+     "node": "sunset-found"
+    },
+    {
+     "if": {
+      "timeOfDay": "sunset"
+     },
+     "node": "sunset-root"
+    },
+    {
+     "if": {
+      "flag": "intl-mia.escort"
+     },
+     "node": "day-again"
+    },
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "root": {
+     "lines": [
+      {
+       "who": "intl-mia",
+       "face": "troubled",
+       "text": "Hi！請問……SC2001？我找不到。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「我帶你去。」",
+       "next": "escort"
+      },
+      {
+       "text": "「長廊走到底上二樓。」",
+       "next": "told"
+      },
+      {
+       "text": "「問林助教。」",
+       "next": "ask"
+      }
+     ]
+    },
+    "escort": {
+     "lines": [
+      {
+       "who": "intl-mia",
+       "face": "smile",
+       "text": "謝謝！跟你走。"
+      },
+      {
+       "who": "narrator",
+       "text": "（你帶她走到 SC2001 門口。）"
+      },
+      {
+       "who": "intl-mia",
+       "face": "smile",
+       "text": "找到了！你是 {player}？我記住了。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "intl-mia.escort"
+      },
+      {
+       "stamp": "good-samaritan"
+      }
+     ]
+    },
+    "told": {
+     "lines": [
+      {
+       "who": "intl-mia",
+       "text": "長廊……理公長廊？好，我試試。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "intl-mia.told"
+      }
+     ]
+    },
+    "ask": {
+     "lines": [
+      {
+       "who": "intl-mia",
+       "face": "troubled",
+       "text": "林助教？在哪裡？……好吧，我找找。"
+      }
+     ]
+    },
+    "day-again": {
+     "lines": [
+      {
+       "who": "intl-mia",
+       "face": "smile",
+       "text": "{player}！今天不迷路了。"
+      }
+     ],
+     "next": "chat"
+    },
+    "sunset-thanks": {
+     "lines": [
+      {
+       "who": "intl-mia",
+       "face": "smile",
+       "text": "{player}！今天謝謝你。我請你喝咖啡……下次。"
+      }
+     ],
+     "next": "chat"
+    },
+    "sunset-found": {
+     "lines": [
+      {
+       "who": "intl-mia",
+       "face": "smile",
+       "text": "我找到了！走了三次。"
+      }
+     ],
+     "next": "chat"
+    },
+    "sunset-root": {
+     "lines": [
+      {
+       "who": "intl-mia",
+       "face": "troubled",
+       "text": "我還在找。……算了，明天再找。"
+      }
+     ],
+     "next": "chat"
+    },
+    "chat": {
+     "lines": [
+      {
+       "who": "intl-mia",
+       "text": "你呢？要去哪？"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「你從哪裡來？」",
+       "next": "from"
+      },
+      {
+       "text": "「要一起去海堤嗎？」",
+       "next": "seawall"
+      },
+      {
+       "text": "「先走了。」"
+      }
+     ]
+    },
+    "from": {
+     "lines": [
+      {
+       "who": "intl-mia",
+       "text": "很遠的地方。這裡的海跟我家很像。"
+      }
+     ]
+    },
+    "seawall": {
+     "lines": [
+      {
+       "who": "intl-mia",
+       "face": "smile",
+       "text": "海堤？蘿蔔坑？大家都說。好！"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "intl-mia.seawall"
+      }
+     ]
+    }
+   }
+  }
+ },
+ "events": [
+  {
+   "id": "ev-club-fair",
+   "when": "day",
+   "npcs": [
+    "club-ocean-ting",
+    "coffee-kai"
+   ],
+   "banner": "社團擺攤，長廊中段熱鬧起來"
+  },
+  {
+   "id": "ev-macaque-alert-day",
+   "when": "day",
+   "npcs": [
+    "monkey-volunteer-man",
+    "m3-thief",
+    "m1"
+   ],
+   "banner": "哨聲響起，大膽從樹上下來了"
+  },
+  {
+   "id": "ev-sunset-crowd",
+   "when": "sunset",
+   "npcs": [
+    "photo-ju",
+    "guide",
+    "poet-wen",
+    "jogger-po",
+    "intl-mia"
+   ],
+   "banner": "夕陽時間，蘿蔔坑坐滿了人"
+  },
+  {
+   "id": "ev-macaque-alert-sunset",
+   "when": "sunset",
+   "npcs": [
+    "monkey-volunteer-man",
+    "m3-thief",
+    "m1"
+   ],
+   "banner": "哨聲響起，食物收好"
+  },
+  {
+   "id": "ev-night-song",
+   "when": "night",
+   "npcs": [
+    "guitar-yun",
+    "guard-chung"
+   ],
+   "banner": "長廊夜唱，柱廊燈全亮"
+  }
+ ]
+}

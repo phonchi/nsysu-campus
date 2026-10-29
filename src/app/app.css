@@ -1,0 +1,14 @@
+@font-face{font-family:'Noto Sans TC';src:url('/assets/fonts/noto-sans-tc.woff2') format('woff2');font-display:swap;font-weight:100 900}
+:root{
+ --ui-paper:#fbf6ea;--ui-paper-2:#f1e9d6;--ui-ink:#1d2a3a;--ui-ink-soft:#56657a;--ui-line:#2a2c4a;
+ --ui-gold:#e9b949;--ui-gold-deep:#b98422;--ui-sea:#2c7f91;--ui-brick:#c75f4a;--ui-leaf:#4d9a44;
+ --ui-shadow:0 6px 0 #2a2c4a22,0 14px 32px #1d2a3a2e;--ui-radius:18px;--ui-radius-sm:10px;
+ font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;color:var(--ui-ink);background:#bfe2e3;
+ font-synthesis:none;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{overflow:hidden}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--ui-gold);outline-offset:2px}
+.no-webgl{position:fixed;inset:auto 16px 16px auto;max-width:360px;padding:12px 14px;background:var(--ui-paper);border:2px solid var(--ui-line);border-radius:var(--ui-radius-sm);box-shadow:var(--ui-shadow);font-size:14px;z-index:50}

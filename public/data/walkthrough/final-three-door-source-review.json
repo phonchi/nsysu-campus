@@ -1,0 +1,187 @@
+{
+  "scope": "only final three source cases",
+  "sourceBuildingSHA256": {
+    "SC": "7867a5215f66f509df063b688465bc9f2380389107d13b7775a9cf9cfba39c06",
+    "EV": "fc334b9b8a997dfb17adcbf0c70b6437883032686805caaf6c13570d8c698d11"
+  },
+  "entries": [
+    {
+      "buildingId": "SC",
+      "floorId": "SC-B1",
+      "roomId": "SC-B1-region-053",
+      "neighborRoomId": "SC-B1-region-031",
+      "decision": "retain-source-enclosure",
+      "sourceId": "safety-pta_174543_8048869_04268",
+      "page": 1,
+      "crop": {
+        "x": 67.3766650390625,
+        "y": 47.6566650390625,
+        "width": 3200.3915893554686,
+        "height": 2144.549926757813
+      },
+      "imageUrl": "/data/walkthrough/SC-B1.webp",
+      "note": "原圖可見左右門口的矩形小房，門弧/門扇造成周界碎片；保留房間，不因共有長邊不足移類。",
+      "sourceDoorPixel": [
+        172,
+        1115
+      ],
+      "suggestedPortal": {
+        "basis": "schematic",
+        "width": 1.1,
+        "outwardDirection": [
+          -1,
+          0
+        ],
+        "perRoomPosition": {
+          "SC-B1-region-053": [
+            -81.6849,
+            20.6629
+          ],
+          "SC-B1-region-031": [
+            -82.1492,
+            20.6629
+          ]
+        },
+        "coordinates": "registered building-local illustrative metres"
+      },
+      "geometryWarning": "同一開洞帶須處理候選描入的門扇/平行短邊；只切最近單邊會留下假牆。保持房型與sourceoutline，不以coverage為由移房。",
+      "parallelLeafLines": [],
+      "sourceOverlaySVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1921\" height=\"1288\" viewBox=\"0 0 1921 1288\"><image href=\"/data/walkthrough/SC-B1.webp\" width=\"1921\" height=\"1288\"/><polygon points=\"172.00,1140.00 282.00,1140.00 282.00,1132.00 274.00,1131.01 275.00,1122.00 268.99,1122.00 264.99,1117.00 267.00,1114.00 274.00,1114.00 275.00,1107.00 282.00,1107.00 282.00,1089.01 278.00,1089.01 277.01,1099.00 270.01,1095.99 276.00,1095.00 276.00,1089.01 268.99,1089.01 270.01,1094.00 259.00,1099.00 256.00,1098.00 256.00,1089.01 241.00,1091.00 241.00,1098.00 237.99,1101.01 233.00,1101.01 230.00,1098.00 230.00,1091.00 172.00,1091.00 172.00,1107.00 179.00,1107.00 180.99,1109.00 176.00,1118.00 176.99,1122.99 172.00,1124.01 172.00,1129.99 176.99,1129.99 178.01,1124.01 180.99,1129.99 180.00,1132.00 172.00,1132.00\" fill=\"none\" stroke=\"red\" stroke-width=\"2\"/><polygon points=\"84.00,1175.00 86.01,1148.00 164.00,1148.00 164.00,1132.00 155.01,1131.01 159.01,1117.00 164.00,1116.01 164.00,1109.00 157.99,1109.00 157.99,1116.01 155.01,1111.00 156.00,1107.00 164.00,1107.00 164.00,962.00 132.01,962.00 130.99,965.00 125.00,965.00 123.99,962.00 88.00,962.00 88.00,1083.00 91.00,1083.00 92.99,1090.00 98.01,1090.00 99.00,1094.00 96.99,1097.01 96.00,1091.99 88.00,1091.99 88.00,1099.99 92.99,1101.01 88.00,1103.00 88.00,1137.00 86.01,1137.99 84.00,1090.00 84.99,961.00 84.00,956.01 58.99,956.01 58.99,1175.00\" fill=\"none\" stroke=\"blue\" stroke-width=\"2\"/><circle cx=\"172\" cy=\"1115\" r=\"8\" fill=\"none\" stroke=\"green\" stroke-width=\"3\"/></svg>"
+    },
+    {
+      "buildingId": "EV",
+      "floorId": "EV-4F",
+      "roomId": "EV-4F-region-009",
+      "neighborRoomId": "EV-4F-region-008",
+      "decision": "retain-source-enclosure",
+      "sourceId": "safety-pta_174548_7958856_04269",
+      "page": 2,
+      "crop": {
+        "x": 1347.53330078125,
+        "y": 47.6566650390625,
+        "width": 1937.0791198730467,
+        "height": 1048.446630859375
+      },
+      "imageUrl": "/data/walkthrough/EV-4F.webp",
+      "note": "原圖有完整L形牆及西側門弧，為衛浴旁小間；候選輪廓混入門扇線，不能把小間當裝飾或走廊刪掉。",
+      "sourceDoorPixel": [
+        739,
+        165
+      ],
+      "suggestedPortal": {
+        "basis": "schematic",
+        "width": 1.0,
+        "outwardDirection": [
+          -1,
+          0
+        ],
+        "perRoomPosition": {
+          "EV-4F-region-009": [
+            1.8514,
+            -3.8703
+          ],
+          "EV-4F-region-008": [
+            1.3786,
+            -3.8703
+          ]
+        },
+        "coordinates": "registered building-local illustrative metres"
+      },
+      "geometryWarning": "同一開洞帶須處理候選描入的門扇/平行短邊；只切最近單邊會留下假牆。保持房型與sourceoutline，不以coverage為由移房。",
+      "parallelLeafLines": [
+        {
+          "x": 1.5601,
+          "z": [
+            -4.6345,
+            -3.3977
+          ]
+        },
+        {
+          "x": 1.8514,
+          "z": [
+            -4.2342,
+            -3.2155
+          ]
+        }
+      ],
+      "sourceOverlaySVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1163\" height=\"630\" viewBox=\"0 0 1163 630\"><image href=\"/data/walkthrough/EV-4F.webp\" width=\"1163\" height=\"630\"/><polygon points=\"744.01,115.01 744.01,143.01 730.99,143.99 730.99,177.99 737.01,177.99 737.01,153.01 741.99,152.00 747.00,153.99 739.00,155.00 739.00,183.00 767.00,183.00 765.99,174.01 771.00,173.00 771.00,115.01\" fill=\"none\" stroke=\"red\" stroke-width=\"2\"/><polygon points=\"650.99,115.01 650.99,151.00 657.99,152.00 667.00,157.99 650.99,153.99 650.99,177.01 674.00,177.01 675.01,170.99 675.99,177.99 726.00,177.99 726.00,115.01\" fill=\"none\" stroke=\"blue\" stroke-width=\"2\"/><circle cx=\"739\" cy=\"165\" r=\"8\" fill=\"none\" stroke=\"green\" stroke-width=\"3\"/></svg>"
+    },
+    {
+      "buildingId": "EV",
+      "floorId": "EV-6F",
+      "roomId": "EV-6F-region-017",
+      "neighborRoomId": "EV-6F-region-016",
+      "decision": "retain-source-enclosure",
+      "sourceId": "safety-pta_174548_7958856_04269",
+      "page": 3,
+      "crop": {
+        "x": 1347.53330078125,
+        "y": 47.6566650390625,
+        "width": 1937.0791198730467,
+        "height": 1048.446630859375
+      },
+      "imageUrl": "/data/walkthrough/EV-6F.webp",
+      "note": "原圖有完整L形牆及西側門弧，為衛浴旁小間；候選輪廓混入門扇線，不能把小間當裝飾或走廊刪掉。",
+      "sourceDoorPixel": [
+        830,
+        143
+      ],
+      "suggestedPortal": {
+        "basis": "schematic",
+        "width": 1.0,
+        "outwardDirection": [
+          -1,
+          0
+        ],
+        "perRoomPosition": {
+          "EV-6F-region-017": [
+            1.9699,
+            -4.2274
+          ],
+          "EV-6F-region-016": [
+            1.4659,
+            -4.2274
+          ]
+        },
+        "coordinates": "registered building-local illustrative metres"
+      },
+      "geometryWarning": "同一開洞帶須處理候選描入的門扇/平行短邊；只切最近單邊會留下假牆。保持房型與sourceoutline，不以coverage為由移房。",
+      "parallelLeafLines": [
+        {
+          "x": 1.6594,
+          "z": [
+            -5.0806,
+            -3.7621
+          ]
+        },
+        {
+          "x": 1.9699,
+          "z": [
+            -4.6538,
+            -3.5678
+          ]
+        }
+      ],
+      "sourceOverlaySVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1163\" height=\"630\" viewBox=\"0 0 1163 630\"><image href=\"/data/walkthrough/EV-6F.webp\" width=\"1163\" height=\"630\"/><polygon points=\"834.99,93.00 834.99,120.00 822.00,121.00 822.00,155.00 827.99,155.00 827.99,129.99 830.00,129.01 836.00,131.00 830.00,132.01 830.00,160.01 858.00,160.01 857.00,152.00 852.01,143.01 855.99,145.00 858.00,150.01 862.01,150.01 862.01,93.00\" fill=\"none\" stroke=\"red\" stroke-width=\"2\"/><polygon points=\"741.99,93.00 741.99,128.00 753.00,132.01 741.99,131.00 741.99,153.99 765.01,153.99 765.01,150.01 767.00,150.01 765.99,156.00 746.00,156.00 746.00,160.99 814.01,160.99 814.01,156.00 817.01,155.00 817.01,93.00\" fill=\"none\" stroke=\"blue\" stroke-width=\"2\"/><circle cx=\"830\" cy=\"143\" r=\"8\" fill=\"none\" stroke=\"green\" stroke-width=\"3\"/></svg>"
+    }
+  ],
+  "sourceBuildingJSONModified": false,
+  "fieldVerified": false,
+  "note": "只根據原圖判斷圍合與門符號，建議共享門位置為示意。8棟來源JSON/註冊/SC1F/2F均未修改，來源hash不變。 EV來源SHA因另兩個電梯井分類更正更新；已逐物件核對原三覆核門及其鄰房全部未變，舊SHA保存在refreshHistory。",
+  "sourceSHARefreshHistory": [
+    {
+      "buildingId": "EV",
+      "oldSHA256": "fb2a40705508ddaeaf4d869329ea78621333262a8ab0953a077d6612ba4d3061",
+      "newSHA256": "fc334b9b8a997dfb17adcbf0c70b6437883032686805caaf6c13570d8c698d11",
+      "reason": "Only EV1-region030/EV6-region024 reclassified from source X/lift-slot evidence to elevator shafts. All 3 reviewed rooms and 3 neighbors unchanged.",
+      "reviewedRoomCanonicalSHA256": {
+        "EV-4F-region-008": "a4c8edc28deb6b68eafe619199a6e119e4221237baee1110c7dbe1beffd26655",
+        "SC-B1-region-053": "6c2e0faf8575facd30c81628adca9b520a3a88751160f9c24273c9ea2a6eb0c9",
+        "EV-6F-region-017": "20893a0856c111838189ce7fb0d9bbf6fe90aa5bcdd13b38563283e834e78da9",
+        "EV-6F-region-016": "172bb44c8963d6094a57669d9bc19df44e1e401e04f9d3a67e4b4b2ae0503763",
+        "SC-B1-region-031": "62b99eee3235786c91b7c84e4c64f1de82a3039b4fca9b65a114f534d93b1b73",
+        "EV-4F-region-009": "383bced9b71055f5eb3f3fa789f0dab911ff781cf218a99c611320d9a206c453"
+      }
+    }
+  ]
+}

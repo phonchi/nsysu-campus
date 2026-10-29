@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "encounters": [
+    {
+      "id": "monkey-snack",
+      "title": "猴學長的點心突襲",
+      "zone": "arcade",
+      "npc": "m3-thief",
+      "description": "猴子抓走了活動用的空點心袋，還回頭看了你一眼！",
+      "target": "npc:m3-thief",
+      "radius": 4,
+      "reward": "猴學長的點心突襲見聞",
+      "success": "點心袋平安回來了，猴學長裝作沒事。",
+      "giveUp": "猴學長帶著空袋跑遠了，下次再玩。",
+      "duration": 90
+    },
+    {
+      "id": "monkey-hat",
+      "title": "猴學長的新帽子",
+      "zone": "arcade",
+      "npc": "m1",
+      "description": "猴學長戴上志工的活動帽子，自信地走起台步。",
+      "target": "npc:m1",
+      "radius": 4,
+      "reward": "猴學長的新帽子見聞",
+      "success": "你用備用帽逗牠注意，成功拿回活動帽！",
+      "giveUp": "帽子先借猴學長走秀，志工笑著拿出備用帽。",
+      "duration": 90
+    },
+    {
+      "id": "wind-flyer",
+      "title": "海風傳單接力",
+      "zone": "tunnel-west",
+      "npc": "s1",
+      "description": "一陣風把迎新傳單吹成紙蝴蝶，小禾正忙著追。",
+      "target": "zone:tunnel-west",
+      "radius": 12,
+      "reward": "海風傳單接力見聞",
+      "success": "你攔住飛舞的傳單，大家一起歡呼。",
+      "giveUp": "傳單飛進回收箱，這場接力意外完成了。",
+      "duration": 90
+    },
+    {
+      "id": "rolling-ball",
+      "title": "社團球逃跑了",
+      "zone": "admin",
+      "npc": "jogger-po",
+      "description": "社團的軟球滾走了，阿柏想請你一起攔截。",
+      "target": "npc:jogger-po",
+      "radius": 4,
+      "reward": "社團球逃跑了見聞",
+      "success": "軟球回到阿柏手中，他請你當榮譽守門員。",
+      "giveUp": "阿柏自己追上了軟球，遠遠向你揮手。",
+      "duration": 90
+    },
+    {
+      "id": "pop-up-song",
+      "title": "路過就來一首",
+      "zone": "arcade",
+      "npc": "guitar-yun",
+      "description": "夕陽落在長廊，允哲彈起輕快旋律，想邀你加入拍手伴奏。",
+      "target": "npc:guitar-yun",
+      "radius": 4,
+      "reward": "路過就來一首見聞",
+      "success": "你跟著節拍加入，海風也像在打拍子。",
+      "giveUp": "你遠遠聽完一段旋律，繼續自己的散步。",
+      "duration": 90,
+      "when": "sunset"
+    },
+    {
+      "id": "group-photo",
+      "title": "今天的路人合照",
+      "zone": "library",
+      "npc": "intl-mia",
+      "description": "圖書館旁，Mia 想邀新朋友拍張有趣的合照，正好缺一位。",
+      "target": "npc:intl-mia",
+      "radius": 4,
+      "reward": "今天的路人合照見聞",
+      "success": "大家比出不同手勢，一起留下歡樂的合照回憶。",
+      "giveUp": "大家向你揮揮手，說下次再一起拍。",
+      "duration": 90,
+      "when": "day"
+    }
+  ]
+}

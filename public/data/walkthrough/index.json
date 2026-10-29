@@ -1,0 +1,77 @@
+{
+  "buildings": [
+    {
+      "id": "BI",
+      "url": "/data/walkthrough/BI.json",
+      "floorCount": 8,
+      "roomCandidateCount": 74,
+      "namedRoomCount": 39,
+      "reviewStatus": "candidate-review-required",
+      "detectionCoverage": "partial"
+    },
+    {
+      "id": "CH",
+      "url": "/data/walkthrough/CH.json",
+      "floorCount": 7,
+      "roomCandidateCount": 75,
+      "namedRoomCount": 41,
+      "reviewStatus": "candidate-review-required",
+      "detectionCoverage": "partial"
+    },
+    {
+      "id": "EC",
+      "url": "/data/walkthrough/EC.json",
+      "floorCount": 11,
+      "roomCandidateCount": 164,
+      "namedRoomCount": 17,
+      "reviewStatus": "candidate-review-required",
+      "detectionCoverage": "partial"
+    },
+    {
+      "id": "EN",
+      "url": "/data/walkthrough/EN.json",
+      "floorCount": 6,
+      "roomCandidateCount": 144,
+      "namedRoomCount": 30,
+      "reviewStatus": "candidate-review-required",
+      "detectionCoverage": "partial"
+    },
+    {
+      "id": "EV",
+      "url": "/data/walkthrough/EV.json",
+      "floorCount": 7,
+      "roomCandidateCount": 90,
+      "namedRoomCount": 0,
+      "reviewStatus": "candidate-review-required",
+      "detectionCoverage": "partial"
+    },
+    {
+      "id": "MS",
+      "url": "/data/walkthrough/MS.json",
+      "floorCount": 7,
+      "roomCandidateCount": 96,
+      "namedRoomCount": 23,
+      "reviewStatus": "candidate-review-required",
+      "detectionCoverage": "partial"
+    },
+    {
+      "id": "PH",
+      "url": "/data/walkthrough/PH.json",
+      "floorCount": 8,
+      "roomCandidateCount": 78,
+      "namedRoomCount": 41,
+      "reviewStatus": "candidate-review-required",
+      "detectionCoverage": "partial"
+    },
+    {
+      "id": "SC",
+      "url": "/data/walkthrough/SC.json",
+      "floorCount": 6,
+      "roomCandidateCount": 156,
+      "namedRoomCount": 74,
+      "reviewStatus": "candidate-review-required",
+      "detectionCoverage": "partial"
+    }
+  ],
+  "note": "877個房間/房間候選；廊道另計，候選未逐間升級map-checked。"
+}

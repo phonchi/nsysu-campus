@@ -1,0 +1,548 @@
+{
+  "version": 1,
+  "quests": [
+    {
+      "id": "gate-lost",
+      "title": "阿忠伯的失物招領",
+      "zone": "gate",
+      "npc": "guard-chung",
+      "description": "循著警衛的提示，在校門找到一張失物卡。",
+      "reward": "阿忠伯的失物招領紀念章",
+      "steps": [
+        {
+          "id": "errand-1",
+          "target": "npc:guard-chung",
+          "text": "向阿忠伯詢問失物：他說卡片上畫著一朵小花。",
+          "kind": "interact",
+          "radius": 4
+        },
+        {
+          "id": "errand-2",
+          "target": "zone:gate",
+          "text": "查看校門旁的失物公告，確認花朵圖案。",
+          "kind": "interact",
+          "radius": 8
+        },
+        {
+          "id": "errand-3",
+          "target": "npc:clerk-jie",
+          "text": "向小潔詢問是否有人來找花朵卡片。",
+          "kind": "interact",
+          "radius": 4
+        },
+        {
+          "id": "return",
+          "target": "npc:guard-chung",
+          "text": "回到阿忠伯身邊，決定如何妥善交還這張花朵卡片。",
+          "radius": 4,
+          "choices": [
+            {
+              "id": "a",
+              "label": "先詢問失主的特徵",
+              "result": "先詢問失主的特徵，對方笑著向你道謝。"
+            },
+            {
+              "id": "b",
+              "label": "先交給警衛保管",
+              "result": "先交給警衛保管，留下了屬於你們的校園回憶。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gate-mia",
+      "title": "Mia 的第一天",
+      "zone": "library",
+      "npc": "intl-mia",
+      "description": "到圖書館旁認識 Mia；替她走訪行政區，再把路線筆記帶回閱讀區分享。",
+      "reward": "Mia 的第一天紀念章",
+      "steps": [
+        {
+          "id": "errand-1",
+          "target": "npc:intl-mia",
+          "text": "和 Mia 確認她最想先認識圖書館。",
+          "kind": "interact",
+          "radius": 4
+        },
+        {
+          "id": "errand-2",
+          "target": "zone:admin",
+          "text": "帶 Mia 認識行政區，在手帳記下服務台方向。",
+          "kind": "interact",
+          "radius": 8
+        },
+        {
+          "id": "errand-3",
+          "target": "zone:library",
+          "text": "到達圖書館前，向 Mia 介紹這一站。",
+          "kind": "interact",
+          "radius": 8
+        },
+        {
+          "id": "return",
+          "target": "zone:library",
+          "text": "回到圖書館閱讀區，在路線筆記上選擇最想推薦給 Mia 的重點。",
+          "radius": 4,
+          "choices": [
+            {
+              "id": "a",
+              "label": "介紹海景閱讀區",
+              "result": "介紹海景閱讀區，對方笑著向你道謝。"
+            },
+            {
+              "id": "b",
+              "label": "介紹借還書服務",
+              "result": "介紹借還書服務，留下了屬於你們的校園回憶。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tunnel-leaflet",
+      "title": "迎新傳單飛走了",
+      "zone": "tunnel-west",
+      "npc": "s1",
+      "description": "找回散落在洞口的迎新傳單，幫小禾整理。",
+      "reward": "迎新傳單飛走了紀念章",
+      "steps": [
+        {
+          "id": "errand-1",
+          "target": "npc:s1",
+          "text": "向小禾領取空資料夾，準備幫忙整理迎新傳單。",
+          "kind": "interact",
+          "radius": 4
+        },
+        {
+          "id": "errand-2",
+          "target": "zone:tunnel-west",
+          "text": "在隧道洞口撿起第一疊傳單。",
+          "kind": "interact",
+          "radius": 8
+        },
+        {
+          "id": "errand-3",
+          "target": "zone:tunnel-inside",
+          "text": "到可走的洞口內側，收好第二疊傳單。",
+          "kind": "interact",
+          "radius": 8
+        },
+        {
+          "id": "return",
+          "target": "npc:s1",
+          "text": "把兩疊傳單交還小禾，選擇資料夾的整理方式。",
+          "radius": 4,
+          "choices": [
+            {
+              "id": "a",
+              "label": "依活動時間整理",
+              "result": "依活動時間整理，對方笑著向你道謝。"
+            },
+            {
+              "id": "b",
+              "label": "依社團種類整理",
+              "result": "依社團種類整理，留下了屬於你們的校園回憶。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tunnel-photo",
+      "title": "洞口攝影練習",
+      "zone": "tunnel-west",
+      "npc": "photo-ju",
+      "description": "在隧道校園側拍一張照片，再請小橘看看。",
+      "reward": "洞口攝影練習紀念章",
+      "steps": [
+        {
+          "id": "explore",
+          "target": "zone:tunnel-west",
+          "text": "在隧道校園側拍一張照片，再請小橘看看。",
+          "kind": "photo",
+          "radius": 12
+        },
+        {
+          "id": "return",
+          "target": "npc:photo-ju",
+          "text": "把剛才實際拍下的洞口照片分享給小橘，選擇構圖主題。",
+          "radius": 4,
+          "choices": [
+            {
+              "id": "a",
+              "label": "選拱圈當主角",
+              "result": "選拱圈當主角，對方笑著向你道謝。"
+            },
+            {
+              "id": "b",
+              "label": "選洞口光影當主角",
+              "result": "選洞口光影當主角，留下了屬於你們的校園回憶。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "admin-list",
+      "title": "小禾的報到清單",
+      "zone": "admin",
+      "npc": "s1",
+      "description": "到行政大樓確認服務台的位置，幫忙完成清單。",
+      "reward": "小禾的報到清單紀念章",
+      "steps": [
+        {
+          "id": "errand-1",
+          "target": "npc:s1",
+          "text": "和小禾核對報到清單：服務台、借書處與回報。",
+          "kind": "interact",
+          "radius": 4
+        },
+        {
+          "id": "errand-2",
+          "target": "npc:s2",
+          "text": "向建宇學長確認服務台位置，在清單上勾選。",
+          "kind": "interact",
+          "radius": 4
+        },
+        {
+          "id": "errand-3",
+          "target": "npc:s3",
+          "text": "向佩蓉學姊確認借還書處，再把筆記帶回服務台。",
+          "kind": "interact",
+          "radius": 4
+        },
+        {
+          "id": "return",
+          "target": "npc:s2",
+          "text": "將確認過的報到筆記交給建宇學長，選擇清單的呈現方式。",
+          "radius": 4,
+          "choices": [
+            {
+              "id": "a",
+              "label": "畫一張小地圖",
+              "result": "畫一張小地圖，對方笑著向你道謝。"
+            },
+            {
+              "id": "b",
+              "label": "寫下方向提示",
+              "result": "寫下方向提示，留下了屬於你們的校園回憶。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "admin-garden",
+      "title": "海伯的園藝幫手",
+      "zone": "admin",
+      "npc": "gardener-hai",
+      "description": "在廣場尋找園藝工具，與海伯討論佈置。",
+      "reward": "海伯的園藝幫手紀念章",
+      "steps": [
+        {
+          "id": "errand-1",
+          "target": "npc:gardener-hai",
+          "text": "向海伯領取園藝工作單，先確認不踩進植栽。",
+          "kind": "interact",
+          "radius": 4
+        },
+        {
+          "id": "errand-2",
+          "target": "zone:admin",
+          "text": "在行政廣場檢查花盆間的通行空間。",
+          "kind": "interact",
+          "radius": 8
+        },
+        {
+          "id": "errand-3",
+          "target": "zone:library",
+          "text": "查看閱讀區旁的遮蔭，記下可以借用的佈置點子。",
+          "kind": "interact",
+          "radius": 8
+        },
+        {
+          "id": "return",
+          "target": "npc:gardener-hai",
+          "text": "向海伯報告通行空間和遮蔭觀察，選擇花盆佈置提案。",
+          "radius": 4,
+          "choices": [
+            {
+              "id": "a",
+              "label": "花盆排成小隊伍",
+              "result": "花盆排成小隊伍，對方笑著向你道謝。"
+            },
+            {
+              "id": "b",
+              "label": "留一條看海的小路",
+              "result": "留一條看海的小路，留下了屬於你們的校園回憶。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "library-bookmark",
+      "title": "遺落的書籤",
+      "zone": "library",
+      "npc": "s3",
+      "description": "找到閱讀區的書籤，交給佩蓉學姊協助找失主。",
+      "reward": "遺落的書籤紀念章",
+      "steps": [
+        {
+          "id": "errand-1",
+          "target": "npc:s3",
+          "text": "佩蓉學姊說：有人把藍色書籤忘在閱讀角。",
+          "kind": "interact",
+          "radius": 4
+        },
+        {
+          "id": "errand-2",
+          "target": "zone:library",
+          "text": "在閱讀角找到藍色書籤，先收進失物信封。",
+          "kind": "interact",
+          "radius": 8
+        },
+        {
+          "id": "errand-3",
+          "target": "npc:poet-wen",
+          "text": "詢問阿文是否認得書籤上的短詩，取得失主線索。",
+          "kind": "interact",
+          "radius": 4
+        },
+        {
+          "id": "return",
+          "target": "npc:s3",
+          "text": "把書籤與短詩線索交給佩蓉學姊，選擇留給失主的訊息。",
+          "radius": 4,
+          "choices": [
+            {
+              "id": "a",
+              "label": "留下溫暖小紙條",
+              "result": "留下溫暖小紙條，對方笑著向你道謝。"
+            },
+            {
+              "id": "b",
+              "label": "夾進失物收納冊",
+              "result": "夾進失物收納冊，留下了屬於你們的校園回憶。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "library-corner",
+      "title": "靠海閱讀角",
+      "zone": "library",
+      "npc": "poet-wen",
+      "description": "拍下適合閱讀的角落，與阿文交換想法。",
+      "reward": "靠海閱讀角紀念章",
+      "steps": [
+        {
+          "id": "explore",
+          "target": "zone:library",
+          "text": "拍下適合閱讀的角落，與阿文交換想法。",
+          "kind": "photo",
+          "radius": 12
+        },
+        {
+          "id": "return",
+          "target": "npc:poet-wen",
+          "text": "向阿文分享剛拍下的閱讀角照片，說明你推薦它的理由。",
+          "radius": 4,
+          "choices": [
+            {
+              "id": "a",
+              "label": "推薦安靜的角落",
+              "result": "推薦安靜的角落，對方笑著向你道謝。"
+            },
+            {
+              "id": "b",
+              "label": "推薦可以望海的位子",
+              "result": "推薦可以望海的位子，留下了屬於你們的校園回憶。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arcade-coffee",
+      "title": "阿凱的咖啡訂單",
+      "zone": "arcade",
+      "npc": "coffee-kai",
+      "description": "向阿凱領取活動用飲品，送到助教手上。",
+      "reward": "阿凱的咖啡訂單紀念章",
+      "steps": [
+        {
+          "id": "errand-1",
+          "target": "npc:coffee-kai",
+          "text": "向阿凱核對活動訂單：一杯無糖飲品，封好杯蓋。",
+          "kind": "interact",
+          "radius": 4
+        },
+        {
+          "id": "errand-2",
+          "target": "npc:ta-lin",
+          "text": "把活動飲品交給林老師，確認收件人沒有弄錯。",
+          "kind": "interact",
+          "radius": 4
+        },
+        {
+          "id": "return",
+          "target": "npc:ta-lin",
+          "text": "飲品送達了！告訴林老師這份心意是什麼。",
+          "radius": 4,
+          "choices": [
+            {
+              "id": "a",
+              "label": "附上一句加油",
+              "result": "附上一句加油，對方笑著向你道謝。"
+            },
+            {
+              "id": "b",
+              "label": "附上一張笑臉",
+              "result": "附上一張笑臉，留下了屬於你們的校園回憶。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arcade-club",
+      "title": "社團攤位救援",
+      "zone": "arcade",
+      "npc": "club-ocean-ting",
+      "description": "在長廊找回攤位材料，幫小婷決定招牌。",
+      "reward": "社團攤位救援紀念章",
+      "steps": [
+        {
+          "id": "errand-1",
+          "target": "npc:club-ocean-ting",
+          "text": "向小婷詢問攤位缺什麼：固定帶、紙卡與招牌點子。",
+          "kind": "interact",
+          "radius": 4
+        },
+        {
+          "id": "errand-2",
+          "target": "npc:coffee-kai",
+          "text": "向阿凱借用固定帶，收好咖啡車旁的材料包。",
+          "kind": "interact",
+          "radius": 4
+        },
+        {
+          "id": "errand-3",
+          "target": "zone:arcade",
+          "text": "在長廊整理攤位紙卡，把桌面留出可通行空間。",
+          "kind": "interact",
+          "radius": 8
+        },
+        {
+          "id": "return",
+          "target": "npc:club-ocean-ting",
+          "text": "把固定帶與紙卡交給小婷，選擇你們攤位的新招牌。",
+          "radius": 4,
+          "choices": [
+            {
+              "id": "a",
+              "label": "海洋冷知識招牌",
+              "result": "海洋冷知識招牌，對方笑著向你道謝。"
+            },
+            {
+              "id": "b",
+              "label": "海浪塗鴉招牌",
+              "result": "海浪塗鴉招牌，留下了屬於你們的校園回憶。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sea-postcard",
+      "title": "小橘的夕陽明信片",
+      "zone": "seawall",
+      "npc": "photo-ju",
+      "description": "到海堤拍攝自己的明信片，再給小橘欣賞。",
+      "reward": "小橘的夕陽明信片紀念章",
+      "steps": [
+        {
+          "id": "explore",
+          "target": "zone:seawall",
+          "text": "夕陽時段，在海堤啟動拍照模式並按快門，留下自己的明信片照片。",
+          "kind": "photo",
+          "radius": 12,
+          "when": "sunset"
+        },
+        {
+          "id": "return",
+          "target": "npc:photo-ju",
+          "text": "把剛拍下的海堤照片分享給小橘，選擇明信片要寫給誰。",
+          "radius": 4,
+          "choices": [
+            {
+              "id": "a",
+              "label": "寫給未來的自己",
+              "result": "寫給未來的自己，對方笑著向你道謝。"
+            },
+            {
+              "id": "b",
+              "label": "寄給想念的朋友",
+              "result": "寄給想念的朋友，留下了屬於你們的校園回憶。"
+            }
+          ],
+          "when": "sunset"
+        }
+      ]
+    },
+    {
+      "id": "sea-stage",
+      "title": "允哲的海風小舞台",
+      "zone": "arcade",
+      "npc": "guitar-yun",
+      "description": "到長廊找允哲，替以海風為靈感的小演出邀請聽眾，再選擇曲風。",
+      "reward": "允哲的海風小舞台紀念章",
+      "steps": [
+        {
+          "id": "errand-1",
+          "target": "npc:guitar-yun",
+          "text": "和允哲確認小舞台的位置，演出不占用步道。",
+          "kind": "interact",
+          "radius": 4,
+          "when": "sunset"
+        },
+        {
+          "id": "errand-2",
+          "target": "npc:jogger-po",
+          "text": "邀請阿柏跑完步後來聽一首歌。",
+          "kind": "interact",
+          "radius": 4
+        },
+        {
+          "id": "errand-3",
+          "target": "zone:arcade",
+          "text": "到理工長廊確認聽眾站位，替大家留下通行空間。",
+          "kind": "interact",
+          "radius": 8
+        },
+        {
+          "id": "return",
+          "target": "npc:guitar-yun",
+          "text": "回到允哲身邊，告訴他聽眾已收到邀請，選擇開場曲風。",
+          "radius": 4,
+          "choices": [
+            {
+              "id": "a",
+              "label": "輕快的校園小調",
+              "result": "輕快的校園小調，對方笑著向你道謝。"
+            },
+            {
+              "id": "b",
+              "label": "慢慢的海風旋律",
+              "result": "慢慢的海風旋律，留下了屬於你們的校園回憶。"
+            }
+          ],
+          "when": "sunset"
+        }
+      ]
+    }
+  ]
+}

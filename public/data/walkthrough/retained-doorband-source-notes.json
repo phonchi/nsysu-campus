@@ -1,0 +1,131 @@
+{
+  "sourceBuildingSHA256": {
+    "CH": "48856224cd8e84715d071db93a5f7256204f7c2b862be5668740a3198ef79ba4",
+    "EV": "fc334b9b8a997dfb17adcbf0c70b6437883032686805caaf6c13570d8c698d11"
+  },
+  "entries": [
+    {
+      "buildingId": "EV",
+      "floorId": "EV-2F",
+      "roomId": "EV-2F-region-038",
+      "decision": "retain-enclosed-space",
+      "printedSourceCode": null,
+      "sourceId": "safety-pta_174548_7958856_04269",
+      "page": 1,
+      "crop": {
+        "x": 1347.53330078125,
+        "y": 47.6566650390625,
+        "width": 1937.0791198730467,
+        "height": 1048.446630859375
+      },
+      "imageUrl": "/data/walkthrough/EV-2F.webp",
+      "visibleDoorGlyphPixels": [
+        801,
+        289,
+        821,
+        311
+      ],
+      "suggestedPortal": {
+        "basis": "schematic",
+        "sourceImagePixel": [
+          819,
+          298
+        ],
+        "position": [
+          2.116,
+          1.3243
+        ],
+        "width": 1.1,
+        "outwardDirection": [
+          0,
+          1
+        ]
+      },
+      "sourceOverlaySVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1163\" height=\"630\"><image href=\"/data/walkthrough/EV-2F.webp\" width=\"1163\" height=\"630\"/><polygon points=\"801.0,189.0 801.0,291.0 808.0,293.0 802.0,294.0 802.0,311.0 820.0,311.0 820.0,307.0 814.0,299.0 815.0,297.0 817.0,299.0 868.0,298.0 868.0,189.0\" fill=\"none\" stroke=\"red\" stroke-width=\"2\"/><rect x=\"801\" y=\"289\" width=\"20\" height=\"22\" fill=\"#1a9c4344\" stroke=\"green\" stroke-width=\"2\"/></svg>",
+      "note": "原圖有真實圍合牆與門弧；該門弧/門扇被候選輪廓描入邊界。應局部處理綠框門帶的非結構線，保留房間與其他實牆，不以通行率移候選。建議門點是示意開洞，未更動source或geometry。"
+    },
+    {
+      "buildingId": "CH",
+      "floorId": "CH-3F",
+      "roomId": "CH-3F-region-013",
+      "decision": "retain-enclosed-space",
+      "printedSourceCode": "CH3020",
+      "sourceId": "oaa-02Room_COS_4",
+      "page": 1,
+      "crop": {
+        "x": 238.406005859375,
+        "y": 1617.82078125,
+        "width": 1025.1458251953125,
+        "height": 539.2735937500001
+      },
+      "imageUrl": "/data/walkthrough/CH-3F.webp",
+      "visibleDoorGlyphPixels": [
+        578,
+        215,
+        597,
+        223
+      ],
+      "suggestedPortal": {
+        "basis": "schematic",
+        "sourceImagePixel": [
+          593,
+          221
+        ],
+        "position": [
+          -12.3728,
+          2.0293
+        ],
+        "width": 1.1,
+        "outwardDirection": [
+          0,
+          1
+        ]
+      },
+      "sourceOverlaySVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1026\" height=\"541\"><image href=\"/data/walkthrough/CH-3F.webp\" width=\"1026\" height=\"541\"/><polygon points=\"579.0,126.0 578.0,220.0 581.0,221.0 581.0,216.0 585.0,215.0 597.0,222.0 642.0,221.0 642.0,126.0\" fill=\"none\" stroke=\"red\" stroke-width=\"2\"/><rect x=\"578\" y=\"215\" width=\"19\" height=\"8\" fill=\"#1a9c4344\" stroke=\"green\" stroke-width=\"2\"/></svg>",
+      "note": "原圖有真實圍合牆與門弧；該門弧/門扇被候選輪廓描入邊界。應局部處理綠框門帶的非結構線，保留房間與其他實牆，不以通行率移候選。建議門點是示意開洞，未更動source或geometry。"
+    },
+    {
+      "buildingId": "CH",
+      "floorId": "CH-4F",
+      "roomId": "CH-4F-region-016",
+      "decision": "retain-enclosed-space",
+      "printedSourceCode": null,
+      "sourceId": "oaa-02Room_COS_4",
+      "page": 1,
+      "crop": {
+        "x": 1287.392431640625,
+        "y": 1617.82078125,
+        "width": 1001.3052246093748,
+        "height": 539.2735937500001
+      },
+      "imageUrl": "/data/walkthrough/CH-4F.webp",
+      "visibleDoorGlyphPixels": [
+        710,
+        313,
+        726,
+        332
+      ],
+      "suggestedPortal": {
+        "basis": "schematic",
+        "sourceImagePixel": [
+          714,
+          313
+        ],
+        "position": [
+          -4.3766,
+          6.3275
+        ],
+        "width": 1.1,
+        "outwardDirection": [
+          0,
+          -1
+        ]
+      },
+      "sourceOverlaySVG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1002\" height=\"541\"><image href=\"/data/walkthrough/CH-4F.webp\" width=\"1002\" height=\"541\"/><polygon points=\"692.0,374.0 726.0,374.0 726.0,332.0 717.0,329.0 710.0,318.0 712.0,313.0 692.0,313.0 692.0,353.0 698.0,355.0 700.0,359.0 702.0,358.0 707.0,366.0 707.0,371.0 692.0,372.0\" fill=\"none\" stroke=\"red\" stroke-width=\"2\"/><rect x=\"710\" y=\"313\" width=\"16\" height=\"19\" fill=\"#1a9c4344\" stroke=\"green\" stroke-width=\"2\"/></svg>",
+      "note": "原圖有真實圍合牆與門弧；該門弧/門扇被候選輪廓描入邊界。應局部處理綠框門帶的非結構線，保留房間與其他實牆，不以通行率移候選。建議門點是示意開洞，未更動source或geometry。"
+    }
+  ],
+  "sourceJSONModified": false,
+  "geometryModified": false,
+  "note": "只讀源圖房形與門符號證據；留給planner/runtime最小門帶處理，不自動套用切牆或改房型。"
+}

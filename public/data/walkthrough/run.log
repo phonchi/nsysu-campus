@@ -1,0 +1,316 @@
+2026-10-19 15:33:44,708 SC-B1: 26 polygon candidates, 0 unmatched labels
+2026-10-19 15:33:44,902 SC-1F: 17 polygon candidates, 2 unmatched labels
+2026-10-19 15:33:45,073 SC-2F: 22 polygon candidates, 1 unmatched labels
+2026-10-19 15:33:45,263 SC-3F: 27 polygon candidates, 6 unmatched labels
+2026-10-19 15:33:45,463 SC-4F: 32 polygon candidates, 12 unmatched labels
+2026-10-19 15:33:45,625 SC-RF: 23 polygon candidates, 0 unmatched labels
+2026-10-19 15:33:45,628 BUILDING READY SC
+2026-10-19 15:35:36,900 SC-B1: 26 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:37,094 SC-1F: 13 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:37,263 SC-2F: 21 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:37,456 SC-3F: 27 polygon candidates, 6 unmatched labels
+2026-10-19 15:35:37,678 SC-4F: 32 polygon candidates, 12 unmatched labels
+2026-10-19 15:35:37,859 SC-RF: 23 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:37,862 BUILDING READY SC
+2026-10-19 15:35:38,054 EN-B1: 28 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:38,263 EN-1F: 46 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:38,455 EN-2F: 35 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:38,649 EN-3F: 39 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:38,867 EN-4F: 70 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:39,025 EN-RF: 12 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:39,029 BUILDING READY EN
+2026-10-19 15:35:39,131 BI-1F: 48 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:39,232 BI-2F: 59 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:39,332 BI-3F: 59 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:39,421 BI-4F: 40 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:39,507 BI-5F: 32 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:39,588 BI-6F: 23 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:39,661 BI-7F: 2 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:39,722 BI-RF: 0 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:39,726 BUILDING READY BI
+2026-10-19 15:35:39,843 PH-1F: 25 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:39,962 PH-2F: 51 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:40,063 PH-3F: 16 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:40,179 PH-4F: 22 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:40,283 PH-5F: 19 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:40,388 PH-6F: 19 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:40,491 PH-7F: 18 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:40,583 PH-RF: 6 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:40,587 BUILDING READY PH
+2026-10-19 15:35:40,666 CH-1F: 38 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:40,741 CH-2F: 51 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:40,825 CH-3F: 59 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:40,900 CH-4F: 47 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:40,977 CH-5F: 52 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:41,050 CH-6F: 55 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:41,197 CH-RF: 3 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:41,200 BUILDING READY CH
+2026-10-19 15:35:41,295 EC-B1: 17 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:41,421 EC-1F: 46 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:41,615 EC-2F: 36 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:41,826 EC-3F: 51 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:42,037 EC-4F: 62 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:42,218 EC-5F: 29 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:42,398 EC-6F: 36 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:42,581 EC-7F: 44 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:42,768 EC-8F: 39 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:42,966 EC-9F: 49 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:43,129 EC-RF: 18 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:43,138 BUILDING READY EC
+2026-10-19 15:35:43,228 MS-1F: 54 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:43,305 MS-2F: 49 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:43,386 MS-3F: 58 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:43,461 MS-4F: 63 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:43,540 MS-5F: 53 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:43,612 MS-6F: 45 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:43,772 MS-RF: 5 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:43,777 BUILDING READY MS
+2026-10-19 15:35:43,868 EV-1F: 57 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:43,951 EV-2F: 62 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:44,029 EV-3F: 56 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:44,106 EV-4F: 47 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:44,181 EV-5F: 50 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:44,250 EV-6F: 47 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:44,397 EV-RF: 6 polygon candidates, 0 unmatched labels
+2026-10-19 15:35:44,401 BUILDING READY EV
+2026-10-19 15:37:04,135 EN-B1: 42 polygon candidates, 0 unmatched labels
+2026-10-19 15:37:04,529 EN-1F: 22 polygon candidates, 0 unmatched labels
+2026-10-19 15:37:04,814 EN-2F: 27 polygon candidates, 0 unmatched labels
+2026-10-19 15:37:05,139 EN-3F: 15 polygon candidates, 0 unmatched labels
+2026-10-19 15:37:05,606 EN-4F: 57 polygon candidates, 0 unmatched labels
+2026-10-19 15:37:05,778 EN-RF: 12 polygon candidates, 0 unmatched labels
+2026-10-19 15:37:05,781 BUILDING READY EN
+2026-10-19 15:38:12,031 SC-B1: 58 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:12,266 SC-1F: 13 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:12,469 SC-2F: 21 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:19,876 SC-B1: 58 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:20,112 SC-1F: 13 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:20,316 SC-2F: 21 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:20,544 SC-3F: 32 polygon candidates, 4 unmatched labels
+2026-10-19 15:38:20,796 SC-4F: 42 polygon candidates, 8 unmatched labels
+2026-10-19 15:38:20,961 SC-RF: 30 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:20,964 BUILDING READY SC
+2026-10-19 15:38:21,146 EN-B1: 42 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:21,457 EN-1F: 22 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:21,746 EN-2F: 27 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:22,080 EN-3F: 15 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:22,553 EN-4F: 57 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:22,715 EN-RF: 12 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:22,720 BUILDING READY EN
+2026-10-19 15:38:22,992 BI-1F: 33 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:23,267 BI-2F: 31 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:23,618 BI-3F: 57 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:23,957 BI-4F: 34 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:24,283 BI-5F: 6 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:24,622 BI-6F: 54 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:24,889 BI-7F: 8 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:24,951 BI-RF: 0 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:24,955 BUILDING READY BI
+2026-10-19 15:38:25,226 PH-1F: 26 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:25,474 PH-2F: 17 polygon candidates, 1 unmatched labels
+2026-10-19 15:38:25,756 PH-3F: 22 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:26,049 PH-4F: 29 polygon candidates, 1 unmatched labels
+2026-10-19 15:38:26,325 PH-5F: 22 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:26,652 PH-6F: 23 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:26,972 PH-7F: 36 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:27,070 PH-RF: 6 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:27,074 BUILDING READY PH
+2026-10-19 15:38:27,350 CH-1F: 8 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:27,622 CH-2F: 11 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:27,930 CH-3F: 21 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:28,224 CH-4F: 19 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:28,547 CH-5F: 29 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:28,863 CH-6F: 37 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:29,012 CH-RF: 5 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:29,015 BUILDING READY CH
+2026-10-19 15:38:29,111 EC-B1: 20 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:29,313 EC-1F: 23 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:29,557 EC-2F: 20 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:29,771 EC-3F: 17 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:29,976 EC-4F: 22 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:30,216 EC-5F: 19 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:30,473 EC-6F: 15 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:30,807 EC-7F: 14 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:31,121 EC-8F: 21 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:31,386 EC-9F: 19 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:31,557 EC-RF: 18 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:31,567 BUILDING READY EC
+2026-10-19 15:38:31,810 MS-1F: 45 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:32,110 MS-2F: 29 polygon candidates, 1 unmatched labels
+2026-10-19 15:38:32,434 MS-3F: 44 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:32,737 MS-4F: 41 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:33,009 MS-5F: 20 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:33,274 MS-6F: 17 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:33,431 MS-RF: 5 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:33,436 BUILDING READY MS
+2026-10-19 15:38:33,527 EV-1F: 60 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:33,614 EV-2F: 71 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:33,700 EV-3F: 59 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:33,779 EV-4F: 47 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:33,860 EV-5F: 57 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:33,934 EV-6F: 49 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:34,086 EV-RF: 6 polygon candidates, 0 unmatched labels
+2026-10-19 15:38:34,091 BUILDING READY EV
+2026-10-19 15:39:54,924 SC-B1: 45 polygon candidates, 0 unmatched labels
+2026-10-19 15:39:55,151 SC-1F: 13 polygon candidates, 0 unmatched labels
+2026-10-19 15:39:55,355 SC-2F: 21 polygon candidates, 0 unmatched labels
+2026-10-19 15:39:55,601 SC-3F: 28 polygon candidates, 4 unmatched labels
+2026-10-19 15:39:55,874 SC-4F: 36 polygon candidates, 8 unmatched labels
+2026-10-19 15:39:56,054 SC-RF: 28 polygon candidates, 0 unmatched labels
+2026-10-19 15:39:56,058 BUILDING READY SC
+2026-10-19 15:39:56,240 EN-B1: 35 polygon candidates, 0 unmatched labels
+2026-10-19 15:39:56,543 EN-1F: 20 polygon candidates, 0 unmatched labels
+2026-10-19 15:39:56,831 EN-2F: 24 polygon candidates, 0 unmatched labels
+2026-10-19 15:39:57,169 EN-3F: 14 polygon candidates, 0 unmatched labels
+2026-10-19 15:39:57,629 EN-4F: 50 polygon candidates, 0 unmatched labels
+2026-10-19 15:39:57,785 EN-RF: 12 polygon candidates, 0 unmatched labels
+2026-10-19 15:39:57,790 BUILDING READY EN
+2026-10-19 15:39:58,062 BI-1F: 8 polygon candidates, 0 unmatched labels
+2026-10-19 15:39:58,331 BI-2F: 11 polygon candidates, 0 unmatched labels
+2026-10-19 15:39:58,687 BI-3F: 15 polygon candidates, 0 unmatched labels
+2026-10-19 15:39:59,026 BI-4F: 15 polygon candidates, 0 unmatched labels
+2026-10-19 15:39:59,351 BI-5F: 3 polygon candidates, 0 unmatched labels
+2026-10-19 15:39:59,681 BI-6F: 20 polygon candidates, 0 unmatched labels
+2026-10-19 15:39:59,943 BI-7F: 3 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:00,005 BI-RF: 0 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:00,009 BUILDING READY BI
+2026-10-19 15:40:00,268 PH-1F: 9 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:00,514 PH-2F: 14 polygon candidates, 1 unmatched labels
+2026-10-19 15:40:00,794 PH-3F: 11 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:01,091 PH-4F: 11 polygon candidates, 1 unmatched labels
+2026-10-19 15:40:01,367 PH-5F: 10 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:01,692 PH-6F: 11 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:02,006 PH-7F: 12 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:02,101 PH-RF: 3 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:02,104 BUILDING READY PH
+2026-10-19 15:40:02,351 CH-1F: 4 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:02,615 CH-2F: 9 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:02,920 CH-3F: 17 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:03,211 CH-4F: 16 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:03,530 CH-5F: 14 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:03,851 CH-6F: 14 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:04,001 CH-RF: 3 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:04,003 BUILDING READY CH
+2026-10-19 15:40:04,095 EC-B1: 10 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:04,291 EC-1F: 17 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:04,532 EC-2F: 14 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:04,743 EC-3F: 12 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:04,946 EC-4F: 22 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:05,186 EC-5F: 17 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:05,442 EC-6F: 12 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:05,780 EC-7F: 12 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:06,083 EC-8F: 15 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:06,347 EC-9F: 18 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:06,515 EC-RF: 16 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:06,524 BUILDING READY EC
+2026-10-19 15:40:06,761 MS-1F: 13 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:07,054 MS-2F: 11 polygon candidates, 1 unmatched labels
+2026-10-19 15:40:07,374 MS-3F: 23 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:07,682 MS-4F: 21 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:07,958 MS-5F: 14 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:08,217 MS-6F: 13 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:08,374 MS-RF: 4 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:08,377 BUILDING READY MS
+2026-10-19 15:40:08,468 EV-1F: 12 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:08,556 EV-2F: 17 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:08,644 EV-3F: 22 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:08,725 EV-4F: 19 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:08,809 EV-5F: 15 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:08,884 EV-6F: 15 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:09,044 EV-RF: 2 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:09,051 BUILDING READY EV
+2026-10-19 15:40:35,895 SC-B1: 45 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:36,128 SC-1F: 13 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:36,336 SC-2F: 21 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:36,580 SC-3F: 28 polygon candidates, 4 unmatched labels
+2026-10-19 15:40:36,842 SC-4F: 36 polygon candidates, 8 unmatched labels
+2026-10-19 15:40:37,020 SC-RF: 28 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:37,024 BUILDING READY SC
+2026-10-19 15:40:37,211 EN-B1: 35 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:37,525 EN-1F: 20 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:37,809 EN-2F: 24 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:38,137 EN-3F: 14 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:38,596 EN-4F: 50 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:38,754 EN-RF: 12 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:38,758 BUILDING READY EN
+2026-10-19 15:40:39,027 BI-1F: 8 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:39,296 BI-2F: 11 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:39,649 BI-3F: 15 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:39,989 BI-4F: 15 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:40,313 BI-5F: 3 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:40,649 BI-6F: 20 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:40,911 BI-7F: 3 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:40,976 BI-RF: 0 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:40,979 BUILDING READY BI
+2026-10-19 15:40:41,238 PH-1F: 9 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:41,479 PH-2F: 14 polygon candidates, 1 unmatched labels
+2026-10-19 15:40:41,762 PH-3F: 11 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:42,054 PH-4F: 11 polygon candidates, 1 unmatched labels
+2026-10-19 15:40:42,331 PH-5F: 10 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:42,661 PH-6F: 11 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:42,974 PH-7F: 12 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:43,073 PH-RF: 3 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:43,076 BUILDING READY PH
+2026-10-19 15:40:43,318 CH-1F: 4 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:43,582 CH-2F: 9 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:43,888 CH-3F: 17 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:44,184 CH-4F: 16 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:44,512 CH-5F: 14 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:44,833 CH-6F: 14 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:44,983 CH-RF: 3 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:44,985 BUILDING READY CH
+2026-10-19 15:40:45,079 EC-B1: 10 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:45,283 EC-1F: 17 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:45,527 EC-2F: 14 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:45,742 EC-3F: 12 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:45,944 EC-4F: 22 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:46,187 EC-5F: 17 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:46,444 EC-6F: 12 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:46,791 EC-7F: 12 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:47,102 EC-8F: 15 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:47,371 EC-9F: 18 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:47,552 EC-RF: 16 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:47,561 BUILDING READY EC
+2026-10-19 15:40:47,819 MS-1F: 13 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:48,138 MS-2F: 11 polygon candidates, 1 unmatched labels
+2026-10-19 15:40:48,466 MS-3F: 23 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:48,777 MS-4F: 21 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:49,057 MS-5F: 14 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:49,326 MS-6F: 13 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:49,479 MS-RF: 4 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:49,484 BUILDING READY MS
+2026-10-19 15:40:49,578 EV-1F: 12 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:49,668 EV-2F: 17 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:49,755 EV-3F: 22 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:49,839 EV-4F: 19 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:49,925 EV-5F: 15 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:50,003 EV-6F: 15 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:50,154 EV-RF: 2 polygon candidates, 0 unmatched labels
+2026-10-19 15:40:50,160 BUILDING READY EV
+2026-10-19 15:41:22,397 BI-1F: 8 polygon candidates, 0 unmatched labels
+2026-10-19 15:41:22,668 BI-2F: 11 polygon candidates, 0 unmatched labels
+2026-10-19 15:41:23,013 BI-3F: 15 polygon candidates, 0 unmatched labels
+2026-10-19 15:41:23,358 BI-4F: 15 polygon candidates, 0 unmatched labels
+2026-10-19 15:41:23,681 BI-5F: 3 polygon candidates, 0 unmatched labels
+2026-10-19 15:41:24,015 BI-6F: 20 polygon candidates, 0 unmatched labels
+2026-10-19 15:41:24,277 BI-7F: 3 polygon candidates, 0 unmatched labels
+2026-10-19 15:41:24,343 BI-RF: 0 polygon candidates, 0 unmatched labels
+2026-10-19 15:41:24,346 BUILDING READY BI
+2026-10-19 15:41:24,611 PH-1F: 9 polygon candidates, 0 unmatched labels
+2026-10-19 15:41:24,856 PH-2F: 14 polygon candidates, 1 unmatched labels
+2026-10-19 15:41:25,136 PH-3F: 11 polygon candidates, 0 unmatched labels
+2026-10-19 15:41:25,426 PH-4F: 11 polygon candidates, 1 unmatched labels
+2026-10-19 15:41:25,702 PH-5F: 10 polygon candidates, 0 unmatched labels
+2026-10-19 15:41:26,028 PH-6F: 11 polygon candidates, 0 unmatched labels
+2026-10-19 15:41:26,353 PH-7F: 12 polygon candidates, 0 unmatched labels
+2026-10-19 15:41:26,448 PH-RF: 3 polygon candidates, 0 unmatched labels
+2026-10-19 15:41:26,451 BUILDING READY PH
+2026-10-19 15:43:10,972 SC-B1: 45 polygon candidates, 0 unmatched labels
+2026-10-19 15:43:11,200 SC-1F: 13 polygon candidates, 0 unmatched labels
+2026-10-19 15:43:11,404 SC-2F: 21 polygon candidates, 0 unmatched labels
+2026-10-19 15:43:11,638 SC-3F: 28 polygon candidates, 4 unmatched labels
+2026-10-19 15:43:11,886 SC-4F: 36 polygon candidates, 8 unmatched labels
+2026-10-19 15:43:12,056 SC-RF: 28 polygon candidates, 0 unmatched labels
+2026-10-19 15:43:12,059 BUILDING READY SC
+2026-10-19 15:44:17,718 VALIDATED 8 buildings, 60 floors, 925 room/circulation polygons
+2026-10-19 15:44:31,935 VALIDATED 8 buildings, 60 floors, 925 room/circulation polygons

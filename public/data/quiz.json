@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "questions": [
+    {
+      "id": "q01", "q": "校門口的校碑標高幾公尺？",
+      "options": ["12.1 公尺", "21.2 公尺", "30.5 公尺", "19.8 公尺"], "answer": 1,
+      "row": 10, "source": "https://news.nsysu.edu.tw/p/404-1120-242198.php?Lang=zh-tw",
+      "explain": "校門口的校碑標高 21.2 公尺，迷路就找它。"
+    },
+    {
+      "id": "q02", "q": "海堤那排凹進去的雅座，大家叫它什麼？",
+      "options": ["情人座", "蘿蔔坑", "海景窗", "貝殼位"], "answer": 1,
+      "row": 11, "source": "https://news.nsysu.edu.tw/p/404-1120-242198.php?Lang=zh-tw",
+      "explain": "海邊雅座的暱稱是「蘿蔔坑」。"
+    },
+    {
+      "id": "q03", "q": "西子灣隧道旁的坑道群，戰時曾作什麼用途？",
+      "options": ["倉庫", "防空避難", "宿舍", "實驗室"], "answer": 1,
+      "row": 14, "source": "https://www.nsysu.edu.tw/p/404-1000-179130.php?Lang=zh-tw",
+      "explain": "隧道旁的坑道群戰時作防空避難用，以前不對外開放。"
+    },
+    {
+      "id": "q04", "q": "2024 年 12 月，行政大樓前的銅獅戴上了什麼？",
+      "options": ["墨鏡", "紅白毛帽", "花環", "口罩"], "answer": 1,
+      "row": 19, "source": "https://news.nsysu.edu.tw/p/404-1120-346875.php?Lang=zh-tw",
+      "explain": "2024 年 12 月耶誕期間，兩隻銅獅戴過紅白毛帽與圍巾。"
+    },
+    {
+      "id": "q05", "q": "校訓五項中，不包含下列哪一個？",
+      "options": ["博學", "審問", "力行", "篤行"], "answer": 2,
+      "row": 21, "source": "https://www.nsysu.edu.tw/p/412-1000-1497.php?Lang=zh-tw",
+      "explain": "校訓是「博學、審問、慎思、明辨、篤行」。"
+    },
+    {
+      "id": "q06", "q": "校慶是哪一天？",
+      "options": ["10 月 10 日", "11 月 12 日", "3 月 29 日", "9 月 28 日"], "answer": 1,
+      "row": 22, "source": "https://www.nsysu.edu.tw/p/412-1000-1497.php?Lang=zh-tw",
+      "explain": "校慶為國父誕辰 11 月 12 日。"
+    },
+    {
+      "id": "q07", "q": "圖書館遷入圖資大樓前，原本設在哪一棟？",
+      "options": ["逸仙館", "行政大樓", "理學院", "活動中心"], "answer": 1,
+      "row": 23, "source": "https://lis.nsysu.edu.tw/p/412-1001-1174.php?Lang=zh-tw",
+      "explain": "圖書館原在行政大樓，民國 77 年 8 月先遷至圖資大樓十樓。"
+    },
+    {
+      "id": "q08", "q": "圖書館全面開館的日期是？",
+      "options": ["1988-06-01", "1989-11-12", "1980-07-01", "1997-11-12"], "answer": 1,
+      "row": 24, "source": "https://lis.nsysu.edu.tw/p/412-1001-1174.php?Lang=zh-tw",
+      "explain": "民國 78 年 11 月 12 日（1989-11-12）全面開館，正是校慶日。"
+    },
+    {
+      "id": "q09", "q": "借還書服務與余光中特藏室都在圖資大樓幾樓？",
+      "options": ["1 樓", "2 樓", "3 樓", "10 樓"], "answer": 2,
+      "row": 25, "source": "https://lis.nsysu.edu.tw/p/412-1001-1175.php?Lang=zh-tw",
+      "explain": "借還書服務與余光中特藏室都在圖資大樓 3 樓。"
+    },
+    {
+      "id": "q10", "q": "余光中曾擔任本校哪個學院的院長？",
+      "options": ["海洋科學學院", "文學院", "管理學院", "理學院"], "answer": 1,
+      "row": 27, "source": "https://la.nsysu.edu.tw/p/412-1016-3641.php?Lang=zh-tw",
+      "explain": "余光中曾任文學院院長。"
+    },
+    {
+      "id": "q11", "q": "校園獼猴宣導「四不」中，下列哪一項不是？",
+      "options": ["不餵食", "不接觸", "不拍照", "不攻擊"], "answer": 2,
+      "row": 28, "source": "https://admin-support-oga.nsysu.edu.tw/p/406-1100-110789,r1266.php?Lang=zh-tw",
+      "explain": "四不是：不外露食物、不餵食、不接觸、不攻擊。"
+    },
+    {
+      "id": "q12", "q": "民國 69 年（1980）秋季首次招生時，成立幾系幾所？",
+      "options": ["2 系 1 所", "4 系 2 所", "6 系 3 所", "8 系 4 所"], "answer": 1,
+      "row": 29, "source": "https://www.nsysu.edu.tw/p/412-1000-1497.php?Lang=zh-tw",
+      "explain": "民國 69 年秋季開始招生，成立 4 系 2 所。"
+    },
+    {
+      "id": "q13", "q": "1997 年的識別標誌中，綠色山形代表什麼？",
+      "options": ["柴山步道", "壽山", "半屏山", "旗後山"], "answer": 1,
+      "row": 30, "source": "https://www.nsysu.edu.tw/p/412-1000-1508.php?Lang=zh-tw",
+      "explain": "綠色山形是壽山，藍色筆觸是西灣。"
+    },
+    {
+      "id": "q14", "q": "壽山動物園於哪一年在西子灣創立？",
+      "options": ["1968", "1978", "1986", "1990"], "answer": 1,
+      "row": 32, "source": "https://zoo.kcg.gov.tw/en/intro/",
+      "explain": "壽山動物園 1978 年於西子灣創立，1986 年遷至現址。"
+    }
+  ]
+}

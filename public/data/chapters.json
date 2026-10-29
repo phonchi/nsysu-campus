@@ -1,0 +1,268 @@
+{
+  "version": 1,
+  "guide": {"id": "guide", "name": "阿灣", "model": "guide"},
+  "chapters": [
+    {
+      "id": "c1-gate",
+      "title": "校門報到",
+      "zone": "gate",
+      "objective": "到校碑前找阿灣報到",
+      "start": {"when": []},
+      "steps": [
+        {"id": "arrow", "when": [],
+         "then": [{"showArrow": "npc:guide"}]},
+        {"id": "talk", "when": [{"near": "npc:guide", "r": 3}, {"press": "E"}],
+         "then": [{"dialogue": "c1-talk"}, {"setFlag": "c1.talked"}]},
+        {"id": "freshman", "when": [{"near": "npc:s1", "r": 2.5}, {"press": "E"}],
+         "then": [{"dialogue": "c1-s1"}]},
+        {"id": "done", "when": [{"flag": "c1.talked"}],
+         "then": [{"dialogue": "c1-done"}, {"completeChapter": "c1-gate"},
+                  {"unlockSideQuest": "story-sunset"}, {"moveNpc": ["guide", "tunnel-west"]}]}
+      ],
+      "sources": [
+        "https://news.nsysu.edu.tw/p/404-1120-242198.php?Lang=zh-tw",
+        "https://www.nsysu.edu.tw/p/404-1000-10337.php?Lang=zh-tw"
+      ]
+    },
+    {
+      "id": "c2-tunnel",
+      "title": "西子灣隧道",
+      "zone": "tunnel-west",
+      "objective": "走到隧道校園側洞口",
+      "start": {"when": [{"chapterDone": "c1-gate"}]},
+      "steps": [
+        {"id": "arrow", "when": [],
+         "then": [{"showArrow": "zone:tunnel-west"}]},
+        {"id": "arrive", "when": [{"inZone": "tunnel-west"}],
+         "then": [{"dialogue": "c2-arrive"}, {"setObjective": "走進洞口看看"},
+                  {"showArrow": "zone:tunnel-inside"}, {"setFlag": "c2.briefed"}]},
+        {"id": "inside", "when": [{"flag": "c2.briefed"}, {"inZone": "tunnel-inside"}],
+         "then": [{"playSound": "echo"}, {"dialogue": "c2-echo"}, {"setFlag": "c2.entered"}]},
+        {"id": "done", "when": [{"flag": "c2.entered"}],
+         "then": [{"dialogue": "c2-done"}, {"completeChapter": "c2-tunnel"},
+                  {"unlockSideQuest": "story-tunnel"}, {"moveNpc": ["guide", "admin"]}]}
+      ],
+      "sources": [
+        "https://www.nsysu.edu.tw/p/404-1000-179130.php?Lang=zh-tw"
+      ]
+    },
+    {
+      "id": "c3-admin",
+      "title": "行政大樓辦手續",
+      "zone": "admin",
+      "objective": "到行政大樓辦手續",
+      "start": {"when": [{"chapterDone": "c2-tunnel"}]},
+      "steps": [
+        {"id": "arrow", "when": [],
+         "then": [{"showArrow": "npc:guide"}]},
+        {"id": "talk", "when": [{"near": "npc:guide", "r": 3}, {"press": "E"}],
+         "then": [{"dialogue": "c3-talk"}, {"setObjective": "找服務台學長領學生證"},
+                  {"showArrow": "npc:s2"}, {"setFlag": "c3.talked"}]},
+        {"id": "desk", "when": [{"flag": "c3.talked"}, {"near": "npc:s2", "r": 2.5}, {"press": "E"}],
+         "then": [{"playSound": "chime"}, {"dialogue": "c3-desk"}, {"setFlag": "c3.card"}]},
+        {"id": "done", "when": [{"flag": "c3.card"}],
+         "then": [{"dialogue": "c3-done"}, {"completeChapter": "c3-admin"},
+                  {"unlockSideQuest": "story-lions"}, {"unlockSideQuest": "story-zoo"},
+                  {"moveNpc": ["guide", "library"]}]}
+      ],
+      "sources": [
+        "https://news.nsysu.edu.tw/p/404-1120-346875.php?Lang=zh-tw",
+        "https://www.nsysu.edu.tw/p/412-1000-1497.php?Lang=zh-tw"
+      ]
+    },
+    {
+      "id": "c4-library",
+      "title": "圖資大樓借書",
+      "zone": "library",
+      "objective": "到圖資大樓借第一本書",
+      "start": {"when": [{"chapterDone": "c3-admin"}]},
+      "steps": [
+        {"id": "arrow", "when": [],
+         "then": [{"showArrow": "npc:guide"}]},
+        {"id": "talk", "when": [{"near": "npc:guide", "r": 3}, {"press": "E"}],
+         "then": [{"dialogue": "c4-talk"}, {"setObjective": "找服務台借一本書"},
+                  {"showArrow": "npc:s3"}, {"setFlag": "c4.talked"}]},
+        {"id": "desk", "when": [{"flag": "c4.talked"}, {"near": "npc:s3", "r": 2.5}, {"press": "E"}],
+         "then": [{"playSound": "chime"}, {"dialogue": "c4-desk"}, {"setFlag": "c4.book"}]},
+        {"id": "done", "when": [{"flag": "c4.book"}],
+         "then": [{"dialogue": "c4-done"}, {"completeChapter": "c4-library"},
+                  {"unlockSideQuest": "story-library"}, {"unlockSideQuest": "story-bodhi"},
+                  {"moveNpc": ["guide", "arcade"]}]}
+      ],
+      "sources": [
+        "https://lis.nsysu.edu.tw/p/412-1001-1174.php?Lang=zh-tw",
+        "https://lis.nsysu.edu.tw/p/412-1001-1175.php?Lang=zh-tw",
+        "https://la.nsysu.edu.tw/p/412-1016-3641.php?Lang=zh-tw",
+        "https://www.nsysu.edu.tw/p/412-1000-1497.php?Lang=zh-tw"
+      ]
+    },
+    {
+      "id": "c5-arcade",
+      "title": "理工長廊找教室",
+      "zone": "arcade",
+      "objective": "到理工長廊找SC2001",
+      "start": {"when": [{"chapterDone": "c4-library"}]},
+      "steps": [
+        {"id": "arrow", "when": [],
+         "then": [{"showArrow": "zone:arcade"}]},
+        {"id": "arrive", "when": [{"inZone": "arcade"}],
+         "then": [{"dialogue": "c5-arrive"}, {"setObjective": "走進理學院找SC2001"},
+                  {"setFlag": "c5.briefed"}]},
+        {"id": "monkey", "when": [{"near": "npc:m1", "r": 4}],
+         "then": [{"dialogue": "c5-monkey"}, {"setFlag": "c5.monkey"}]},
+        {"id": "room", "when": [{"flag": "c5.briefed"}, {"atDestination": "SC2001"}],
+         "then": [{"playSound": "chime"}, {"dialogue": "c5-room"}, {"completeChapter": "c5-arcade"},
+                  {"unlockSideQuest": "story-monkeys"}, {"moveNpc": ["guide", "seawall"]}]}
+      ],
+      "sources": [
+        "https://admin-support-oga.nsysu.edu.tw/p/406-1100-110789,r1266.php?Lang=zh-tw",
+        "https://www.nsysu.edu.tw/p/412-1000-1497.php?Lang=zh-tw"
+      ]
+    },
+    {
+      "id": "c6-sunset",
+      "title": "西子灣看夕陽",
+      "zone": "seawall",
+      "objective": "回海堤蘿蔔坑看夕陽",
+      "start": {"when": [{"chapterDone": "c5-arcade"}]},
+      "steps": [
+        {"id": "arrow", "when": [],
+         "then": [{"showArrow": "zone:seawall"}]},
+        {"id": "arrive", "when": [{"inZone": "seawall"}],
+         "then": [{"setSky": "sunset"}, {"dialogue": "c6-arrive"},
+                  {"setObjective": "坐到阿灣旁邊"}, {"showArrow": "npc:guide"}, {"setFlag": "c6.arrived"}]},
+        {"id": "night", "when": [{"flag": "c6.arrived"}, {"timeOfDay": "night"}],
+         "then": [{"dialogue": "c6-night"}]},
+        {"id": "sit", "when": [{"flag": "c6.arrived"}, {"near": "npc:guide", "r": 2.5}, {"press": "E"}],
+         "then": [{"dialogue": "c6-end"}, {"completeChapter": "c6-sunset"},
+                  {"unlockSideQuest": "story-gallery"}]}
+      ],
+      "sources": [
+        "https://news.nsysu.edu.tw/p/404-1120-242198.php?Lang=zh-tw",
+        "https://www.nsysu.edu.tw/p/412-1000-1508.php?Lang=zh-tw"
+      ]
+    }
+  ],
+  "dialogues": {
+    "c1-talk": [
+      {"who": "guide", "text": "新生？看你東張西望就知道了。歡迎來到中山！"},
+      {"who": "guide", "text": "我是阿灣，海科系大三，今天負責帶你。跟我走就對了。"},
+      {"who": "player", "text": "……報到是在這裡嗎？"},
+      {"who": "guide", "text": "不是，報到在行政大樓。不過先繞一段路，認識一下學校。"},
+      {"who": "guide", "text": "先抬頭。這根校碑標高 21.2 公尺，迷路就找它。"},
+      {"who": "guide", "text": "後面那片是海。以後心情不好，來海堤坐一下就好。"}
+    ],
+    "c1-s1": [
+      {"who": "s1", "text": "你也是新生？我在這裡轉三圈了，報到到底在哪？"},
+      {"who": "player", "text": "聽說在行政大樓。"},
+      {"who": "s1", "text": "太好了，那我跟著你們的方向走，假裝很熟。"}
+    ],
+    "c1-done": [
+      {"who": "guide", "text": "走吧，第一站先帶你去看隧道。"},
+      {"who": "guide", "text": "跟緊喔，我走路很快，這個我考過，不要問。"},
+      {"who": "guide", "text": "對了，校門旁可以租腳踏車，按 E 租，之後 B 上下車，比較快。"},
+      {"who": "narrator", "text": "【校史小知識】1979 年籌備處設在高雄西子灣，翌年 7 月正式建校。"}
+    ],
+    "c2-arrive": [
+      {"who": "guide", "text": "到了，這是西子灣隧道，穿過去就是校外了。"},
+      {"who": "guide", "text": "它是日治時期開挖的，快一百歲了，比學校老很多。"},
+      {"who": "player", "text": "我們要走到另一頭嗎？"},
+      {"who": "guide", "text": "今天不用。走進洞口幾步，感受一下就好。"},
+      {"who": "guide", "text": "不要喊太大聲，回音會出賣你。"}
+    ],
+    "c2-echo": [
+      {"who": "player", "text": "喂——"},
+      {"who": "guide", "text": "你看，我就說吧。整條隧道都知道你來了。"},
+      {"who": "guide", "text": "岩壁裡其實還藏著一群坑道，以前都不開放。"},
+      {"who": "guide", "text": "好，出來吧，手續還沒辦呢。"}
+    ],
+    "c2-done": [
+      {"who": "guide", "text": "下一站行政大樓，跟我來。"},
+      {"who": "guide", "text": "路上看到猴子不要理牠，牠比你熟這裡。"},
+      {"who": "narrator", "text": "【校史小知識】隧道 1927 年開挖、1928 年完工，旁邊坑道戰時曾當防空洞。"}
+    ],
+    "c3-talk": [
+      {"who": "guide", "text": "行政大樓到了。報到、辦證、各種手續都在這裡。"},
+      {"who": "guide", "text": "門口這兩隻銅獅，是學校最資深的門神。"},
+      {"who": "guide", "text": "聖誕節的時候，牠們還戴過紅白毛帽，超可愛。"},
+      {"who": "player", "text": "牠們看起來有點兇。"},
+      {"who": "guide", "text": "摸摸頭就不兇了。好，去服務台找學長領學生證。"}
+    ],
+    "c3-desk": [
+      {"who": "s2", "text": "新生嗎？名字我看一下……有了，學生證拿好。"},
+      {"who": "s2", "text": "第一件事：拍照存起來。第二件事：不要弄丟。"},
+      {"who": "player", "text": "謝謝學長！"},
+      {"who": "s2", "text": "不客氣，歡迎加入。下次見面可能是在期中考。"}
+    ],
+    "c3-done": [
+      {"who": "guide", "text": "學生證到手，你正式是中山人了。"},
+      {"who": "guide", "text": "下一站圖資大樓，中庭另一頭那棟高樓。"},
+      {"who": "narrator", "text": "【校史小知識】校訓「博學、審問、慎思、明辨、篤行」，校慶是 11 月 12 日。"}
+    ],
+    "c4-talk": [
+      {"who": "guide", "text": "圖資大樓到了。我私下叫它「皇冠」，看屋頂就懂。"},
+      {"who": "guide", "text": "圖書館以前擠在行政大樓裡，後來才搬來這裡。"},
+      {"who": "guide", "text": "借還書在三樓，余光中特藏室也在三樓。"},
+      {"who": "player", "text": "余光中？課本裡那位詩人？"},
+      {"who": "guide", "text": "對，他當過我們文學院院長。去借第一本書吧。"}
+    ],
+    "c4-desk": [
+      {"who": "s3", "text": "借書嗎？學生證給我……好，這本給你。"},
+      {"who": "s3", "text": "到期前記得還，別讓它在宿舍積灰塵。"},
+      {"who": "player", "text": "第一本書，感覺好隆重。"}
+    ],
+    "c4-done": [
+      {"who": "guide", "text": "很好，有書就有藉口去海邊坐。"},
+      {"who": "guide", "text": "下一站理工長廊，你的第一堂課在那邊。"},
+      {"who": "narrator", "text": "【校史小知識】圖書館在 1989 年 11 月 12 日全面開館，剛好是校慶日。"}
+    ],
+    "c5-arrive": [
+      {"who": "guide", "text": "這是理工長廊，理學院、工學院都靠它串起來。"},
+      {"who": "guide", "text": "你的第一堂課在 SC2001，理學院二樓。"},
+      {"who": "guide", "text": "這次我不帶路，跟著地上的指引自己走。"},
+      {"who": "player", "text": "好，我試試看。"},
+      {"who": "guide", "text": "對了，食物收好。這附近常有猴子出沒。"}
+    ],
+    "c5-monkey": [
+      {"who": "m1", "text": "（獼猴盯著你的背包，一動也不動。）"},
+      {"who": "guide", "text": "別跟牠對看，也別餵牠。慢慢走開就好。"},
+      {"who": "player", "text": "牠好像在看我的麵包……"},
+      {"who": "guide", "text": "所以麵包要收進包包，塑膠袋也別拎在手上。"},
+      {"who": "guide", "text": "不外露食物、不餵食、不接觸、不攻擊，記住了。"}
+    ],
+    "c5-room": [
+      {"who": "player", "text": "SC2001，找到了！"},
+      {"who": "guide", "text": "（訊息）找到了吧？找得到教室，就找得到路。"},
+      {"who": "guide", "text": "（訊息）最後一站，回海堤找我。太陽快下山了。"},
+      {"who": "narrator", "text": "【校史小知識】1980 年秋天第一次招生，當時只有 4 系 2 所。"}
+    ],
+    "c6-arrive": [
+      {"who": "guide", "text": "回來啦。今天走的路，以後四年會走很多次。"},
+      {"who": "guide", "text": "海堤這排凹進去的位子，大家叫它「蘿蔔坑」。"},
+      {"who": "player", "text": "好漂亮……"},
+      {"who": "guide", "text": "過來坐吧，我幫你留了位子。"}
+    ],
+    "c6-night": [
+      {"who": "guide", "text": "夜景也不錯，但別待太晚。"},
+      {"who": "guide", "text": "猴子睡了，警衛可沒睡。"},
+      {"who": "player", "text": "收到，看完就回宿舍。"}
+    ],
+    "c6-end": [
+      {"who": "guide", "text": "背後是山，前面是海。中山就在中間。"},
+      {"who": "guide", "text": "好，導覽結束。明天開始，路你自己走。"},
+      {"who": "player", "text": "謝謝學姊！"},
+      {"who": "guide", "text": "有空回來找我，我常在這裡發呆。"},
+      {"who": "narrator", "text": "【校史小知識】1997 年的識別標誌裡，綠色山形是壽山，藍色筆觸是西灣。"}
+    ]
+  },
+  "sideQuests": [
+    {"id": "story-sunset", "fromCampusInfo": "sunset", "title": "海堤的兩人座", "hint": "校碑旁的海堤，找一個凹進去的位子。"},
+    {"id": "story-tunnel", "fromCampusInfo": "tunnel", "title": "洞口的回音", "hint": "回到隧道校園側的洞口看看拱圈。"},
+    {"id": "story-lions", "fromCampusInfo": "lions", "title": "摸獅頭", "hint": "行政大樓正門階梯前，有兩隻在等你。"},
+    {"id": "story-zoo", "fromCampusInfo": "zoo", "title": "動物園搬走以後", "hint": "行政大樓附近，以前住過另一群鄰居。"},
+    {"id": "story-bodhi", "fromCampusInfo": "bodhi", "title": "菩提樹下的投票", "hint": "去中庭的老菩提樹那邊走走。"},
+    {"id": "story-library", "fromCampusInfo": "library", "title": "高樓對海", "hint": "圖資大樓前，抬頭看看那頂皇冠。"},
+    {"id": "story-monkeys", "fromCampusInfo": "monkeys", "title": "猴學長的規矩", "hint": "長廊東側常有猴學長，記得食物收好。"},
+    {"id": "story-gallery", "fromCampusInfo": "gallery", "title": "海邊的老房子", "hint": "還有一顆在海邊很遠的地方，去過的人不多。"}
+  ]
+}
