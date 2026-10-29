@@ -6,4 +6,4 @@
 
 公開範圍：src、public、tests、tools、docs、套件與建置設定。排除 data 原始來源、artifacts、reviews、handoffs、node_modules、dist、第三方下載包與本機設定。
 
-公開版 build 不執行需原始官方 PDF/平面圖的內部資料稽核；保留公開資料／導航 hash／章節／型別驗證。詳見公開快照根目錄 PUBLICATION.md。沒有啟用部署或付費服務。
+公開版 build 不執行需原始官方 PDF/平面圖的內部資料稽核；保留公開資料／導航 hash／章節／型別驗證。詳見公開快照根目錄 PUBLICATION.md。已啟用 GitHub Actions → GitHub Pages 自動部署；網站 https://phonchi.github.io/nsysu-campus/ ，工作流程位於公開快照 `.github/workflows/pages.yml`。公開版使用免費 Pages／Actions，沒有啟用付費設定。後續同步原始碼時保留公開庫的 workflow、PUBLICATION.md 與公開版 package scripts。
