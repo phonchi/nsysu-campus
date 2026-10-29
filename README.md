@@ -1,3 +1,5 @@
+網站：[山海之間 · 中山校園導覽](https://phonchi.github.io/nsysu-campus/)
+
 > 公開快照的內容範圍、建置與驗證說明請見 [PUBLICATION.md](PUBLICATION.md)。完整本機驗證輸出未上傳。
 
 # 山海之間 · 中山校園導覽

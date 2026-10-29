@@ -16,4 +16,4 @@ v6 本機完整測試138項通過；最後觀測資料空值處理另有15項相
 
 上述測量使用 Chromium SwiftShader，不是所有GPU／瀏覽器認證。公開版推送前另做乾淨快照建置檢查。
 
-此推送沒有啟用GitHub Pages、自動部署或付費服務。素材及圖資來源見 `docs/licenses.md` 與各資產 README。
+GitHub Pages： https://phonchi.github.io/nsysu-campus/ 。main 更新後由 GitHub Actions 自動驗證、建置並部署 dist；只使用公開儲存庫的免費功能，不啟用付費服務。素材及圖資來源見 `docs/licenses.md` 與各資產 README。
