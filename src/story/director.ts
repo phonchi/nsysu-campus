@@ -1,4 +1,5 @@
 import * as T from 'three';
+import { badgeGlyph, beaconFade } from './guide-goal';
 import { StoryEngine, loadProgress, type StoryWorld } from './engine';
 import { validateStory, type Chapter, type StoryData } from './schema';
 import { StoryUi } from './ui';
@@ -36,11 +37,12 @@ export class StoryDirector {
   private routeAt = 0;
   private routeLine = new T.Group();
   private beacon: T.Mesh;
-  private marker: T.Mesh;
   private pointer: T.Mesh;
   private zone?: string;
   private cardOpen = false;
   private tmp = new T.Vector3();
+  /** A tracked side quest takes the guidance over; `point` is undefined while its person is away. */
+  private override?: { target: string; point: T.Vector3 | undefined };
 
   constructor(private d: DirectorDeps, data: StoryData) {
     const errors = validateStory(data);
@@ -72,8 +74,6 @@ export class StoryDirector {
     // Gold light pillar over a near target; flat arrow over the player's head pointing along the route.
     this.beacon = new T.Mesh(new T.CylinderGeometry(.6, .6, 7, 16, 1, true), new T.MeshBasicMaterial({ color: '#e9b949', transparent: true, opacity: .35, blending: T.AdditiveBlending, depthWrite: false, side: T.DoubleSide }));
     this.beacon.visible = false; d.scene.add(this.beacon);
-    this.marker = new T.Mesh(new T.OctahedronGeometry(.22), new T.MeshBasicMaterial({ color: '#e9b949' }));
-    this.marker.scale.y = 1.5; this.marker.visible = false; d.scene.add(this.marker);
     const shape = new T.Shape([new T.Vector2(0, .55), new T.Vector2(.38, 0), new T.Vector2(.14, 0), new T.Vector2(.14, -.4), new T.Vector2(-.14, -.4), new T.Vector2(-.14, 0), new T.Vector2(-.38, 0)]);
     const g = new T.ExtrudeGeometry(shape, { depth: .06, bevelEnabled: false }); g.rotateX(-Math.PI / 2 + .75); // tilted up toward the camera
     this.pointer = new T.Mesh(g, new T.MeshBasicMaterial({ color: '#e9b949', side: T.DoubleSide, depthTest: false }));
@@ -167,6 +167,11 @@ export class StoryDirector {
     return this.engine.press();
   }
 
+  setGuideOverride(next?: { target: string; point: T.Vector3 | undefined }) {
+    if (next?.target !== this.override?.target) this.routeAt = 0;
+    this.override = next;
+  }
+
   /** Current guidance goal in world space (for auto-walking the quest), if any. */
   goal() { const t = this.effectiveTarget(); return t ? this.targetPoint(t) : undefined; }
   get objectiveText() { return this.ui.objectiveText; }
@@ -195,23 +200,25 @@ export class StoryDirector {
     if (inside && inside !== this.zone) { const z = this.d.zones.zones[inside]; this.ui.banner(z.label, z.sub); this.d.cue('chime'); }
     this.zone = inside;
     // Guidance.
-    const target = this.effectiveTarget(), goal = target ? this.targetPoint(target) : undefined, p = this.d.player();
-    if (!goal) { this.pointer.visible = this.beacon.visible = this.marker.visible = false; this.ui.edge(null); this.ui.pointer(null); this.ui.distance(undefined); if (this.route.length) { this.route = []; this.drawRoute([]); } return; }
+    const o = this.override, target = o ? o.target : this.effectiveTarget(), goal = o ? o.point : target ? this.targetPoint(target) : undefined, p = this.d.player();
+    if (!goal) { this.pointer.visible = this.beacon.visible = false; this.ui.edge(null); this.ui.pointer(null); this.ui.badge(null); this.ui.distance(o ? '追蹤支線中' : undefined); if (this.route.length) { this.route = []; this.drawRoute([]); } return; }
     if (time - this.routeAt > 1200) {
       this.routeAt = time;
       const path = this.d.navPath(p, goal);
       this.route = path; this.drawRoute(path);
     }
     const dist = flat(goal, p);
-    this.ui.distance(dist);
+    this.ui.distance(o ? '追蹤支線中' : dist);
     // Beacon at the goal when close; pointer over the head aims at the next route corner.
-    // Pillar marks places; a person gets a small diamond over the head instead (the pillar would hide them).
-    const person = target!.startsWith('npc:');
-    this.beacon.visible = !person && dist < 40;
+    // Pillar marks places and fades as the camera or player closes in; a person gets a named badge instead (the pillar would hide them).
+    const person = target!.startsWith('npc:'), fade = beaconFade(Math.min(dist, flat(goal, this.d.camera.position)));
+    this.beacon.visible = !person && dist < 40 && fade > .01;
     this.beacon.position.set(goal.x, goal.y + 3.5, goal.z);
-    this.marker.visible = person && dist < 60;
-    this.marker.position.set(goal.x, goal.y + 2.35 + Math.sin(time * .005) * .08, goal.z); this.marker.rotation.y = time * .002;
-    (this.beacon.material as T.MeshBasicMaterial).opacity = .25 + .1 * Math.sin(time * .004);
+    const glyph = person && dist < 60 && !this.blocking ? badgeGlyph(this.d.npcs.displayName(target!.slice(4)) ?? '') : '';
+    this.tmp.set(goal.x, goal.y + 2.35, goal.z).project(this.d.camera);
+    const badgeShown = !!glyph && this.tmp.z < 1 && Math.abs(this.tmp.x) < 1 && Math.abs(this.tmp.y) < 1;
+    this.ui.badge(badgeShown ? { x: (this.tmp.x + 1) / 2 * innerWidth, y: (1 - this.tmp.y) / 2 * innerHeight, text: glyph, distance: dist } : null);
+    (this.beacon.material as T.MeshBasicMaterial).opacity = (.25 + .1 * Math.sin(time * .004)) * fade;
     let next = goal;
     for (const q of this.route) if (flat(q, p) > 3) { next = q; break; }
     // Screen-space pointer over the head, aimed at the next route corner as seen on screen (never edge-on).
@@ -220,7 +227,7 @@ export class StoryDirector {
     const ahead = this.tmp.set(next.x, p.y + 2.3, next.z).project(this.d.camera);
     let ang = Math.atan2(-(ahead.y - hy), ahead.x - hx);
     if (ahead.z > 1) ang += Math.PI; // behind the camera
-    this.ui.pointer(dist > 4 && hz < 1 ? { x: (hx + 1) / 2 * innerWidth, y: (1 - hy) / 2 * innerHeight - Math.sin(time * .004) * 3, angle: ang } : null);
+    this.ui.pointer(!badgeShown && dist > 4 && hz < 1 ? { x: (hx + 1) / 2 * innerWidth, y: (1 - hy) / 2 * innerHeight - Math.sin(time * .004) * 3, angle: ang } : null);
     // Screen-edge indicator when the goal is off screen.
     this.tmp.copy(goal).project(this.d.camera);
     const off = Math.abs(this.tmp.x) > .95 || Math.abs(this.tmp.y) > .95 || this.tmp.z > 1;
@@ -230,9 +237,10 @@ export class StoryDirector {
 
   dispose() {
     this.ui.dispose(); this.drawRoute([]);
-    for (const m of [this.beacon, this.pointer, this.marker]) { m.geometry.dispose(); (m.material as T.Material).dispose(); m.removeFromParent(); }
+    for (const m of [this.beacon, this.pointer]) { m.geometry.dispose(); (m.material as T.Material).dispose(); m.removeFromParent(); }
     this.routeLine.removeFromParent();
   }
+  get beaconState() { return { visible: this.beacon.visible, opacity: +(this.beacon.material as T.MeshBasicMaterial).opacity.toFixed(3) }; }
   get routeDiagnostics() {
     return this.routeLine.children.filter((o): o is T.Line => o instanceof T.Line).map(line => {
       const p = line.geometry.attributes.position;

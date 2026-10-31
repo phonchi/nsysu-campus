@@ -1,6 +1,8 @@
 /** v4 progress beside the story save (spec-v4 §9.1, §15.3): dialogue flags, items, stamps, achievements,
  * counters, who the player talked to, mini-game results and the player's look. Story progress stays in
  * `nsysu-story-v3`; this store never writes story flags. */
+import { readSave, removeSave, writeSave } from './save-guard';
+
 export type Body = 'm' | 'f';
 export interface PlayerLook { body: Body; palette: number; nickname: string }
 export interface GameResult { best: number; wins: number; plays: number }
@@ -43,12 +45,12 @@ export function normalizeCampus(raw: unknown): CampusProgress {
 }
 
 export function loadCampus(): CampusProgress {
-  try { const raw = localStorage.getItem(KEY); return normalizeCampus(raw ? JSON.parse(raw) : {}); } catch { return normalizeCampus({}); }
+  try { return normalizeCampus(readSave(localStorage, KEY).value ?? {}); } catch { return normalizeCampus({}); }
 }
-export function saveCampus(p: CampusProgress) { try { localStorage.setItem(KEY, JSON.stringify(p)); } catch { if (typeof window !== 'undefined') window.dispatchEvent(new Event('campus-storage-error')); } }
+export function saveCampus(p: CampusProgress) { try { writeSave(localStorage, KEY, p); } catch { if (typeof window !== 'undefined') window.dispatchEvent(new Event('campus-storage-error')); } }
 export function clearCampus(keepPlayer = true) {
   const player = keepPlayer ? loadCampus().player : undefined;
-  try { localStorage.removeItem(KEY); } catch { /* ignore */ }
+  try { removeSave(localStorage, KEY); } catch { /* ignore */ }
   if (player) { const fresh = normalizeCampus({}); fresh.player = player; saveCampus(fresh); }
 }
 

@@ -65,6 +65,11 @@
 .q-actions button.primary{background:var(--ui-gold)}
 .q-confetti{position:absolute;left:50%;top:60px;width:8px;height:12px;border-radius:2px;pointer-events:none;animation:q-fall var(--d) ease-out both}
 @keyframes q-fall{from{transform:translate(0,0) rotate(0)}to{transform:translate(var(--x),140px) rotate(540deg);opacity:0}}
+.q-badge{position:absolute;left:0;top:0;display:grid;justify-items:center;gap:2px;pointer-events:none;filter:drop-shadow(0 2px 2px #1d2a3a55)}
+.q-badge[hidden]{display:none}
+.q-badge b{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--ui-gold);border:2px solid var(--ui-line);color:#2a2c4a;font-size:18px;font-weight:700;line-height:1}
+.q-badge small{padding:0 6px;border-radius:8px;background:#fffdf5e6;color:#2a2c4a;font-size:12px;line-height:18px}
+.walkthrough.is-overview .q-badge{display:none}
 .q-pointer{position:absolute;left:0;top:0;width:40px;height:40px;pointer-events:none;filter:drop-shadow(0 2px 2px #1d2a3a55)}
 .q-pointer[hidden]{display:none}
 .walkthrough.is-overview .q-pointer{display:none}

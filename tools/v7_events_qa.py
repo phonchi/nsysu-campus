@@ -5,7 +5,7 @@ Uses an isolated browser context with completed-main-story fixture, not the user
 import asyncio,json,time,traceback,os
 from pathlib import Path
 from playwright.async_api import async_playwright
-ROOT=Path(__file__).resolve().parents[1]; OUT=ROOT/'artifacts/v7/events/events-browser';OUT=OUT/(os.environ.get('EVENTS_OUT','encounters-final') if os.environ.get('EVENTS_ONLY') else 'full');OUT.mkdir(parents=True,exist_ok=True)
+ROOT=Path(__file__).resolve().parents[1]; ARTIFACTS=Path(os.environ.get('V7_ARTIFACTS',ROOT/'artifacts/v7')); OUT=ARTIFACTS/'events/events-browser';OUT=OUT/(os.environ.get('EVENTS_OUT','encounters-final') if os.environ.get('EVENTS_ONLY') else 'full');OUT.mkdir(parents=True,exist_ok=True)
 QUESTS=json.loads((ROOT/'public/data/quests.json').read_text())['quests']
 ENCOUNTERS=json.loads((ROOT/'public/data/encounters.json').read_text())['encounters']
 ZONES=json.loads((ROOT/'public/data/story-zones.json').read_text())['zones']

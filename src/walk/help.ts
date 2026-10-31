@@ -1,4 +1,4 @@
-/** First-run guide and the `?` help entry (spec-v7 Lane C).
+/** First-run guide, contextual tips and the `?` help entry (spec-v7 Lane C).
  * The show-once decision and the key routing are DOM-free so they run in node tests; only `FirstRunGuide` touches the DOM. */
 
 export const GUIDE_KEY = 'nsysu-walk-guide-v7';
@@ -74,15 +74,68 @@ export interface GuideHooks {
 
 const DESKTOP_TIPS = [
   '<kbd>WASD</kbd>／方向鍵移動，<kbd>Shift</kbd> 奔跑；拖曳畫面轉頭，滾輪拉遠拉近。',
-  '靠近人物或物件時按 <kbd>E</kbd> 互動；同一處有多個目標時按 <kbd>R</kbd> 切換。',
-  '<kbd>G</kbd> 自動走到任務地點，<kbd>J</kbd> 打開校園手帳查看任務。',
-  '<kbd>Esc</kbd> 選單、<kbd>P</kbd> 拍照、<kbd>N</kbd> 切換時段。',
+  '靠近人物或物件時按 <kbd>E</kbd> 互動。其他操作會在用得到時提示你。',
 ];
 const TOUCH_TIPS = [
   '左下搖桿移動，在畫面上拖曳可以轉頭。',
-  '靠近人物或物件時，按右下的「互動 E」交談、開門；多個目標時會出現「切換目標 R」。',
-  '右上角的圖示可以打開校園手帳、選單、音樂與拍照。',
+  '靠近人物或物件時，按右下的「互動 E」。其他操作會在用得到時提示你。',
 ];
+
+export const TIPS_KEY = 'nsysu-walk-tips-v8';
+export type TipId = 'goal' | 'accept' | 'switch' | 'bike' | 'photo';
+const CONTEXT_TIPS: Record<TipId, { desktop: string; touch: string }> = {
+  goal: { desktop: '不知道怎麼走？按 <kbd>G</kbd> 自動走到目標，按任一方向鍵可中斷。', touch: '不知道怎麼走？點左上的目標卡，人物會自動走過去。' },
+  accept: { desktop: '對方有事想拜託你。按 <kbd>E</kbd> 接下任務，之後按 <kbd>J</kbd> 在手帳查看與追蹤。', touch: '對方有事想拜託你。按「互動 E」接下任務，之後在右上的手帳查看與追蹤。' },
+  switch: { desktop: '這裡不只一個目標，按 <kbd>R</kbd> 切換，再按 <kbd>E</kbd>。', touch: '這裡不只一個目標，按「切換目標 R」後再按「互動 E」。' },
+  bike: { desktop: '這裡可以租腳踏車，按 <kbd>E</kbd> 租車，之後按 <kbd>B</kbd> 上下車。', touch: '這裡可以租腳踏車，按「互動 E」租車，之後按「騎車 B」上下車。' },
+  photo: { desktop: '這一步要拍照：走到地點按 <kbd>P</kbd>，再按 <kbd>Space</kbd> 拍下。', touch: '這一步要拍照：走到地點點右上的相機，再按快門。' },
+};
+/** A shown tip stays this long; there is no dialog to dismiss, so it never takes the keyboard. */
+export const TIP_MS = 7000;
+
+/** Shows each tip once, one at a time, and only while nothing modal is on screen. Storage failures only cost the memory across visits. */
+export class TipPolicy {
+  private seen = new Set<TipId>();
+  private until = 0;
+  constructor(private storage: GuideStorage | undefined) {
+    try { const raw = storage?.getItem(TIPS_KEY); if (raw) for (const id of JSON.parse(raw) as TipId[]) this.seen.add(id); } catch { /* start over */ }
+  }
+  /** Returns the tip to show on this tick, if any. `wanted` lists what the player could use right now. */
+  update(now: number, blocked: boolean, wanted: readonly TipId[]): TipId | undefined {
+    if (blocked || now < this.until) return undefined;
+    const id = wanted.find(x => !this.seen.has(x));
+    if (!id) return undefined;
+    this.seen.add(id); this.until = now + TIP_MS;
+    this.write();
+    return id;
+  }
+  /** "Show the tips again" in the help panel. */
+  reset() { this.seen.clear(); this.until = 0; this.write(); }
+  private write() { try { this.storage?.setItem(TIPS_KEY, JSON.stringify([...this.seen])); } catch { /* memory only */ } }
+}
+
+/** The one-line tip card; pointer-events none and never focused, so walking input is untouched. */
+export class ContextTips {
+  private el: HTMLElement;
+  private policy: TipPolicy;
+  private hideAt = 0;
+  constructor(host: HTMLElement, private coarse: boolean, storage: GuideStorage | undefined = defaultGuideStorage()) {
+    this.policy = new TipPolicy(storage);
+    this.el = document.createElement('div');
+    this.el.className = 'walk-tip'; this.el.hidden = true; this.el.setAttribute('role', 'status');
+    host.append(this.el);
+  }
+  update(now: number, blocked: boolean, wanted: readonly TipId[]) {
+    if (blocked) { this.el.hidden = true; this.hideAt = 0; }
+    else if (this.hideAt && now > this.hideAt) { this.el.hidden = true; this.hideAt = 0; }
+    const id = this.policy.update(now, blocked, wanted);
+    if (!id) return;
+    this.el.innerHTML = CONTEXT_TIPS[id][this.coarse ? 'touch' : 'desktop'];
+    this.el.hidden = false; this.hideAt = now + TIP_MS;
+  }
+  reset() { this.policy.reset(); }
+  dispose() { this.el.remove(); }
+}
 
 /** The dismissable overlay shown once at the first entry into walking. */
 export class FirstRunGuide {

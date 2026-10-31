@@ -32,6 +32,13 @@ export class CampusSound {
     return this.enabled;
   }
 
+  /** A hidden tab goes quiet; returning resumes only if sound is still on. */
+  setHidden(hidden: boolean) {
+    if (!this.ctx || this.ctx.state === 'closed') return;
+    if (hidden) void this.ctx.suspend();
+    else if (this.enabled) void this.ctx.resume();
+  }
+
   /** Called on the first gesture when sound was left on last visit. */
   resumeIfEnabled() { if (this.enabled) { this.start(); void this.ctx!.resume(); this.music?.start(); } }
 

@@ -4,6 +4,31 @@ type P = [number, number];
 interface MapData { base?: { url: string; bounds: [number, number, number, number] }; buildings: { kind: string; walkable: boolean; polygon: P[] }[]; background: P[][]; roads: { kind: string; width: number; points: P[] }[] }
 const KIND: Record<string, string> = { teaching: '#c75f4a', admin: '#e9b949', life: '#4d9a44', scenic: '#2c7f91' };
 
+export type MapMarkerKind = 'quest' | 'bike' | 'stamp';
+export interface MapMarker { id: string; kind: MapMarkerKind; x: number; y: number; z: number; label: string }
+export interface MapFrame { x0: number; z0: number; scale: number; width: number; height: number }
+/** The part of the DEM sheet people can actually walk: gate, seawall, tunnel and the campus core. */
+export const CAMPUS_VIEW = { x0: -420, z0: -180, x1: 180, z1: 700 };
+export const MARKER_STYLE: Record<MapMarkerKind, { color: string; glyph: string }> = { quest: { color: '#e9b949', glyph: '任' }, bike: { color: '#2c7f91', glyph: '車' }, stamp: { color: '#c75f4a', glyph: '章' } };
+
+/** Fits the campus into a width × height canvas, centred, north up. */
+export function fitCampusFrame(width: number, height: number, view = CAMPUS_VIEW): MapFrame {
+  const scale = Math.min(width / (view.x1 - view.x0), height / (view.z1 - view.z0));
+  return { x0: view.x0 - (width / scale - (view.x1 - view.x0)) / 2, z0: view.z0 - (height / scale - (view.z1 - view.z0)) / 2, scale, width, height };
+}
+export const frameX = (f: MapFrame, x: number) => (x - f.x0) * f.scale;
+export const frameY = (f: MapFrame, z: number) => (z - f.z0) * f.scale;
+
+/** The marker a tap means: nearest within reach, so overlapping markers still resolve to one. */
+export function pickMarker(markers: readonly MapMarker[], frame: MapFrame, px: number, py: number, reach = 24) {
+  let best: MapMarker | undefined, bestD = reach;
+  for (const m of markers) {
+    const d = Math.hypot(frameX(frame, m.x) - px, frameY(frame, m.z) - py);
+    if (d <= bestD) { best = m; bestD = d; }
+  }
+  return best;
+}
+
 /** Whole-campus minimap: the DEM base map with roads and buildings, pre-rendered once at 1 px per metre,
  * then cropped around the player (north up) with the quest goal marked. */
 export class CampusMinimap {
@@ -31,6 +56,31 @@ export class CampusMinimap {
   }
 
   get ready() { return !!this.sheet; }
+
+  /** The menu's full map: drawn on demand from the existing sheet, so it adds one small canvas and no 3D work. */
+  drawOverview(ctx: CanvasRenderingContext2D, frame: MapFrame, markers: readonly MapMarker[], selected: string | undefined, foot: Vector3, yaw: number, goal?: Vector3) {
+    if (!this.sheet) return false;
+    const [bx, bz] = this.bounds;
+    ctx.fillStyle = '#e9e1cc'; ctx.fillRect(0, 0, frame.width, frame.height);
+    ctx.drawImage(this.sheet, (bx - frame.x0) * frame.scale, (bz - frame.z0) * frame.scale, this.sheet.width * frame.scale, this.sheet.height * frame.scale);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '700 12px "Noto Sans TC",sans-serif';
+    for (const m of markers) {
+      const x = frameX(frame, m.x), y = frameY(frame, m.z), r = m.id === selected ? 13 : 10;
+      ctx.fillStyle = MARKER_STYLE[m.kind].color; ctx.strokeStyle = '#2a2c4a'; ctx.lineWidth = m.id === selected ? 3 : 1.5;
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = m.kind === 'quest' ? '#2a2c4a' : '#fff'; ctx.fillText(MARKER_STYLE[m.kind].glyph, x, y + .5);
+    }
+    if (goal) {
+      ctx.strokeStyle = '#e9b949'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(frameX(frame, goal.x), frameY(frame, goal.z), 16, 0, Math.PI * 2); ctx.stroke();
+    }
+    ctx.save(); ctx.translate(frameX(frame, foot.x), frameY(frame, foot.z)); ctx.rotate(-yaw);
+    ctx.fillStyle = '#173e49'; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(0, -11); ctx.lineTo(-7, 7); ctx.lineTo(7, 7); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.restore();
+    ctx.textAlign = 'start'; ctx.textBaseline = 'alphabetic';
+    return true;
+  }
 
   draw(ctx: CanvasRenderingContext2D, foot: Vector3, yaw: number, goal?: Vector3, W = 280, H = 220) {
     if (!this.sheet) return false;

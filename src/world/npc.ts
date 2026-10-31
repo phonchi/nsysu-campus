@@ -289,6 +289,7 @@ export class NpcManager {
   }
 
   get(id: string) { return this.npcs.get(id); }
+  displayName(id: string) { return this.defs.get(id)?.name; }
   setCollision(sweep: NpcSweep, support?: SupportAt) { this.sweep = sweep; this.support = support; }
   /** Culling never leaves invisible solid people. Only local visible actors enter physics. */
   bodies(player: T.Vector3): ActorBody[] {

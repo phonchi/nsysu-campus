@@ -13,3 +13,7 @@
 
 /* The global button color inherits the pale HUD foreground; paper cards need dark ink. */
 .walkthrough .quest-pocket strong{color:var(--ui-ink)}
+.walkthrough .quest-pocket{z-index:29}
+.walk-tip{position:absolute;left:50%;bottom:112px;transform:translateX(-50%);z-index:29;max-width:min(520px,calc(100vw - 32px));padding:10px 16px;border-radius:10px;border:2px solid var(--ui-line);background:var(--ui-paper);color:var(--ui-ink);box-shadow:var(--ui-shadow);font:14px/1.6 'Noto Sans TC',sans-serif;pointer-events:none}.walk-tip[hidden]{display:none}.walk-tip kbd{padding:0 6px;border:1px solid var(--ui-line);border-bottom-width:2px;border-radius:4px;font:inherit;font-size:12px}
+@media(max-width:759px){.walk-tip{bottom:176px;width:calc(100vw - 32px);font-size:13px}}
+.walk-webview{pointer-events:auto;position:absolute;left:12px;right:12px;top:max(12px,env(safe-area-inset-top));z-index:70;max-width:520px;margin:0 auto;padding:12px 14px;border-radius:10px;border:2px solid var(--ui-line);background:var(--ui-paper);color:var(--ui-ink);box-shadow:var(--ui-shadow);font:14px/1.6 'Noto Sans TC',sans-serif}.walk-webview p{margin:0 0 8px}.walk-webview div{display:flex;gap:8px;justify-content:flex-end}.walk-webview button{min-height:44px;padding:0 14px;border-radius:8px;border:2px solid var(--ui-line);background:transparent;color:var(--ui-ink);font:inherit;cursor:pointer}

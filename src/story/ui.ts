@@ -25,6 +25,7 @@ export class StoryUi {
   private dotsEl: HTMLElement;
   private edgeEl: HTMLElement;
   private pointerEl: HTMLElement;
+  private badgeEl: HTMLElement;
   private typing = 0;
   private advance?: () => void;
   private picking?: { choices: Choice[]; sel: number; resolve: (i: number) => void };
@@ -41,6 +42,7 @@ export class StoryUi {
     this.root.className = 'q-layer';
     this.root.innerHTML = `<div class="q-objective" hidden role="button" tabindex="0"><small></small><strong></strong><span class="q-dist"></span><em>G 自動前往</em></div>
 <ol class="q-dots" aria-label="新生導覽進度">${chapters.map(c => `<li title="${esc(c.title)}"></li>`).join('')}</ol>
+<div class="q-badge" hidden aria-hidden="true"><b></b><small></small></div>
 <div class="q-pointer" hidden aria-hidden="true"><svg viewBox="0 0 40 40"><path d="M6 20h22m-9-10 10 10-10 10" stroke="#2a2c4a" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 20h22m-9-10 10 10-10 10" stroke="#e9b949" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
 <div class="q-edge" hidden aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h13m-5-6 6 6-6 6" stroke="#2a2c4a" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
 <div class="q-dialog" role="dialog" aria-live="polite" hidden><div class="portrait"></div><div class="q-body"><span class="name"></span><p class="text"></p><ol class="q-choices" hidden></ol></div><div class="q-tools"><button type="button" data-q="log">紀錄 L</button><button type="button" data-q="skip">快轉 Tab</button></div><span class="next">E／點擊 繼續</span></div>
@@ -52,6 +54,7 @@ export class StoryUi {
     this.dotsEl = this.root.querySelector('.q-dots')!;
     this.edgeEl = this.root.querySelector('.q-edge')!;
     this.pointerEl = this.root.querySelector('.q-pointer')!;
+    this.badgeEl = this.root.querySelector('.q-badge')!;
     this.logEl = this.root.querySelector('.q-log')!;
     this.dialogueEl.addEventListener('click', e => {
       const t = e.target as HTMLElement, q = t.closest<HTMLElement>('[data-q]')?.dataset.q, c = t.closest<HTMLElement>('[data-choice]');
@@ -179,7 +182,7 @@ export class StoryUi {
     this.dots(chapter.id);
   }
 
-  distance(m: number | undefined) { this.objectiveEl.querySelector<HTMLElement>('.q-dist')!.textContent = m === undefined ? '' : `${Math.round(m)} m`; }
+  distance(m: number | string | undefined) { this.objectiveEl.querySelector<HTMLElement>('.q-dist')!.textContent = m === undefined ? '' : typeof m === 'string' ? m : `${Math.round(m)} m`; }
 
   dots(activeId: string | undefined, done: string[] = []) {
     this.dotsEl.querySelectorAll('li').forEach((li, i) => {
@@ -232,6 +235,15 @@ ${fact ? `<p class="fact"><b>校史小知識</b>${esc(fact)}${source ? ` <a href
   }
 
   /** Guidance arrow above the character's head; angle in screen radians (0 = right). */
+  /** The tracked person's name badge, held at a constant screen size over their head. */
+  badge(b: { x: number; y: number; text: string; distance: number } | null) {
+    this.badgeEl.hidden = !b;
+    if (!b) return;
+    this.badgeEl.style.transform = `translate(${Math.round(b.x)}px,${Math.round(b.y)}px) translate(-50%,-100%)`;
+    this.badgeEl.firstElementChild!.textContent = b.text;
+    this.badgeEl.lastElementChild!.textContent = `${Math.round(b.distance)} m`;
+  }
+
   pointer(p: { x: number; y: number; angle: number } | null) {
     this.pointerEl.hidden = !p;
     if (p) this.pointerEl.style.transform = `translate(${p.x - 20}px,${p.y - 20}px) rotate(${p.angle}rad)`;

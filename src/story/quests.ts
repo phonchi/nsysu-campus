@@ -1,4 +1,5 @@
 /** Persistent side quests and journal; never touches the v3/v4 player saves. */
+import { readSave, removeSave, writeSave } from './save-guard';
 export interface QuestChoice { id: string; label: string; result: string }
 export interface QuestStep { id: string; target: string; text: string; lines?: { who: string; text: string }[]; radius?: number; kind?: 'interact' | 'photo'; choices?: QuestChoice[]; when?: string }
 export interface QuestDefinition { id: string; title: string; zone: string; npc: string; description: string; reward: string; accept: { near: string; chapterDone?: string; lines?: { who: string; text: string }[] }; absent?: Record<string, string>; steps: QuestStep[] }
@@ -31,8 +32,10 @@ export class QuestEngine {
     this.now = options.now ?? Date.now;
     try {
       this.storage = options.storage ?? (typeof localStorage !== 'undefined' ? localStorage : undefined);
-      const raw = this.storage?.getItem(QUEST_KEY);
-      if (raw) { this.hadExistingSave = true; this.restore(JSON.parse(raw)); }
+      const read = readSave(this.storage, QUEST_KEY);
+      this.hadExistingSave = read.existed;
+      if (read.corrupt && !read.recovered) options.onStorageError?.();
+      if (read.value !== undefined) this.restore(read.value);
     } catch { options.onStorageError?.(); }
   }
   private restore(raw: unknown) {
@@ -103,8 +106,8 @@ export class QuestEngine {
   }
   record(entry: Omit<JournalEntry, 'at'>) { if (this.progress.journal.some(e => e.id === entry.id)) return false; if (entry.reward && !this.progress.rewards.includes(entry.reward)) this.progress.rewards.push(entry.reward); this.entry(entry); this.save(); return true; }
   private entry(entry: Omit<JournalEntry, 'at'>) { if (!this.progress.journal.some(e => e.id === entry.id)) this.progress.journal.push({ ...entry, at: this.now() }); }
-  private save() { try { this.storage?.setItem(QUEST_KEY, JSON.stringify(this.progress)); } catch { this.options.onStorageError?.(); } this.options.onChange?.(); }
-  clear() { Object.assign(this.progress, fresh(), { tracked: undefined, legacySnapshotTaken: true }); this.hadExistingSave = true; this.save(); }
+  private save() { try { writeSave(this.storage, QUEST_KEY, this.progress); } catch { this.options.onStorageError?.(); } this.options.onChange?.(); }
+  clear() { Object.assign(this.progress, fresh(), { tracked: undefined, legacySnapshotTaken: true }); this.hadExistingSave = true; try { removeSave(this.storage, QUEST_KEY); } catch { /* the save below reports it */ } this.save(); }
   importLegacy(done: string[], talked: string[]) {
     if (this.progress.legacySnapshotTaken) return;
     this.progress.legacySnapshotTaken = true;

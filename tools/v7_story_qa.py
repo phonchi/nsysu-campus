@@ -7,8 +7,8 @@ import asyncio, json, os, time
 from pathlib import Path
 from playwright.async_api import async_playwright
 
-ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / 'artifacts/v7/story'
+ROOT = Path(__file__).resolve().parents[1]; ARTIFACTS=Path(os.environ.get('V7_ARTIFACTS',ROOT/'artifacts/v7'))
+OUT = ARTIFACTS/'story'
 URL = os.environ.get('CAMPUS_WALK_URL', 'http://127.0.0.1:4173/') + '?view=walk&story=1&quality=C&qa=1'
 STATE = '({s:window.campusWalk.story,card:window.campusWalk.chapterCard,route:window.campusWalk.route.length,p:window.campusWalk.position})'
 

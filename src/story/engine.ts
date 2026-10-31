@@ -1,3 +1,4 @@
+import { readSave, removeSave, writeSave } from './save-guard';
 import type { Action, Chapter, Condition, Line, StoryData } from './schema';
 
 /** What the engine can ask about the world. Targets are `npc:<id>` or `zone:<id>`. */
@@ -43,10 +44,10 @@ export function normalizeProgress(raw: unknown): StoryProgress {
 
 const KEY = 'nsysu-story-v3';
 export function loadProgress(): StoryProgress | undefined {
-  try { const raw = localStorage.getItem(KEY); return raw ? normalizeProgress(JSON.parse(raw)) : undefined; } catch { return undefined; }
+  try { const read = readSave(localStorage, KEY); return read.value !== undefined ? normalizeProgress(read.value) : undefined; } catch { return undefined; }
 }
-function saveProgress(p: StoryProgress) { try { localStorage.setItem(KEY, JSON.stringify(p)); } catch { /* private mode: progress lasts this visit */ } }
-export function clearProgress() { try { localStorage.removeItem(KEY); } catch { /* ignore */ } }
+function saveProgress(p: StoryProgress) { try { writeSave(localStorage, KEY, p); } catch { /* private mode: progress lasts this visit */ } }
+export function clearProgress() { try { removeSave(localStorage, KEY); } catch { /* ignore */ } }
 
 /** Chapter/step state machine (spec §14.11): `when` is AND, `{any}` is OR, each step fires once,
  * a dialogue blocks the rest of its step until finished, completing a chapter starts the next. */

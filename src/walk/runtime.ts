@@ -20,14 +20,17 @@ import { WalkInput } from './input';
 import { selectInteraction, cycleInteraction, encounterReach } from './interaction-choice';
 import { liftWins, toggleDoor, nearestDoor, type LiftStopRef } from './interaction';
 import { hudTemplate, drawFloorMinimap, makeDoorSign, safe } from './hud';
-import { FirstRunGuide, helpShortcut } from './help';
+import { ContextTips, FirstRunGuide, helpShortcut, type TipId } from './help';
+import { startLoadingTips } from './loading-tips';
+import { showInAppBrowserNotice } from './in-app-browser';
+import { lockedSaves } from '../story/save-guard';
 import { toonify } from '../render/toon';
 import { PostPipeline, POST_LOOKS, lerpLook } from '../render/post';
 import { AdaptiveQuality, TIERS, initialTier, type Tier } from '../render/quality';
 import { addOutlines, OUTLINE_UNIFORMS } from '../render/outline';
 import { mergeStatic } from '../render/batch';
 import { CampusSound } from '../audio/sound';
-import { CampusMinimap } from './minimap';
+import { CampusMinimap, fitCampusFrame, pickMarker, type MapMarker, type MapMarkerKind } from './minimap';
 import { Terrain } from '../world/terrain';
 import { GrowableSurfaceField, campusVegetationVolumes } from '../world/growable-surface';
 import { gateBarrierObstacles } from '../world/gate-barriers';
@@ -48,6 +51,7 @@ import { PALETTES, modelFor, recolor } from './player-look';
 import { planRoute as plan, followRoute, validateRoutes as validatePaths, sightLine } from './autopilot';
 import { NpcManager, disposeObject, NPC_CAP, type StoryZones, type Preset } from '../world/npc';
 import { StoryDirector } from '../story/director';
+import { trackedTarget } from '../story/guide-goal';
 import type { StoryData } from '../story/schema';
 import bundledQuests from '../../public/data/quests.json';
 import { QuestEngine, QUEST_KEY, type QuestData, type QuestWorld } from '../story/quests';
@@ -97,6 +101,11 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   host.innerHTML = hudTemplate(asset, base);
   document.body.append(host); document.body.style.overflow = 'hidden';
   const get = <E extends HTMLElement>(s: string) => host.querySelector<E>(s)!;
+  showInAppBrowserNotice(host);
+  const stopLoadingTips = startLoadingTips(get('.walk-loading'), async () => ({
+    chapters: await loadJson<{ dialogues: Record<string, { text: string }[]> }>('data/chapters.json', '故事資料').catch(() => undefined),
+    campus: await loadJson<{ stories: { text: string; sources?: unknown[] }[] }>('data/campus-info.json', '校園資訊').catch(() => undefined),
+  }));
   const status = get('.walk-status'); let statusTimer = 0;
   let encounters: EncounterEngine | undefined;
   let zoneLabels: Record<string,string> = {};
@@ -247,11 +256,13 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       landmarksReady = true; featureStatus.landmarks='ready'; validateRoutes();
     }).catch(e => { console.warn('landmarks', e); landmarksReady = true; featureStatus.landmarks='degraded'; validateRoutes(); });
   } catch (e) {
+    stopLoadingTips();
     get('.walk-loading').textContent = '校園圖資暫時無法開啟，請回到校園地圖。';
     get('.walk-welcome').hidden = true;
     get('[data-action=exit]').addEventListener('click', () => { alive = false; renderer.dispose(); orbit.dispose(); exitToMap(); }, { once: true });
     console.error(e); return;
   }
+  stopLoadingTips();
   get('.walk-loading').hidden = true;
 
   // ---- character -------------------------------------------------------------------------
@@ -316,6 +327,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     say(locked ? '視角已鎖定：角度與距離固定，再按 L 解除。' : '視角已解除鎖定，可拖曳轉動。', 2500);
   }
   const sound = new CampusSound();
+  const soundVisibility = () => sound.setHidden(document.hidden);
+  document.addEventListener('visibilitychange', soundVisibility);
   const soundLabel = () => host.querySelectorAll<HTMLElement>('[data-action=sound]').forEach(b => { if (!b.classList.contains('walk-icon')) b.textContent = sound.enabled ? '音樂 開' : '音樂 關'; b.setAttribute('aria-pressed', String(sound.enabled)); });
   soundLabel();
   host.addEventListener('pointerdown', () => sound.resumeIfEnabled(), { once: true });
@@ -336,6 +349,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   void import('../walk-nav').then(m => m.loadWalkNavigation(base, 'campus-science-engineering-v2', terrainRef?.surfaceVersion)).then(n => {
     if (!alive) { n.dispose(); return; } navigation = n; navigationError = '';
   }).catch(e => { navigationError = '自動帶路暫時未就緒；仍可自由探索。'; console.warn('walk nav', String(e)); });
+  let guideOverride: { target: string; point: T.Vector3 | undefined } | undefined, pocketAt = 0;
+  const tipsFrom = performance.now() + 25000;
   let autoPath: T.Vector3[] = [], pathIndex = 0, autoDestination: WalkDestination | undefined, pendingDestination: WalkDestination | undefined;
   let progressTime = 0, replans = 0; const progressPosition = new T.Vector3();
   const disposeTree = (root: T.Object3D) => root.traverse(o => {
@@ -454,8 +469,10 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     menu.querySelectorAll<HTMLElement>('[data-tab]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
     menu.querySelectorAll<HTMLElement>('[data-pane]').forEach(p => { p.hidden = p.dataset.pane !== tab; });
     if (tab === 'album') renderAlbum();
+    if (tab === 'map') renderMap();
   }
   let renderAlbum = () => {};
+  let renderMap = () => {};
   menu.addEventListener('click', e => {
     const t = e.target as HTMLElement, tab = t.closest<HTMLElement>('[data-tab]')?.dataset.tab;
     if (tab) { showTab(tab); return; }
@@ -532,6 +549,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     blocked: () => !!director?.blocking || menuOpen() || !!notebook?.open || photo.active || !!quiz?.open,
     help: () => setMenu(true, 'help'),
   }, { coarse });
+  const tips = new ContextTips(host, coarse);
+  get('[data-action=tips-reset]').addEventListener('click', () => { tips.reset(); say('提示已重設，用得到時會再出現。', 3000); });
   const input = new WalkInput(renderer.domElement, get('.walk-joystick'), get('.walk-stick'), {
     modal(k, mode) {
       if (guide.open) { guide.key(k); return; }
@@ -642,6 +661,62 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   // ---- HUD refresh (7 Hz) ----------------------------------------------------------------
   const minimap = get<HTMLCanvasElement>('.walk-minimap'), ctx = minimap.getContext('2d')!;
   const minimapSheet = new CampusMinimap(); void minimapSheet.load(asset).catch(e => console.warn('minimap', e));
+  const mapCanvas = get<HTMLCanvasElement>('.walk-map-canvas'), mapPick = get('.walk-map-pick'), mapGo = get('[data-map-go]');
+  const mapHidden = new Set<MapMarkerKind>();
+  let collectionData: CollectionData | undefined;
+  let mapMarkers: MapMarker[] = [], mapSelected: MapMarker | undefined, mapFrame = fitCampusFrame(1, 1);
+  const collectMarkers = () => {
+    const out: MapMarker[] = [{ id: 'bike', kind: 'bike', x: bike.stand.x, y: bike.stand.y, z: bike.stand.z, label: '租車點' }];
+    const world = questWorld();
+    for (const v of quests?.list() ?? []) {
+      if (v.state?.status === 'completed' || (!v.state && !quests!.unlocked(v.definition, world))) continue;
+      const point = questPoint(trackedTarget(v));
+      if (point) out.push({ id: `quest:${v.definition.id}`, kind: 'quest', x: point.x, y: point.y, z: point.z, label: v.definition.title });
+    }
+    // Several stamps share one place; a single marker per place lists them all.
+    const places = new Map<string, MapMarker>();
+    for (const stamp of collectionData?.stamps ?? []) {
+      if (campus.progress.stamps.includes(stamp.id)) continue;
+      const place = String(stamp.at), known = places.get(place);
+      if (known) { known.label += `、${stamp.name}`; continue; }
+      const point = Array.isArray(stamp.at) ? new T.Vector3(stamp.at[0], physics.position.y, stamp.at[1]) : routes?.anchor(stamp.at) ?? npcs?.anchorPoint(stamp.at);
+      if (point) places.set(place, { id: `stamp:${place}`, kind: 'stamp', x: point.x, y: point.y, z: point.z, label: `章戳・${stamp.name}` });
+    }
+    out.push(...places.values());
+    return out;
+  };
+  renderMap = () => {
+    const box = mapCanvas.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
+    if (!box.width || !box.height) return;
+    mapCanvas.width = Math.round(box.width * dpr); mapCanvas.height = Math.round(box.height * dpr);
+    const ctx = mapCanvas.getContext('2d');
+    if (!ctx) return;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    mapFrame = fitCampusFrame(box.width, box.height);
+    mapMarkers = collectMarkers().filter(m => !mapHidden.has(m.kind));
+    if (mapSelected && !mapMarkers.some(m => m.id === mapSelected!.id)) mapSelected = undefined;
+    minimapSheet.drawOverview(ctx, mapFrame, mapMarkers, mapSelected?.id, physics.position, rig.yaw, trackedGuide()?.point ?? director?.goal());
+    mapPick.querySelector('span')!.textContent = mapSelected?.label ?? '點地圖上的標記查看地點。';
+    mapGo.hidden = !mapSelected;
+  };
+  mapCanvas.addEventListener('click', e => {
+    const box = mapCanvas.getBoundingClientRect();
+    mapSelected = pickMarker(mapMarkers, mapFrame, e.clientX - box.left, e.clientY - box.top);
+    renderMap();
+  });
+  host.querySelectorAll<HTMLElement>('[data-map-kind]').forEach(button => button.addEventListener('click', () => {
+    const kind = button.dataset.mapKind as MapMarkerKind, show = mapHidden.has(kind);
+    if (show) mapHidden.delete(kind); else mapHidden.add(kind);
+    button.setAttribute('aria-pressed', String(show));
+    renderMap();
+  }));
+  mapGo.addEventListener('click', () => {
+    const picked = mapSelected;
+    if (!picked) return;
+    setMenu(false);
+    if (picked.kind === 'quest') { quests?.track(picked.id.slice(6)); refreshNotebook(); followQuest(); }
+    else walkToPoint(new T.Vector3(picked.x, picked.y, picked.z), picked.label);
+  });
   let currentFloor = world.floors.find(f => f.buildingId === 'SC' && f.data.level === 1)!;
   const inverseFrames = new Map([...world.frames].map(([id, m]) => [id, m.clone().invert()]));
   const signs = new Map<string, T.Mesh>();
@@ -676,7 +751,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     drawFloorMinimap(ctx, world, floorRecord, foot, rig.yaw, autoPath, inverseFrames.get(floorRecord.buildingId)!);
     if ((overview && floorSelect.value === 'all') || (!overview && best >= 4)) {
       const center = overview ? orbit.target : foot, heading = overview ? Math.atan2(camera.position.x - orbit.target.x, camera.position.z - orbit.target.z) : rig.yaw;
-      if (!minimapSheet.draw(ctx, center, heading, director?.goal())) campusUi?.drawMinimap(ctx, center, heading);
+      if (!minimapSheet.draw(ctx, center, heading, guideOverride ? guideOverride.point : director?.goal())) campusUi?.drawMinimap(ctx, center, heading);
     }
     const door = nearestDoor(world, foot), inLift = liftWins(world, foot);
     if (!inLift) liftPanel.hidden = true;
@@ -690,7 +765,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
 
   function close() {
     alive = false; campusUi?.dispose(); clearTimeout(statusTimer); cancelAnimationFrame(frameId);
-    input.dispose(); window.removeEventListener('campus-storage-error',storageFailed); window.removeEventListener('resize', resize); orbit.dispose(); navigation?.dispose();
+    input.dispose(); document.removeEventListener('visibilitychange', soundVisibility); window.removeEventListener('campus-storage-error',storageFailed); window.removeEventListener('resize', resize); orbit.dispose(); navigation?.dispose();
     encounterScene.dispose();
     notebook?.dispose(); director?.dispose(); npcs?.dispose(); photo.dispose();
     lod.dispose(); physics.dispose(); avatar.dispose(); post.dispose(); sound.dispose(); renderer.dispose();
@@ -751,6 +826,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     return true;
   }
 
+  const trackedQuest = () => quests?.list().find(v => v.definition.id === quests?.progress.tracked);
+  const trackedGuide = () => { const v = trackedQuest(); if (!v) return undefined; const target = trackedTarget(v); return { target, point: questPoint(target) }; };
   function questPoint(target: string): T.Vector3 | undefined {
     const [kind, id] = target.split(':');
     if (kind === 'npc') return npcs && !npcs.isAbsent(id) ? npcs.get(id)?.position.clone() : undefined;
@@ -801,9 +878,9 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   }, open => { input.release(); if (open) clearAuto(); });
   refreshNotebook = () => {
     notebook?.update(notebookModel());
-    const v = quests?.list().find(v => v.definition.id === quests?.progress.tracked);
+    const v = trackedQuest();
     pocket.hidden = !v?.step;
-    if (v?.step) pocket.innerHTML = `<strong>${safe(v.definition.title)}</strong><small>${safe(v.step.text)} · J 手帳</small>`;
+    if (v?.step) pocket.innerHTML = `<strong>${safe(v.definition.title)} <em data-pocket-distance></em></strong><small>${safe(v.step.text)} · J 手帳</small>`;
   };
   async function acceptSideQuest(id: string) {
     const ui = director?.ui;
@@ -880,14 +957,17 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   function followQuest() {
     if(!routesValidated) { say('場景碰撞與步道仍在準備，請稍候再開始帶路。');return; }
     routes?.avoid.splice(0); // stuck spots only matter within one auto-walk
-    const tracked = quests?.list().find(v => v.definition.id === quests?.progress.tracked);
-    const goal = tracked ? questPoint(tracked.step?.target ?? tracked.definition.accept.near) : director?.goal();
+    const tracked = trackedQuest();
+    const goal = tracked ? questPoint(trackedTarget(tracked)) : director?.goal();
     if(tracked && !goal) { say('這位人物目前不在校園；請在手帳選擇『切換至人物出現時段』後再前往。',6000);return; }
     if (!goal || director?.blocking) { say('目前沒有需要前往的地點。', 2500); return; }
+    walkToPoint(goal, tracked?.definition.title ?? (director!.objectiveText || '任務地點'));
+  }
+  function walkToPoint(goal: T.Vector3, label: string) {
     const p = planRoute(goal);
     if (!p.length) { say('找不到通往任務地點的路，請跟著金色箭頭走。', 4000); return; }
     clearAuto(); autoPath = p; pathIndex = 0; replans = 0; progressTime = performance.now(); progressPosition.copy(physics.position);
-    autoDestination = { id: 'quest', label: tracked?.definition.title ?? (director!.objectiveText || '任務地點'), position: goal.toArray() as [number, number, number], buildingId: 'quest', floorId: 'quest' } as WalkDestination;
+    autoDestination = { id: 'quest', label, position: goal.toArray() as [number, number, number], buildingId: 'quest', floorId: 'quest' } as WalkDestination;
     chooseMode(false); drawRoute(p); say(`自動前往：${autoDestination.label}（任意方向鍵可中斷）`, 4000);
   }
   let recoveryFailed=false;
@@ -922,6 +1002,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
         loadJson<CollectionData>('data/collection.json', '收集資料').catch(e => { console.warn('collection', e); return undefined; }),
         loadJson<{ questions: Question[] }>('data/quiz.json', '校史題庫').catch(e => { console.warn('quiz', e); return undefined; }),
       ]);
+      collectionData = collection;
       if (!alive) return;
       routes = graph;
       zoneLabels = Object.fromEntries(Object.entries(zones.zones).map(([id,z]) => [id,z.label]));
@@ -988,6 +1069,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
           quests=new QuestEngine(questData,{onChange:()=>refreshNotebook(),onStorageError:()=>{storageNotice='目前無法保存進度；請勿關閉此頁，並檢查瀏覽器儲存空間。';say(storageNotice,9000);}});
           quests.importLegacy(director!.engine.progress.done,campus.progress.talked);
           if(featureStatus.quests!=='degraded')featureStatus.quests='ready';refreshNotebook();
+          if(lockedSaves().length){storageNotice='這份進度來自較新的版本，已安全保留；請重新整理頁面。在那之前，這次的變更不會保存。';say(storageNotice,0);}
         } catch(e) { featureStatus.quests='failed'; console.warn('quests',e);say('手帳暫時無法載入；主線與自由探索仍可使用。'); }
       })();
       void (async()=>{
@@ -1123,10 +1205,25 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
         if (ev.npcs.some(id => !npcs!.isAbsent(id) && (npcs!.get(id)?.position.distanceTo(physics.position) ?? 1e9) < 25)) { eventsShown.add(ev.id); lastEventAt = time; director.ui.banner(ev.banner, '校園事件'); sound.cue('chime'); break; }
       }
     }
+    guideOverride = trackedGuide();
+    director?.setGuideOverride(guideOverride);
+    if (guideOverride && !pocket.hidden && time - pocketAt > 500) {
+      pocketAt = time;
+      const label = pocket.querySelector('[data-pocket-distance]');
+      if (label) label.textContent = guideOverride.point ? `${Math.round(physics.position.distanceTo(guideOverride.point))} m` : '不在校園';
+    }
     if (!overview && storyStarted && !photo.active && !notebook?.open && !menuOpen()) director?.update(time, dt);
+    else director?.ui.badge(null);
     // This is exactly the candidate that E and the touch button will execute.
     if (director) {
       const candidates=interactionCandidates(), chosen=selectInteraction(candidates,selectedInteraction);
+      const wanted: TipId[] = [];
+      if (candidates.some(c => c.id.startsWith('accept:'))) wanted.push('accept');
+      if (candidates.length > 1) wanted.push('switch');
+      if (candidates.some(c => c.id === 'bike')) wanted.push('bike');
+      if (trackedQuest()?.step?.kind === 'photo') wanted.push('photo');
+      if (time > tipsFrom && (guideOverride?.point ?? director.goal())) wanted.push('goal');
+      tips.update(time, overview || !walking || !get('.walk-welcome').hidden || guide.open || !!director.blocking || menuOpen() || !!notebook?.open || photo.active || !!quiz?.open, wanted);
       if(chosen && !director.blocking) {
         const projected=chosen.point.clone();projected.y+=2;projected.project(camera);
         director.ui.hint(projected.z<1?{x:(projected.x+1)/2*innerWidth,y:(1-projected.y)/2*innerHeight,text:`E ${chosen.label}${candidates.length>1?' · R 切換':''}`}:null);
@@ -1212,7 +1309,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
         return { trail: trail.slice(0, 4), landmark: top.userData.landmarkId, distance: +h.distance.toFixed(2), point: h.point.toArray().map(v => +v.toFixed(2)), hull: !!h.object.userData.outlineHull, side: m?.side, color: (m as T.MeshBasicMaterial)?.color?.getHexString?.(), triangle: h.face ? [h.face.a, h.face.b, h.face.c].map(i => new T.Vector3().fromBufferAttribute((h.object as T.Mesh).geometry.getAttribute('position') as T.BufferAttribute, i).applyMatrix4(h.object.matrixWorld).toArray().map(v => +v.toFixed(1))) : undefined };
       });
     },
-    qaPlace: (x: number, z: number, y?: number) => QA ? teleportTo(new T.Vector3(x, y ?? 0, z), undefined, y !== undefined) : false,
+    qaPlace: (x: number, z: number, y?: number, face?: [number, number]) => QA ? teleportTo(new T.Vector3(x, y ?? 0, z), face && new T.Vector3(face[0], y ?? 0, face[1]), y !== undefined) : false,
     plan(to?: string) {
       const g = to ? questPoint(to) : director?.goal(); const nav = g && navigation ? navigation.findPath(physics.position, g).length : -1; const out = g && routes ? routes.path(physics.position, g).length : -1;
       const clear = sightLine((a, b, r) => physics.sweep(a, b, r)), raw = g ? plan(physics.position, g, navigation, routes, clear) : [], support = (x: number, z: number, y: number) => physics.supportAt(x, z, y);
@@ -1230,6 +1327,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     get journal() { return quests?.progress; },
     get interaction() { const c=selectedCandidate();return {selected:c?.id,label:c?.label,candidates:interactionCandidates().map(x=>({id:x.id,label:x.label,distance:x.distance}))}; },
     get questList() { return quests?.list(); },
+    get guideBeacon() { return director?.beaconState; },
+    get guide() { return guideOverride && { target: guideOverride.target, point: guideOverride.point?.toArray() }; },
     /** QA only: hide scene groups by name prefix to measure their draw cost. */
     qaHide: (prefix: string, hidden = true) => { if (!QA) return 0; let n = 0; scene.traverse(o => { if (o.name.startsWith(prefix)) { o.visible = !hidden; n++; } }); return n; },
     get photo() { return { active: photo.active, yaw: photo.yaw, pitch: photo.pitch, goal: host.querySelector('.photo-goal:not([hidden])')?.textContent ?? null, sun: sky.sunDir.toArray() }; },
