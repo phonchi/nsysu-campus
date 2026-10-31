@@ -692,6 +692,9 @@ def lm_library():
     lm.box(0, rc + 1.5, 2.4, 1.0, 1.1, 1.6, lm.solid(P['bronze']), lm.solid(P['bronze_hi']))
     for s, h in ((15.2, .4), (13.2, .8), (11.0, 1.2)):
         lm.col(0, rc, 0, s * 1.414, s * 1.414, h, walk=True); lm.col(0, rc, 0, s * 1.414, s * 1.414, h, rot=math.pi / 4, walk=True)
+    # The two squares above leave a star; 16 wedges fill the lowest round tier so nobody walks into its visual.
+    for k in range(16):
+        a = k * math.pi / 8; lm.col(7.6 * math.cos(a), rc + 7.6 * math.sin(a), 0, 15.2, 2 * 15.2 * math.tan(math.pi / 16), .4, rot=a, walk=True)
     lm.view('front', 180, 8, 140, (0, south - 10, 20), lens=35)
     lm.view('corner', 135, 18, 150, (0, 0, 22), lens=35)
     return lm

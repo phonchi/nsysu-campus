@@ -2,7 +2,7 @@ import { Vector2, Vector3 } from 'three';
 
 const MOVE_KEYS = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
 /** Keys the walkthrough owns while focus is not in a text field. */
-const OWNED = [...MOVE_KEYS, ' ', 'e', 'g', 'v', 'm', 'n', 'l', 'p', 'b', 'j', 'r', 'shift', '/', 'escape'];
+const OWNED = [...MOVE_KEYS, ' ', 'e', 'g', 'v', 'm', 'n', 'l', 'p', 'b', 'j', 'r', 'h', 'shift', '/', 'escape'];
 
 /** Who owns the keyboard (spec-v4 §15.4). Outside "walk" no movement is recorded and no walk shortcut fires;
  * every key goes to `modal` instead (photo mode still records movement keys for its camera). */

@@ -43,6 +43,12 @@ export function moveNpcSafely(id: string, foot: T.Vector3, desired: T.Vector3, p
   return tryStep(side) ?? tryStep(side.negate()) ?? origin;
 }
 
+/** Opacity from camera distance to the finite vertical body axis. */
+export function npcCameraOpacity(camera: T.Vector3, foot: T.Vector3, height: number) {
+  const y = Math.max(foot.y, Math.min(foot.y + height, camera.y));
+  return T.MathUtils.clamp((Math.hypot(camera.x - foot.x, camera.y - y, camera.z - foot.z) - .55) / .45, 0, 1);
+}
+
 type P2 = [number, number];
 export interface ZoneSpec { label: string; sub?: string; p: P2; r: number; y?: number }
 export interface NpcSpec { model: string; at: string; offset?: P2; activity?: string }
@@ -51,6 +57,8 @@ export type Preset = 'day' | 'sunset' | 'night';
 export type Placement = { at: string | P2; offset?: P2; activity?: string } | null;
 
 /** NPCs whose position the story owns until the tour is complete (spec-v4 §15.1). */
+/** Ambient walkers head here. The graph anchors for IL and ACTIVITY sit inside those buildings' solid colliders. */
+const AMBIENT_ANCHORS = ['arcade', 'admin', 'library', 'YH', 'SPORT', 'CMSS'];
 export const STORY_NPCS = ['guide', 's1', 's2', 's3', 'm1'];
 
 /** Where an NPC should be: the story decides for story NPCs until all chapters are done, otherwise the
@@ -90,6 +98,8 @@ export function disposeObject(root: T.Object3D) {
 class Npc {
   readonly root = new T.Group();
   private mixer: T.AnimationMixer;
+  private fadeMaterials: { material: T.Material; source: T.Material }[] = [];
+  private fade = 1;
   private actions = new Map<string, T.AnimationAction>();
   private current?: T.AnimationAction;
   path: T.Vector3[] = [];
@@ -103,7 +113,18 @@ class Npc {
   monkey = false;
   /** Recoloured clones own their materials and canvas textures (the GLB source owns the rest). */
   owned: T.Material[] = [];
-  constructor(readonly id: string, model: T.Object3D, clips: T.AnimationClip[]) {
+  constructor(readonly id: string, private model: T.Object3D, clips: T.AnimationClip[]) {
+    model.traverse(o => {
+      if (!(o instanceof T.Mesh)) return;
+      const clone = (source: T.Material) => {
+        const material = source.clone();
+        material.onBeforeCompile = source.onBeforeCompile;
+        material.customProgramCacheKey = source.customProgramCacheKey;
+        this.fadeMaterials.push({ material, source });
+        return material;
+      };
+      o.material = Array.isArray(o.material) ? o.material.map(clone) : clone(o.material);
+    });
     model.rotation.y = Math.PI; // glTF characters face +Z; headings below assume -Z
     this.root.add(model);
     this.mixer = new T.AnimationMixer(model);
@@ -144,7 +165,22 @@ class Npc {
     this.root.rotation.y = this.heading;
     this.mixer.update(dt);
   }
+  updateCamera(camera: T.Vector3) {
+    const alpha = this.talking ? 1 : npcCameraOpacity(camera, this.position, this.monkey ? .65 : 1.7);
+    if (alpha === this.fade) return;
+    this.fade = alpha;
+    this.model.visible = alpha > 0;
+    // Without depth writes a hull's dark back faces would paint over the body.
+    this.model.traverse(o => { if (o.userData.outlineHull) o.visible = alpha >= .999; });
+    for (const { material, source } of this.fadeMaterials) {
+      const want = source.transparent || alpha < .999;
+      if (material.transparent !== want) { material.transparent = want; material.needsUpdate = true; }
+      material.opacity = source.opacity * alpha; material.depthWrite = source.depthWrite && alpha >= .999;
+    }
+  }
   dispose() {
+    for (const { material } of this.fadeMaterials) material.dispose();
+    this.fadeMaterials = [];
     this.mixer.stopAllAction(); this.mixer.uncacheRoot(this.mixer.getRoot());
     for (const m of this.owned) { (m as T.MeshToonMaterial).map?.dispose(); m.dispose(); }
     this.owned = [];
@@ -234,7 +270,7 @@ export class NpcManager {
       this.npcs.set(d.id, npc);
     }));
     // Ambient students wander between anchors along real paths.
-    const anchors = this.routes ? ['arcade', 'admin', 'library', 'ACTIVITY', 'YH', 'SPORT', 'IL', 'CMSS'].filter(a => this.routes!.anchor(a)) : [];
+    const anchors = this.routes ? AMBIENT_ANCHORS.filter(a => this.routes!.anchor(a)) : [];
     const students = this.zones.ambient?.students ?? [];
     await Promise.all(students.map(async (model, i) => {
       if (!anchors.length) return;
@@ -305,9 +341,15 @@ export class NpcManager {
   private wander(npc: Npc) {
     if (npc.path.length || !this.routes || npc.id.startsWith('mk')) return;
     if (Math.random() > .004) return;
-    const ids = ['arcade', 'admin', 'library', 'ACTIVITY', 'YH', 'SPORT', 'IL', 'CMSS'];
+    const ids = AMBIENT_ANCHORS;
     const goal = this.routes.anchor(ids[Math.floor(Math.random() * ids.length)]);
     if (goal) npc.path = this.routes.path(npc.position, goal).slice(1, -1);
+  }
+
+  /** Camera fading changes only the visual model, never culling, actors or interaction reach. */
+  updateCamera(camera: T.Vector3) {
+    for (const n of this.npcs.values()) n.updateCamera(camera);
+    for (const n of this.ambient) n.updateCamera(camera);
   }
 
   setTalking(id: string | undefined) { for (const n of this.npcs.values()) n.talking = n.id === id; }

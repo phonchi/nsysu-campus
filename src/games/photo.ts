@@ -1,4 +1,5 @@
 import * as T from 'three';
+import type { Sweep } from '../walk/camera-rig';
 
 /** Photo mode (spec-v4 §9.2): HUD hidden, a free camera that orbits a pivot the player can move within 15 m
  * of where they stood (never below the ground), time-of-day buttons, a shutter that saves a watermarked PNG.
@@ -8,6 +9,7 @@ export interface PhotoDeps {
   camera: T.PerspectiveCamera;
   canvas: HTMLCanvasElement;
   ground(x: number, z: number): number;
+  sweep?: Sweep;
   setSky(p: 'day' | 'sunset' | 'night'): void;
   sky(): string;
   cue(id: string): void;
@@ -23,6 +25,8 @@ export class PhotoMode {
   active = false;
   private pivot = new T.Vector3();
   private origin = new T.Vector3();
+  private previous = new T.Vector3();
+  private delta = new T.Vector3();
   yaw = 0;
   pitch = -.15;
   private dist = 4.5;
@@ -90,14 +94,26 @@ export class PhotoMode {
     const f = (keys.has('w') || keys.has('arrowup') ? 1 : 0) - (keys.has('s') || keys.has('arrowdown') ? 1 : 0);
     const r = (keys.has('d') || keys.has('arrowright') ? 1 : 0) - (keys.has('a') || keys.has('arrowleft') ? 1 : 0);
     const speed = (keys.has('shift') ? 6 : 3) * dt, fx = -Math.sin(this.yaw), fz = -Math.cos(this.yaw);
+    this.previous.copy(this.pivot);
     this.pivot.x += (fx * f - fz * r) * speed; this.pivot.z += (fz * f + fx * r) * speed;
     const off = new T.Vector2(this.pivot.x - this.origin.x, this.pivot.z - this.origin.z);
     if (off.length() > 15) { off.setLength(15); this.pivot.x = this.origin.x + off.x; this.pivot.z = this.origin.z + off.y; }
     this.pivot.y = Math.max(this.pivot.y, this.d.ground(this.pivot.x, this.pivot.z) + .6);
+    this.constrain(this.previous, this.pivot);
     const cam = this.d.camera, cp = Math.cos(this.pitch);
     cam.position.set(this.pivot.x + Math.sin(this.yaw) * cp * this.dist, this.pivot.y - Math.sin(this.pitch) * this.dist, this.pivot.z + Math.cos(this.yaw) * cp * this.dist);
     cam.position.y = Math.max(cam.position.y, this.d.ground(cam.position.x, cam.position.z) + .3);
+    this.constrain(this.pivot, cam.position);
     cam.lookAt(this.pivot);
+  }
+
+  /** Sweep even sub-margin steps: skipping them would let held input accumulate through a wall. */
+  private constrain(from: T.Vector3, to: T.Vector3) {
+    if (!this.d.sweep) return;
+    const delta = this.delta.copy(to).sub(from), length = delta.length();
+    if (length < 1e-8) return;
+    const free = this.d.sweep(from, to, .15);
+    if (free < length) to.copy(from).addScaledVector(delta, Math.max(0, free - .015) / length);
   }
 
   shoot() { if (this.active) this.pending = true; }

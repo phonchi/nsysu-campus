@@ -1,12 +1,12 @@
 /** Persistent side quests and journal; never touches the v3/v4 player saves. */
 export interface QuestChoice { id: string; label: string; result: string }
-export interface QuestStep { id: string; target: string; text: string; radius?: number; kind?: 'interact' | 'photo'; choices?: QuestChoice[]; when?: string }
-export interface QuestDefinition { id: string; title: string; zone: string; npc: string; description: string; reward: string; steps: QuestStep[] }
+export interface QuestStep { id: string; target: string; text: string; lines?: { who: string; text: string }[]; radius?: number; kind?: 'interact' | 'photo'; choices?: QuestChoice[]; when?: string }
+export interface QuestDefinition { id: string; title: string; zone: string; npc: string; description: string; reward: string; accept: { near: string; chapterDone?: string; lines?: { who: string; text: string }[] }; absent?: Record<string, string>; steps: QuestStep[] }
 export interface QuestData { version: number; quests: QuestDefinition[] }
 export interface QuestState { status: 'active' | 'completed'; step: number; choices: Record<string, string>; photoBaseline?: number }
 export interface JournalEntry { id: string; kind: 'quest' | 'encounter' | 'legacy'; title: string; text: string; at: number; zone: string; npc: string; choice?: string; result?: string; reward?: string }
 export interface QuestProgress { version: 1; quests: Record<string, QuestState>; journal: JournalEntry[]; rewards: string[]; tracked?: string; legacySnapshotTaken?: boolean }
-export interface QuestWorld { distanceTo(target: string): number; timeOfDay(): string; photoCount?: number }
+export interface QuestWorld { distanceTo(target: string): number; timeOfDay(): string; photoCount?: number; chapterDone?(id: string): boolean }
 export interface QuestView { definition: QuestDefinition; state?: QuestState; step?: QuestStep }
 export interface QuestOptions { storage?: Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>; now?: () => number; onChange?: () => void; onStorageError?: () => void }
 export const QUEST_KEY = 'nsysu-campus-journal-v5';
@@ -55,17 +55,22 @@ export class QuestEngine {
     // Retain the evidence and stable IDs, but do not assert an unknowable source version.
     if (p.legacySnapshotTaken !== true) this.progress.journal = this.progress.journal.map(entry =>
       entry.kind === 'legacy' ? { ...entry, title: '過往進度', text: '來源版本未記錄，無詳細經過。' } : entry);
-    if (p.tracked && this.progress.quests[p.tracked]?.status === 'active') this.progress.tracked = p.tracked;
+    if (p.tracked && this.data.quests.some(q => q.id === p.tracked) && this.progress.quests[p.tracked]?.status !== 'completed') this.progress.tracked = p.tracked;
   }
   list(): QuestView[] { return this.data.quests.map(definition => { const state = this.progress.quests[definition.id]; return { definition, state, step: state?.status === 'active' ? definition.steps[state.step] : undefined }; }); }
+  unlocked(q: QuestDefinition, world: QuestWorld) { return !q.accept.chapterDone || world.chapterDone?.(q.accept.chapterDone) === true; }
+  acceptable(world: QuestWorld): QuestView[] {
+    // A first step spoken by the same NPC plays on acceptance, so it must be possible right now.
+    return this.list().filter(v => { const first = v.definition.steps[0]; return !v.state && this.unlocked(v.definition, world) && world.distanceTo(v.definition.accept.near) <= 4 && (first.target !== v.definition.accept.near || !first.when || first.when === world.timeOfDay()); });
+  }
   accept(id: string, world?: QuestWorld) {
     const q = this.data.quests.find(q => q.id === id);
-    if (!q || this.progress.quests[id]) return false;
+    if (!q || !world || !this.acceptable(world).some(v => v.definition.id === id)) return false;
     this.progress.quests[id] = { status: 'active', step: 0, choices: {}, photoBaseline: world?.photoCount ?? 0 };
     this.progress.tracked = id;
     this.entry({ id: `${id}:accepted`, kind: 'quest', title: q.title, text: q.description, zone: q.zone, npc: q.npc }); this.save(); return true;
   }
-  track(id?: string) { if (id && this.progress.quests[id]?.status !== 'active') return false; this.progress.tracked = id; this.save(); return true; }
+  track(id?: string) { if (id && (!this.data.quests.some(q => q.id === id) || this.progress.quests[id]?.status === 'completed')) return false; this.progress.tracked = id; this.save(); return true; }
   private reachable(step: QuestStep, world: QuestWorld) { return world.distanceTo(step.target) <= (step.radius ?? 4) && (!step.when || step.when === world.timeOfDay()); }
   candidate(world: QuestWorld, includeZones = false): QuestView | undefined {
     return this.list().filter(v => v.step && v.step.kind !== 'photo' && (includeZones || v.step.target.startsWith('npc:')) && this.reachable(v.step, world)).sort((a, b) => Number(b.definition.id === this.progress.tracked) - Number(a.definition.id === this.progress.tracked) || world.distanceTo(a.step!.target) - world.distanceTo(b.step!.target))[0];

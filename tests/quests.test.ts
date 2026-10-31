@@ -5,13 +5,19 @@ import questData from '../public/data/quests.json';
 import encounterData from '../public/data/encounters.json';
 const data = questData as QuestData, encounters = encounterData as EncounterData;
 const memory = () => { const m = new Map<string, string>(); return { getItem: (k: string) => m.get(k) ?? null, setItem: (k: string, v: string) => { m.set(k,v); }, removeItem: (k: string) => { m.delete(k); } }; };
-const world = (target: string, photos = 0): QuestWorld => ({ distanceTo: t => t === target ? 0 : 1e9, timeOfDay: () => 'day', photoCount: photos });
+const world = (target: string, photos = 0): QuestWorld => ({ distanceTo: t => t === target ? 0 : 1e9, timeOfDay: () => 'day', chapterDone: () => true, photoCount: photos });
+const accept = (e: QuestEngine, id: string) => { const q = e.data.quests.find(q => q.id === id)!; return e.accept(id, { ...world(q.accept.near), timeOfDay: () => q.steps[0].when ?? 'day' }); };
 describe('side quests and persistent journal', () => {
+ it('cannot be accepted while a first step at the same NPC is out of its time window', () => {
+  const q = data.quests.find(q => q.id === 'sea-stage')!, e = new QuestEngine(data, { storage: memory() });
+  expect(e.accept(q.id, world(q.accept.near))).toBe(false);
+  expect(e.accept(q.id, { ...world(q.accept.near), timeOfDay: () => 'sunset' })).toBe(true);
+ });
  it('validates all twelve authored quests', () => { expect(data.quests).toHaveLength(12); expect(validateQuests(data)).toEqual([]); });
  it('finishes every choice branch, reloads at every transition and never repeats reward', () => {
   for (const q of data.quests) for (const choice of q.steps.at(-1)!.choices!) {
    const storage = memory(); let engine = new QuestEngine(data, { storage, now: () => 100 });
-   expect(engine.accept(q.id)).toBe(true); expect(engine.accept(q.id)).toBe(false);
+   expect(accept(engine, q.id)).toBe(true); expect(accept(engine, q.id)).toBe(false);
    for (const step of q.steps) {
     engine = new QuestEngine(data, { storage });
     const atStep={...world(step.target,1),timeOfDay:()=>step.when??'day'};
@@ -31,7 +37,7 @@ describe('side quests and persistent journal', () => {
  it('rejects malformed states, survives corrupt JSON and reports failed storage', () => {
   const storage = memory(); storage.setItem(QUEST_KEY, JSON.stringify({quests:{[data.quests[0].id]:{status:'active',step:-1}}})); expect(new QuestEngine(data,{storage}).list()[0].state).toBeUndefined();
   let errors=0; storage.setItem(QUEST_KEY,'{'); const e = new QuestEngine(data,{storage,onStorageError:()=>errors++}); expect(errors).toBe(1);
-  const failing = { ...storage, setItem:()=> {throw Error('quota');} }; const f = new QuestEngine(data,{storage:failing,onStorageError:()=>errors++}); f.accept(data.quests[0].id); expect(f.progress.quests[data.quests[0].id].status).toBe('active'); expect(errors).toBeGreaterThan(1); expect(e.progress.journal).toEqual([]);
+  const failing = { ...storage, setItem:()=> {throw Error('quota');} }; const f = new QuestEngine(data,{storage:failing,onStorageError:()=>errors++}); accept(f, data.quests[0].id); expect(f.progress.quests[data.quests[0].id].status).toBe('active'); expect(errors).toBeGreaterThan(1); expect(e.progress.journal).toEqual([]);
  });
 });
 describe('joyful encounters', () => {
@@ -61,7 +67,7 @@ describe('review regressions',()=>{
   const storage=memory();storage.setItem(QUEST_KEY,JSON.stringify({version:1,quests:{},journal:[],rewards:[]}));const e=new QuestEngine(data,{storage});e.importLegacy(['new'],[]);expect(e.progress.journal).toHaveLength(0);
  });
  it('only accepts a photo at the shutter instant in the right location and time',()=>{
-  const q=data.quests.find(q=>q.steps[0].kind==='photo')!;const local:QuestData={version:1,quests:[{...q,steps:[{...q.steps[0],when:'sunset'},q.steps[1]]}]};const storage=memory();let e=new QuestEngine(local,{storage});e.accept(q.id);
+  const q=data.quests.find(q=>q.steps[0].kind==='photo')!;const local:QuestData={version:1,quests:[{...q,steps:[{...q.steps[0],when:'sunset'},q.steps[1]]}]};const storage=memory();let e=new QuestEngine(local,{storage});accept(e, q.id);
   const correct={...world(q.steps[0].target,7),timeOfDay:()=> 'sunset'};
   e.update(correct);expect(e.progress.quests[q.id].step).toBe(0);
   expect(e.notifyPhoto(world('wrong',8))).toBe(0);expect(e.notifyPhoto(world(q.steps[0].target,9))).toBe(0);
@@ -69,8 +75,8 @@ describe('review regressions',()=>{
   expect(e.notifyPhoto(correct)).toBe(1);e=new QuestEngine(local,{storage});expect(e.progress.quests[q.id].step).toBe(1);
  });
  it('does not let area/photo quests steal ordinary NPC E candidates',()=>{
-  const e=new QuestEngine(data,{storage:memory()});const photo=data.quests.find(q=>q.steps[0].kind==='photo')!;e.accept(photo.id);expect(e.candidate(world(photo.steps[0].target))).toBeUndefined();
-  const zone={...data.quests[0],id:'zone-fixture',steps:[{id:'zone-step',target:'zone:gate',text:'check area'},data.quests[0].steps.at(-1)!]};const areas=new QuestEngine({version:1,quests:[zone]},{storage:memory()});areas.accept(zone.id);expect(areas.candidate(world('zone:gate'))).toBeUndefined();expect(areas.candidate(world('zone:gate'),true)?.definition.id).toBe(zone.id);
+  const e=new QuestEngine(data,{storage:memory()});const photo=data.quests.find(q=>q.steps[0].kind==='photo')!;accept(e, photo.id);expect(e.candidate(world(photo.steps[0].target))).toBeUndefined();
+  const zone={...data.quests[0],id:'zone-fixture',steps:[{id:'zone-step',target:'zone:gate',text:'check area'},data.quests[0].steps.at(-1)!]};const areas=new QuestEngine({version:1,quests:[zone]},{storage:memory()});accept(areas, zone.id);expect(areas.candidate(world('zone:gate'))).toBeUndefined();expect(areas.candidate(world('zone:gate'),true)?.definition.id).toBe(zone.id);
  });
  it('unaccepted and unsafe offers do not journal or consume cooldown; active abandonment does',()=>{
   const records:unknown[]=[];const e=new EncounterEngine(encounters,{record:x=>records.push(x),random:()=>0});const d=encounters.encounters[0];

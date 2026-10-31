@@ -53,6 +53,8 @@ export class CampusUi {
  get landmarkDiagnostics(){return {labels:this.labelCatalog.map(l=>({id:l.id,name:l.name,position:l.position.toArray()})),footprints:this.structure.context.landmarks.map(l=>({id:l.id,polygon:l.polygon})),mapBounds:[...PLAY_BOUNDS]};}
  updateLandmarkAnchors(anchors:Record<string,T.Vector3>){for(const label of this.landmarkLabels)if(anchors[label.id])label.position.copy(anchors[label.id]);}
  get storyProgress(){return {found:[...this.collected].filter(id=>this.info.stories.some(s=>s.id===id)).length,total:this.info.stories.length};}
+ /** Campus-info story ids the player has read (for the journal's campus-history clues, `story/clues.ts`). */
+ get collectedStoryIds():ReadonlySet<string>{return this.collected;}
  private refreshCounter(){this.counter.innerHTML=`<span>校史支線</span><strong>${[...this.collected].filter(id=>this.info.stories.some(s=>s.id===id)).length}</strong><small>／${this.info.stories.length}</small>`;}
  openCard(id:string){
   const b=this.info.buildings[id] ?? (id==='GATE'?{name:'校門・校碑',college:'admin',summary:'校碑位於校門海側，警衛亭在山側。可前往校門附近觀看。',facts:[],links:[]}:undefined);const walkable=this.world.frames.has(id);

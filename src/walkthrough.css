@@ -162,3 +162,27 @@
 .walkthrough .game-opts button.right{background:#bfe3a6}.walkthrough .game-opts button.wrong{background:#f2b8ac}.walkthrough .game-opts button.dim{opacity:.55}
 .game-foot p{margin:12px 0;line-height:1.7}.game-foot a{color:#2c7f91}
 .walkthrough .game-foot button{min-height:42px;padding:0 18px;border:2px solid #2a2c4a;border-radius:999px;background:#e9b949;color:#1d2a3a;font:inherit;font-weight:700;cursor:pointer}
+
+/* ---- v7 Lane C: `?` help icon, phone hudbar wrap, first-run guide ---- */
+.walk-icon[data-action=help]{font-size:22px;font-weight:700;line-height:1}
+/* Phones: five icons in one row (252px) would run under the objective card (ends at 100vw - 168px); wrap into two rows of three. */
+@media (max-width:759px){.walk-hudbar{flex-wrap:wrap;justify-content:flex-end;width:148px}}
+.walk-guide{pointer-events:auto;position:absolute;inset:0;z-index:58;display:grid;place-items:center;padding:16px;background:#1d2a3a73}
+.walk-guide[hidden]{display:none}
+.walk-guide-panel{width:min(460px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:20px 24px 18px;background:#fbf6ea;border:2px solid #2a2c4a;border-radius:20px;box-shadow:0 6px 0 #2a2c4a22,0 18px 40px #1d2a3a44;color:#1d2a3a;font-family:'Noto Sans TC',system-ui,sans-serif;font-size:14px;line-height:1.7}
+.walk-guide-panel small{color:#b98422;letter-spacing:2px;font-weight:700}
+.walk-guide-panel h2{margin:4px 0 12px;font-size:20px;line-height:1.4}
+.walk-guide-panel ul{margin:0 0 14px;padding:0;list-style:none;display:grid;gap:8px}
+.walk-guide-panel li{display:flex;gap:10px;align-items:flex-start}
+.walk-guide-panel li:before{content:'';flex:none;width:8px;height:8px;margin-top:9px;border-radius:50%;background:#e9b949}
+.walk-guide-panel kbd{display:inline-block;min-width:24px;padding:0 6px;margin:0 2px;text-align:center;line-height:22px;border:1px solid #2a2c4a33;border-radius:6px;background:#f1e9d6;color:#1d2a3a;font:700 12px system-ui}
+.walk-guide-actions{display:flex;flex-wrap:wrap;gap:8px}
+.walkthrough .walk-guide-actions button{min-height:44px;padding:0 18px;border:2px solid #2a2c4a;border-radius:999px;background:#fff;color:#1d2a3a;font:inherit;font-weight:700;cursor:pointer}
+.walkthrough .walk-guide-actions button[data-guide=start]{background:#e9b949}
+.walk-guide-note{margin:12px 0 0;color:#56657a;font-size:13px}
+/* Help tab: section headings and wrapped key descriptions. */
+.walk-menu-panel [data-pane=help] h3{margin:14px 0 6px;font-size:14px;letter-spacing:1px;color:#b98422}
+.walk-menu-panel [data-pane=help] h3:first-child{margin-top:0}
+.walk-menu-panel [data-pane=help] .walk-keys dt{white-space:nowrap}
+.walk-menu-panel [data-pane=help] .walk-keys dd{line-height:1.6}
+@media (pointer: coarse) { .walk-menu-panel header small { display: none; } }

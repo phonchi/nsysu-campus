@@ -1,6 +1,7 @@
 import * as T from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { toonify } from '../render/toon';
 import { addOutlines } from '../render/outline';
 import { NIGHT_MATERIALS } from '../walk-materials';
@@ -98,6 +99,30 @@ export function landmarkTransforms(id: string, p: Placement, ground: (x: number,
   return out;
 }
 
+/** Landmarks sit at their centroid's ground height, so on a slope the downhill side would hang in the air.
+ * Each ground-level box that floats gets a footing down to the lowest soil under it, shown and solid alike. */
+export function landmarkFootings(placements: Record<string, Placement>, collisions: Record<string, { boxes: Box[] }>, ground: (x: number, z: number) => number): Box[] {
+  const out: Box[] = [];
+  for (const id of LANDMARK_IDS) {
+    const p = placements[id], col = collisions[id];
+    if (!p || !col || id === 'tunnel' || p.path) continue;
+    const seat = new T.Vector3().setFromMatrixPosition(landmarkTransforms(id, p, ground)[0]).y, c = Math.cos(p.yaw), s = Math.sin(p.yaw);
+    for (const b of col.boxes) {
+      if (b.center[1] - b.size[1] / 2 > .1) continue;
+      const by = Math.cos(b.yaw), bs = Math.sin(b.yaw), at = (u: number, v: number): P2 => {
+        const lx = b.center[0] + u * b.size[0] * by + v * b.size[2] * bs, lz = b.center[2] - u * b.size[0] * bs + v * b.size[2] * by;
+        return [p.centroid[0] + lx * c + lz * s, p.centroid[1] - lx * s + lz * c];
+      };
+      let low = Infinity;
+      for (let u = -.5; u <= .5; u += .25) for (let v = -.5; v <= .5; v += .25) low = Math.min(low, ground(...at(u, v)));
+      if (seat - low <= .25) continue;
+      const [x, z] = at(0, 0), bottom = low - .1;
+      out.push({ center: [x, (seat + bottom) / 2, z], size: [b.size[0], seat - bottom, b.size[2]], yaw: p.yaw + b.yaw });
+    }
+  }
+  return out;
+}
+
 /** Collision boxes for every landmark, as meshes in one group. Pure (no GLB): shared by the runtime, the navmesh
  * bake and node-side tests so all three see the same world. */
 export function landmarkCollision(placements: Record<string, Placement>, collisions: Record<string, { boxes: Box[] }>, ground: (x: number, z: number) => number) {
@@ -109,6 +134,7 @@ export function landmarkCollision(placements: Record<string, Placement>, collisi
     const extra: Box[] = [];
     for (const m of landmarkTransforms(id, p, ground)) boxesToMeshes([...col.boxes, ...extra], group, m);
   }
+  boxesToMeshes(landmarkFootings(placements, collisions, ground), group, new T.Matrix4());
   if(placements.tunnel){const profile=fullTunnelProfile(placements.tunnel,ground),geometry=fullTunnelGeometry(profile);for(const [kind,g]of Object.entries(geometry)){const mesh=new T.Mesh(g,new T.MeshBasicMaterial());mesh.name=`Tunnel ${kind} collision`;mesh.userData.surfaceKind='tunnel';group.add(mesh);}}
   group.updateMatrixWorld(true);
   return group;
@@ -152,6 +178,14 @@ export async function loadLandmarks(asset: (p: string) => string, placements: Re
     if (REPLACES[id]) replaced.push(REPLACES[id]);
   }));
   if(placements.tunnel){const geometry=fullTunnelGeometry(fullTunnelProfile(placements.tunnel,ground));const corridor=new T.Group();corridor.name='Full Sisihwan tunnel';corridor.userData.landmarkId='tunnel';corridor.userData.portal='interior';for(const [kind,g]of Object.entries(geometry)){const material=new T.MeshStandardMaterial({color:kind==='floor'?0x96918b:0xd0ccc1,roughness:.95,side:T.DoubleSide,emissive:kind==='floor'?0x171716:0x242421,emissiveIntensity:.45});const mesh=new T.Mesh(g,material);mesh.name=`Full tunnel ${kind}`;mesh.receiveShadow=true;corridor.add(mesh);}toonify(corridor);display.add(corridor);}
+  const footings = landmarkFootings(placements, collisions, ground);
+  if (footings.length) {
+    const group = new T.Group(); group.name = 'Landmark footings';
+    boxesToMeshes(footings, group, new T.Matrix4());
+    const merged = mergeGeometries(group.children.map(o => { const m = o as T.Mesh; m.updateMatrix(); return m.geometry.applyMatrix4(m.matrix); }));
+    const footing = new T.Mesh(merged, new T.MeshStandardMaterial({ color: '#b9ae9c' })); footing.name = 'Landmark footings';
+    toonify(footing); footing.castShadow = true; footing.receiveShadow = true; display.add(footing);
+  }
   addOutlines(display, 'landmark');
   display.updateMatrixWorld(true);
   return { display, collision: landmarkCollision(placements, collisions, ground), replacedOsm: replaced,

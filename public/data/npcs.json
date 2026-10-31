@@ -277,8 +277,8 @@
     "night": {
      "at": "seawall",
      "offset": [
-      -6,
-      4
+      3,
+      -4
      ],
      "activity": "Idle"
     }
@@ -396,7 +396,7 @@
     "day": {
      "at": "IL",
      "offset": [
-      4,
+      -3,
       6
      ],
      "activity": "Idle"
@@ -461,7 +461,7 @@
     "night": {
      "at": "IL",
      "offset": [
-      2,
+      -3,
       4
      ],
      "activity": "Idle"
@@ -789,7 +789,7 @@
     "day": {
      "at": "IL",
      "offset": [
-      3,
+      -3,
       -4
      ],
      "activity": "Idle"
@@ -1393,9 +1393,31 @@
     },
     {
      "if": {
+      "all": [
+       {
+        "chapterDone": "c1-gate"
+       },
+       {
+        "notFlag": "c1.s1"
+       },
+       {
+        "notFlag": "s1.late"
+       }
+      ]
+     },
+     "node": "gate-late"
+    },
+    {
+     "if": {
       "flag": "c1.talked"
      },
      "node": "gate-root"
+    },
+    {
+     "if": {
+      "flag": "c1.s1"
+     },
+     "node": "gate-waiting"
     },
     {
      "node": "gate-shy"
@@ -1407,6 +1429,49 @@
       {
        "who": "s1",
        "text": "你也新生？我……我很熟，不用問。"
+      }
+     ]
+    },
+    "gate-waiting": {
+     "lines": [
+      {
+       "who": "s1",
+       "text": "先去問清楚吧，你往哪走我就往哪走。"
+      }
+     ]
+    },
+    "gate-late": {
+     "lines": [
+      {
+       "who": "s1",
+       "text": "你也是新生？我在這裡轉三圈了，報到到底在哪？"
+      },
+      {
+       "who": "player",
+       "text": "阿灣說報到在行政大樓，我正要過去。"
+      },
+      {
+       "who": "s1",
+       "text": "太好了，那我跟著你的方向走。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "s1.late"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「一起走吧。」",
+       "next": "together"
+      },
+      {
+       "text": "「我先走，你慢慢來。」",
+       "next": "solo"
+      },
+      {
+       "text": "「你也怕猴子？」",
+       "next": "bread"
       }
      ]
     },
@@ -1423,7 +1488,7 @@
        "next": "together"
       },
       {
-       "text": "「報到在行政大樓，走隧道。」",
+       "text": "「報到在行政大樓，往隧道口走。」",
        "next": "solo"
       },
       {
@@ -1478,7 +1543,7 @@
       {
        "who": "s1",
        "face": "smile",
-       "text": "{player}！我比你早到，厲害吧。"
+       "text": "{player}！手續我早就辦好了，厲害吧。"
       },
       {
        "who": "s1",
@@ -1514,7 +1579,7 @@
      "lines": [
       {
        "who": "s1",
-       "text": "{player}？你也到了。階梯好多。"
+       "text": "{player}？你也辦完了。行政大樓階梯好多。"
       }
      ],
      "next": "admin-hub"
@@ -1548,7 +1613,7 @@
      "lines": [
       {
        "who": "s1",
-       "text": "不了，我要先找宿舍。晚點長廊見。"
+       "text": "不了，我要先找宿舍。晚點再聊。"
       }
      ],
      "effects": [
@@ -1561,7 +1626,7 @@
      "lines": [
       {
        "who": "s1",
-       "text": "剛剛往圖資大樓走了，馬尾很好認。"
+       "text": "她先往下一站去了，馬尾很好認。"
       }
      ]
     },

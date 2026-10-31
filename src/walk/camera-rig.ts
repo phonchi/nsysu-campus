@@ -96,7 +96,10 @@ export class CameraRig {
     const eased = this.arm + (this.distance - this.arm) * damp(3, dt);
     this.arm = Math.max(0, Math.min(eased, free, this.distance));
     cam.position.copy(this.pivot).addScaledVector(this.look, -this.arm);
-    cam.lookAt(this.want.copy(this.pivot).addScaledVector(this.look, 2));
+    // Low steps and kerbs have no collider that stops the arm; stay above them and keep the player framed.
+    const floor = f.foot.y + .5;
+    if (cam.position.y < floor) { cam.position.y = floor; cam.lookAt(this.pivot); }
+    else cam.lookAt(this.want.copy(this.pivot).addScaledVector(this.look, 2));
     this.avatarOpacity = MathUtils.clamp((this.arm - .6) / .6, 0, 1);
   }
 }

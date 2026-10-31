@@ -12,7 +12,8 @@
       "reward": "猴學長的點心突襲見聞",
       "success": "點心袋平安回來了，猴學長裝作沒事。",
       "giveUp": "猴學長帶著空袋跑遠了，下次再玩。",
-      "duration": 90
+      "duration": 90,
+      "when": "day"
     },
     {
       "id": "monkey-hat",
@@ -23,20 +24,21 @@
       "target": "npc:m1",
       "radius": 4,
       "reward": "猴學長的新帽子見聞",
-      "success": "你用備用帽逗牠注意，成功拿回活動帽！",
+      "success": "你沒有跟牠對看，慢慢退開。猴學長玩膩了，丟下帽子走了。",
       "giveUp": "帽子先借猴學長走秀，志工笑著拿出備用帽。",
-      "duration": 90
+      "duration": 90,
+      "when": "day"
     },
     {
       "id": "wind-flyer",
       "title": "海風傳單接力",
       "zone": "tunnel-west",
-      "npc": "s1",
-      "description": "一陣風把迎新傳單吹成紙蝴蝶，小禾正忙著追。",
+      "npc": "player",
+      "description": "一陣風把洞口的活動傳單吹成紙蝴蝶，你伸手試著攔住。",
       "target": "zone:tunnel-west",
       "radius": 12,
       "reward": "海風傳單接力見聞",
-      "success": "你攔住飛舞的傳單，大家一起歡呼。",
+      "success": "飛舞的傳單收回公告旁，洞口的路面清爽了。",
       "giveUp": "傳單飛進回收箱，這場接力意外完成了。",
       "duration": 90
     },
@@ -51,7 +53,8 @@
       "reward": "社團球逃跑了見聞",
       "success": "軟球回到阿柏手中，他請你當榮譽守門員。",
       "giveUp": "阿柏自己追上了軟球，遠遠向你揮手。",
-      "duration": 90
+      "duration": 90,
+      "when": "day"
     },
     {
       "id": "pop-up-song",

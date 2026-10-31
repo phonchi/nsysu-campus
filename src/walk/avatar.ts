@@ -52,6 +52,8 @@ export class Avatar {
   private wasGround = true;
   private oneShotLeft = 0;
   private materials: T.Material[] = [];
+  private vehicleMaterials: T.Material[] = [];
+  private hullsVisible = true;
   private squash = 0;
   private model?: T.Object3D;
   private vehicle?: T.Object3D;
@@ -70,6 +72,7 @@ export class Avatar {
     model.traverse(o => {
       if (o instanceof T.Mesh) {
         o.castShadow = true;
+        if (o.userData.outlineHull) return; // shared with other characters; hidden while fading instead
         for (const m of Array.isArray(o.material) ? o.material : [o.material]) this.materials.push(m);
       }
     });
@@ -115,7 +118,16 @@ export class Avatar {
 
   setOpacity(alpha: number) {
     this.root.visible = alpha > .02;
-    for (const m of this.materials) {
+    this.fadeMaterials(this.materials, alpha);
+    this.fadeMaterials(this.vehicleMaterials, alpha);
+    // Without depth writes a hull's dark back faces would paint over the body.
+    const hullVisible = alpha >= .999;
+    if (!hullVisible || !this.hullsVisible) this.root.traverse(o => { if (o.userData.outlineHull) o.visible = hullVisible; });
+    this.hullsVisible = hullVisible;
+  }
+
+  private fadeMaterials(materials: T.Material[], alpha: number) {
+    for (const m of materials) {
       const want = alpha < .999;
       if (m.transparent !== want) { m.transparent = want; m.needsUpdate = true; }
       m.opacity = alpha;
@@ -183,7 +195,22 @@ export class Avatar {
   }
 
   /** Attach the bike (shown only while riding); wheels named /wheel/i spin with speed. */
-  setVehicle(bike: T.Object3D) { this.vehicle?.removeFromParent(); this.vehicle = bike; bike.visible = this.riding; this.root.add(bike); this.rebuildRide(); }
+  setVehicle(bike: T.Object3D) {
+    this.vehicle?.removeFromParent();
+    for (const m of this.vehicleMaterials) m.dispose();
+    this.vehicleMaterials = [];
+    bike.traverse(o => {
+      if (!(o instanceof T.Mesh)) return;
+      const clone = (source: T.Material) => {
+        const material = source.clone();
+        material.onBeforeCompile = source.onBeforeCompile;
+        material.customProgramCacheKey = source.customProgramCacheKey;
+        this.vehicleMaterials.push(material); return material;
+      };
+      o.material = Array.isArray(o.material) ? o.material.map(clone) : clone(o.material);
+    });
+    this.vehicle = bike; bike.visible = this.riding; this.root.add(bike); this.rebuildRide();
+  }
   private spinWheels(speed: number, dt: number) {
     this.vehicle?.traverse(o => { if (/wheel/i.test(o.name)) o.rotation.x -= speed * dt / .34; });
   }
@@ -220,5 +247,5 @@ export class Avatar {
     this.model = undefined;
   }
 
-  dispose() { this.disposeModel(); }
+  dispose() { this.disposeModel(); for (const m of this.vehicleMaterials) m.dispose(); this.vehicleMaterials = []; }
 }

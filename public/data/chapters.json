@@ -14,7 +14,7 @@
         {"id": "talk", "when": [{"near": "npc:guide", "r": 3}, {"press": "E"}],
          "then": [{"dialogue": "c1-talk"}, {"setFlag": "c1.talked"}]},
         {"id": "freshman", "when": [{"near": "npc:s1", "r": 2.5}, {"press": "E"}],
-         "then": [{"dialogue": "c1-s1"}]},
+         "then": [{"dialogue": "c1-s1"}, {"setFlag": "c1.s1"}]},
         {"id": "done", "when": [{"flag": "c1.talked"}],
          "then": [{"dialogue": "c1-done"}, {"completeChapter": "c1-gate"},
                   {"unlockSideQuest": "story-sunset"}, {"moveNpc": ["guide", "tunnel-west"]}]}
