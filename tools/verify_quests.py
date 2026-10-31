@@ -11,20 +11,54 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 TIMES = ('day', 'sunset', 'night')
 IDS = ['gate-lost', 'gate-mia', 'tunnel-leaflet', 'tunnel-photo', 'admin-list', 'admin-garden',
-       'library-bookmark', 'library-corner', 'arcade-coffee', 'arcade-club', 'sea-postcard', 'sea-stage']
+       'library-bookmark', 'library-corner', 'arcade-coffee', 'arcade-club', 'sea-postcard', 'sea-stage', 'math-day']
 TITLES = ['阿忠伯的失物招領', 'Mia 的第一天', '迎新傳單飛走了', '洞口攝影練習', '小禾的報到清單', '海伯的園藝幫手',
-          '遺落的書籤', '靠海閱讀角', '阿凱的咖啡訂單', '社團攤位救援', '小橘的夕陽明信片', '允哲的海風小舞台']
+          '遺落的書籤', '靠海閱讀角', '阿凱的咖啡訂單', '社團攤位救援', '小橘的夕陽明信片', '允哲的海風小舞台', '高中人才培育班的一天']
+RESULTS = 26
 GATES = ['c1-gate', 'c4-library', 'c2-tunnel', 'c4-library', 'c4-library', 'c4-library',
-         'c4-library', 'c4-library', 'c5-arcade', 'c5-arcade', 'c5-arcade', 'c5-arcade']
+         'c4-library', 'c4-library', 'c5-arcade', 'c5-arcade', 'c5-arcade', 'c5-arcade', 'c5-arcade']
+
+
+# A spot must be close enough to the stand point to interact, and near the walking network unless it is indoors.
+STAND_REACH, SPOT_RADIUS, PHOTO_RADIUS, PATH_REACH, ZONE_REACH = 2.6, 3, 4, 18, 45  # a walk ends up to .35 m short of its stand point
+
+
+def point_in_polygon(x, z, polygon):
+    inside = False
+    for i, (ax, az) in enumerate(polygon):
+        bx, bz = polygon[i - 1]
+        if (az > z) != (bz > z) and x < (bx - ax) * (z - az) / (bz - az) + ax:
+            inside = not inside
+    return inside
+
+
+def segment_distance(x, z, a, b):
+    ex, ez = b[0] - a[0], b[1] - a[1]
+    length = ex * ex + ez * ez
+    t = max(0, min(1, ((x - a[0]) * ex + (z - a[1]) * ez) / length)) if length > 1e-9 else 0
+    return math.hypot(a[0] + ex * t - x, a[1] + ez * t - z)
+
+
+def building_rooms(code):
+    # dest:SC1005 reads the building from its prefix. A code the map labels but no room polygon holds counts: a destination is still to come for it.
+    match = re.match(r'[A-Z]+', code)
+    path = ROOT / 'public/data/walkthrough' / f'{match.group(0) if match else "?"}.json'
+    if not path.exists():
+        return set()
+    codes = set()
+    for floor in json.loads(path.read_text())['floors']:
+        codes |= {room.get('code') for room in floor.get('rooms', [])}
+        codes |= {label.get('code') for label in floor.get('unmatchedRoomLabels', [])}
+    return codes
 
 
 def load():
     def read(name):
         return json.loads((ROOT / 'public/data' / name).read_text())
-    return read('quests.json'), read('encounters.json'), read('npcs.json'), read('story-zones.json'), read('chapters.json'), read('walkthrough/outdoor-graph.json')
+    return read('quests.json'), read('encounters.json'), read('npcs.json'), read('story-zones.json'), read('chapters.json'), read('walkthrough/outdoor-graph.json'), read('walkthrough/campus-structure.json')
 
 
-def verify(quests, encounters, npcs, zones, chapters, graph):
+def verify(quests, encounters, npcs, zones, chapters, graph, structure):
     errors, results = [], set()
     def check(ok, message):
         if not ok:
@@ -72,15 +106,35 @@ def verify(quests, encounters, npcs, zones, chapters, graph):
         offset = spec.get('offset', [0, 0])
         return [p[0] + offset[0], p[1] + offset[1]]
 
+    spots = quests.get('spots', {})
+    kinds = set(re.search(r'export type SpotKind = (.*?);', (ROOT / 'src/world/quest-spots.ts').read_text(), re.S).group(1).replace("'", '').replace(' ', '').split('|'))
+    footprints = [l['polygon'] for l in structure['context']['landmarks'] if l.get('storeys')]
+    live_edges = [(graph['nodes'][a]['p'], graph['nodes'][b]['p']) for (a, b, _), kind in zip(graph['edges'], graph['edgeKind']) if kind != 'tunnel']
+    def path_distance(x, z):
+        return min(segment_distance(x, z, (a[0], a[2]), (b[0], b[2])) for a, b in live_edges)
+    used_spots = set()
+    for sid, s in spots.items():
+        check(s.get('kind') in kinds, f'spot {sid}: unknown kind {s.get("kind")}')
+        check(bool(s.get('label')), f'spot {sid}: missing label')
+        (x, z), (sx, sz) = s['at'], s['stand']
+        check(math.hypot(x - sx, z - sz) <= STAND_REACH, f'spot {sid}: stand point out of reach of the object')
+        if s.get('y') is None:  # with y it sits indoors or under the hill by design; tools/v9_visibility_qa.py proves it reachable.
+            for px, pz, what in ((x, z, 'object'), (sx, sz, 'stand point')):
+                check(not any(point_in_polygon(px, pz, polygon) for polygon in footprints), f'spot {sid}: {what} inside a building footprint')
+                check(path_distance(px, pz) <= PATH_REACH, f'spot {sid}: {what} too far from the walking network')
+
     def target_point(target, time, count):
         kind, _, name = target.partition(':')
         if kind == 'npc':
             return placement(name, time, count)
+        if kind == 'spot':
+            return spots[name]['at'] if name in spots else None
         return anchor(name) if kind == 'zone' else None
 
     def reference(target, label):
         kind, _, name = target.partition(':')
-        check((kind == 'npc' and name in people) or (kind == 'zone' and anchor(name) is not None), f'{label}: unknown target {target}')
+        known = (kind == 'npc' and name in people) or (kind == 'zone' and anchor(name) is not None) or (kind == 'spot' and name in spots) or (kind == 'dest' and name in building_rooms(name))
+        check(known, f'{label}: unknown target {target}')
 
     check(quests.get('version') == 1, 'quest data version must stay 1')
     check([q['id'] for q in quests['quests']] == IDS, 'quest IDs/order changed')
@@ -90,7 +144,7 @@ def verify(quests, encounters, npcs, zones, chapters, graph):
             continue
         index = IDS.index(label)
         check(q['reward'] == TITLES[index] + '紀念章', f'{label}: reward changed')
-        expected = ['explore', 'return'] if label in ('tunnel-photo', 'library-corner', 'sea-postcard') else ['errand-1', 'errand-2', 'return'] if label == 'arcade-coffee' else ['errand-1', 'errand-2', 'errand-3', 'return']
+        expected = ['explore', 'return'] if label in ('tunnel-photo', 'library-corner', 'sea-postcard') else ['errand-1', 'errand-2', 'return'] if label == 'arcade-coffee' else ['check-in', 'lecture', 'classroom', 'office', 'math-library', 'return'] if label == 'math-day' else ['errand-1', 'errand-2', 'errand-3', 'return']
         check([s['id'] for s in q['steps']] == expected, f'{label}: save step IDs/count changed')
         check(q['steps'][-1]['id'] == 'return', f'{label}: delivery must be last')
         gate = q.get('accept', {}).get('chapterDone')
@@ -103,6 +157,16 @@ def verify(quests, encounters, npcs, zones, chapters, graph):
         for step in q['steps']:
             sl = f"{label}/{step['id']}"
             reference(step['target'], sl)
+            kind, _, name = step['target'].partition(':')
+            check(kind != 'zone', f'{sl}: a quest step needs something to see (spot:, dest: or npc:), not a bare zone')
+            if kind == 'spot':
+                used_spots.add(name)
+                limit = PHOTO_RADIUS if step.get('kind') == 'photo' else SPOT_RADIUS
+                check(step.get('radius', 4) <= limit, f'{sl}: radius over {limit} m')
+                check(name not in spots or spots[name]['kind'] == 'viewpoint' or step.get('kind') != 'photo', f'{sl}: a photo step marks a viewpoint')
+                if name in spots and spots[name].get('y') is None and q['zone'] in zone_map:
+                    z = zone_map[q['zone']]['p']
+                    check(math.dist(spots[name]['at'], z) <= ZONE_REACH or any(math.dist(spots[name]['at'], zone_map[t]['p']) <= ZONE_REACH for t in zone_map), f'{sl}: spot strays from any named place')
             check(step.get('when', 'day') in TIMES, f'{sl}: invalid time')
             inherited = step.get('when', inherited)
             check(bool(step.get('lines')), f'{sl}: missing on-location lines')
@@ -135,7 +199,9 @@ def verify(quests, encounters, npcs, zones, chapters, graph):
         for time in TIMES:
             if placement(q['npc'], time, len(chapters_list)) is None:
                 check(bool(q.get('absent', {}).get(time)), f'{label}/{time}: acceptance NPC absence needs directions')
-    check(len(results) == 24, 'expected 24 distinct choice results')
+    check(len(results) == RESULTS, f'expected {RESULTS} distinct choice results')
+    for sid in spots:
+        check(sid in used_spots, f'spot {sid}: no step uses it')
     for e in encounters['encounters']:
         reference(e['target'], e['id'])
         check(e['npc'] == 'player' or e['npc'] in people, f'{e["id"]}: unknown attribution')
@@ -153,5 +219,5 @@ if __name__ == '__main__':
     errors = verify(*load())
     for error in errors:
         print(error, file=sys.stderr)
-    print(f'quests: {"FAIL" if errors else "OK"}（12 個任務、24 個結果、排程、錨點與舊存檔契約）')
+    print(f'quests: {"FAIL" if errors else "OK"}（{len(IDS)} 個任務、{RESULTS} 個結果、實體目標、排程、錨點與舊存檔契約）')
     sys.exit(bool(errors))

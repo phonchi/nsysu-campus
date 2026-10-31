@@ -1,7 +1,7 @@
 {
   "scope": "only final three source cases",
   "sourceBuildingSHA256": {
-    "SC": "7867a5215f66f509df063b688465bc9f2380389107d13b7775a9cf9cfba39c06",
+    "SC": "49f50d107d6c736bcf04d25936f2d472853fed8ada4b3acc13c1b8604793543a",
     "EV": "fc334b9b8a997dfb17adcbf0c70b6437883032686805caaf6c13570d8c698d11"
   },
   "entries": [
@@ -182,6 +182,8 @@
         "SC-B1-region-031": "62b99eee3235786c91b7c84e4c64f1de82a3039b4fca9b65a114f534d93b1b73",
         "EV-4F-region-009": "383bced9b71055f5eb3f3fa789f0dab911ff781cf218a99c611320d9a206c453"
       }
-    }
+    },
+    "v9: SC.json courtyard void, SC2001/SC3001 doors, SC4010 room, display names; reviewed B1 entry unaffected.",
+    "v9: SC.json courtyard void, SC2001/SC3001 doors, SC4010 room, display names; reviewed B1 entry unaffected."
   ]
 }

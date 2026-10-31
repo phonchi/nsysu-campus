@@ -131,10 +131,11 @@ export function decorateCampus(world:WalkWorld,structure:CampusStructure,terrain
  const caps:Piece[]=[],tanks:Piece[]=[],units:Piece[]=[],rr=rng(99);
  for(const floor of world.floors){
   const top=world.floors.filter(f=>f.buildingId===floor.buildingId).reduce((a,b)=>b.y>a.y?b:a);if(top!==floor)continue;
-  const frame=world.frames.get(floor.buildingId)!,pts=floor.data.outline.map(([x,z])=>{const v=new T.Vector3(x,0,z).applyMatrix4(frame);return [v.x,v.z] as Point2;}),y=floor.y+3.7;
+  const frame=world.frames.get(floor.buildingId)!,toLocal=frame.clone().invert(),pts=floor.data.outline.map(([x,z])=>{const v=new T.Vector3(x,0,z).applyMatrix4(frame);return [v.x,v.z] as Point2;}),y=floor.y+3.7;
   for(let i=0;i<pts.length;i++){const a=pts[i],b=pts[(i+1)%pts.length],L=Math.hypot(b[0]-a[0],b[1]-a[1]);if(L<1.5)continue;caps.push(piece((a[0]+b[0])/2,y+.55,(a[1]+b[1])/2,L+.3,1.1,.32,-Math.atan2(b[1]-a[1],b[0]-a[0])));}
   const xs=pts.map(p=>p[0]),zs=pts.map(p=>p[1]),area=Math.abs(pts.reduce((n,a,i)=>{const b=pts[(i+1)%pts.length];return n+a[0]*b[1]-b[0]*a[1];},0)/2);
   for(let n=0;n<Math.min(14,Math.round(area/400));n++){for(let k=0;k<20;k++){const x=Math.min(...xs)+rr()*(Math.max(...xs)-Math.min(...xs)),z=Math.min(...zs)+rr()*(Math.max(...zs)-Math.min(...zs));if(!inside([x,z],pts)||pts.some((a,i)=>segDist([x,z],a,pts[(i+1)%pts.length])<3))continue;
+   const local=new T.Vector3(x,0,z).applyMatrix4(toLocal);if(floor.data.holes?.some(h=>inside([local.x,local.z],h)))continue; // not over a courtyard
    if(n%3===0)tanks.push(piece(x,y+1,z,2.4,2,2.4));else units.push(piece(x,y+.5,z,1.6,1,1.1,rr()*3));break;}}
  }
  instances(art,box,solid(PALETTE.cream,.8),caps,'Parapet caps');instances(art,new T.CylinderGeometry(.5,.5,1,10),solid(PALETTE.roofEquip,.6,{metalness:.2}),tanks,'Roof water tanks');instances(art,box,solid('#aab1ad',.6,{metalness:.25}),units,'Roof plant');
@@ -215,6 +216,7 @@ export function decorateCampus(world:WalkWorld,structure:CampusStructure,terrain
  const sourceSpots=assignTreeYaw(campusTreeSpots(trees,rand));
  const treeSeat=terrainSeatAt(structure,lift),worldSpots=sourceSpots.map(t=>({...t,y:t.y+(t.f==='hill'?0:treeSeat(t.x,t.z))}));
  const spots=filterTreeSpots(worldSpots,(world.display.userData.treeBores??[]) as TreeBore[],terrain?(x,z)=>terrain.surfaceAt(x,z):undefined);
+ spots.push(...scienceCourtyard(world,art));
  const treeGroup=buildTrees(spots,leafDensity??(mobile?.5:1));treeGroup.userData.terrainSeated=true;art.add(treeGroup);
  art.userData.treeFiltering={before:sourceSpots.length,after:spots.length,removed:worldSpots.filter(t=>!spots.includes(t)).map(t=>({x:t.x,y:t.y,z:t.z,f:t.f,s:t.s,yaw:t.yaw}))};
  const crownMats=PALETTE.trees.map(c=>solid(c,.9,{flatShading:true,vertexColors:true}));
@@ -252,6 +254,18 @@ hillCrowns.forEach((p,i)=>tint(instances(art,crownGeo,crownMats[i],p,'Hill tree 
 
 /** Read the final instance transforms after terrain seating, so collision follows the
  * visible tree trunk rather than the canopy bounding box. No DOM or renderer required. */
+/** Illustrative trees and beds on the SC 1F courtyard floor; the void itself follows the official plans, the planting does not. */
+function scienceCourtyard(world:WalkWorld,art:T.Group):TreeSpot[]{
+ const floor=world.floors.find(f=>f.buildingId==='SC'&&f.data.level===1),frame=world.frames.get('SC');if(!floor||!frame)return [];
+ const beds:Piece[]=[],spots:TreeSpot[]=[];
+ for(const [i,[x,z]] of ([[-8,13],[3.5,13],[-6.5,19],[2.5,19]] as Point2[]).entries()){
+  const p=new T.Vector3(x,floor.y,z).applyMatrix4(frame);spots.push({x:p.x,y:p.y,z:p.z,s:1.05+i*.05,f:'almond',yaw:i*1.7});
+  beds.push({position:new T.Vector3(p.x,p.y+.04,p.z),scale:new T.Vector3(4.6,.08,4.6)});
+ }
+ instances(art,new T.BoxGeometry(1,1,1),solid('#7f9a5a',.95),beds,'Science courtyard beds');
+ return spots;
+}
+
 export function artObstacles(art:T.Object3D):Obstacle[]{
  const out:Obstacle[]=[],m=new T.Matrix4(),p=new T.Vector3(),q=new T.Quaternion(),s=new T.Vector3(),e=new T.Euler(0,0,0,'YXZ');
  const trunks:Record<string,[number,number]>={banyan:[.45,3.4],flame:[.28,2.6],almond:[.22,8.2],hill:[.18,2]};
@@ -342,9 +356,21 @@ function addLandmarkFeatures(world:WalkWorld,structure:CampusStructure,art:T.Gro
 }
 
 /** GLB props (characters live in walkthrough.ts): monkeys, bicycles, cones, sailboats as instances. */
+/** Where chapter 4 happens: glass doors, frame, canopy and name on the hand-modelled library's south wall (schematic, display only). */
+function libraryEntrance(art:T.Object3D,ground?:(x:number,z:number)=>number){
+ if(typeof document==='undefined')return;
+ const g=new T.Group();g.name='Library entrance';const x=-50.3,z=-62.95,y=ground?.(x,z)??0,cream=solid(PALETTE.cream,.8);
+ const add=(geo:T.BufferGeometry,m:T.Material,px:number,py:number,pz:number)=>{const o=new T.Mesh(geo,m);o.position.set(px,y+py,pz);o.castShadow=o.receiveShadow=true;g.add(o);return o;};
+ add(new T.BoxGeometry(3.4,2.7,.1),solid('#8fb9bf',.2),x,1.35,z);const steel=solid('#46555a',.5);add(new T.BoxGeometry(.14,2.7,.16),cream,x,1.35,z);add(new T.BoxGeometry(3.4,.1,.16),cream,x,2.25,z);for(const dx of [-.2,.2])add(new T.BoxGeometry(.05,.8,.1),steel,x+dx,1.1,z+.1);
+ for(const dx of [-1.8,1.8])add(new T.BoxGeometry(.3,3.1,.2),cream,x+dx,1.55,z);add(new T.BoxGeometry(3.9,.26,.2),cream,x,2.95,z);add(new T.BoxGeometry(4.6,.22,2),cream,x,3.3,z+.95);
+ add(new T.PlaneGeometry(2.6,.62),new T.MeshStandardMaterial({map:canvasSign(['圖資大樓'],416,100,false),roughness:.7}),x,3.78,z+.08);
+ art.add(g);
+}
+
 export async function addCampusProps(world:WalkWorld,load:(url:string)=>Promise<{scene:T.Object3D}>,asset:(p:string)=>string,alive:()=>boolean=()=>true,support?:SupportAt):Promise<Obstacle[]>{
  const art=world.display.getObjectByName('Campus art');if(!art)return [];
  const obstacles:Obstacle[]=[],ground=art.userData.groundAt as ((x:number,z:number)=>number)|undefined;
+ libraryEntrance(art,ground);
  // One InstancedMesh per prop: the GLB's parts are baked into one geometry with their material colour as a
  // vertex colour (v4 draw budget: a multi-part prop costs one draw instead of one per part).
  const toInstances=async(file:string,matrices:T.Matrix4[],name:string,tint?:(i:number)=>T.Color|undefined)=>{

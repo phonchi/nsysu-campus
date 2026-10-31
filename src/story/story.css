@@ -7,6 +7,15 @@
 .q-layer{position:absolute;inset:0;pointer-events:none;z-index:30;font-family:'Noto Sans TC',system-ui,sans-serif;color:var(--ui-ink)}
 .q-layer>*{pointer-events:auto}
 .q-objective{position:absolute;top:240px;left:28px;max-width:300px;padding:10px 14px 10px 12px;background:var(--ui-paper);border:2px solid var(--ui-line);border-left:6px solid var(--ui-gold);border-radius:var(--ui-radius-sm);box-shadow:var(--ui-shadow);font-size:14px;font-weight:600;display:grid;grid-template-columns:1fr auto;column-gap:10px;cursor:pointer}
+.q-lines{grid-column:1/-1;display:flex;align-items:center;gap:4px;margin:-2px 0 6px}
+.q-lines button{font:inherit;font-size:12px;font-weight:600;color:var(--ui-ink-soft);background:transparent;border:1px solid var(--ui-line);border-radius:999px;padding:1px 10px;min-height:24px;cursor:pointer}
+.q-lines button[aria-pressed=true]{background:var(--ui-gold);color:var(--ui-ink)}
+.q-lines button:focus-visible{outline:3px solid var(--ui-sea);outline-offset:1px}
+.q-lines kbd{font:inherit;font-size:11px;color:var(--ui-ink-soft);margin-left:4px;border:1px solid var(--ui-line);border-radius:4px;padding:0 4px}
+.q-objective.is-side{border-left-color:var(--ui-sea)}
+.q-other{grid-column:1/-1;font-style:normal;font-size:12px;font-weight:500;color:var(--ui-ink-soft);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.q-other:empty{display:none}
+@media (pointer:coarse){.q-lines button{min-height:32px;padding:3px 12px}}
 .q-objective em{grid-column:1/-1;font-style:normal;font-size:12px;font-weight:500;color:var(--ui-ink-soft)}
 .q-objective:hover{transform:translateY(-1px)}
 .q-objective small{grid-column:1/-1;font-size:13px;font-weight:500;color:var(--ui-ink-soft)}

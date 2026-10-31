@@ -18,14 +18,14 @@ export function hudTemplate(asset: (p: string) => string, base: string) {
 <section data-pane="help" hidden>
 <h3>移動與視角</h3><dl class="walk-keys"><dt>WASD／方向鍵</dt><dd>移動；Shift 奔跑、Space 跳躍（騎車時不能跳）。自動前往時按任一方向鍵即可中斷。</dd><dt>滑鼠</dt><dd>拖曳畫面轉頭，滾輪拉遠拉近；第一人稱時點一下畫面可鎖定滑鼠，Esc 解除。</dd><dt>V</dt><dd>切換第一人稱／第三人稱。</dd><dt>M</dt><dd>切換鳥瞰：可選大樓並逐層查看，再按一次回到步行。</dd><dt>L</dt><dd>鎖定視角的角度與距離，再按一次解除；對話中改為開關對話紀錄。</dd><dt>N</dt><dd>切換時段：白天→西子灣夕陽→夜晚。有些人物只在特定時段出現。</dd></dl>
 <h3>互動與對話</h3><dl class="walk-keys"><dt>E</dt><dd>靠近人物或物件時交談、開門、搭電梯（再點樓層）；對話中按 E 看下一句，Space、Enter 也可以。</dd><dt>R</dt><dd>同一處有多個目標時切換互動對象，確認後再按 E。</dd><dt>1–4</dt><dd>對話中以數字選擇選項；也可用方向鍵或 W／S 移動選項，再按 E 確認。</dd><dt>Tab</dt><dd>對話快轉到下一個選項或結尾（選項不會被跳過）。</dd></dl>
-<h3>任務與手帳</h3><dl class="walk-keys"><dt>J</dt><dd>打開校園手帳：查看可接與進行中的任務、事件經過與認識的人物；可追蹤任務或「帶我去找」。</dd><dt>地圖</dt><dd>Esc 選單的「地圖」分頁：校園全圖，點任務、章戳或租車點後可「帶我去」。</dd><dt>G</dt><dd>自動走到任務地點：優先前往手帳追蹤中的支線，否則前往目前的導覽目標。</dd><dt>接支線</dt><dd>走到 NPC 身旁，出現提示後按 E 就能接下任務；部分支線要先完成對應的導覽章節才會開放。</dd><dt>人物不在</dt><dd>NPC 這個時段不在時，提示會寫他去了哪裡；可在手帳直接切換到他出現的時段。</dd></dl>
+<h3>任務與手帳</h3><dl class="walk-keys"><dt>J</dt><dd>打開校園手帳：查看可接與進行中的任務、事件經過與認識的人物；可追蹤任務或「帶我去找」。</dd><dt>地圖</dt><dd>Esc 選單的「地圖」分頁：校園全圖，點任務、章戳或租車點後可「帶我去」。</dd><dt>Q</dt><dd>切換主線與進行中的支線，也可以點目標卡上的「主線｜支線」。專注支線時主線會暫停，切回後接續。</dd><dt>G</dt><dd>自動走到目前焦點的目標；對話後會接著走下一步。走動、到拍照步驟或再按一次 G 就停止。</dd><dt>接支線</dt><dd>走到 NPC 身旁，出現提示後按 E 就能接下任務；部分支線要先完成對應的導覽章節才會開放。</dd><dt>人物不在</dt><dd>NPC 這個時段不在時，提示會寫他去了哪裡；可在手帳直接切換到他出現的時段。</dd></dl>
 <h3>腳踏車與拍照</h3><dl class="walk-keys"><dt>B</dt><dd>上下腳踏車。要先走到校門旁的租車點按 E 租車；只能在戶外騎，進建築會自動停在門口。</dd><dt>P</dt><dd>拍照模式：WASD 移動鏡頭、拖曳轉向、滾輪縮放，Space 或 Enter 拍照並下載，P 或 Esc 離開。</dd><dt>拍照任務</dt><dd>鏡頭在任務指定地點附近（約 4 公尺內）、處於指定時段時拍下一張照片，那一步就算完成。</dd></dl>
 <h3>其他</h3><dl class="walk-keys"><dt>/</dt><dd>搜尋教室或大樓，選取後由人物帶路到門口。</dd><dt>Esc</dt><dd>開關選單；帶路、搜尋、偶遇或追逐進行中時，先按一次會停止它。</dd><dt>H／?</dt><dd>打開這份操作說明；右上角的「?」按鈕也可以。</dd></dl>
 <h3>手機操作</h3><p class="walk-menu-note">左下搖桿移動，在畫面上拖曳轉頭。右下按鈕：奔跑、互動 E、騎車 B、跳、回到起點，多個目標時會多出「切換目標 R」。右上圖示：校園手帳、選單、音樂、拍照、操作說明。</p><p class="walk-menu-note"><button type="button" class="walk-button secondary" data-action="tips-reset">重新顯示提示</button></p></section></div></div>
 <div class="walk-location"><strong id="walk-place">中山・理工院區</strong><span class="walk-evidence">理工八棟・虛擬導覽｜部分通道與內裝示意</span></div>
 <div class="walk-floor-label"><label><select aria-label="鳥瞰建築" data-building></select></label><label>逐層看 <select aria-label="鳥瞰樓層" data-floor><option value="all">全棟</option></select></label></div>
 <canvas class="walk-minimap" width="280" height="220" aria-label="目前樓層小地圖"></canvas>
-<div class="walk-help"><span><kbd>WASD</kbd>移動</span><span><kbd>Shift</kbd>奔跑</span><span><kbd>Space</kbd>跳躍</span><span><kbd>E</kbd>互動</span><span><kbd>G</kbd>任務自動前往</span><span><kbd>L</kbd>鎖定視角</span><span><kbd>V</kbd>第一人稱</span><span><kbd>M</kbd>鳥瞰</span><span><kbd>N</kbd>時段</span><span><kbd>H</kbd>說明</span><span>拖曳轉頭・滾輪遠近</span></div>
+<div class="walk-help"><span><kbd>WASD</kbd>移動</span><span><kbd>Shift</kbd>奔跑</span><span><kbd>Space</kbd>跳躍</span><span><kbd>E</kbd>互動</span><span><kbd>G</kbd>任務自動前往</span><span><kbd>Q</kbd>切換主線／支線</span><span><kbd>L</kbd>鎖定視角</span><span><kbd>V</kbd>第一人稱</span><span><kbd>M</kbd>鳥瞰</span><span><kbd>N</kbd>時段</span><span><kbd>H</kbd>說明</span><span>拖曳轉頭・滾輪遠近</span></div>
 <div class="walk-lock-badge" hidden>視角已鎖定・按 L 解除</div>
 <div class="walk-status" role="status" aria-live="polite"></div>
 <div class="walk-attrib">地圖資料 © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors（ODbL）・建築配置與內裝為示意</div>
@@ -40,7 +40,7 @@ export function hudTemplate(asset: (p: string) => string, base: string) {
 }
 
 /** Floor-plan minimap of the storey the player stands on (or the one inspected from above). */
-export function drawFloorMinimap(ctx: CanvasRenderingContext2D, world: WalkWorld, floorRecord: WorldFloor, foot: T.Vector3, yaw: number, route: T.Vector3[], inverse: T.Matrix4) {
+export function drawFloorMinimap(ctx: CanvasRenderingContext2D, world: WalkWorld, floorRecord: WorldFloor, foot: T.Vector3, yaw: number, route: T.Vector3[], inverse: T.Matrix4, goal?: T.Vector3) {
   const floor = floorRecord.data, b = floor.bounds, w = b[2] - b[0], d = b[3] - b[1];
   const scale = Math.min(254 / Math.max(w, 1), 185 / Math.max(d, 1)), cx = (b[0] + b[2]) / 2, cz = (b[1] + b[3]) / 2;
   const path = (pts: [number, number][]) => { ctx.beginPath(); pts.forEach(([x, z], i) => i ? ctx.lineTo(x, z) : ctx.moveTo(x, z)); ctx.closePath(); };
@@ -58,7 +58,14 @@ export function drawFloorMinimap(ctx: CanvasRenderingContext2D, world: WalkWorld
   const local = foot.clone().applyMatrix4(inverse), e = world.frames.get(floorRecord.buildingId)!.elements, rotation = Math.atan2(e[8], e[0]);
   ctx.translate(local.x, local.z); ctx.rotate(-(yaw - rotation));
   ctx.fillStyle = '#eecc7d'; ctx.beginPath(); ctx.moveTo(0, -1.4); ctx.lineTo(-.8, 1); ctx.lineTo(.8, 1); ctx.closePath(); ctx.fill();
-  ctx.restore(); ctx.font = '12px sans-serif'; ctx.fillStyle = '#faf4de';
+  ctx.restore();
+  // The goal pin stays on the map even when the goal is off this floor plan: it then sits on the edge, pointing the way.
+  if (goal) {
+    const l = goal.clone().applyMatrix4(inverse), x = T.MathUtils.clamp(140 + (l.x - cx) * scale, 10, 270), y = T.MathUtils.clamp(108 + (l.z - cz) * scale, 12, 186);
+    ctx.fillStyle = '#e9b949'; ctx.strokeStyle = '#2a2c4a'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(x, y, 6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  }
+  ctx.font = '12px sans-serif'; ctx.fillStyle = '#faf4de';
   ctx.fillText(`${floorRecord.buildingId} ${floor.label} · 樓層小地圖`, 12, 205);
 }
 
@@ -67,7 +74,11 @@ export function makeDoorSign(label: string) {
   const c = document.createElement('canvas'); c.width = 384; c.height = 112;
   const ctx = c.getContext('2d')!;
   ctx.fillStyle = '#264c50'; ctx.fillRect(0, 0, 384, 112); ctx.fillStyle = '#eedcad'; ctx.fillRect(0, 0, 7, 112);
-  ctx.font = 'bold 37px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(label.length > 12 ? label.slice(0, 12) : label, 192, 70);
+  ctx.textAlign = 'center';
+  // A named room reads on two lines: its code, then its name fitted to the plate.
+  const [code, name] = label.split(/ (.*)/s);
+  if (name) { ctx.font = 'bold 34px sans-serif'; ctx.fillText(code, 192, 46); let size = 28; do { ctx.font = `bold ${size}px sans-serif`; } while (ctx.measureText(name).width > 360 && --size > 14); ctx.fillText(name, 192, 90); }
+  else { ctx.font = 'bold 37px sans-serif'; ctx.fillText(label.length > 12 ? label.slice(0, 12) : label, 192, 70); }
   const texture = new T.CanvasTexture(c); texture.colorSpace = T.SRGBColorSpace;
   return new T.Mesh(new T.PlaneGeometry(1.35, .38), new T.MeshBasicMaterial({ map: texture, side: T.DoubleSide }));
 }

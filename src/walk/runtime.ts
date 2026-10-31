@@ -42,7 +42,8 @@ import { clearProgress } from '../story/engine';
 import { GrassTufts, type GroundMask } from '../render/ground';
 import { buildClouds } from '../render/clouds';
 import { Album } from '../story/album';
-import { planProps, addProps, propsForTier } from '../world/props';
+import { planProps, addProps, propsForTier, loadPropGeometry } from '../world/props';
+import { QuestSpotField, activeSpotIds } from '../world/quest-spots';
 import { PhotoMode } from '../games/photo';
 import { Bike, RIDE_SPEED } from './bike';
 import { Quiz, Chase, judgeSunset, type Question } from '../games/minigames';
@@ -50,19 +51,22 @@ import { TalkDirector, type NpcData, type CollectionData } from '../story/talk';
 import { PALETTES, modelFor, recolor } from './player-look';
 import { planRoute as plan, followRoute, validateRoutes as validatePaths, sightLine } from './autopilot';
 import { NpcManager, disposeObject, NPC_CAP, type StoryZones, type Preset } from '../world/npc';
-import { StoryDirector } from '../story/director';
+import { StoryDirector, type GuideOverride } from '../story/director';
 import { trackedTarget } from '../story/guide-goal';
+import { nextFocus, questPriority, storyPriority, acceptPriority, destinationDistance, findDestination, floorLabel, walkResumes } from '../story/focus';
 import type { StoryData } from '../story/schema';
 import bundledQuests from '../../public/data/quests.json';
-import { QuestEngine, QUEST_KEY, type QuestData, type QuestWorld } from '../story/quests';
+import { QuestEngine, QUEST_KEY, type QuestData, type QuestDefinition, type QuestStep, type QuestWorld } from '../story/quests';
 import { EncounterEngine, type EncounterData } from '../story/encounters';
 import { EncounterScene } from '../world/encounter-scene';
-import { ObstacleField, doorCameraObstacles, type Obstacle } from './obstacles';
+import { ObstacleField, doorCameraObstacles, type ActorBody, type Obstacle } from './obstacles';
 import { JournalView, type JournalModel } from '../story/journal';
 import { campusClues } from '../story/clues';
 import '../walkthrough.css';
 
 const WALK_SPEED = 3.6, RUN_SPEED = 7.2;
+/** An auto-walk to a person stops this far from them, inside every talk radius (the tightest is 2.5 m). */
+const NPC_ARRIVE = 1.8, ARRIVAL_OFFSET = .32;
 /** Frame time cap. `?qa=1` lets slow software-rendered test browsers keep real-time simulation (physics still
  * sub-steps at 1/120 s, so movement and collisions are identical, only fewer frames are drawn). */
 const QA = new URLSearchParams(location.search).get('qa') === '1';
@@ -101,6 +105,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   host.innerHTML = hudTemplate(asset, base);
   document.body.append(host); document.body.style.overflow = 'hidden';
   const get = <E extends HTMLElement>(s: string) => host.querySelector<E>(s)!;
+  /** Writing the same text still dirties layout; the HUD refreshes many times a second. */
+  const setText = (el: HTMLElement, text: string) => { if (el.textContent !== text) el.textContent = text; };
   showInAppBrowserNotice(host);
   const stopLoadingTips = startLoadingTips(get('.walk-loading'), async () => ({
     chapters: await loadJson<{ dialogues: Record<string, { text: string }[]> }>('data/chapters.json', '故事資料').catch(() => undefined),
@@ -109,6 +115,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   const status = get('.walk-status'); let statusTimer = 0;
   let encounters: EncounterEngine | undefined;
   let zoneLabels: Record<string,string> = {};
+  let spotField: QuestSpotField | undefined;
   let quests: QuestEngine | undefined, notebook: JournalView | undefined, npcDefinitions: NpcData | undefined, storageNotice = '';
   let refreshNotebook = () => {};
   const pocket = document.createElement('button'); pocket.className = 'quest-pocket'; pocket.hidden = true; host.append(pocket);
@@ -349,17 +356,20 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   void import('../walk-nav').then(m => m.loadWalkNavigation(base, 'campus-science-engineering-v2', terrainRef?.surfaceVersion)).then(n => {
     if (!alive) { n.dispose(); return; } navigation = n; navigationError = '';
   }).catch(e => { navigationError = '自動帶路暫時未就緒；仍可自由探索。'; console.warn('walk nav', String(e)); });
-  let guideOverride: { target: string; point: T.Vector3 | undefined } | undefined, pocketAt = 0;
+  let guideOverride: GuideOverride | undefined, pocketAt = 0;
   const tipsFrom = performance.now() + 25000;
   let autoPath: T.Vector3[] = [], pathIndex = 0, autoDestination: WalkDestination | undefined, pendingDestination: WalkDestination | undefined;
   let progressTime = 0, replans = 0; const progressPosition = new T.Vector3();
+  /** G set off and has not been called off: after each dialogue the walk carries on to the next goal. */
+  let autoFollow = false, autoTarget: string | undefined, wasBlocking = false, autoCheckAt = 0;
   const disposeTree = (root: T.Object3D) => root.traverse(o => {
     if (o instanceof T.Mesh || o instanceof T.Line) { o.geometry.dispose(); for (const m of [o.material].flat()) m.dispose(); }
   });
   function clearRoute() { disposeTree(routeLine); routeLine.clear(); }
   function clearAuto(manual = false) {
     const was = autoPath.length > 0;
-    autoPath = []; autoDestination = undefined; pendingDestination = undefined; clearRoute();
+    autoPath = []; autoDestination = undefined; pendingDestination = undefined; autoTarget = undefined; clearRoute();
+    if (manual) autoFollow = false;
     if (manual && was) say('已暫停帶路，可自由探索。', 2500);
   }
   function drawRoute(path: T.Vector3[]) {
@@ -418,16 +428,17 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     if (notebook?.open || menuOpen() || overview || !walking || photo.active || quiz?.open) return [];
     const p=physics.position, out:Candidate[]=[];
     const add=(id:string,label:string,priority:number,point:T.Vector3|undefined,run:()=>void)=>{if(point)out.push({id,label,priority,point:point.clone(),distance:p.distanceTo(point),run});};
-    if (director?.canInteract) add('story','繼續新生導覽',100,director.goal()??p,()=>{director?.press();});
+    const focused=quests?.progress.tracked;
+    if (director?.canInteract) add('story','繼續新生導覽',storyPriority(!!focused,director.blocking),director.goal()??p,()=>{director?.press();});
     const monkey=npcs?.get('m3-thief');
     if(chase.active && monkey && Math.hypot(p.x-monkey.position.x,p.z-monkey.position.z)<2.2) add('chase','拿回便當',95,monkey.position,()=>{chase.press(p);});
     const encounter=encounters?.active;
     if(encounter && p.distanceTo(encounterTarget())<=encounterReach(encounter.phase)) add('encounter',encounter.phase==='offered'?'參與偶遇':'完成偶遇互動',90,encounterTarget(),()=>{pressEncounter();});
-    for (const v of quests?.acceptable(questWorld()) ?? []) add(`accept:${v.definition.id}`, `接取・${v.definition.title}`, 80, questPoint(v.definition.accept.near), () => { void acceptSideQuest(v.definition.id); });
+    for (const v of quests?.acceptable(questWorld()) ?? []) add(`accept:${v.definition.id}`, `接取・${v.definition.title}`, acceptPriority(v.definition.id === focused), questPoint(v.definition.accept.near), () => { void acceptSideQuest(v.definition.id); });
     for(const v of quests?.list()??[]) {
       const step=v.step; if(!step || step.kind==='photo' || (step.when && step.when!==sky.preset))continue;
-      const point=questPoint(step.target);if(!point || p.distanceTo(point)>(step.radius??4))continue;
-      add(`quest:${v.definition.id}`,v.definition.title,step.target.startsWith('npc:')?80:10,point,()=>{void sideQuestDialogue(v.definition.id);});
+      const point=questPoint(step.target);if(!point || questDistance(step.target)>(step.radius??4))continue;
+      add(`quest:${v.definition.id}`,step.target.startsWith('spot:')?spotField?.label(step.target.slice(5))??v.definition.title:v.definition.title,questPriority(step.target,v.definition.id===focused),point,()=>{void sideQuestDialogue(v.definition.id);});
     }
     const person=talk?.candidate(p);
     if(person) add(`talk:${person.id}`,`交談・${person.name}`,75,npcs?.get(person.id)?.position,()=>{talk?.press(p);});
@@ -462,7 +473,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   const menuOpen = () => !menu.hidden;
   function setMenu(open: boolean, tab?: string) {
     menu.hidden = !open;
-    if (open) { notebook?.close(); input.release(); clearAuto(); if (tab) showTab(tab); menu.querySelector<HTMLElement>('[data-tab][aria-selected=true]')?.focus(); }
+    if (open) { notebook?.close(); input.release(); clearAuto(); autoFollow = false; if (tab) showTab(tab); menu.querySelector<HTMLElement>('[data-tab][aria-selected=true]')?.focus(); }
     get('[data-action=menu]').setAttribute('aria-pressed', String(open));
   }
   function showTab(tab: string) {
@@ -491,7 +502,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     sky: () => sky.preset, cue: id => sound.cue(id),
     saved: () => campus.count('photo.saved'),
     recordShot: () => {
-      const at = camera.position.clone(), preset = sky.preset;
+      // Measured from where the player stands: the photo camera orbits 4.5 m out and can roam 15 m, a viewpoint is a place to stand on.
+      const at = physics.position.clone(), preset = sky.preset;
       const distances = new Map((quests?.data.quests ?? []).flatMap(q=>q.steps.map(step=>[step.target,questPoint(step.target)?.distanceTo(at) ?? Infinity] as const)));
       const snapshot: QuestWorld = { distanceTo:t=>distances.get(t)??Infinity, timeOfDay:()=>preset };
       return () => { const before=quests?.progress.journal.length; quests?.notifyPhoto(snapshot); if (quests && quests.progress.journal.length !== before) say('照片已收進手帳，拍攝任務完成這一步。'); };
@@ -500,7 +512,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   });
   function enterPhoto() {
     if (overview || !walking || director?.blocking) return;
-    setMenu(false); clearAuto(); photo.enter(physics.position, rig.yaw);
+    setMenu(false); clearAuto(); autoFollow = false; photo.enter(physics.position, rig.yaw);
   }
 
   // ---- rental bike (gate → campus on wheels) ---------------------------------------------
@@ -566,7 +578,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       if (k === 'escape' && encounters?.active?.phase === 'active') { encounters.giveUp(); say('這次先放過它，下次再遇見！'); return; }
       if (k === 'escape' && chase.active) { chase.cancel(); say('放棄追逐。', 2500); return; }
       if (k === 'escape' && !autoPath.length && get('.walk-results').hidden) { setMenu(true, 'play'); return; }
-      if (k === 'escape') { get('.walk-results').hidden = true; get<HTMLInputElement>('.walk-search input').blur(); input.release(); clearAuto(); say('已暫停帶路'); return; }
+      if (k === 'escape') { get('.walk-results').hidden = true; get<HTMLInputElement>('.walk-search input').blur(); input.release(); clearAuto(); autoFollow = false; say('已暫停帶路'); return; }
       if (k === '/') { setMenu(true, 'play'); get<HTMLInputElement>('.walk-search input').focus(); return; }
       if (k === 'm') { chooseMode(walking ? !overview : true); return; }
       if (k === 'v') { setFirstPerson(!rig.firstPerson); return; }
@@ -575,7 +587,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       if (k === 'n') cycleSky();
       if (k === 'p') enterPhoto();
       if (k === 'b') toggleBike();
-      if (k === 'g') followQuest();
+      if (k === 'g') toggleFollow();
+      if (k === 'q') switchLine();
       if (k === 'r') cycleTarget();
     },
     moveStarted() { if (!walking || overview) chooseMode(false); clearAuto(true); },
@@ -596,8 +609,9 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   searchInput.addEventListener('input', () => {
     const term = searchInput.value.normalize('NFKC').toUpperCase().replace(/\s/g, ''), results = get('.walk-results');
     if (!term) { results.hidden = true; return; }
-    const matches = world.destinations.filter(d => (d.label + ' ' + d.buildingId).normalize('NFKC').toUpperCase().includes(term)).slice(0, 12);
-    results.innerHTML = matches.length ? matches.map(d => `<button data-destination="${safe(d.id)}"><strong>${safe(d.label)}</strong><small>${safe(d.floorId)} · 帶我走到門口 →</small></button>`).join('')
+    const matches = world.destinations.filter(d => (d.label + ' ' + d.buildingId + ' ' + (d.displayName ?? '')).normalize('NFKC').toUpperCase().includes(term)).slice(0, 12);
+    const places = (routes?.anchorIds ?? []).filter(id => routes!.label(id).normalize('NFKC').toUpperCase().includes(term)).slice(0, 6);
+    results.innerHTML = matches.length || places.length ? places.map(id => `<button data-place="${safe(id)}"><strong>${safe(routes!.label(id))}</strong><small>校園步道 · 帶我走過去 →</small></button>`).join('') + matches.map(d => `<button data-destination="${safe(d.id)}"><strong>${safe(d.displayName ? `${d.label} ${d.displayName}` : d.label)}</strong><small>${safe(d.floorId)} · 帶我走到門口 →</small></button>`).join('')
       : '<div class="walk-empty">找不到這個名稱。可試房號前綴，或選擇上方大樓與樓層探索。</div>';
     results.hidden = false;
   });
@@ -606,6 +620,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     const bodyBtn = target.closest<HTMLElement>('[data-body]'), palBtn = target.closest<HTMLElement>('[data-palette]');
     if (bodyBtn) { if (bodyBtn.dataset.body !== look().body) { campus.setPlayer({ body: bodyBtn.dataset.body as Body, palette: 0 }); markChar(); loadCharacter(); } return; }
     if (palBtn) { campus.setPlayer({ palette: Number(palBtn.dataset.palette) }); markChar(); loadCharacter(); return; }
+    const place = target.closest<HTMLElement>('[data-place]')?.dataset.place;
+    if (place) { setMenu(false); walkOutdoor(place); return; }
     const destination = target.closest<HTMLElement>('[data-destination]')?.dataset.destination;
     if (destination) { const d = world.destinations.find(d => d.id === destination); if (d) { setMenu(false); goTo(d); } return; }
     const action = target.closest<HTMLElement>('[data-action]')?.dataset.action;
@@ -714,7 +730,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     const picked = mapSelected;
     if (!picked) return;
     setMenu(false);
-    if (picked.kind === 'quest') { quests?.track(picked.id.slice(6)); refreshNotebook(); followQuest(); }
+    if (picked.kind === 'quest') { quests?.track(picked.id.slice(6), questWorld()); refreshNotebook(); followQuest(); }
     else walkToPoint(new T.Vector3(picked.x, picked.y, picked.z), picked.label);
   });
   let currentFloor = world.floors.find(f => f.buildingId === 'SC' && f.data.level === 1)!;
@@ -733,7 +749,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     const selected = world.floors.find(f => f.data.id === floorSelect.value), floorRecord = overview && selected ? selected : currentFloor;
     const buildingName = campusData.find(b => b.id === nearestBuilding)!.name;
     placeIndoors = best < .5;
-    get('#walk-place').textContent = autoDestination ? `前往 ${autoDestination.label}` : best < 8 ? `${buildingName}・${currentFloor.data.label}` : director?.zoneLabel ?? (best < 60 ? '中山・理工校園' : '中山大學・西子灣');
+    setText(get('#walk-place'), autoDestination ? `前往 ${autoDestination.label}` : best < 8 ? `${buildingName}・${currentFloor.data.label}` : director?.zoneLabel ?? (best < 60 ? '中山・理工校園' : '中山大學・西子灣'));
     lod.update(foot, { overview, buildingId: inspectedBuilding, floorId: floorSelect.value });
     const runBtn = get('[data-action=run]'); runBtn.classList.toggle('is-running', input.running); runBtn.setAttribute('aria-pressed', String(input.running));
     for (const door of world.doors) {
@@ -748,14 +764,14 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
         if (distance > 65) { scene.remove(sign); disposeTree(sign); signs.delete(door.id); }
       }
     }
-    drawFloorMinimap(ctx, world, floorRecord, foot, rig.yaw, autoPath, inverseFrames.get(floorRecord.buildingId)!);
+    drawFloorMinimap(ctx, world, floorRecord, foot, rig.yaw, autoPath, inverseFrames.get(floorRecord.buildingId)!, guideOverride ? guideOverride.point : director?.goal());
     if ((overview && floorSelect.value === 'all') || (!overview && best >= 4)) {
       const center = overview ? orbit.target : foot, heading = overview ? Math.atan2(camera.position.x - orbit.target.x, camera.position.z - orbit.target.z) : rig.yaw;
       if (!minimapSheet.draw(ctx, center, heading, guideOverride ? guideOverride.point : director?.goal())) campusUi?.drawMinimap(ctx, center, heading);
     }
     const door = nearestDoor(world, foot), inLift = liftWins(world, foot);
     if (!inLift) liftPanel.hidden = true;
-    const candidate=selectedCandidate(); get('[data-action=door]').textContent=candidate?`${candidate.label} E`:'互動 E';
+    const candidate=selectedCandidate(); setText(get('[data-action=door]'),candidate?`${candidate.label} E`:'互動 E');
   }
   function placeSign(door: WorldDoor) {
     const mesh = makeDoorSign(door.label), normal = door.outside.clone().sub(door.position); normal.y = 0; normal.normalize();
@@ -767,7 +783,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     alive = false; campusUi?.dispose(); clearTimeout(statusTimer); cancelAnimationFrame(frameId);
     input.dispose(); document.removeEventListener('visibilitychange', soundVisibility); window.removeEventListener('campus-storage-error',storageFailed); window.removeEventListener('resize', resize); orbit.dispose(); navigation?.dispose();
     encounterScene.dispose();
-    notebook?.dispose(); director?.dispose(); npcs?.dispose(); photo.dispose();
+    notebook?.dispose(); director?.dispose(); npcs?.dispose(); photo.dispose(); spotField?.dispose();
     lod.dispose(); physics.dispose(); avatar.dispose(); post.dispose(); sound.dispose(); renderer.dispose();
     for (const sign of signs.values()) disposeTree(sign); signs.clear();
     Reflect.deleteProperty(window, 'campusWalk'); sky.dispose();
@@ -827,14 +843,55 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   }
 
   const trackedQuest = () => quests?.list().find(v => v.definition.id === quests?.progress.tracked);
-  const trackedGuide = () => { const v = trackedQuest(); if (!v) return undefined; const target = trackedTarget(v); return { target, point: questPoint(target) }; };
+  const questerName = (near: string) => npcDefinitions?.npcs.find(n => `npc:${n.id}` === near)?.name ?? '委託人';
+  const trackedGuide = (): GuideOverride | undefined => { const v = trackedQuest(); if (!v) return undefined; const target = trackedTarget(v); return { target, point: questPoint(target), title: v.definition.title, text: v.step?.text ?? `到${questerName(v.definition.accept.near)}面前按 E 接取任務。`, floor: target.startsWith('dest:') ? floorLabel(findDestination(world.destinations, target.slice(5))?.floorId ?? '') : undefined }; };
+  /** The side quests the switch cycles through, in journal order; a tracked offer not accepted yet counts too. */
+  const sideLines = () => (quests?.list() ?? []).filter(v => v.state?.status === 'active' || v.definition.id === quests?.progress.tracked).map(v => v.definition.id);
+  const sideSummary = () => { const active = (quests?.list() ?? []).filter(v => v.state?.status === 'active'); return !active.length ? '' : active.length === 1 ? active[0].definition.title : `${active[0].definition.title} 等 ${active.length} 件`; };
+  function focusLine(id: string | undefined) {
+    if (!quests || id === quests.progress.tracked) return;
+    if (!quests.track(id, questWorld())) return;
+    clearAuto(); autoFollow = false; selectedInteraction = undefined; sound.cue('page');
+    const v = trackedQuest();
+    say(v ? `專注支線：${v.definition.title}。主線暫停，切回後接續。` : '回到主線。', 3000);
+    syncFocus(); refreshNotebook();
+  }
+  /** Q: main → each side quest in progress → main. With nothing on the side there is nothing to switch to: the journal lists what can be taken. */
+  function switchLine() {
+    if (!quests || director?.blocking) return;
+    const lines = sideLines();
+    if (!lines.length) { say('目前沒有進行中的支線，可以在手帳挑一件。', 3500); openNotebook(); return; }
+    focusLine(nextFocus(lines, quests.progress.tracked));
+  }
+  /** Tapping 主線｜支線 on the card; tapping 支線 again moves on to the next side quest. */
+  function pickLine(which: 'main' | 'side') {
+    if (director?.blocking) return; // Q waits for the end of a dialogue or chapter card; so does the card
+    if (which === 'main') { focusLine(undefined); return; }
+    if (!quests) return;
+    const lines = sideLines();
+    if (!lines.length) { say('目前沒有進行中的支線，可以在手帳挑一件。', 3500); openNotebook(); return; }
+    focusLine(nextFocus(lines, quests.progress.tracked) ?? lines[0]);
+  }
+  /** Objects appear only with their step, and only once the collision world can say what floor they stand on. */
+  function syncSpots() { if (routesValidated && quests) spotField?.sync(activeSpotIds(quests.list())); }
+  function syncFocus() {
+    guideOverride = trackedGuide(); director?.setGuideOverride(guideOverride, sideSummary());
+    const target = guideOverride?.target ?? director?.goalTarget;
+    npcs?.setFocus(target?.startsWith('npc:') ? target.slice(4) : undefined);
+  }
   function questPoint(target: string): T.Vector3 | undefined {
     const [kind, id] = target.split(':');
     if (kind === 'npc') return npcs && !npcs.isAbsent(id) ? npcs.get(id)?.position.clone() : undefined;
+    if (kind === 'spot') return spotField?.point(id);
+    if (kind === 'dest') { const d = findDestination(world.destinations, id); return d ? new T.Vector3(...d.position) : undefined; }
     return npcs?.anchorPoint(id) ?? routes?.anchor(id);
   }
+  const questDistance = (t: string) => {
+    if (t.startsWith('dest:')) { const d = findDestination(world.destinations, t.slice(5)); return d ? destinationDistance(d.position, physics.position) : Infinity; }
+    const p = questPoint(t); return p ? physics.position.distanceTo(p) : Infinity;
+  };
   function questWorld(): QuestWorld {
-    return { distanceTo: t => { const p = questPoint(t); return p ? physics.position.distanceTo(p) : Infinity; }, timeOfDay: () => sky.preset, photoCount: campus.progress.counters['photo.saved'] ?? 0, chapterDone: id => director?.engine.progress.done.includes(id) ?? false };
+    return { distanceTo: questDistance, timeOfDay: () => sky.preset, photoCount: campus.progress.counters['photo.saved'] ?? 0, chapterDone: id => director?.engine.progress.done.includes(id) ?? false };
   }
   function notebookModel(): JournalModel {
     const names = new Map((npcDefinitions?.npcs ?? []).map(n => [n.id, n.name]));
@@ -852,7 +909,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
           subtitle: `${v.state?.status === 'completed' ? '已完成' : v.state ? '進行中' : unlocked ? '可接任務' : '尚未解鎖'}・${zoneLabels[v.definition.zone] ?? '校園'}`,
           text: v.definition.description + '\n\n' + (v.step?.text ?? (v.state ? '這段故事已收進手帳。' : unlocked ? `到${name}面前按 E 接取任務。` : `完成「${chapter ?? '新生導覽'}」後，才能向${name}接取任務。`)) + (timeHint ? `\n\n${timeHint}` : ''),
           meta: `委託人物：${names.get(v.definition.npc) ?? v.definition.npc}\n紀念：${v.definition.reward}`,
-          actions: v.state?.status === 'completed' ? [] : [{ id: 'track', label: '追蹤這件事' }, { id: 'go', label: `帶我去找${v.step && !target.startsWith('npc:') ? '任務地點' : name}` },
+          actions: v.state?.status === 'completed' ? [] : [...(unlocked || v.state ? [v.definition.id === quests?.progress.tracked ? { id: 'untrack', label: '追蹤中・切回主線' } : { id: 'track', label: '追蹤這件事' }] : []), { id: 'go', label: `帶我去找${v.step && !target.startsWith('npc:') ? '任務地點' : name}` },
             ...((v.step?.when || missing || timeHint) ? [{ id: 'time', label: '切換至人物出現時段' }] : [])] };
       }),
       events: [...(quests?.progress.journal ?? [])].reverse().map(e => ({ id: e.id, title: e.title, subtitle: `${new Date(e.at).toLocaleString('zh-TW')} · ${zoneLabels[e.zone] ?? '校園'}`, text: [e.text, e.choice && `我的選擇：${e.choice}`, e.result, e.reward && `獲得紀念：${e.reward}`].filter(Boolean).join('\n\n'), meta: names.get(e.npc) })),
@@ -862,26 +919,41 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   function openNotebook() {
     if (director?.blocking || photo.active || quiz?.open) return;
     if (!quests) { say('校園手帳正在準備中。'); return; }
-    setMenu(false); clearAuto(); notebook?.show(notebookModel());
+    setMenu(false); clearAuto(); autoFollow = false; notebook?.show(notebookModel());
   }
   notebook = new JournalView(host, (id, action) => {
     const v = quests?.list().find(v => v.definition.id === id); if (!v || !quests) return;
-    if (action === 'track') quests.track(id);
+    if (action === 'track') focusLine(id);
+    if (action === 'untrack') focusLine(undefined);
     if (action === 'time') {
       const target = v.step?.target ?? v.definition.accept.near;
       const npc = npcDefinitions?.npcs.find(n => `npc:${n.id}` === target);
       const preset = v.step?.when ?? (['day','sunset','night'] as const).find(p => npc?.schedule[p]);
       if (preset && ['day','sunset','night'].includes(preset)) { sky.set(preset as Preset); get('[data-action=sky]').textContent = `${PRESET_LABEL[preset as Preset]} N`; scheduleNpcs(true); }
     }
-    if (action === 'go' && v.state?.status !== 'completed') { quests.track(id); notebook?.close(); followQuest(); }
+    if (action === 'go' && v.state?.status !== 'completed') {
+      notebook?.close();
+      // A locked quest's giver can be visited, but not tracked: walking there does not make it the focus.
+      if (quests.track(id, questWorld())) followQuest();
+      else { const point = questPoint(v.definition.accept.near); if (point) walkToPoint(point, v.definition.title); else say('這位人物目前不在校園；請切換時段再來。', 5000); }
+    }
     refreshNotebook();
   }, open => { input.release(); if (open) clearAuto(); });
+  const pocketDistance = (point: T.Vector3 | undefined) => point ? `${Math.round(physics.position.distanceTo(point))} m` : '不在校園';
   refreshNotebook = () => {
     notebook?.update(notebookModel());
+    syncFocus(); syncSpots();
     const v = trackedQuest();
     pocket.hidden = !v?.step;
-    if (v?.step) pocket.innerHTML = `<strong>${safe(v.definition.title)} <em data-pocket-distance></em></strong><small>${safe(v.step.text)} · J 手帳</small>`;
+    if (v?.step) pocket.innerHTML = `<strong>${safe(v.definition.title)} <em data-pocket-distance>${pocketDistance(guideOverride?.point)}</em></strong><small>${safe(v.step.text)} · J 手帳</small>`;
   };
+  /** Said once the step is really done: the card has already moved on, so a tap of feedback is all that is left. */
+  function questStepDone(q: QuestDefinition, next: QuestStep | undefined) {
+    if (next) { director?.ui.toast('item', `${q.title}：完成一步`, `接下來：${next.text}`); sound.cue('chime'); return; }
+    autoFollow = false;
+    director?.ui.toast('achievement', `完成支線「${q.title}」`, q.reward); sound.cue('fanfare');
+    say('支線完成，回到主線。', 3500);
+  }
   async function acceptSideQuest(id: string) {
     const ui = director?.ui;
     if (!quests || !ui || director?.blocking || !quests.accept(id, questWorld())) return;
@@ -912,11 +984,6 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       } else if (!quests.interact(id, questWorld())) say(v.step.kind === 'photo' ? '請在這個地點拍一張照片，再繼續。' : '請再靠近目標，或切換至指定時段。');
     } finally { if (targetNpc) npcs?.setTalking(undefined); ui.end(); refreshNotebook(); }
   }
-  function pressSideQuest() {
-    const v = quests?.candidate(questWorld());
-    if (!v || director?.blocking) return false;
-    void sideQuestDialogue(v.definition.id); return true;
-  }
 
   // ---- story, NPCs and outdoor routes --------------------------------------------------------
   let routes: OutdoorRoutes | undefined, npcs: NpcManager | undefined, director: StoryDirector | undefined, storyStarted = false, talk: TalkDirector | undefined;
@@ -942,6 +1009,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     const removed = validatePaths(routes, (p, q, r) => physics.sweep(p, q, r), (x, z) => terrainRef ? terrainRef.heightAt(x, z) : -1e9);
     routesValidated = true;
     console.info('outdoor paths blocked by geometry:', removed);
+    syncSpots();
     startStoryWhenReady();
   }
   const planRoute = (to: T.Vector3) => {
@@ -951,24 +1019,47 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     if (direct.length) return direct;
     // A long navmesh leg across a planted plaza can exhaust the local detour; the path network has shorter legs.
     const outdoor = routes?.path(physics.position, to) ?? [];
-    return outdoor.length ? around(outdoor) : [];
+    const network = outdoor.length ? around(outdoor) : [];
+    if (network.length || !routes || !navigation) return network;
+    // Either end may sit off the network with no straight link to it (a door beside a building): navmesh to and from the nearest stops, network between.
+    for (const start of routes.stopsNear(physics.position, 3)) for (const stop of routes.stopsNear(to, 3)) {
+      const lead = navigation.findPath(physics.position, start), middle = lead.length ? routes.path(start, stop) : [], tail = middle.length ? navigation.findPath(stop, to) : [];
+      const joined = tail.length ? around([...lead, ...middle.slice(1, -1), ...tail]) : [];
+      if (joined.length) return joined;
+    }
+    return [];
   };
   /** Auto-walk to the current quest goal: indoor navmesh where it reaches, else the outdoor path network. */
   function followQuest() {
     if(!routesValidated) { say('場景碰撞與步道仍在準備，請稍候再開始帶路。');return; }
     routes?.avoid.splice(0); // stuck spots only matter within one auto-walk
-    const tracked = trackedQuest();
-    const goal = tracked ? questPoint(trackedTarget(tracked)) : director?.goal();
-    if(tracked && !goal) { say('這位人物目前不在校園；請在手帳選擇『切換至人物出現時段』後再前往。',6000);return; }
-    if (!goal || director?.blocking) { say('目前沒有需要前往的地點。', 2500); return; }
-    walkToPoint(goal, tracked?.definition.title ?? (director!.objectiveText || '任務地點'));
+    const tracked = trackedQuest(), target = tracked ? trackedTarget(tracked) : director?.goalTarget ?? undefined;
+    const goal = target ? walkGoal(target) : undefined;
+    if(tracked && !goal) { autoFollow = false; say(target?.startsWith('npc:') ? '這位人物目前不在校園；請在手帳選擇『切換至人物出現時段』後再前往。' : '這個地點目前還沒有路線。',6000);return; }
+    if (!goal || director?.blocking) { autoFollow = false; say('目前沒有需要前往的地點。', 2500); return; }
+    autoFollow = walkToPoint(goal, tracked?.definition.title ?? (director!.objectiveText || '任務地點'));
+    if (autoFollow) autoTarget = target;
+  }
+  /** G and the objective card: set off, or call off the walk under way. */
+  function toggleFollow() {
+    if (autoPath.length && autoDestination?.id === 'quest' && autoFollow) { clearAuto(); autoFollow = false; say('已停止帶路；再按一次可繼續。', 2500); return; }
+    followQuest();
+  }
+  /** Where a walk heads for a target: a walking person's destination, or the target itself. */
+  function walkGoal(target: string) {
+    const [kind, id] = target.split(':');
+    if (kind === 'spot') return spotField?.stand(id);
+    if (kind !== 'npc') return questPoint(target) ?? director?.pointOf(target);
+    const n = npcs && !npcs.isAbsent(id) ? npcs.get(id) : undefined;
+    return n ? (n.path.at(-1) ?? n.position).clone() : undefined;
   }
   function walkToPoint(goal: T.Vector3, label: string) {
     const p = planRoute(goal);
-    if (!p.length) { say('找不到通往任務地點的路，請跟著金色箭頭走。', 4000); return; }
+    if (!p.length) { say('找不到通往任務地點的路，請跟著金色箭頭走。', 4000); return false; }
     clearAuto(); autoPath = p; pathIndex = 0; replans = 0; progressTime = performance.now(); progressPosition.copy(physics.position);
     autoDestination = { id: 'quest', label, position: goal.toArray() as [number, number, number], buildingId: 'quest', floorId: 'quest' } as WalkDestination;
-    chooseMode(false); drawRoute(p); say(`自動前往：${autoDestination.label}（任意方向鍵可中斷）`, 4000);
+    chooseMode(false); drawRoute(p); say(`自動前往：${autoDestination.label}（再按 G 或方向鍵可中斷）`, 4000);
+    return true;
   }
   let recoveryFailed=false;
   function moveSafely(wanted:T.Vector3,face?:T.Vector3):boolean {
@@ -1032,9 +1123,9 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
         host, scene, camera, player: () => physics.position, destinations: world.destinations,
         navPath: (_a, b) => planRoute(b), routeSurface, routes, npcs, zones,
         timeOfDay: () => sky.preset, setSky: p => { if (p === 'day' || p === 'sunset' || p === 'night') { sky.set(p); get('[data-action=sky]').textContent = `${PRESET_LABEL[p]} N`; } },
-        cue: id => sound.cue(id), say, teleport: teleportTo,
+        cue: id => sound.cue(id), say, teleport: teleportTo, autoWalking: () => autoPath.length > 0, questsLoading: () => featureStatus.quests === 'loading',
       }, story);
-      director.ui.onObjectiveClick(followQuest);
+      director.ui.onObjectiveClick(toggleFollow, pickLine);
       director.ui.player = () => {
         const l = look(), pal = PALETTES[l.body][l.palette].look;
         return { name: l.nickname || '新生', portrait: { hair: pal.hair, hairStyle: l.body === 'f' ? 'ponytail' : 'messy', top: pal.top, topStyle: l.body === 'f' ? 'hoodie' : 'tee', accessory: l.body === 'f' ? 'hairclip' : undefined } };
@@ -1066,8 +1157,11 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
         try {
           const questData = await loadJson<QuestData>('data/quests.json','支線任務').catch(e=>{ featureStatus.quests='degraded';console.warn('quests',e); return bundledQuests as QuestData; });
           if(!alive)return;
-          quests=new QuestEngine(questData,{onChange:()=>refreshNotebook(),onStorageError:()=>{storageNotice='目前無法保存進度；請勿關閉此頁，並檢查瀏覽器儲存空間。';say(storageNotice,9000);}});
+          quests=new QuestEngine(questData,{onChange:()=>refreshNotebook(),onStep:questStepDone,onStorageError:()=>{storageNotice='目前無法保存進度；請勿關閉此頁，並檢查瀏覽器儲存空間。';say(storageNotice,9000);}});
           quests.importLegacy(director!.engine.progress.done,campus.progress.talked);
+          quests.settle(questWorld());
+          spotField=new QuestSpotField({spots:questData.spots??{},support:(x,z,y)=>physics.supportAt(x,z,y),terrain:(x,z)=>terrainRef?terrainRef.heightAt(x,z):-.055,alive:()=>alive,loadProp:kind=>loadPropGeometry(new GLTFLoader().setMeshoptDecoder(MeshoptDecoder),asset,kind)});
+          scene.add(spotField.group);
           if(featureStatus.quests!=='degraded')featureStatus.quests='ready';refreshNotebook();
           if(lockedSaves().length){storageNotice='這份進度來自較新的版本，已安全保留；請重新整理頁面。在那之前，這次的變更不會保存。';say(storageNotice,0);}
         } catch(e) { featureStatus.quests='failed'; console.warn('quests',e);say('手帳暫時無法載入；主線與自由探索仍可使用。'); }
@@ -1124,14 +1218,41 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
 
   // ---- frame loop ------------------------------------------------------------------------
   const direction = new T.Vector3(), previous = new T.Vector3();
+  let journalAt = 0, journalKey = '', qaRing: ActorBody[] = [];
   let lastTime = performance.now(), frameId = 0, lastUi = 0, lastShadowOverview: boolean | undefined, jumped = false;
+  /** A walking person's destination moved: plan again rather than walk to where they used to be headed. Checked about once a second. */
+  function followMovedTarget(time: number) {
+    if (!autoTarget?.startsWith('npc:') || time - autoCheckAt < 1000) return;
+    autoCheckAt = time;
+    if (npcs?.isAbsent(autoTarget.slice(4))) { clearAuto(); autoFollow = false; say('這位人物目前不在校園；請在手帳選擇『切換至人物出現時段』後再前往。', 5000); return; }
+    const goal = walkGoal(autoTarget), end = autoPath.at(-1);
+    if (!goal || !end || Math.hypot(goal.x - end.x, goal.z - end.z) <= 2) return;
+    const p = planRoute(goal);
+    if (p.length) { autoPath = p; pathIndex = 0; drawRoute(p); }
+  }
+  /** Close enough to talk to the person being walked to: stop short rather than lean on them. */
+  const atAutoPerson = () => { if (!autoTarget?.startsWith('npc:')) return false; const n = npcs?.get(autoTarget.slice(4)); return !!n && Math.hypot(n.position.x - physics.position.x, n.position.z - physics.position.z) < NPC_ARRIVE && Math.abs(n.position.y - physics.position.y) < 1.2; };
+  /** At the end of a walk, turn to what the walk was for, so it is in the picture without the player hunting for it. */
+  function faceTarget(target: string | undefined) {
+    if (!target) return;
+    const [kind, id] = target.split(':'), door = kind === 'dest' ? world.doors.find(d => d.id === findDestination(world.destinations, id)?.doorId) : undefined;
+    const at = kind === 'spot' ? spotField?.look(id) : door?.position ?? questPoint(target);
+    if (!at) return;
+    // A little off-centre for anything close, or the player's own back would hide it; a far view stays square on.
+    const p = physics.position, yaw = Math.atan2(-(at.x - p.x), -(at.z - p.z)) + (Math.hypot(at.x - p.x, at.z - p.z) < 6 ? ARRIVAL_OFFSET : 0);
+    avatar.face(yaw); rig.yaw = yaw;
+  }
   function steer(time: number) {
     input.direction(rig.forward, direction);
     if (autoPath.length && pathIndex < autoPath.length) {
+      followMovedTarget(time);
       const step = followRoute(autoPath, pathIndex, physics.position, direction);
       pathIndex = step.index;
+      if (atAutoPerson()) { step.arrived = true; direction.set(0, 0, 0); }
       if (step.arrived) {
+        if (trackedQuest()?.step?.kind === 'photo') autoFollow = false; // the walk ends at the viewpoint: the shot is the player's
         const arrivalId=autoDestination?.id;
+        faceTarget(autoTarget);
         const label = autoDestination?.label, indoor = !['quest', 'outdoor'].includes(autoDestination?.floorId ?? ''); clearAuto(); direction.set(0, 0, 0);
         if ((arrivalId==='tunnel-west'||arrivalId==='TUNNEL'||arrivalId==='tunnel-east') && uiPlacements?.tunnel && terrainRef) {
           const profile=fullTunnelProfile(uiPlacements.tunnel,(x,z)=>terrainRef!.heightAt(x,z));
@@ -1148,8 +1269,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
             replans++; routes.avoid.push(physics.position.clone().addScaledVector(direction.lengthSq() > 1e-6 ? direction.clone().normalize() : new T.Vector3(), 2.5));
             const p = planRoute(goal);
             if (p.length) { autoPath = p; pathIndex = 0; drawRoute(p); say('前方不通，改走另一條路。', 2500); }
-            else { clearAuto(); say('人物暫時無法前進，已停止帶路；可手動調整位置後再試。'); }
-          } else { clearAuto(); say('人物暫時無法前進，已停止帶路；可手動調整位置後再試。'); }
+            else { clearAuto(); autoFollow = false; say('人物暫時無法前進，已停止帶路；可手動調整位置後再試。'); }
+          } else { clearAuto(); autoFollow = false; say('人物暫時無法前進，已停止帶路；可手動調整位置後再試。'); }
         }
         progressTime = time; progressPosition.copy(physics.position);
       }
@@ -1173,6 +1294,10 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       if (photo.active || notebook?.open || menuOpen()) direction.set(0, 0, 0); else steer(time);
       // Dialogue and chapter cards hold the player; Space advances like E.
       if (director?.blocking) { direction.set(0, 0, 0); if (input.takeJump()) director.press(); }
+      // A dialogue ends the walk under way (its goal may be out of date by the end); G's walk resumes to whatever is next.
+      if (director?.blocking && autoPath.length) clearAuto();
+      if (walkResumes({ wasBlocking, blocking: !!director?.blocking, follow: autoFollow, walking: autoPath.length > 0 })) followQuest();
+      wasBlocking = !!director?.blocking;
       const jump = input.takeJump() && !bike.riding; if (jump) clearAuto(true);
       const wasGround = physics.onGround;
       bike.update(physics.position);
@@ -1191,7 +1316,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     animateDoors(world.doors, physics.position, dt);
     physics.setCameraObstacles(doorCameraObstacles(world.doors,physics.position));
     if(routesValidated)npcs?.update(dt, physics.position);
-    physics.setActors([...(npcs?.bodies(physics.position) ?? []),...encounterScene.bodies()]);
+    physics.setActors([...(npcs?.bodies(physics.position) ?? []),...encounterScene.bodies(),...(spotField?.bodies() ?? []),...qaRing]);
     tufts?.update(physics.position);
     chase.update(dt, physics.position);
     // Waits for the tour placement: the player still stands on the default spawn (the arcade) until then.
@@ -1205,12 +1330,17 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
         if (ev.npcs.some(id => !npcs!.isAbsent(id) && (npcs!.get(id)?.position.distanceTo(physics.position) ?? 1e9) < 25)) { eventsShown.add(ev.id); lastEventAt = time; director.ui.banner(ev.banner, '校園事件'); sound.cue('chime'); break; }
       }
     }
-    guideOverride = trackedGuide();
-    director?.setGuideOverride(guideOverride);
+    syncFocus();
     if (guideOverride && !pocket.hidden && time - pocketAt > 500) {
       pocketAt = time;
-      const label = pocket.querySelector('[data-pocket-distance]');
-      if (label) label.textContent = guideOverride.point ? `${Math.round(physics.position.distanceTo(guideOverride.point))} m` : '不在校園';
+      const label = pocket.querySelector<HTMLElement>('[data-pocket-distance]');
+      if (label) setText(label, pocketDistance(guideOverride.point));
+    }
+    // The journal keeps up while it is open: a change of time or of the chapters changes what it says. Rebuilt only on a real change.
+    if (notebook?.open && time - journalAt > 1000) {
+      journalAt = time;
+      const model = notebookModel(), key = JSON.stringify(model);
+      if (key !== journalKey) { journalKey = key; notebook.update(model); }
     }
     if (!overview && storyStarted && !photo.active && !notebook?.open && !menuOpen()) director?.update(time, dt);
     else director?.ui.badge(null);
@@ -1223,12 +1353,13 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       if (candidates.some(c => c.id === 'bike')) wanted.push('bike');
       if (trackedQuest()?.step?.kind === 'photo') wanted.push('photo');
       if (time > tipsFrom && (guideOverride?.point ?? director.goal())) wanted.push('goal');
+      if (time > tipsFrom && sideLines().length) wanted.push('line');
       tips.update(time, overview || !walking || !get('.walk-welcome').hidden || guide.open || !!director.blocking || menuOpen() || !!notebook?.open || photo.active || !!quiz?.open, wanted);
       if(chosen && !director.blocking) {
         const projected=chosen.point.clone();projected.y+=2;projected.project(camera);
         director.ui.hint(projected.z<1?{x:(projected.x+1)/2*innerWidth,y:(1-projected.y)/2*innerHeight,text:`E ${chosen.label}${candidates.length>1?' · R 切換':''}`}:null);
       } else director.ui.hint(null);
-      get('[data-action=door]').textContent=chosen?`${chosen.label} E`:'互動 E';
+      setText(get('[data-action=door]'),chosen?`${chosen.label} E`:'互動 E');
       const switchButton=get('[data-action=cycle-target]');switchButton.hidden=candidates.length<2;
     }
     if (sound.enabled) {
@@ -1309,15 +1440,52 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
         return { trail: trail.slice(0, 4), landmark: top.userData.landmarkId, distance: +h.distance.toFixed(2), point: h.point.toArray().map(v => +v.toFixed(2)), hull: !!h.object.userData.outlineHull, side: m?.side, color: (m as T.MeshBasicMaterial)?.color?.getHexString?.(), triangle: h.face ? [h.face.a, h.face.b, h.face.c].map(i => new T.Vector3().fromBufferAttribute((h.object as T.Mesh).geometry.getAttribute('position') as T.BufferAttribute, i).applyMatrix4(h.object.matrixWorld).toArray().map(v => +v.toFixed(1))) : undefined };
       });
     },
+    qaObstacles: (x: number, z: number, r: number) => QA ? obstacleField.obstacles.filter(o => Math.hypot(o.center[0] - x, o.center[2] - z) < r + Math.max(o.half[0], o.half[2])).map(o => ({ id: o.id, shape: o.shape, center: o.center, half: o.half, yaw: o.yaw ?? 0 })) : [],
     qaPlace: (x: number, z: number, y?: number, face?: [number, number]) => QA ? teleportTo(new T.Vector3(x, y ?? 0, z), face && new T.Vector3(face[0], y ?? 0, face[1]), y !== undefined) : false,
     plan(to?: string) {
-      const g = to ? questPoint(to) : director?.goal(); const nav = g && navigation ? navigation.findPath(physics.position, g).length : -1; const out = g && routes ? routes.path(physics.position, g).length : -1;
+      const g = to ? walkGoal(to) : director?.goal(); const nav = g && navigation ? navigation.findPath(physics.position, g).length : -1; const out = g && routes ? routes.path(physics.position, g).length : -1;
       const clear = sightLine((a, b, r) => physics.sweep(a, b, r)), raw = g ? plan(physics.position, g, navigation, routes, clear) : [], support = (x: number, z: number, y: number) => physics.supportAt(x, z, y);
       let failsAt = -1; for (let k = 2; k <= raw.length && failsAt < 0; k++) if (!obstacleField.route(raw.slice(0, k), .30, clear, support).length) failsAt = k - 1;
       return { goal: g?.toArray(), plan: g ? planRoute(g).length : -1, nav, outdoor: out, nearest: routes ? routes.nearest(physics.position) : -1, raw: raw.length, failsAt, failing: failsAt > 0 ? [raw[failsAt - 1].toArray(), raw[failsAt].toArray()] : undefined };
     },
+    get autoFollow() { return autoFollow; },
+    /** QA only: a ring of colliders round the player, to force an auto-walk to give up; false lifts it. */
+    qaRing: (on: boolean) => {
+      if (!QA) return false;
+      qaRing = on ? Array.from({ length: 10 }, (_, i) => ({ id: `qa-ring:${i}`, position: physics.position.clone().add(new T.Vector3(Math.cos(i / 10 * Math.PI * 2) * 1.5, 0, Math.sin(i / 10 * Math.PI * 2) * 1.5)), radius: .55, height: 2.4 })) : [];
+      return true;
+    },
+    /** QA only: put the save on one step of one quest, nothing else active (sets the scene; playing it needs real input). */
+    qaSetQuest: (id: string, step: number) => {
+      if (!QA || !quests) return false;
+      for (const key of Object.keys(quests.progress.quests)) delete quests.progress.quests[key];
+      quests.progress.quests[id] = { status: 'active', step, choices: {}, photoBaseline: 0 };
+      return quests.track(id);
+    },
+    get questSpots() { return spotField?.shown.map(id => ({ id, position: spotField!.point(id)!.toArray(), stand: spotField!.stand(id)!.toArray(), bodies: spotField!.bodies().filter(b => b.id.startsWith(`spot:${id}:`)).length })) ?? []; },
+    /** QA only: is what this target means on screen and unobstructed? Rays at three heights; nothing but it may come before it. */
+    qaTargetView: (target: string) => {
+      if (!QA) return undefined;
+      const [kind, id] = target.split(':');
+      const object: T.Object3D | undefined = kind === 'spot' ? spotField?.mesh(id) : kind === 'npc' ? npcs?.get(id)?.root : kind === 'dest' ? world.doors.find(d => d.id === findDestination(world.destinations, id)?.doorId)?.group : undefined;
+      const point = kind === 'npc' ? npcs?.get(id)?.position.clone() : questPoint(target);
+      if (!point) return { found: false, reason: 'no point' };
+      const shown = (o: T.Object3D | null) => { for (; o; o = o.parent) if (!o.visible) return false; return true; };
+      const box = object ? new T.Box3().setFromObject(object) : undefined, heights = box && !box.isEmpty() ? [.2, .5, .8].map(t => box.min.y + (box.max.y - box.min.y) * t) : [point.y + 1];
+      const rays = heights.map(y => {
+        const at = new T.Vector3(box && !box.isEmpty() ? (box.min.x + box.max.x) / 2 : point.x, y, box && !box.isEmpty() ? (box.min.z + box.max.z) / 2 : point.z), ndc = at.clone().project(camera);
+        const inFrame = ndc.z < 1 && Math.abs(ndc.x) < .98 && Math.abs(ndc.y) < .98;
+        const ray = new T.Raycaster(camera.position, at.clone().sub(camera.position).normalize());
+        const isAvatar = (o: T.Object3D | null) => { for (; o; o = o.parent) if (o === avatar.root) return true; return false; };
+        const hits = ray.intersectObjects(scene.children, true).filter(h => shown(h.object) && !h.object.userData.outlineHull && !(h.object instanceof T.Sprite) && !isAvatar(h.object) && ![(h.object as T.Mesh).material].flat().some(m => m?.transparent) && !h.object.name.startsWith('Story route'));
+        const first = hits[0], targetDistance = camera.position.distanceTo(at); let mine = !first || first.distance > targetDistance - .15; if (first && object) for (let o: T.Object3D | null = first.object; o; o = o.parent) if (o === object) mine = true;
+        let top: T.Object3D | null = first?.object ?? null; const trail: string[] = []; for (; top && trail.length < 3; top = top.parent) if (top.name) trail.push(top.name);
+        return { ndc: [+ndc.x.toFixed(3), +ndc.y.toFixed(3)], inFrame, mine, first: trail.join(' < '), firstDistance: first ? +first.distance.toFixed(2) : null, targetDistance: +camera.position.distanceTo(at).toFixed(2) };
+      });
+      return { found: !!object, visibleFlag: object ? shown(object) : false, rays, seen: rays.some(r => r.inFrame && r.mine), inFrame: rays.some(r => r.inFrame), distance: +physics.position.distanceTo(point).toFixed(2) };
+    },
     get steering() { return { direction: direction.toArray(), intended: physics.intendedSpeed, pathIndex, target: autoPath[pathIndex]?.toArray(), onGround: physics.onGround, blocking: director?.blocking ?? false }; },
-    get story() { return director ? { active: director.engine.active?.id, done: director.engine.progress.done, flags: director.engine.progress.flags, dialogue: director.ui.dialogueOpen, blocking: director.blocking } : undefined; },
+    get story() { return director ? { active: director.engine.active?.id, done: director.engine.progress.done, flags: director.engine.progress.flags, fired: director.engine.progress.fired, dialogue: director.ui.dialogueOpen, blocking: director.blocking } : undefined; },
     get npcs() { return npcs ? npcs.ids().map(id => ({ id, position: npcs!.get(id)?.position.toArray(), absent: npcs!.isAbsent(id), visible: npcs!.get(id)?.root.visible, target: npcs!.targets.get(id)?.toArray() })) : []; },
     get talk() { return talk ? { busy: talk.talking, mode: input.mode, choices: [...host.querySelectorAll('.q-choices:not([hidden]) button')].map(b => b.textContent), line: host.querySelector('.q-dialog:not([hidden]) .text')?.textContent ?? null, name: host.querySelector('.q-dialog:not([hidden]) .name')?.textContent ?? null } : undefined; },
     get campus() { return campus.progress; },
@@ -1329,6 +1497,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     get questList() { return quests?.list(); },
     get guideBeacon() { return director?.beaconState; },
     get guide() { return guideOverride && { target: guideOverride.target, point: guideOverride.point?.toArray() }; },
+    get focus() { const e = host.querySelector('.q-objective'); return { line: guideOverride ? 'side' : 'main', quest: quests?.progress.tracked, shown: !!e && !(e as HTMLElement).hidden, small: e?.querySelector('small')?.textContent, text: e?.querySelector('strong')?.textContent, distance: e?.querySelector('.q-dist')?.textContent, other: e?.querySelector('.q-other')?.textContent, hint: e?.querySelector('em')?.textContent, goal: (guideOverride?.point ?? director?.goal())?.toArray() }; },
     /** QA only: hide scene groups by name prefix to measure their draw cost. */
     qaHide: (prefix: string, hidden = true) => { if (!QA) return 0; let n = 0; scene.traverse(o => { if (o.name.startsWith(prefix)) { o.visible = !hidden; n++; } }); return n; },
     get photo() { return { active: photo.active, yaw: photo.yaw, pitch: photo.pitch, goal: host.querySelector('.photo-goal:not([hidden])')?.textContent ?? null, sun: sky.sunDir.toArray() }; },

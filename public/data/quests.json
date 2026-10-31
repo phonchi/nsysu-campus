@@ -24,14 +24,14 @@
         },
         {
           "id": "errand-2",
-          "target": "zone:gate",
-          "text": "查看校門旁的失物公告，確認還沒有人登記這張卡片。",
+          "target": "spot:gate-notice",
+          "text": "查看校門旁的失物公告板，確認還沒有人登記這張卡片。",
           "kind": "interact",
-          "radius": 8,
+          "radius": 3,
           "lines": [
             {
               "who": "player",
-              "text": "公告上沒有人登記花朵卡片，去問小潔吧。"
+              "text": "公告板上沒有人登記花朵卡片，去問小潔吧。"
             }
           ]
         },
@@ -108,45 +108,45 @@
         },
         {
           "id": "errand-2",
-          "target": "zone:admin",
-          "text": "自己到行政區記下服務台方向。",
+          "target": "spot:admin-service-sign",
+          "text": "找到行政大樓前的服務台指示牌，記下方向。",
           "kind": "interact",
-          "radius": 8,
+          "radius": 3,
           "lines": [
             {
               "who": "player",
-              "text": "服務台在行政大樓這一側，把方向記下來了。"
+              "text": "指示牌寫著服務台就在行政大樓這一側，把方向記下來了。"
             }
           ]
         },
         {
           "id": "errand-3",
-          "target": "zone:library",
-          "text": "自己查看圖書館閱讀區。",
+          "target": "spot:library-reading-desk",
+          "text": "到圖資大樓前廣場的閱讀桌看看。",
           "kind": "interact",
-          "radius": 8,
+          "radius": 3,
           "lines": [
             {
               "who": "player",
-              "text": "這裡就是閱讀區。回去向 Mia 說說我看到的環境。"
+              "text": "閱讀桌上擺著幾本書，坐下來看書應該不錯。回去向 Mia 說說。"
             }
           ]
         },
         {
           "id": "return",
           "target": "npc:intl-mia",
-          "text": "回到 Mia 身邊，告訴她服務台方向，並推薦閱讀區。",
+          "text": "回到 Mia 身邊，告訴她服務台方向，並推薦閱讀的地方。",
           "radius": 4,
           "choices": [
             {
               "id": "a",
-              "label": "介紹海景閱讀區",
-              "result": "能看海的閱讀區聽起來很棒，我會照你的方向筆記去看看。"
+              "label": "介紹廣場的閱讀桌",
+              "result": "廣場的閱讀桌聽起來很棒，我會照你的方向筆記去看看。"
             },
             {
               "id": "b",
-              "label": "介紹靠窗的安靜座位",
-              "result": "靠窗的安靜座位聽起來很好，我帶本書就去坐坐。"
+              "label": "介紹有遮陽傘的座位",
+              "result": "有遮陽傘的座位聽起來很好，我帶本書就去坐坐。"
             }
           ],
           "lines": [
@@ -188,10 +188,10 @@
         },
         {
           "id": "errand-2",
-          "target": "zone:tunnel-west",
-          "text": "在隧道洞口撿起第一疊傳單。",
+          "target": "spot:tunnel-leaflets-mouth",
+          "text": "在隧道洞口旁撿起第一疊傳單。",
           "kind": "interact",
-          "radius": 8,
+          "radius": 3,
           "lines": [
             {
               "who": "player",
@@ -201,10 +201,10 @@
         },
         {
           "id": "errand-3",
-          "target": "zone:tunnel-inside",
-          "text": "到可走的洞口內側，收好第二疊傳單。",
+          "target": "spot:tunnel-leaflets-inside",
+          "text": "到洞口內側，收好第二疊傳單。",
           "kind": "interact",
-          "radius": 8,
+          "radius": 3,
           "lines": [
             {
               "who": "player",
@@ -256,10 +256,10 @@
       "steps": [
         {
           "id": "explore",
-          "target": "zone:tunnel-west",
-          "text": "在隧道校園側拍一張照片，再請小橘看看。",
+          "target": "spot:tunnel-photo-view",
+          "text": "站到取景點，在隧道校園側拍一張洞口照片，再請小橘看看。",
           "kind": "photo",
-          "radius": 12,
+          "radius": 4,
           "lines": [
             {
               "who": "player",
@@ -385,7 +385,7 @@
       "title": "海伯的園藝幫手",
       "zone": "admin",
       "npc": "gardener-hai",
-      "description": "幫海伯看看廣場通道和閱讀區遮蔭，再一起討論花盆佈置。",
+      "description": "幫海伯看看行政大樓前的花盆通道和廣場遮陽傘，再一起討論花盆佈置。",
       "reward": "海伯的園藝幫手紀念章",
       "steps": [
         {
@@ -397,16 +397,16 @@
           "lines": [
             {
               "who": "gardener-hai",
-              "text": "請幫我看看廣場花盆間能不能通行，再參考閱讀區的遮蔭。"
+              "text": "請幫我看看行政大樓前的花盆間能不能通行，再參考圖資大樓前廣場的遮陽傘。"
             }
           ]
         },
         {
           "id": "errand-2",
-          "target": "zone:admin",
-          "text": "在行政廣場檢查花盆間的通行空間。",
+          "target": "spot:admin-planters",
+          "text": "到行政大樓前的花盆旁，檢查花盆間的通行空間。",
           "kind": "interact",
-          "radius": 8,
+          "radius": 3,
           "lines": [
             {
               "who": "player",
@@ -416,14 +416,14 @@
         },
         {
           "id": "errand-3",
-          "target": "zone:library",
-          "text": "查看閱讀區旁的遮蔭，記下可以借用的佈置點子。",
+          "target": "spot:library-shade",
+          "text": "到圖資大樓前廣場的遮陽傘，看看遮蔭可以借用什麼點子。",
           "kind": "interact",
-          "radius": 8,
+          "radius": 3,
           "lines": [
             {
               "who": "player",
-              "text": "閱讀區旁有遮蔭，可以把這個點子帶回去給海伯。"
+              "text": "遮陽傘下的陰影很夠，可以把這個點子帶回去給海伯。"
             }
           ]
         },
@@ -483,10 +483,10 @@
         },
         {
           "id": "errand-2",
-          "target": "zone:library",
-          "text": "在閱讀角找到藍色書籤，先收進失物信封。",
+          "target": "spot:library-bookmark",
+          "text": "到廣場旁的閱讀角小桌，找到藍色書籤，先收進失物信封。",
           "kind": "interact",
-          "radius": 8,
+          "radius": 3,
           "lines": [
             {
               "who": "player",
@@ -547,10 +547,10 @@
       "steps": [
         {
           "id": "explore",
-          "target": "zone:library",
-          "text": "拍下適合閱讀的角落，與阿文交換想法。",
+          "target": "spot:library-corner-view",
+          "text": "站到取景點，拍下廣場旁的閱讀角，再與阿文交換想法。",
           "kind": "photo",
-          "radius": 12,
+          "radius": 4,
           "lines": [
             {
               "who": "player",
@@ -599,32 +599,32 @@
       "title": "阿凱的咖啡訂單",
       "zone": "arcade",
       "npc": "coffee-kai",
-      "description": "向阿凱領取活動用飲品，送到林老師手上。",
+      "description": "向阿凱核對訂單，到取餐桌拿飲品，送到林老師手上。",
       "reward": "阿凱的咖啡訂單紀念章",
       "steps": [
         {
           "id": "errand-1",
           "target": "npc:coffee-kai",
-          "text": "向阿凱核對活動訂單：一杯無糖飲品，封好杯蓋。",
+          "text": "向阿凱核對活動訂單：一杯無糖飲品，放在取餐桌上。",
           "kind": "interact",
           "radius": 4,
           "lines": [
             {
               "who": "coffee-kai",
-              "text": "這是林老師訂的無糖飲品，杯蓋封好了，請沿長廊送過去。"
+              "text": "這是林老師訂的無糖飲品，杯蓋封好了，放在長廊另一頭的取餐桌上，拿了送過去吧。"
             }
           ]
         },
         {
           "id": "errand-2",
-          "target": "zone:arcade",
-          "text": "沿長廊走過去，確認飲品仍封好，準備送給林老師。",
+          "target": "spot:arcade-drink",
+          "text": "到長廊另一頭的取餐桌，拿起封好杯蓋的飲品。",
           "kind": "interact",
-          "radius": 8,
+          "radius": 3,
           "lines": [
             {
               "who": "player",
-              "text": "沿長廊走到這裡了，杯蓋還封著，再送到林老師面前。"
+              "text": "飲品還在取餐桌上，杯蓋封得好好的。拿去給林老師。"
             }
           ]
         },
@@ -697,10 +697,10 @@
         },
         {
           "id": "errand-3",
-          "target": "zone:arcade",
-          "text": "到長廊的攤位旁，先把桌邊的通行空間留出來。",
+          "target": "spot:arcade-stall",
+          "text": "到長廊上小婷的攤位桌旁，把桌邊的通行空間留出來。",
           "kind": "interact",
-          "radius": 8,
+          "radius": 3,
           "lines": [
             {
               "who": "player",
@@ -753,10 +753,10 @@
       "steps": [
         {
           "id": "explore",
-          "target": "zone:seawall",
-          "text": "夕陽時段，在海堤啟動拍照模式並按快門，留下自己的明信片照片。",
+          "target": "spot:seawall-view",
+          "text": "夕陽時段，站到海堤的取景點，啟動拍照模式並按快門，留下自己的明信片照片。",
           "kind": "photo",
-          "radius": 12,
+          "radius": 4,
           "when": "sunset",
           "lines": [
             {
@@ -844,14 +844,14 @@
         },
         {
           "id": "errand-3",
-          "target": "zone:arcade",
-          "text": "到理工長廊確認聽眾站位，替大家留下通行空間。",
+          "target": "spot:arcade-stage-marks",
+          "text": "到理工長廊的小舞台預定地，照著三角錐確認聽眾站位。",
           "kind": "interact",
-          "radius": 8,
+          "radius": 3,
           "lines": [
             {
               "who": "player",
-              "text": "站位安排好了，步道中央保持暢通，回去告訴允哲。"
+              "text": "三角錐排好站位了，步道中央保持暢通，回去告訴允哲。"
             }
           ],
           "when": "sunset"
@@ -890,6 +890,315 @@
         "day": "允哲白天在圖資大樓附近準備，夕陽才到長廊演出；阿柏夕陽在海堤。",
         "night": "阿柏已跑完步離校，請切換夕陽再邀他來長廊。"
       }
+    },
+    {
+      "id": "math-day",
+      "title": "高中人才培育班的一天",
+      "zone": "arcade",
+      "npc": "ta-lin",
+      "description": "跟著林老師的提示，走一趟應用數學系的高中人才培育班會用到的地方：中庭、演講廳、教室、系辦與數學圖書館。",
+      "reward": "高中人才培育班的一天紀念章",
+      "steps": [
+        {
+          "id": "check-in",
+          "target": "spot:sc-courtyard-checkin",
+          "text": "到理學院中庭的報到桌。考試當天要先到這裡報到。",
+          "kind": "interact",
+          "radius": 3,
+          "lines": [
+            {
+              "who": "player",
+              "text": "考試當天請先到理學院中庭報到，就是這張桌子。"
+            }
+          ]
+        },
+        {
+          "id": "lecture",
+          "target": "dest:SC1005",
+          "text": "到理 1005，一樓的國際會議廳，演講在這裡。",
+          "kind": "interact",
+          "radius": 1.4,
+          "lines": [
+            {
+              "who": "player",
+              "text": "理 1005 在一樓，是國際會議廳，演講在這裡。"
+            }
+          ]
+        },
+        {
+          "id": "classroom",
+          "target": "dest:SC2001",
+          "text": "上二樓，找到教室理 2001。",
+          "kind": "interact",
+          "radius": 1.4,
+          "lines": [
+            {
+              "who": "player",
+              "text": "理 2001 在二樓，是這裡的教室。"
+            }
+          ]
+        },
+        {
+          "id": "office",
+          "target": "dest:SC4010",
+          "text": "上四樓，找到應用數學系系辦理 4010。",
+          "kind": "interact",
+          "radius": 1.4,
+          "lines": [
+            {
+              "who": "player",
+              "text": "應用數學系系辦在理學院 4 樓，就是理 4010。"
+            }
+          ]
+        },
+        {
+          "id": "math-library",
+          "target": "dest:SC4009",
+          "text": "同一層樓，找到數學圖書館 4009 室。",
+          "kind": "interact",
+          "radius": 1.4,
+          "lines": [
+            {
+              "who": "player",
+              "text": "數學圖書館在理學院 4 樓 4009 室。回去告訴林老師吧。"
+            }
+          ]
+        },
+        {
+          "id": "return",
+          "target": "npc:ta-lin",
+          "text": "回到林老師身邊，告訴她你最想再去哪裡。",
+          "radius": 4,
+          "choices": [
+            {
+              "id": "a",
+              "label": "四樓的數學圖書館",
+              "result": "數學圖書館在理學院 4 樓 4009 室，下次直接上樓就對了。"
+            },
+            {
+              "id": "b",
+              "label": "一樓的國際會議廳",
+              "result": "國際會議廳就是理 1005，下次從中庭過去就到了。"
+            }
+          ],
+          "lines": [
+            {
+              "who": "ta-lin",
+              "text": "都走過一遍了。你最想再去哪裡？"
+            }
+          ]
+        }
+      ],
+      "accept": {
+        "near": "npc:ta-lin",
+        "chapterDone": "c5-arcade",
+        "lines": [
+          {
+            "who": "ta-lin",
+            "text": "高中人才培育班的同學會走過理學院好幾個地方。你走一遍看看，從中庭的報到桌開始，走完回來找我。"
+          }
+        ]
+      },
+      "absent": {
+        "night": "林老師已離校，請切換白天或夕陽再來。"
+      }
     }
-  ]
+  ],
+  "spots": {
+    "gate-notice": {
+      "kind": "notice",
+      "label": "查看失物公告板",
+      "at": [
+        -80.5,
+        589.5
+      ],
+      "stand": [
+        -83,
+        589.5
+      ]
+    },
+    "admin-service-sign": {
+      "kind": "sign",
+      "label": "看服務台指示牌",
+      "at": [
+        -72,
+        93
+      ],
+      "stand": [
+        -72,
+        95.6
+      ]
+    },
+    "admin-planters": {
+      "kind": "planters",
+      "label": "檢查花盆間的通道",
+      "at": [
+        -64,
+        92.5
+      ],
+      "stand": [
+        -64,
+        95
+      ]
+    },
+    "library-reading-desk": {
+      "kind": "reading",
+      "label": "看看閱讀桌",
+      "at": [
+        -55,
+        -40
+      ],
+      "stand": [
+        -55,
+        -37.6
+      ]
+    },
+    "library-shade": {
+      "kind": "shade",
+      "label": "看看遮陽傘的遮蔭",
+      "at": [
+        -49.5,
+        -40.5
+      ],
+      "stand": [
+        -49.5,
+        -38
+      ]
+    },
+    "library-bookmark": {
+      "kind": "bookmark",
+      "label": "拿起藍色書籤",
+      "at": [
+        -74.5,
+        -32
+      ],
+      "stand": [
+        -72.5,
+        -33.3
+      ]
+    },
+    "library-corner-view": {
+      "kind": "viewpoint",
+      "label": "閱讀角取景點",
+      "at": [
+        -75,
+        -38.5
+      ],
+      "stand": [
+        -74,
+        -37.5
+      ],
+      "face": [
+        -78,
+        -45
+      ]
+    },
+    "tunnel-leaflets-mouth": {
+      "kind": "leaflets",
+      "label": "撿起第一疊傳單",
+      "at": [
+        16,
+        151.2
+      ],
+      "stand": [
+        16,
+        148.8
+      ],
+      "y": 1
+    },
+    "tunnel-leaflets-inside": {
+      "kind": "leaflets",
+      "label": "撿起第二疊傳單",
+      "at": [
+        27.2,
+        152.1
+      ],
+      "stand": [
+        25.7,
+        150.1
+      ],
+      "y": 1
+    },
+    "tunnel-photo-view": {
+      "kind": "viewpoint",
+      "label": "洞口取景點",
+      "at": [
+        13.5,
+        149.6
+      ],
+      "stand": [
+        12.5,
+        148.6
+      ],
+      "face": [
+        29,
+        151
+      ]
+    },
+    "arcade-drink": {
+      "kind": "drink",
+      "label": "拿起飲品",
+      "at": [
+        -72.5,
+        126.2
+      ],
+      "stand": [
+        -72.5,
+        128.6
+      ]
+    },
+    "arcade-stall": {
+      "kind": "stall",
+      "label": "整理攤位桌邊",
+      "at": [
+        -57,
+        131
+      ],
+      "stand": [
+        -57,
+        128.6
+      ]
+    },
+    "arcade-stage-marks": {
+      "kind": "marks",
+      "label": "確認聽眾站位",
+      "at": [
+        -83,
+        131.3
+      ],
+      "stand": [
+        -83,
+        128.8
+      ]
+    },
+    "seawall-view": {
+      "kind": "viewpoint",
+      "label": "海堤取景點",
+      "at": [
+        -303,
+        471
+      ],
+      "stand": [
+        -303,
+        469.6
+      ],
+      "face": [
+        -303,
+        495
+      ]
+    },
+    "sc-courtyard-checkin": {
+      "kind": "checkin",
+      "label": "在報到桌報到",
+      "at": [
+        -24,
+        107
+      ],
+      "stand": [
+        -24,
+        104.6
+      ],
+      "y": 0
+    }
+  }
 }

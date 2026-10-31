@@ -138,6 +138,27 @@ export function planProps(w: PropWorld, seed = 2026): PropSpot[] {
   return out;
 }
 
+/** One prop GLB as a plain position/normal/colour geometry, non-indexed so any number of copies merge; undefined when the asset fails. */
+export async function loadPropGeometry(loader: GLTFLoader, asset: (p: string) => string, kind: string) {
+  const g = await loader.loadAsync(asset(`models/props/${kind}.glb`)).catch(() => undefined);
+  if (!g) return undefined;
+  let out: T.BufferGeometry | undefined;
+  g.scene.updateMatrixWorld(true);
+  g.scene.traverse(m => {
+    if (!(m instanceof T.Mesh) || out) return;
+    const geo = m.geometry.clone().applyMatrix4(m.matrixWorld);
+    for (const k of Object.keys(geo.attributes)) if (!['position', 'normal', 'color'].includes(k)) geo.deleteAttribute(k);
+    if (geo.attributes.color && geo.attributes.color.itemSize === 4) { // keep RGB only, as float
+      const c = geo.attributes.color, rgb = new Float32Array(c.count * 3);
+      for (let i = 0; i < c.count; i++) { rgb[i * 3] = c.getX(i); rgb[i * 3 + 1] = c.getY(i); rgb[i * 3 + 2] = c.getZ(i); }
+      geo.setAttribute('color', new T.BufferAttribute(rgb, 3));
+    }
+    out = geo.index ? geo.toNonIndexed() : geo;
+  });
+  g.scene.traverse(m => { if (m instanceof T.Mesh) { m.geometry.dispose(); for (const mt of [m.material].flat()) mt.dispose(); } });
+  return out;
+}
+
 /** Load the prop GLBs and bake every placed prop into one static mesh per 160 m cell (all props share the
  * vertex-colour toon material, so a whole place is a single draw call and still frustum-culls). */
 export async function addProps(parent: T.Object3D, spots: PropSpot[], asset: (p: string) => string, ground: (x: number, z: number) => number, alive: () => boolean) {
@@ -146,21 +167,8 @@ export async function addProps(parent: T.Object3D, spots: PropSpot[], asset: (p:
   const kinds = [...new Set(spots.map(s => s.kind))], o = new T.Object3D();
   const geos = new Map<string, T.BufferGeometry>();
   await Promise.all(kinds.map(async kind => {
-    const g = await loader.loadAsync(asset(`models/props/${kind}.glb`)).catch(() => undefined);
-    if (!g) return;
-    g.scene.updateMatrixWorld(true);
-    g.scene.traverse(m => {
-      if (!(m instanceof T.Mesh) || geos.has(kind)) return;
-      const geo = m.geometry.clone().applyMatrix4(m.matrixWorld);
-      for (const k of Object.keys(geo.attributes)) if (!['position', 'normal', 'color'].includes(k)) geo.deleteAttribute(k);
-      if (geo.attributes.color && geo.attributes.color.itemSize === 4) { // keep RGB only, as float
-        const c = geo.attributes.color, rgb = new Float32Array(c.count * 3);
-        for (let i = 0; i < c.count; i++) { rgb[i * 3] = c.getX(i); rgb[i * 3 + 1] = c.getY(i); rgb[i * 3 + 2] = c.getZ(i); }
-        geo.setAttribute('color', new T.BufferAttribute(rgb, 3));
-      }
-      geos.set(kind, geo.index ? geo.toNonIndexed() : geo);
-    });
-    g.scene.traverse(m => { if (m instanceof T.Mesh) { m.geometry.dispose(); for (const mt of [m.material].flat()) mt.dispose(); } });
+    const geo = await loadPropGeometry(loader, asset, kind);
+    if (geo) geos.set(kind, geo);
   }));
   if (!alive()) { for (const g of geos.values()) g.dispose(); return group; }
   const material = toonMaterial({ vertexColors: true, name: 'props' }), CELL = 160;

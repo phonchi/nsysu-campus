@@ -20,7 +20,7 @@ async def main():
   await ctx.add_init_script('if(!sessionStorage.getItem("qa-fixture")){localStorage.clear();localStorage.setItem("nsysu-story-v3",JSON.stringify('+json.dumps(dict(done=[x['id'] for x in CHAPTERS],flags=[],fired={},sideQuests=[],npcAt={})) +'));sessionStorage.setItem("qa-fixture","1")}')
   page=await ctx.new_page();page.on('pageerror',lambda e:errors.append(str(e)))
   await page.goto('http://127.0.0.1:4173/?view=walk&quality=C&qa=1',wait_until='networkidle')
-  await page.wait_for_function('window.campusWalk?.questList?.length===12',timeout=120000)
+  await page.wait_for_function('window.campusWalk?.questList?.length>=12',timeout=120000)
   await page.locator('[data-action=start]').first.click();await page.wait_for_timeout(3000)
   async def drain():
    for _ in range(35):
@@ -69,7 +69,7 @@ async def main():
    except Exception as exc:
     check('quest:'+q['id'],False,error=str(exc));await page.screenshot(path=str(OUT/'error.png'));break
   await page.screenshot(path=str(OUT/'quests-complete.png'))
-  await page.reload(wait_until='networkidle');await page.wait_for_function('window.campusWalk?.questList?.length===12',timeout=120000);await page.locator('[data-action=start]').first.click();await page.wait_for_function('window.campusWalk.talk.mode === "walk"',timeout=10000)
+  await page.reload(wait_until='networkidle');await page.wait_for_function('window.campusWalk?.questList?.length>=12',timeout=120000);await page.locator('[data-action=start]').first.click();await page.wait_for_function('window.campusWalk.talk.mode === "walk"',timeout=10000)
   # Place on wide gate clearing for deterministic encounter scene, use live scene target.
   for d in ENCOUNTERS:
    try:

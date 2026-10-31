@@ -1,5 +1,6 @@
 import * as T from 'three';
-import { badgeGlyph, beaconFade } from './guide-goal';
+import { badgeGlyph, beaconFade, nextCorner, routeDue, routeProgress } from './guide-goal';
+import { AT_DESTINATION, destinationDistance, findDestination } from './focus';
 import { StoryEngine, loadProgress, type StoryWorld } from './engine';
 import { validateStory, type Chapter, type StoryData } from './schema';
 import { StoryUi } from './ui';
@@ -23,8 +24,15 @@ export interface DirectorDeps {
   setSky: (preset: string) => void;
   cue: (id: string) => void;
   say: (text: string, ms?: number) => void;
+  /** The quest save is still loading, so the focus is not known yet: the main story must not jump the gun. */
+  questsLoading?: () => boolean;
+  /** The player is on an auto-walk, which plans and draws its own route. */
+  autoWalking?: () => boolean;
   teleport: (p: T.Vector3, faceToward?: T.Vector3) => boolean | void;
 }
+
+/** The side quest in focus: its goal for the guidance, its words for the objective card. */
+export interface GuideOverride { target: string; point: T.Vector3 | undefined; title: string; text: string; /** The floor it is on, shown while the player is on another. */ floor?: string }
 
 const flat = (a: T.Vector3, b: T.Vector3) => Math.hypot(a.x - b.x, a.z - b.z);
 
@@ -35,6 +43,8 @@ export class StoryDirector {
   private arrowTarget: string | null = null;
   private route: T.Vector3[] = [];
   private routeAt = 0;
+  private routeDirty = true;
+  private routeGoal?: T.Vector3;
   private routeLine = new T.Group();
   private beacon: T.Mesh;
   private pointer: T.Mesh;
@@ -42,7 +52,7 @@ export class StoryDirector {
   private cardOpen = false;
   private tmp = new T.Vector3();
   /** A tracked side quest takes the guidance over; `point` is undefined while its person is away. */
-  private override?: { target: string; point: T.Vector3 | undefined };
+  private override?: GuideOverride;
 
   constructor(private d: DirectorDeps, data: StoryData) {
     const errors = validateStory(data);
@@ -51,7 +61,7 @@ export class StoryDirector {
     const world: StoryWorld = {
       distanceTo: t => this.distanceTo(t),
       inZone: z => this.inZone(z),
-      atDestination: code => { const dst = d.destinations.find(x => x.label === code); if (!dst) return false; const p = d.player(); return Math.hypot(dst.position[0] - p.x, dst.position[2] - p.z) < 1.4 && Math.abs(dst.position[1] - p.y) < .8; },
+      atDestination: code => { const dst = findDestination(d.destinations, code); return !!dst && destinationDistance(dst.position, d.player()) < AT_DESTINATION; },
       timeOfDay: () => d.timeOfDay(),
     };
     this.engine = new StoryEngine(data, world, {
@@ -61,13 +71,13 @@ export class StoryDirector {
         this.ui.dialogue(lines, () => { d.npcs.setTalking(undefined); done(); });
       },
       setObjective: (ch, text) => this.ui.objective(ch, text),
-      showArrow: t => { this.arrowTarget = t; this.routeAt = 0; },
+      showArrow: t => { this.arrowTarget = t; this.routeDirty = true; },
       setSky: s => d.setSky(s),
       playSound: s => d.cue(s),
       moveNpc: (n, a) => d.npcs.moveTo(n, a, d.player()),
       chapterStart: ch => { this.ui.dots(ch.id, this.engine?.progress.done ?? []); this.ui.banner(ch.title, `第 ${data.chapters.indexOf(ch) + 1} 章`); },
       chapterComplete: (ch, fact, next) => this.complete(ch, fact, next),
-      unlockSideQuest: id => { const q = data.sideQuests.find(x => x.id === id); if (q) d.say(`解鎖支線「${q.title}」：${q.hint}`, 6000); },
+      unlockSideQuest: id => { const q = data.sideQuests.find(x => x.id === id); if (q) d.say(`新的校史線索「${q.title}」：${q.hint}`, 6000); },
     }, loadProgress());
     this.routeLine.name = 'Story route';
     d.scene.add(this.routeLine);
@@ -120,7 +130,7 @@ export class StoryDirector {
     const [kind, id] = t.split(':');
     // A walking NPC is a moving target: head for where they are going, not where they happen to be.
     if (kind === 'npc') { const n = this.d.npcs.get(id); return n ? (n.path.at(-1) ?? n.position).clone() : undefined; }
-    if (kind === 'dest') { const dst = this.d.destinations.find(x => x.label === id); return dst ? new T.Vector3(...dst.position) : undefined; }
+    if (kind === 'dest') { const dst = findDestination(this.d.destinations, id); return dst ? new T.Vector3(...dst.position) : undefined; }
     return this.zonePoint(id);
   }
 
@@ -145,7 +155,7 @@ export class StoryDirector {
       this.cardOpen = false;
       this.ui.dots(undefined, this.engine.progress.done);
       if (!next) { this.ui.objective(ch, '導覽完成！自由探索校園吧'); this.d.say('新生導覽完成。地圖首頁會記住你的進度。', 6000); }
-      this.engine.update();
+      if (!this.override) this.engine.update(); // a side quest in focus holds the next chapter back
       if (how === 'bus') this.ride();
     });
   }
@@ -167,13 +177,17 @@ export class StoryDirector {
     return this.engine.press();
   }
 
-  setGuideOverride(next?: { target: string; point: T.Vector3 | undefined }) {
-    if (next?.target !== this.override?.target) this.routeAt = 0;
+  setGuideOverride(next?: GuideOverride, sideSummary = '') {
+    if (next?.target !== this.override?.target) this.routeDirty = true;
     this.override = next;
+    this.ui.focusLine(next && { title: next.title, text: next.text }, sideSummary);
   }
 
   /** Current guidance goal in world space (for auto-walking the quest), if any. */
   goal() { const t = this.effectiveTarget(); return t ? this.targetPoint(t) : undefined; }
+  /** What the main story is guiding to, as a target string, and any target's point. */
+  get goalTarget() { return this.effectiveTarget(); }
+  pointOf(target: string) { return this.targetPoint(target); }
   get objectiveText() { return this.ui.objectiveText; }
 
   /** Label of the named place the player stands in, if any. */
@@ -193,7 +207,8 @@ export class StoryDirector {
   }
 
   update(time: number, dt: number) {
-    if (!this.blocking) this.engine.update();
+    // Focus on a side quest holds the main story's automatic steps; they pick up where they were on switching back.
+    if (!this.blocking && !this.override && !this.d.questsLoading?.()) this.engine.update();
     // Zone banners on entry.
     let inside: string | undefined;
     for (const [id, z] of Object.entries(this.d.zones.zones)) if (id !== 'tunnel-inside' && this.inZone(id)) { inside = id; break; }
@@ -201,14 +216,18 @@ export class StoryDirector {
     this.zone = inside;
     // Guidance.
     const o = this.override, target = o ? o.target : this.effectiveTarget(), goal = o ? o.point : target ? this.targetPoint(target) : undefined, p = this.d.player();
-    if (!goal) { this.pointer.visible = this.beacon.visible = false; this.ui.edge(null); this.ui.pointer(null); this.ui.badge(null); this.ui.distance(o ? '追蹤支線中' : undefined); if (this.route.length) { this.route = []; this.drawRoute([]); } return; }
-    if (time - this.routeAt > 1200) {
-      this.routeAt = time;
+    if (!goal) { this.pointer.visible = this.beacon.visible = false; this.ui.edge(null); this.ui.pointer(null); this.ui.badge(null); this.ui.distance(o ? '不在校園' : undefined); if (this.route.length) { this.route = []; this.drawRoute([]); } return; }
+    if (this.d.autoWalking?.()) {
+      // One gold line at a time: the auto-walk has its own, and needs no second plan.
+      if (this.route.length) { this.route = []; this.drawRoute([]); }
+      this.routeDirty = true;
+    } else if (!this.blocking && routeDue({ now: time, at: this.routeAt, dirty: this.routeDirty, empty: !this.route.length, goalMoved: !this.routeGoal || flat(this.routeGoal, goal) > 2, offRoute: routeProgress(this.route, p).offset > 3 })) {
+      this.routeAt = time; this.routeDirty = false; this.routeGoal = goal.clone();
       const path = this.d.navPath(p, goal);
       this.route = path; this.drawRoute(path);
     }
     const dist = flat(goal, p);
-    this.ui.distance(o ? '追蹤支線中' : dist);
+    this.ui.distance(o?.floor && Math.abs(goal.y - p.y) > 1.5 ? `${Math.round(dist)} m・${o.floor}` : dist);
     // Beacon at the goal when close; pointer over the head aims at the next route corner.
     // Pillar marks places and fades as the camera or player closes in; a person gets a named badge instead (the pillar would hide them).
     const person = target!.startsWith('npc:'), fade = beaconFade(Math.min(dist, flat(goal, this.d.camera.position)));
@@ -219,8 +238,7 @@ export class StoryDirector {
     const badgeShown = !!glyph && this.tmp.z < 1 && Math.abs(this.tmp.x) < 1 && Math.abs(this.tmp.y) < 1;
     this.ui.badge(badgeShown ? { x: (this.tmp.x + 1) / 2 * innerWidth, y: (1 - this.tmp.y) / 2 * innerHeight, text: glyph, distance: dist } : null);
     (this.beacon.material as T.MeshBasicMaterial).opacity = (.25 + .1 * Math.sin(time * .004)) * fade;
-    let next = goal;
-    for (const q of this.route) if (flat(q, p) > 3) { next = q; break; }
+    const next = nextCorner(this.route, p) ?? goal;
     // Screen-space pointer over the head, aimed at the next route corner as seen on screen (never edge-on).
     this.pointer.visible = false;
     const head = this.tmp.set(p.x, p.y + 2.3, p.z).project(this.d.camera), hx = head.x, hy = head.y, hz = head.z;

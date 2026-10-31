@@ -81,6 +81,17 @@ export class OutdoorRoutes {
     return out;
   }
 
+  /** Stops of the main network closest to `p`, whether or not a straight line reaches it: for an end only the navmesh can join. */
+  stopsNear(p: Vector3, max = 4) {
+    const size = new Map<number, number>();
+    for (const id of this.comp) size.set(id, (size.get(id) ?? 0) + 1);
+    size.delete(-1);
+    const main = [...size].reduce((best, c) => c[1] > best[1] ? c : best, [-1, 0])[0];
+    const c: [number, number][] = [];
+    for (let i = 0; i < this.pos.length; i++) if (this.adj[i].length && (main < 0 || this.comp[i] === main)) c.push([Math.hypot(this.pos[i].x - p.x, this.pos[i].z - p.z) + Math.abs(this.pos[i].y - p.y) * 2, i]);
+    return c.sort((a, b) => a[0] - b[0]).slice(0, max).map(([, i]) => this.pos[i].clone());
+  }
+
   /** Horizontal distance from (x, z) to the nearest remaining network edge. */
   edgeDistance(x: number, z: number) {
     let best = Infinity;

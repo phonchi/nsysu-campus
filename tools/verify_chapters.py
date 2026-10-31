@@ -24,7 +24,7 @@ CAMPUS_INFO = ROOT / 'public/data/campus-info.json'
 CONDITIONS = {'near', 'press', 'flag', 'chapterDone', 'inZone', 'atDestination', 'timeOfDay', 'any'}
 ACTIONS = {'dialogue', 'setFlag', 'completeChapter', 'moveNpc', 'setObjective', 'showArrow',
            'setSky', 'playSound', 'unlockSideQuest'}
-ZONES = {'gate', 'tunnel-west', 'tunnel-inside', 'admin', 'library', 'arcade', 'seawall'}
+ZONES = {'gate', 'tunnel-west', 'tunnel-inside', 'admin', 'library', 'library-door', 'arcade', 'seawall'}
 NPC_RE = re.compile(r'^(guide|s[1-6]|m[1-9])$')
 WHO_RE = re.compile(r'^(guide|player|narrator|s[1-6]|m[1-9])$')
 SKIES = {'dawn', 'day', 'sunset', 'night'}

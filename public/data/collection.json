@@ -18,7 +18,7 @@
     { "id": "gate", "name": "校碑", "at": "gate", "r": 14, "desc": "校門口 21.2 公尺的校碑。迷路就找它。" },
     { "id": "tunnel", "name": "拱圈", "at": "tunnel-inside", "r": 8, "desc": "西子灣隧道。回音很長。" },
     { "id": "admin", "name": "銅獅", "at": "admin", "r": 12, "desc": "行政大樓前的兩隻銅獅。" },
-    { "id": "library-3f", "name": "皇冠", "at": "library", "r": 4, "desc": "圖資大樓三樓，借還書與余光中特藏室。" },
+    { "id": "library-3f", "name": "皇冠", "at": "library-door", "r": 6, "desc": "圖資大樓入口。借還書與余光中特藏室都在三樓。" },
     { "id": "arcade", "name": "柱廊", "at": "arcade", "r": 12, "desc": "理工長廊。下雨不用傘。" },
     { "id": "seawall", "name": "蘿蔔坑", "at": "seawall", "r": 14, "desc": "海堤的雅座，大家叫它蘿蔔坑。" },
     { "id": "monkey-rule", "name": "猴", "at": [82, 62], "r": 4, "desc": "四不：不外露食物、不餵食、不接觸、不攻擊。" },

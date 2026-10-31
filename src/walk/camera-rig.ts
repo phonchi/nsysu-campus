@@ -92,7 +92,8 @@ export class CameraRig {
     }
     // Arm: pull in instantly to the free distance, ease back out slowly; never through a wall.
     this.want.copy(this.pivot).addScaledVector(this.look, -this.distance);
-    const free = Math.max(0, this.sweep(this.pivot, this.want, .2) - .05);
+    // Pressed against a door or wall the wide ball starts overlapping it and reports no room at all; a thin one still finds the way back.
+    const wide = this.sweep(this.pivot, this.want, .2), free = Math.max(0, (wide > .001 ? wide : this.sweep(this.pivot, this.want, .1)) - .05);
     const eased = this.arm + (this.distance - this.arm) * damp(3, dt);
     this.arm = Math.max(0, Math.min(eased, free, this.distance));
     cam.position.copy(this.pivot).addScaledVector(this.look, -this.arm);

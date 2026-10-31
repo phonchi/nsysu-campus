@@ -82,12 +82,13 @@ const TOUCH_TIPS = [
 ];
 
 export const TIPS_KEY = 'nsysu-walk-tips-v8';
-export type TipId = 'goal' | 'accept' | 'switch' | 'bike' | 'photo';
+export type TipId = 'goal' | 'accept' | 'switch' | 'bike' | 'photo' | 'line';
 const CONTEXT_TIPS: Record<TipId, { desktop: string; touch: string }> = {
-  goal: { desktop: '不知道怎麼走？按 <kbd>G</kbd> 自動走到目標，按任一方向鍵可中斷。', touch: '不知道怎麼走？點左上的目標卡，人物會自動走過去。' },
+  goal: { desktop: '不知道怎麼走？按 <kbd>G</kbd> 自動走到目標，再按一次或按方向鍵可中斷。', touch: '不知道怎麼走？點左上的目標卡，人物會自動走過去。' },
   accept: { desktop: '對方有事想拜託你。按 <kbd>E</kbd> 接下任務，之後按 <kbd>J</kbd> 在手帳查看與追蹤。', touch: '對方有事想拜託你。按「互動 E」接下任務，之後在右上的手帳查看與追蹤。' },
   switch: { desktop: '這裡不只一個目標，按 <kbd>R</kbd> 切換，再按 <kbd>E</kbd>。', touch: '這裡不只一個目標，按「切換目標 R」後再按「互動 E」。' },
   bike: { desktop: '這裡可以租腳踏車，按 <kbd>E</kbd> 租車，之後按 <kbd>B</kbd> 上下車。', touch: '這裡可以租腳踏車，按「互動 E」租車，之後按「騎車 B」上下車。' },
+  line: { desktop: '按 <kbd>Q</kbd> 切換主線與支線；專注支線時主線會暫停，切回後接續。', touch: '點目標卡上的「主線｜支線」切換；專注支線時主線會暫停，切回後接續。' },
   photo: { desktop: '這一步要拍照：走到地點按 <kbd>P</kbd>，再按 <kbd>Space</kbd> 拍下。', touch: '這一步要拍照：走到地點點右上的相機，再按快門。' },
 };
 /** A shown tip stays this long; there is no dialog to dismiss, so it never takes the keyboard. */

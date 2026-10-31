@@ -55,7 +55,7 @@ export class CampusUi {
  get storyProgress(){return {found:[...this.collected].filter(id=>this.info.stories.some(s=>s.id===id)).length,total:this.info.stories.length};}
  /** Campus-info story ids the player has read (for the journal's campus-history clues, `story/clues.ts`). */
  get collectedStoryIds():ReadonlySet<string>{return this.collected;}
- private refreshCounter(){this.counter.innerHTML=`<span>校史支線</span><strong>${[...this.collected].filter(id=>this.info.stories.some(s=>s.id===id)).length}</strong><small>／${this.info.stories.length}</small>`;}
+ private refreshCounter(){this.counter.innerHTML=`<span>校史線索</span><strong>${[...this.collected].filter(id=>this.info.stories.some(s=>s.id===id)).length}</strong><small>／${this.info.stories.length}</small>`;}
  openCard(id:string){
   const b=this.info.buildings[id] ?? (id==='GATE'?{name:'校門・校碑',college:'admin',summary:'校碑位於校門海側，警衛亭在山側。可前往校門附近觀看。',facts:[],links:[]}:undefined);const walkable=this.world.frames.has(id);
   if(!b){this.hooks.say(id==='TUNNEL'?'西子灣隧道：1928 年貫通的「壽山洞」。':'這裡目前只有外觀。',3500);return;}

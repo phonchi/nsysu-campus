@@ -1,5 +1,5 @@
 {
- "note": "Story anchors in world metres (x east, z south). Positions come from outdoor-graph anchors (tools/build_outdoor_graph.py, T3 alignment). r = zone radius. library moved south of the hand-modelled pavilion (it extends ~12 m beyond the OSM footprint). A zone may give `y` when its floor is not the terrain (tunnel-inside: the bore floor, under the hill).",
+ "note": "Story anchors in world metres (x east, z south). Positions come from outdoor-graph anchors (tools/build_outdoor_graph.py, T3 alignment). r = zone radius. library is the plaza south of the hand-modelled pavilion; library-door is the building entrance the main story reaches. A zone may give `y` when its floor is not the terrain (tunnel-inside: the bore floor, under the hill).",
  "zones": {
   "gate": {
    "label": "校門・蓮海路",
@@ -40,13 +40,22 @@
    "r": 16
   },
   "library": {
-   "label": "圖資大樓",
-   "sub": "LIBRARY",
+   "label": "圖資大樓前廣場",
+   "sub": "LIBRARY PLAZA",
    "p": [
     -63.0,
     -35.0
    ],
    "r": 16
+  },
+  "library-door": {
+   "label": "圖資大樓",
+   "sub": "LIBRARY",
+   "p": [
+    -52.5,
+    -60.5
+   ],
+   "r": 8
   },
   "arcade": {
    "label": "理工長廊",
@@ -96,10 +105,10 @@
   },
   "s3": {
    "model": "npc-desk",
-   "at": "library",
+   "at": "library-door",
    "offset": [
-    -3,
-    2
+    -0.5,
+    -1
    ],
    "activity": "Idle"
   },

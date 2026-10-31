@@ -19,7 +19,7 @@ query = dict(parse_qsl(parts.query))
 query.update(view='walk', story='1', quality='C', qa='1')
 URL = urlunsplit(parts._replace(query=urlencode(query)))
 CHAPTERS = json.loads((ROOT / 'public/data/chapters.json').read_text())['chapters']
-ZONES = json.loads((ROOT / 'public/data/story-zones.json').read_text())['zones']
+SPOTS = json.loads((ROOT / 'public/data/quests.json').read_text())['spots']
 STORY, QUEST, GUIDE = 'nsysu-story-v3', 'nsysu-campus-journal-v5', 'nsysu-walk-guide-v7'
 
 
@@ -66,7 +66,7 @@ async def beacon(browser, report):
     save['quests']['gate-mia']['step'] = 1
     context, page, errors = await open_page(browser, {'width': 1280, 'height': 720}, False, {STORY: story(4), QUEST: save, GUIDE: '1'})
     await close_dialogue(page)
-    p = ZONES['admin']['p']
+    p = SPOTS['admin-service-sign']['at']  # the tracked step's object: the pillar stands over it
     shots = {}
     for mark in (30, 12, 8, 5, 3):
         await page.evaluate('([x, z, fx, fz]) => window.campusWalk.qaPlace(x, z, undefined, [fx, fz])', [p[0] + mark, p[1], p[0], p[1]])

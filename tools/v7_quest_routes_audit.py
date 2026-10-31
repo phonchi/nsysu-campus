@@ -18,7 +18,7 @@ async def main():
             pg = await b.new_page(viewport={'width': 800, 'height': 500})
             await pg.add_init_script("if(!sessionStorage.f){sessionStorage.f=1;localStorage.setItem('nsysu-walk-guide-v7','1');localStorage.setItem('nsysu-story-v3',%s)}" % json.dumps(json.dumps(STORY)))
             await pg.goto(BASE + '?view=walk&story=1&quality=C&qa=1', wait_until='networkidle')
-            await pg.wait_for_function('window.campusWalk?.worldReady && window.campusWalk.story && window.campusWalk.questList?.length===12', timeout=180000)
+            await pg.wait_for_function('window.campusWalk?.worldReady && window.campusWalk.story && window.campusWalk.questList?.length===%d' % len(QUESTS), timeout=180000)
             await pg.wait_for_timeout(2000)
             for preset in PRESETS:
                 label = {'day': '白天', 'sunset': '夕陽', 'night': '夜晚'}[preset]

@@ -6,7 +6,7 @@
   "method": "original room polygons + explicitly schematic exterior gallery + body-clearance free-space cores + parallel contact + public-root spanning tree; no grid replacement",
   "planningClearance": 0.42,
   "galleryWidth": 1.4,
-  "sourceReviewHash": "4a26fbd7fb251a279d717f56f64cbe3707e3834d1df59c2ee2c08310e5a112a4",
+  "sourceReviewHash": "d822f6992b57000c07d450e606188c7256951f0f55fa6ab869ed69f928d81d78",
   "sourceReviewFile": "public/data/walkthrough/final-three-door-source-review.json",
   "sourceFiles": [
     "public/data/walkthrough/SC.json",
@@ -19,7 +19,7 @@
     "public/data/walkthrough/EV.json"
   ],
   "sourceSHA256": {
-    "SC.json": "7867a5215f66f509df063b688465bc9f2380389107d13b7775a9cf9cfba39c06",
+    "SC.json": "49f50d107d6c736bcf04d25936f2d472853fed8ada4b3acc13c1b8604793543a",
     "EN.json": "1f771128d636e82efa2c0e7426a8661b7b7f012400ed9535d0c820e890d774cf",
     "BI.json": "8f517cb84899267c049e1325d2457d581accb05ea8bddfd39b1801832bf36795",
     "PH.json": "ef6e626046761d64ba8a49d7f76798b5eb05d73f38d23bd7937488feff4fd2d5",
@@ -28,7 +28,7 @@
     "MS.json": "20922c445187ee3fa56d6bb9ffac803df665f8c97e77716264031563e6e523df",
     "EV.json": "fc334b9b8a997dfb17adcbf0c70b6437883032686805caaf6c13570d8c698d11"
   },
-  "structureSHA256": "a10f1a1bf0eb5bf08ab735a0dbfc842468d4ddbec6490385d06c7d42c33565a0",
+  "structureSHA256": "4ec4e9312121d4bc2067807fcfbeb5dc1586787868ebfa5894fea879554275b6",
   "floors": {
     "SC-B1": {
       "floorId": "SC-B1",
@@ -2352,7 +2352,7 @@
           "sourceReview": {
             "report": "public/data/walkthrough/final-three-door-source-review.json",
             "entryId": "SC-B1:SC-B1-region-053:SC-B1-region-031",
-            "sha256": "4a26fbd7fb251a279d717f56f64cbe3707e3834d1df59c2ee2c08310e5a112a4"
+            "sha256": "d822f6992b57000c07d450e606188c7256951f0f55fa6ab869ed69f928d81d78"
           },
           "cutDepth": 0.65,
           "traceCorrection": {
@@ -4826,8 +4826,8 @@
         {
           "id": "SC-2F-portal-009",
           "position": [
-            15.51,
-            17.106
+            8.8,
+            13.0
           ],
           "width": 1,
           "roomIds": [
@@ -4837,22 +4837,22 @@
             "SC-2F-SC2001",
             "@free-000"
           ],
-          "basis": "schematic",
+          "basis": "map-derived",
           "gap": 0.0,
-          "sharedSpan": 10.824,
+          "sharedSpan": 2.364,
           "tangent": [
             0.0,
-            -1.0
+            1.0
           ],
           "insideClearanceChecks": {
             "SC-2F-SC2001": {
               "passed": true,
               "insidePosition": [
-                15.15,
-                17.106
+                9.27,
+                13.0
               ],
               "inwardNormal": [
-                -1.0,
+                1.0,
                 -0.0
               ],
               "distanceToRoomCore": 0.36,
@@ -4862,20 +4862,23 @@
           },
           "clearancePositions": {
             "SC-2F-SC2001": [
-              15.15,
-              17.106
+              9.27,
+              13.0
             ],
             "@free-000": [
-              15.93,
-              17.106
+              8.49,
+              13.0
             ]
           },
           "perRoomPosition": {
             "SC-2F-SC2001": [
-              15.51,
-              17.106
+              8.91,
+              13.0
             ]
-          }
+          },
+          "preferredDoorRoomId": "SC-2F-SC2001",
+          "sourceDoorPreserved": true,
+          "sourceDoorProjectionOffset": 0.11
         },
         {
           "id": "SC-2F-portal-010",
@@ -5981,12 +5984,12 @@
         "roomInsideProbe": "nearest core; wall-normal radius probe",
         "verticalServiceObstacleCount": 7,
         "rootNodeId": "@free-000",
-        "rootArea": 1622.8058,
+        "rootArea": 1411.4693,
         "rootFromMapAnnotations": true,
         "candidatePortalCount": 34,
         "reviewedOverrideCount": 0,
         "selectedPortalCount": 21,
-        "preservedManualDoorCount": 19,
+        "preservedManualDoorCount": 20,
         "manualDoorCount": 21,
         "islands": [],
         "issues": [
@@ -5996,15 +5999,6 @@
             "sourcePosition": [
               -22.33,
               -2.923
-            ],
-            "reason": "source point lacks a width-qualified shared wall span; any alternative is schematic"
-          },
-          {
-            "type": "manual-door-not-preserved",
-            "roomId": "SC-2F-SC2001",
-            "sourcePosition": [
-              8.8,
-              14.577
             ],
             "reason": "source point lacks a width-qualified shared wall span; any alternative is schematic"
           }
@@ -6938,10 +6932,10 @@
         {
           "id": "SC-3F-portal-018",
           "position": [
-            15.6267,
-            17.2639
+            8.8,
+            13.0
           ],
-          "width": 1.2,
+          "width": 1.1,
           "roomIds": [
             "SC-3F-region-021"
           ],
@@ -6949,22 +6943,22 @@
             "SC-3F-region-021",
             "@free-000"
           ],
-          "basis": "schematic",
+          "basis": "map-derived",
           "gap": 0.0,
-          "sharedSpan": 10.929,
+          "sharedSpan": 2.2586,
           "tangent": [
             0.0,
-            -1.0
+            1.0
           ],
           "insideClearanceChecks": {
             "SC-3F-region-021": {
               "passed": true,
               "insidePosition": [
-                15.2667,
-                17.2639
+                9.5997,
+                13.0
               ],
               "inwardNormal": [
-                -1.0,
+                1.0,
                 -0.0
               ],
               "distanceToRoomCore": 0.36,
@@ -6974,20 +6968,23 @@
           },
           "clearancePositions": {
             "SC-3F-region-021": [
-              15.2667,
-              17.2639
+              9.5997,
+              13.0
             ],
             "@free-000": [
-              16.0467,
-              17.2639
+              8.8197,
+              13.0
             ]
           },
           "perRoomPosition": {
             "SC-3F-region-021": [
-              15.6267,
-              17.2639
+              9.2397,
+              13.0
             ]
-          }
+          },
+          "preferredDoorRoomId": "SC-3F-region-021",
+          "sourceDoorPreserved": true,
+          "sourceDoorProjectionOffset": 0.4397
         },
         {
           "id": "SC-3F-portal-019",
@@ -8037,13 +8034,13 @@
         "roomInsideProbe": "nearest core; wall-normal radius probe",
         "verticalServiceObstacleCount": 5,
         "rootNodeId": "@free-000",
-        "rootArea": 1615.2236,
+        "rootArea": 1403.887,
         "rootFromMapAnnotations": true,
         "candidatePortalCount": 45,
         "reviewedOverrideCount": 0,
         "selectedPortalCount": 28,
-        "preservedManualDoorCount": 0,
-        "manualDoorCount": 0,
+        "preservedManualDoorCount": 1,
+        "manualDoorCount": 1,
         "islands": [
           {
             "nodeIds": [
@@ -8172,10 +8169,10 @@
         {
           "id": "SC-4F-portal-003",
           "position": [
-            -1.1727,
-            -8.599
+            -1.15,
+            -2.2
           ],
-          "width": 1.2,
+          "width": 1.1,
           "roomIds": [
             "SC-4F-region-003"
           ],
@@ -8183,23 +8180,23 @@
             "SC-4F-region-003",
             "@free-000"
           ],
-          "basis": "schematic",
+          "basis": "map-derived",
           "gap": 0.0,
           "sharedSpan": 6.67,
           "tangent": [
-            -1.0,
+            1.0,
             0.0
           ],
           "insideClearanceChecks": {
             "SC-4F-region-003": {
               "passed": true,
               "insidePosition": [
-                -1.1727,
-                -8.239
+                -1.15,
+                -2.56
               ],
               "inwardNormal": [
                 0.0,
-                1.0
+                -1.0
               ],
               "distanceToRoomCore": 0.36,
               "normalProbeCoreGap": 0.0,
@@ -8208,20 +8205,23 @@
           },
           "clearancePositions": {
             "SC-4F-region-003": [
-              -1.1727,
-              -8.239
+              -1.15,
+              -2.56
             ],
             "@free-000": [
-              -1.1727,
-              -9.019
+              -1.15,
+              -1.78
             ]
           },
           "perRoomPosition": {
             "SC-4F-region-003": [
-              -1.1727,
-              -8.599
+              -1.15,
+              -2.2
             ]
-          }
+          },
+          "preferredDoorRoomId": "SC-4F-region-003",
+          "sourceDoorPreserved": true,
+          "sourceDoorProjectionOffset": 0.0
         },
         {
           "id": "SC-4F-portal-004",
@@ -10004,6 +10004,63 @@
               22.532
             ]
           }
+        },
+        {
+          "id": "SC-4F-portal-037",
+          "position": [
+            6.0,
+            0.1
+          ],
+          "width": 1,
+          "roomIds": [
+            "SC-4F-SC4010"
+          ],
+          "nodeIds": [
+            "SC-4F-SC4010",
+            "@free-000"
+          ],
+          "basis": "map-derived",
+          "gap": 0.0,
+          "sharedSpan": 4.49,
+          "tangent": [
+            1.0,
+            0.0
+          ],
+          "insideClearanceChecks": {
+            "SC-4F-SC4010": {
+              "passed": true,
+              "insidePosition": [
+                6.0,
+                0.46
+              ],
+              "inwardNormal": [
+                -0.0,
+                1.0
+              ],
+              "distanceToRoomCore": 0.36,
+              "normalProbeCoreGap": 0.0,
+              "coreRadius": 0.36
+            }
+          },
+          "clearancePositions": {
+            "SC-4F-SC4010": [
+              6.0,
+              0.46
+            ],
+            "@free-000": [
+              6.0,
+              -0.32
+            ]
+          },
+          "perRoomPosition": {
+            "SC-4F-SC4010": [
+              6.0,
+              0.1
+            ]
+          },
+          "preferredDoorRoomId": "SC-4F-SC4010",
+          "sourceDoorPreserved": true,
+          "sourceDoorProjectionOffset": 0.0
         }
       ],
       "primaryPortalByRoom": {
@@ -10042,7 +10099,8 @@
         "SC-4F-region-039": "SC-4F-portal-033",
         "SC-4F-region-040": "SC-4F-portal-034",
         "SC-4F-region-041": "SC-4F-portal-035",
-        "SC-4F-region-042": "SC-4F-portal-036"
+        "SC-4F-region-042": "SC-4F-portal-036",
+        "SC-4F-SC4010": "SC-4F-portal-037"
       },
       "entry": [
         -3.166,
@@ -10312,9 +10370,9 @@
       "entryKind": "interior-stair-landing",
       "report": {
         "status": "complete",
-        "roomCount": 36,
-        "validRoomCount": 36,
-        "reachableRoomCount": 36,
+        "roomCount": 37,
+        "validRoomCount": 37,
+        "reachableRoomCount": 37,
         "unreachableRoomIds": [],
         "invalidRoomIds": [],
         "freeComponentCount": 1,
@@ -10375,13 +10433,13 @@
         "roomInsideProbe": "nearest core; wall-normal radius probe",
         "verticalServiceObstacleCount": 5,
         "rootNodeId": "@free-000",
-        "rootArea": 1694.1795,
+        "rootArea": 1439.4387,
         "rootFromMapAnnotations": true,
-        "candidatePortalCount": 59,
+        "candidatePortalCount": 60,
         "reviewedOverrideCount": 0,
-        "selectedPortalCount": 36,
-        "preservedManualDoorCount": 0,
-        "manualDoorCount": 0,
+        "selectedPortalCount": 37,
+        "preservedManualDoorCount": 2,
+        "manualDoorCount": 2,
         "islands": [],
         "issues": [],
         "maxWallGap": 0.4,
@@ -63119,7 +63177,7 @@
           "sourceReview": {
             "report": "public/data/walkthrough/final-three-door-source-review.json",
             "entryId": "EV-4F:EV-4F-region-009:EV-4F-region-008",
-            "sha256": "4a26fbd7fb251a279d717f56f64cbe3707e3834d1df59c2ee2c08310e5a112a4"
+            "sha256": "d822f6992b57000c07d450e606188c7256951f0f55fa6ab869ed69f928d81d78"
           },
           "cutDepth": 0.65,
           "traceCorrection": {
@@ -65220,7 +65278,7 @@
           "sourceReview": {
             "report": "public/data/walkthrough/final-three-door-source-review.json",
             "entryId": "EV-6F:EV-6F-region-017:EV-6F-region-016",
-            "sha256": "4a26fbd7fb251a279d717f56f64cbe3707e3834d1df59c2ee2c08310e5a112a4"
+            "sha256": "d822f6992b57000c07d450e606188c7256951f0f55fa6ab869ed69f928d81d78"
           },
           "cutDepth": 0.65,
           "traceCorrection": {
@@ -65614,8 +65672,8 @@
   },
   "summary": {
     "floors": 60,
-    "rooms": 877,
-    "reachableRooms": 877,
+    "rooms": 878,
+    "reachableRooms": 878,
     "unreachableOrInvalidRooms": 0,
     "completeFloors": 60
   }

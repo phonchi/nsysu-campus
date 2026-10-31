@@ -25,7 +25,7 @@ for lid, p in P.items():
     if not f.exists(): continue
     cx, cz = p['centroid']; yaw = p.get('yaw', 0)
     for b in json.loads(f.read_text())['boxes']:
-        if b['size'][1] < 1.2 or b['center'][1] - b['size'][1] / 2 > 1.5: continue  # kerbs and overhead slabs do not trap a walker
+        if b.get('walkable') or b['size'][1] < 1.2 or b['center'][1] - b['size'][1] / 2 > 1.5: continue  # kerbs, stair tiers and overhead slabs do not trap a walker
         x, _, z = b['center']; c, s = math.cos(yaw), math.sin(yaw)
         boxes.append((lid, cx + x * c + z * s, cz - x * s + z * c, b['size'][0] / 2, b['size'][2] / 2, yaw + b['yaw']))
 def inside(x, z, m=.3):

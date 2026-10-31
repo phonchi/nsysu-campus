@@ -40,7 +40,8 @@ export class StoryUi {
 
   constructor(host: HTMLElement, private chapters: Chapter[], private guideName: string) {
     this.root.className = 'q-layer';
-    this.root.innerHTML = `<div class="q-objective" hidden role="button" tabindex="0"><small></small><strong></strong><span class="q-dist"></span><em>G 自動前往</em></div>
+    const coarse = typeof matchMedia === 'function' && matchMedia('(pointer:coarse)').matches;
+    this.root.innerHTML = `<div class="q-objective" hidden role="group" aria-label="目前目標"><div class="q-lines" role="group" aria-label="切換主線與支線"><button type="button" data-line="main">主線</button><button type="button" data-line="side">支線</button>${coarse ? '' : '<kbd>Q</kbd>'}</div><small></small><strong></strong><span class="q-dist"></span><i class="q-other"></i><em>${coarse ? '點此帶路' : 'G 自動前往'}</em></div>
 <ol class="q-dots" aria-label="新生導覽進度">${chapters.map(c => `<li title="${esc(c.title)}"></li>`).join('')}</ol>
 <div class="q-badge" hidden aria-hidden="true"><b></b><small></small></div>
 <div class="q-pointer" hidden aria-hidden="true"><svg viewBox="0 0 40 40"><path d="M6 20h22m-9-10 10 10-10 10" stroke="#2a2c4a" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 20h22m-9-10 10 10-10 10" stroke="#e9b949" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
@@ -49,6 +50,7 @@ export class StoryUi {
 <div class="q-safe-insets" aria-hidden="true"></div><div class="q-hint" hidden aria-hidden="true"></div>
 <div class="q-log" role="dialog" aria-label="對話紀錄" hidden><h3>對話紀錄</h3><ol></ol><button type="button" data-q="log-close">關閉 Esc</button></div>`;
     host.append(this.root);
+    window.addEventListener('resize', this.forgetHintBox);
     this.dialogueEl = this.root.querySelector('.q-dialog')!;
     this.objectiveEl = this.root.querySelector('.q-objective')!;
     this.dotsEl = this.root.querySelector('.q-dots')!;
@@ -66,9 +68,15 @@ export class StoryUi {
     this.logEl.addEventListener('click', e => { if ((e.target as HTMLElement).closest('[data-q=log-close]')) this.toggleLog(false); });
   }
 
-  get objectiveText() { return this.objectiveEl.querySelector('strong')!.textContent ?? ''; }
-  /** Clicking the objective card asks to be walked there. */
-  onObjectiveClick(fn: () => void) { this.objectiveEl.addEventListener('click', fn); this.objectiveEl.title = '點擊或按 G：自動走到任務地點'; }
+  get objectiveText() { return this.main.text; }
+  /** Clicking the objective card asks to be walked there; its 主線｜支線 buttons switch the line instead. */
+  onObjectiveClick(fn: () => void, line: (which: 'main' | 'side') => void) {
+    this.objectiveEl.addEventListener('click', e => {
+      const which = (e.target as HTMLElement).closest<HTMLElement>('[data-line]')?.dataset.line as 'main' | 'side' | undefined;
+      if (which) line(which); else fn();
+    });
+    this.objectiveEl.title = '點擊或按 G：自動走到目前的目標';
+  }
 
   get dialogueOpen() { return !this.dialogueEl.hidden || this.session > 0; }
 
@@ -176,13 +184,39 @@ export class StoryUi {
 
   objective(chapter: Chapter, text: string) {
     const idx = this.chapters.indexOf(chapter) + 1;
-    this.objectiveEl.hidden = false;
-    this.objectiveEl.querySelector('small')!.textContent = `第 ${'①②③④⑤⑥⑦⑧'[idx - 1] ?? idx} 章・${chapter.title}`;
-    this.objectiveEl.querySelector('strong')!.textContent = text;
+    this.main = { small: `第 ${'①②③④⑤⑥⑦⑧'[idx - 1] ?? idx} 章・${chapter.title}`, text };
+    this.renderCard();
     this.dots(chapter.id);
   }
 
-  distance(m: number | string | undefined) { this.objectiveEl.querySelector<HTMLElement>('.q-dist')!.textContent = m === undefined ? '' : typeof m === 'string' ? m : `${Math.round(m)} m`; }
+  private main = { small: '', text: '' };
+  private side?: { title: string; text: string };
+  private sideSummary = '';
+  private cardKey = '';
+  /** Which line the card speaks for: a side quest, or the main story when `side` is undefined. `summary` names what waits on the side. */
+  focusLine(side: { title: string; text: string } | undefined, summary = '') {
+    this.side = side; this.sideSummary = summary;
+    this.renderCard();
+  }
+  private renderCard() {
+    const s = this.side, small = s ? `支線・${s.title}` : this.main.small || '新生導覽', text = s ? s.text : this.main.text || '導覽已完成，自由探索校園吧';
+    const other = s ? (this.main.text ? `主線暫停：${this.main.text}` : '') : this.sideSummary ? `支線：${this.sideSummary}` : '';
+    const key = [small, text, other, !!s, !s && !this.main.text && !this.sideSummary].join('|');
+    if (key === this.cardKey) return;
+    this.cardKey = key;
+    this.objectiveEl.hidden = !s && !this.main.text && !this.sideSummary;
+    this.objectiveEl.querySelector('small')!.textContent = small;
+    this.objectiveEl.querySelector('strong')!.textContent = text;
+    this.objectiveEl.querySelector('.q-other')!.textContent = other;
+    this.objectiveEl.classList.toggle('is-side', !!s);
+    this.objectiveEl.querySelectorAll<HTMLElement>('[data-line]').forEach(b => b.setAttribute('aria-pressed', String((b.dataset.line === 'side') === !!s)));
+  }
+
+  private distanceText = '';
+  distance(m: number | string | undefined) {
+    const text = m === undefined ? '' : typeof m === 'string' ? m : `${Math.round(m)} m`;
+    if (text !== this.distanceText) this.objectiveEl.querySelector<HTMLElement>('.q-dist')!.textContent = this.distanceText = text;
+  }
 
   dots(activeId: string | undefined, done: string[] = []) {
     this.dotsEl.querySelectorAll('li').forEach((li, i) => {
@@ -240,8 +274,9 @@ ${fact ? `<p class="fact"><b>校史小知識</b>${esc(fact)}${source ? ` <a href
     this.badgeEl.hidden = !b;
     if (!b) return;
     this.badgeEl.style.transform = `translate(${Math.round(b.x)}px,${Math.round(b.y)}px) translate(-50%,-100%)`;
-    this.badgeEl.firstElementChild!.textContent = b.text;
-    this.badgeEl.lastElementChild!.textContent = `${Math.round(b.distance)} m`;
+    const head = this.badgeEl.firstElementChild!, foot = this.badgeEl.lastElementChild!, meters = `${Math.round(b.distance)} m`;
+    if (head.textContent !== b.text) head.textContent = b.text;
+    if (foot.textContent !== meters) foot.textContent = meters;
   }
 
   pointer(p: { x: number; y: number; angle: number } | null) {
@@ -281,17 +316,23 @@ ${fact ? `<p class="fact"><b>校史小知識</b>${esc(fact)}${source ? ` <a href
   }
   private giveUp?: () => void;
 
+  private hintBox?: { width: number; height: number; rootWidth: number; rootHeight: number; insets: { top: number; right: number; bottom: number; left: number } };
+  private forgetHintBox = () => { this.hintBox = undefined; };
   /** World-anchored interaction hint ("E 交談・阿凱"), or null to hide. */
   hint(p: { x: number; y: number; text: string } | null) {
     const el = this.root.querySelector<HTMLElement>('.q-hint')!;
     el.hidden = !p;
     if (!p) return;
-    if (el.textContent !== p.text) el.textContent = p.text;
-    const safe=getComputedStyle(this.root.querySelector<HTMLElement>('.q-safe-insets')!);
-    const insets={top:parseFloat(safe.paddingTop)||0,right:parseFloat(safe.paddingRight)||0,bottom:parseFloat(safe.paddingBottom)||0,left:parseFloat(safe.paddingLeft)||0};
-    const bounds=clampHint(p.x,p.y,el.offsetWidth,el.offsetHeight,this.root.clientWidth,this.root.clientHeight,insets);
+    // Measure only when the text or the window changed: reading layout every frame forces a reflow every frame.
+    if (el.textContent !== p.text || !this.hintBox) {
+      el.textContent = p.text;
+      const safe=getComputedStyle(this.root.querySelector<HTMLElement>('.q-safe-insets')!);
+      this.hintBox={width:el.offsetWidth,height:el.offsetHeight,rootWidth:this.root.clientWidth,rootHeight:this.root.clientHeight,insets:{top:parseFloat(safe.paddingTop)||0,right:parseFloat(safe.paddingRight)||0,bottom:parseFloat(safe.paddingBottom)||0,left:parseFloat(safe.paddingLeft)||0}};
+    }
+    const box=this.hintBox;
+    const bounds=clampHint(p.x,p.y,box.width,box.height,box.rootWidth,box.rootHeight,box.insets);
     el.style.transform = `translate(${Math.round(bounds.x)}px,${Math.round(bounds.y)}px)`;
   }
 
-  dispose() { clearInterval(this.typing); this.root.remove(); }
+  dispose() { clearInterval(this.typing); window.removeEventListener('resize', this.forgetHintBox); this.root.remove(); }
 }

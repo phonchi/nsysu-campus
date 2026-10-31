@@ -28,7 +28,7 @@ it('retains every old accepted step and choice even before the new gate is compl
  }
 });
 it('random acceptance, interactions, choices, reloads and time changes preserve progress invariants', () => {
- fc.assert(fc.property(fc.array(fc.record({ op: fc.integer({ min: 0, max: 6 }), q: fc.integer({ min: 0, max: 11 }), time: fc.constantFrom('day', 'sunset', 'night'), near: fc.boolean(), done: fc.boolean() }), { maxLength: 120 }), actions => {
+ fc.assert(fc.property(fc.array(fc.record({ op: fc.integer({ min: 0, max: 6 }), q: fc.integer({ min: 0, max: data.quests.length - 1 }), time: fc.constantFrom('day', 'sunset', 'night'), near: fc.boolean(), done: fc.boolean() }), { maxLength: 120 }), actions => {
   const storage = memory(); let e = new QuestEngine(data, { storage });
   const previous = new Map<string, number>();
   for (const a of actions) {
@@ -55,4 +55,21 @@ it('random acceptance, interactions, choices, reloads and time changes preserve 
    expect(new Set(e.progress.journal.map(x => x.id)).size).toBe(e.progress.journal.length);
   }
  }), { seed: 71031, numRuns: 100 });
+});
+it('a locked quest cannot be tracked, an accepted one can, and undefined returns to the main story', () => {
+ const storage = memory(), e = new QuestEngine(data, { storage }), q = data.quests[0];
+ expect(e.track(q.id, at('wrong', false))).toBe(false); expect(e.progress.tracked).toBeUndefined();
+ expect(e.track(q.id, at('wrong', true))).toBe(true); expect(e.progress.tracked).toBe(q.id);
+ expect(e.track(undefined)).toBe(true); expect(e.progress.tracked).toBeUndefined();
+ expect(e.accept(q.id, at(q.accept.near))).toBe(true); expect(e.progress.tracked).toBe(q.id);
+ expect(e.track(undefined, at('wrong', false))).toBe(true); expect(e.track(q.id, at('wrong', false))).toBe(true);
+});
+it('an old save tracking a locked quest starts on the main story; one tracking an accepted quest keeps it', () => {
+ const q = data.quests[0], locked = memory(), accepted = memory(), base = { version: 1, journal: [], rewards: [], tracked: q.id };
+ locked.setItem(QUEST_KEY, JSON.stringify({ ...base, quests: {} }));
+ accepted.setItem(QUEST_KEY, JSON.stringify({ ...base, quests: { [q.id]: { status: 'active', step: 1, choices: {} } } }));
+ const a = new QuestEngine(data, { storage: locked }), b = new QuestEngine(data, { storage: accepted }), w = at('wrong', false);
+ expect(a.progress.tracked).toBe(q.id); a.settle(w); expect(a.progress.tracked).toBeUndefined();
+ b.settle(w); expect(b.progress.tracked).toBe(q.id);
+ expect(new QuestEngine(data, { storage: locked }).progress.tracked).toBeUndefined();
 });

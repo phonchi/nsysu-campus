@@ -63,7 +63,7 @@
         {"id": "done", "when": [{"flag": "c3.card"}],
          "then": [{"dialogue": "c3-done"}, {"completeChapter": "c3-admin"},
                   {"unlockSideQuest": "story-lions"}, {"unlockSideQuest": "story-zoo"},
-                  {"moveNpc": ["guide", "library"]}]}
+                  {"moveNpc": ["guide", "library-door"]}]}
       ],
       "sources": [
         "https://news.nsysu.edu.tw/p/404-1120-346875.php?Lang=zh-tw",
@@ -73,14 +73,14 @@
     {
       "id": "c4-library",
       "title": "圖資大樓借書",
-      "zone": "library",
+      "zone": "library-door",
       "objective": "到圖資大樓借第一本書",
       "start": {"when": [{"chapterDone": "c3-admin"}]},
       "steps": [
         {"id": "arrow", "when": [],
          "then": [{"showArrow": "npc:guide"}]},
         {"id": "talk", "when": [{"near": "npc:guide", "r": 3}, {"press": "E"}],
-         "then": [{"dialogue": "c4-talk"}, {"setObjective": "找服務台借一本書"},
+         "then": [{"dialogue": "c4-talk"}, {"setObjective": "找門口的學姊借書"},
                   {"showArrow": "npc:s3"}, {"setFlag": "c4.talked"}]},
         {"id": "desk", "when": [{"flag": "c4.talked"}, {"near": "npc:s3", "r": 2.5}, {"press": "E"}],
          "then": [{"playSound": "chime"}, {"dialogue": "c4-desk"}, {"setFlag": "c4.book"}]},
@@ -196,7 +196,7 @@
     ],
     "c3-done": [
       {"who": "guide", "text": "學生證到手，你正式是中山人了。"},
-      {"who": "guide", "text": "下一站圖資大樓，中庭另一頭那棟高樓。"},
+      {"who": "guide", "text": "下一站圖資大樓，繞過廣場盡頭的圓亭就到。"},
       {"who": "narrator", "text": "【校史小知識】校訓「博學、審問、慎思、明辨、篤行」，校慶是 11 月 12 日。"}
     ],
     "c4-talk": [
@@ -204,7 +204,7 @@
       {"who": "guide", "text": "圖書館以前擠在行政大樓裡，後來才搬來這裡。"},
       {"who": "guide", "text": "借還書在三樓，余光中特藏室也在三樓。"},
       {"who": "player", "text": "余光中？課本裡那位詩人？"},
-      {"who": "guide", "text": "對，他當過我們文學院院長。去借第一本書吧。"}
+      {"who": "guide", "text": "對，他當過文學院院長。學姊在門口幫新生辦借書，去吧。"}
     ],
     "c4-desk": [
       {"who": "s3", "text": "借書嗎？學生證給我……好，這本給你。"},

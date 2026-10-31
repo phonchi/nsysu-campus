@@ -15,6 +15,11 @@ describe('camera rig',()=>{
   rig.snap(new Vector3());rig.update(DT,{foot:new Vector3(),running:false,moving:false});
   expect(rig.arm).toBeLessThanOrEqual(.18);
  });
+ it('pressed against a door the arm still finds its way back through a thinner ball',()=>{
+  const cam=new PerspectiveCamera(),rig=new CameraRig(cam,(_a,_b,r)=>r>=.2?0:3);
+  rig.snap(new Vector3());rig.update(DT,{foot:new Vector3(),running:false,moving:false});
+  expect(rig.arm).toBeCloseTo(2.95,5);
+ });
  it('holds a steady arm on open ground and never rotates on its own while walking',()=>{
   const p=scene(()=>{});const cam=new PerspectiveCamera();const rig=new CameraRig(cam,(a,b,r)=>p.sweep(a,b,r));
   const yaw0=rig.yaw;const arms:number[]=[];

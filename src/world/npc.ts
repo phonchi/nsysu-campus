@@ -61,6 +61,16 @@ export type Placement = { at: string | P2; offset?: P2; activity?: string } | nu
 const AMBIENT_ANCHORS = ['arcade', 'admin', 'library', 'YH', 'SPORT', 'CMSS'];
 export const STORY_NPCS = ['guide', 's1', 's2', 's3', 'm1'];
 
+/** Who stays visible, from a list sorted nearest first: those who must (talking, or named in `always`) count first, the rest fill the cap.
+ * The goal's person comes on top of the cap: on the lowest tier the story cast nearly fills it, and taking the last place would hide whoever stands beside the player. */
+export function npcsWithinCap<N extends { id: string; talking: boolean }>(sorted: readonly N[], cap: number, always: readonly string[], focus?: string) {
+  const keep = sorted.filter(n => n.talking || always.includes(n.id));
+  for (const n of sorted) if (!keep.includes(n) && keep.length < cap) keep.push(n);
+  const wanted = focus === undefined ? undefined : sorted.find(n => n.id === focus);
+  if (wanted && !keep.includes(wanted)) keep.push(wanted);
+  return keep;
+}
+
 /** Where an NPC should be: the story decides for story NPCs until all chapters are done, otherwise the
  * schedule for the current light preset (null = not on campus now). Pure, so it is unit-tested. */
 export function resolveNpcPlacement(id: string, def: NpcDef | undefined, preset: Preset, tourDone: boolean, zones: StoryZones, storyAt: Record<string, string>): Placement {
@@ -315,10 +325,11 @@ export class NpcManager {
       const dest = this.anchorPoint(place.at, place.offset);
       if (!dest) continue;
       this.targets.set(id, dest.clone());
-      if (Math.hypot(dest.x - npc.position.x, dest.z - npc.position.z) < 2) { npc.path = []; npc.root.position.copy(dest); continue; }
       // Back on campus after being absent: they simply arrive at their spot (unless the player is watching it).
-      const returning = npc.absent, far = !player || (npc.position.distanceTo(player) > 60 && dest.distanceTo(player) > 60);
-      npc.absent = false;
+      const returning = npc.absent;
+      npc.absent = false; // before the early out below: someone back at the very spot they left was never marked present again
+      if (Math.hypot(dest.x - npc.position.x, dest.z - npc.position.z) < 2) { npc.path = []; npc.root.position.copy(dest); continue; }
+      const far = !player || (npc.position.distanceTo(player) > 60 && dest.distanceTo(player) > 60);
       const path = !far && !(returning && dest.distanceTo(player!) > 30) && this.routes ? this.routes.path(npc.position, dest) : [];
       const length = path.reduce((s, q, i) => i ? s + q.distanceTo(path[i - 1]) : 0, 0);
       // Long walks are jogged so a time-of-day change settles within about a minute.
@@ -353,6 +364,10 @@ export class NpcManager {
     for (const n of this.ambient) n.updateCamera(camera);
   }
 
+  /** The person the current goal is about: never squeezed out by the visible cap. */
+  private focusNpc?: string;
+  setFocus(id: string | undefined) { this.focusNpc = id; }
+
   setTalking(id: string | undefined) { for (const n of this.npcs.values()) n.talking = n.id === id; }
 
   update(dt: number, player: T.Vector3) {
@@ -362,10 +377,7 @@ export class NpcManager {
     const keep = new Set<Npc>();
     for (const [list, cap] of [[people, night ? this.cap.night : this.cap.day], [monkeys, this.cap.monkeys]] as const) {
       list.sort((a, b) => a[0] - b[0]);
-      // Story NPCs and the one talking always count first; the rest fill the budget nearest first.
-      let used = 0;
-      for (const [, n] of list) if (n.talking || STORY_NPCS.includes(n.id)) { keep.add(n); used++; }
-      for (const [, n] of list) if (!keep.has(n) && used < cap) { keep.add(n); used++; }
+      for (const n of npcsWithinCap(list.map(([, n]) => n), cap, STORY_NPCS, this.focusNpc)) keep.add(n);
     }
     for (const n of [...this.npcs.values(), ...this.ambient]) {
       const d = n.position.distanceTo(player);

@@ -1,14 +1,14 @@
 {
   "summary": {
     "floors": 60,
-    "rooms": 877,
-    "reachableRooms": 877,
+    "rooms": 878,
+    "reachableRooms": 878,
     "unreachableOrInvalidRooms": 0,
     "completeFloors": 60
   },
-  "sourceReviewHash": "4a26fbd7fb251a279d717f56f64cbe3707e3834d1df59c2ee2c08310e5a112a4",
+  "sourceReviewHash": "d822f6992b57000c07d450e606188c7256951f0f55fa6ab869ed69f928d81d78",
   "sourceSHA256": {
-    "SC.json": "7867a5215f66f509df063b688465bc9f2380389107d13b7775a9cf9cfba39c06",
+    "SC.json": "49f50d107d6c736bcf04d25936f2d472853fed8ada4b3acc13c1b8604793543a",
     "EN.json": "1f771128d636e82efa2c0e7426a8661b7b7f012400ed9535d0c820e890d774cf",
     "BI.json": "8f517cb84899267c049e1325d2457d581accb05ea8bddfd39b1801832bf36795",
     "PH.json": "ef6e626046761d64ba8a49d7f76798b5eb05d73f38d23bd7937488feff4fd2d5",
@@ -17,7 +17,7 @@
     "MS.json": "20922c445187ee3fa56d6bb9ffac803df665f8c97e77716264031563e6e523df",
     "EV.json": "fc334b9b8a997dfb17adcbf0c70b6437883032686805caaf6c13570d8c698d11"
   },
-  "accessPlanSHA256": "a17b18add9d710dae3f85240e6c9e652b39d923c2a8f31ae0e069369ce17cfc3",
+  "accessPlanSHA256": "ec96f78adfa0592787c044a73a5de25acfabd4480ce0180653d76005ea6cc79b",
   "floors": {
     "SC-B1": {
       "reachableRooms": 42,
@@ -68,15 +68,6 @@
             -2.923
           ],
           "reason": "source point lacks a width-qualified shared wall span; any alternative is schematic"
-        },
-        {
-          "type": "manual-door-not-preserved",
-          "roomId": "SC-2F-SC2001",
-          "sourcePosition": [
-            8.8,
-            14.577
-          ],
-          "reason": "source point lacks a width-qualified shared wall span; any alternative is schematic"
         }
       ],
       "unreachableRoomIds": []
@@ -90,8 +81,8 @@
       "unreachableRoomIds": []
     },
     "SC-4F": {
-      "reachableRooms": 36,
-      "rooms": 36,
+      "reachableRooms": 37,
+      "rooms": 37,
       "rate": 1.0,
       "status": "complete",
       "issues": [],

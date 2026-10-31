@@ -28,10 +28,44 @@ class VerifyQuestsTests(unittest.TestCase):
         self.assertTrue(any('speaker s1 is not on location' in e for e in self.errors()))
 
     def test_inherited_time_without_npc(self):
-        stage = self.data[0]['quests'][-1]
+        stage = next(q for q in self.data[0]['quests'] if q['id'] == 'sea-stage')
         del stage['steps'][1]['when']
         self.data[2]['npcs'][next(i for i, n in enumerate(self.data[2]['npcs']) if n['id'] == 'jogger-po')]['schedule']['sunset'] = None
         self.assertTrue(any('inherited-time NPC absent' in e for e in self.errors()))
+
+    def step_with(self, prefix):
+        return next(s for q in self.data[0]['quests'] for s in q['steps'] if s['target'].startswith(prefix))
+
+    def test_bare_zone_step(self):
+        self.step_with('spot:')['target'] = 'zone:gate'
+        self.assertTrue(any('not a bare zone' in e for e in self.errors()))
+
+    def test_unknown_spot_and_room(self):
+        self.step_with('spot:')['target'] = 'spot:nowhere'
+        self.step_with('dest:')['target'] = 'dest:SC9999'
+        errors = self.errors()
+        self.assertTrue(any('unknown target spot:nowhere' in e for e in errors))
+        self.assertTrue(any('unknown target dest:SC9999' in e for e in errors))
+
+    def test_room_known_only_by_its_map_label(self):
+        # SC4010 has a label on the plan and, until its polygon lands, no room: it must still count.
+        self.assertIn('SC4010', module.building_rooms('SC4010'))
+
+    def test_spot_in_a_building_or_out_of_reach(self):
+        spots = self.data[0]['spots']
+        spots['gate-notice']['stand'] = [spots['gate-notice']['at'][0] + 6, spots['gate-notice']['at'][1]]
+        ad = next(l for l in self.data[6]['context']['landmarks'] if l['id'] == 'AD')['polygon']
+        spots['admin-planters']['at'] = spots['admin-planters']['stand'] = [sum(p[0] for p in ad) / len(ad), sum(p[1] for p in ad) / len(ad)]
+        errors = self.errors()
+        self.assertTrue(any('gate-notice: stand point out of reach' in e for e in errors))
+        self.assertTrue(any('admin-planters: object inside a building' in e for e in errors))
+
+    def test_wide_radius_and_unused_spot(self):
+        self.step_with('spot:')['radius'] = 8
+        self.data[0]['spots']['spare'] = dict(self.data[0]['spots']['gate-notice'])
+        errors = self.errors()
+        self.assertTrue(any('radius over' in e for e in errors))
+        self.assertTrue(any('spot spare: no step uses it' in e for e in errors))
 
     def test_legacy_contract_and_results(self):
         q = self.data[0]['quests'][0]

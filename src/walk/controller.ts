@@ -298,8 +298,8 @@ export class RapierController implements CharacterController {
           let nx = 0, nz = 0;
           for (let i = 0; i < this.kcc.numComputedCollisions(); i++) { const c = this.kcc.computedCollision(i); if (c && Math.abs(c.normal1.y) < .3) { nx += c.normal1.x; nz += c.normal1.z; } }
           const l = Math.hypot(nx, nz);
-          // Only for grazing contacts (normal nearly perpendicular to the motion); head-on walls stay solid.
-          const d = Math.hypot(dx, dz), graze = l > 1e-6 && Math.abs((nx * dx + nz * dz) / (l * d)) < .3;
+          // Only for glancing contacts; a wall met within about 53° of head-on stays solid. A tighter .3 limit left a 0.00 m stall at the SC-B1 corner.
+          const d = Math.hypot(dx, dz), graze = l > 1e-6 && Math.abs((nx * dx + nz * dz) / (l * d)) < .6;
           if (graze) { this.move(nx / l * .015, 0, nz / l * .015, false); m = this.move(dx, along * h, dz, false); }
         }
         // Fallback step-up (lift, move, settle) for kerbs beside a wall corner, where autostep gives up.

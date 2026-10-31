@@ -52,7 +52,7 @@ LANDMARKS = {  # OSM name -> (id, label, storeys, colour hint, interior?)
     '中山大學體育館': ('SPORT','體育館',4,'cream'),
     '國際研究大樓': ('IR','國際研究大樓',6,'brick'),
     '西子灣沙灘會館': ('BEACH','西子灣沙灘會館',3,'white'),
-    '蔣介石行館（蔣公行館）西灣藝廊': ('GALLERY','西灣藝廊',2,'white'),
+    '蔣介石行館（蔣公行館）西灣藝廊': ('GALLERY','西子灣行館（360 藝文空間・路易莎咖啡）',2,'white'),
     '國立中山大學附設高雄市私立幼兒園': ('KINDER','幼兒園',2,'cream'),
     '中山貨櫃創業基地': ('STARTUP','中山貨櫃創業基地',2,'container'),
     '海工館 & 通識中心': ('ME','海工館',5,'brick'),

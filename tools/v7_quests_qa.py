@@ -63,7 +63,7 @@ async def main():
                 for (const [key, value] of Object.entries(fixture)) localStorage.setItem(key, JSON.stringify(value));
             }''', {'keys': KEYS, 'fixture': fixture})
             await page.goto(URL, wait_until='networkidle')
-            await page.wait_for_function('window.campusWalk?.questList?.length === 12', timeout=180000)
+            await page.wait_for_function(f'window.campusWalk?.questList?.length === {len(QUESTS)}', timeout=180000)
             await page.wait_for_function('window.campusWalk?.npcs?.length > 0 && window.campusWalk.worldReady && window.campusWalk.story', timeout=180000)
             await page.wait_for_timeout(1200)
 
@@ -104,8 +104,9 @@ async def main():
                 await page.wait_for_timeout(800)
             await page.locator(f'[data-journal="go"][data-id="{qid}"]').click()
             await page.wait_for_timeout(700)
-            # G repeats the same player route after NPC scheduling/async readiness has settled.
-            await page.keyboard.press('g')
+            # A journal "go" is already walking; G would call it off. Only a walk that did not start gets a press.
+            if not (await snapshot(page))['route']:
+                await page.keyboard.press('g')
             t0, last_trace, last_position = time.monotonic(), 0.0, None
             while time.monotonic() - t0 < 900:
                 # Random encounters are part of play: decline like a player and keep going.
@@ -114,7 +115,8 @@ async def main():
                     report['encounters_declined'] = report.get('encounters_declined', 0) + 1
                     await skip.click()
                     await page.wait_for_timeout(300)
-                    await page.keyboard.press('g')
+                    if not (await snapshot(page))['route']:
+                        await page.keyboard.press('g')
                     await page.wait_for_timeout(500)
                 st = await snapshot(page)
                 if not st['route']:
@@ -127,6 +129,9 @@ async def main():
                         log('autowalk_stopped', quest=qid, position=st['position'], message=message)
                         await page.keyboard.press('g')
                         await page.wait_for_timeout(700)
+                        # Does pressing G recover? Counted, not assumed.
+                        if (await snapshot(page))['route']:
+                            report['autowalk_recovered'] = report.get('autowalk_recovered', 0) + 1
                         last_position = None
                         continue
                     return st
@@ -226,7 +231,7 @@ async def main():
                         log('quest_completed', quest=qid, count=len(report['quests']))
                     final = await snapshot(page)
                     report['journal'] = final['journal']
-                    report['completed'] = len(report['quests']) == 12 and all(
+                    report['completed'] = len(report['quests']) == len(QUESTS) and all(
                         final['journal']['quests'].get(q['id'], {}).get('status') == 'completed' for q in QUESTS)
                     await page.screenshot(path=str(OUT / 'quests-final.png'))
                 except Exception:

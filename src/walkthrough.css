@@ -121,7 +121,7 @@
 .walkthrough:has(.q-chapter) .walk-card,.walkthrough:has(.q-dialog:not([hidden])) .walk-card{display:none!important}
 .walkthrough:has(.q-dialog:not([hidden])) .walk-minimap,.walkthrough:has(.q-dialog:not([hidden])) .q-objective,.walkthrough:has(.q-dialog:not([hidden])) .walk-hudbar{opacity:.0;pointer-events:none}
 .walkthrough:not(.is-overview) .q-objective{top:20px;left:20px}
-@media (max-width:759px){.walk-hudbar{top:12px;right:12px}.walkthrough:not(.is-overview) .q-objective{top:12px;left:12px;bottom:auto;max-width:calc(100vw - 180px)}}
+@media (max-width:759px){.walk-hudbar{top:12px;right:12px}.walkthrough:not(.is-overview) .q-objective{top:12px;left:12px;bottom:auto;max-width:calc(100vw - 180px);max-height:150px}}
 .walkthrough .walk-menu .walk-search{width:100%;max-width:none;flex:none}
 .walkthrough:not(.is-overview) .walk-stories{display:none}
 .album h3{margin:16px 0 8px;font-size:15px;display:flex;gap:8px;align-items:baseline}.album h3 b{color:#b98422}

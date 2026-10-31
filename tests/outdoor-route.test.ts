@@ -9,6 +9,21 @@ const routes = new OutdoorRoutes(graph);
 const length = (p: Vector3[]) => p.slice(1).reduce((s, q, i) => s + Math.hypot(q.x - p[i].x, q.z - p[i].z), 0);
 
 describe('outdoor routes', () => {
+  it('keeps stops on the main network when validation cuts a piece of it off', () => {
+    const cut = new OutdoorRoutes(graph), at = new Vector3(-53, 0, -61.5), near = cut.stopsNear(at, 1)[0];
+    // Sever everything within 15 m of the place: what is left near it must still join the rest of the campus.
+    cut.validate((a, b) => Math.hypot(a.x - near.x, a.z - near.z) > 15 && Math.hypot(b.x - near.x, b.z - near.z) > 15);
+    const [stop] = cut.stopsNear(at, 1);
+    expect(Math.hypot(stop.x - near.x, stop.z - near.z)).toBeGreaterThan(15);
+    expect(cut.path(cut.anchor('arcade')!, stop).length).toBeGreaterThan(1);
+  });
+  it('offers the stops nearest a place, closest first, none of them cut off from the network', () => {
+    const at = new Vector3(-53, 0, -61.5), stops = routes.stopsNear(at, 3);
+    expect(stops).toHaveLength(3);
+    const d = stops.map(s => Math.hypot(s.x - at.x, s.z - at.z));
+    expect(d[0]).toBeLessThanOrEqual(d[1] + 1);
+    for (const stop of stops) expect(routes.path(routes.anchor('arcade')!, stop).length).toBeGreaterThan(1);
+  });
   it('connects every story anchor to the arcade without using the tunnel', () => {
     const arcade = routes.anchor('arcade')!;
     for (const id of ['gate', 'tunnel-west', 'admin', 'library', 'sunset']) {

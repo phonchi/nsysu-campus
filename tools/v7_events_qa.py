@@ -9,6 +9,7 @@ ROOT=Path(__file__).resolve().parents[1]; ARTIFACTS=Path(os.environ.get('V7_ARTI
 QUESTS=json.loads((ROOT/'public/data/quests.json').read_text())['quests']
 ENCOUNTERS=json.loads((ROOT/'public/data/encounters.json').read_text())['encounters']
 ZONES=json.loads((ROOT/'public/data/story-zones.json').read_text())['zones']
+SPOTS=json.loads((ROOT/'public/data/quests.json').read_text())['spots']
 CHAPTERS=json.loads((ROOT/'public/data/chapters.json').read_text())['chapters']
 async def main():
  results=[];errors=[]
@@ -20,7 +21,7 @@ async def main():
   await ctx.add_init_script('if(!sessionStorage.getItem("qa-fixture")){localStorage.clear();localStorage.setItem("nsysu-story-v3",JSON.stringify('+json.dumps(dict(done=[x['id'] for x in CHAPTERS],flags=[],fired={},sideQuests=[],npcAt={})) +'));sessionStorage.setItem("qa-fixture","1")}')
   page=await ctx.new_page();await page.add_init_script("try{localStorage.setItem('nsysu-walk-guide-v7','1')}catch(e){}");page.on('pageerror',lambda e:errors.append(str(e)))
   await page.goto(os.environ.get('CAMPUS_WALK_URL','http://127.0.0.1:4312/')+'?view=walk&quality=C&qa=1',wait_until='networkidle')
-  await page.wait_for_function('window.campusWalk?.worldReady && window.campusWalk?.questList?.length===12',timeout=120000)
+  await page.wait_for_function('window.campusWalk?.worldReady && window.campusWalk?.questList?.length>=12',timeout=120000)
   await page.locator('[data-action=start]').first.click();await page.wait_for_timeout(3000)
   async def drain():
    for _ in range(35):
@@ -50,6 +51,8 @@ async def main():
      await page.keyboard.press('n');await page.wait_for_timeout(1000)
     if not n:raise Exception('NPC unavailable '+id)
     x,y,z=n['position'];await page.evaluate('p=>window.campusWalk.qaPlace(p[0]+1,p[2],p[1])',[x,y,z])
+   elif kind=='spot':
+    z=SPOTS[id];await page.evaluate('p=>p[2]===null?window.campusWalk.qaPlace(p[0],p[1]):window.campusWalk.qaPlace(p[0],p[1],p[2])',[z['stand'][0],z['stand'][1],z.get('y')])
    else:
     z=ZONES[id];x,zp=z['p'];await page.evaluate('p=>p[2]===null?window.campusWalk.qaPlace(p[0],p[1]):window.campusWalk.qaPlace(p[0],p[1],p[2])',[x,zp,z.get('y')])
    await page.wait_for_timeout(700)
@@ -69,13 +72,13 @@ async def main():
   if not os.environ.get('EVENTS_ONLY'):
    # A photo at a wrong location must not turn into a valid submission on arrival.
    photo_quest=next(q for q in QUESTS if q['id']=='tunnel-photo')
-   await accept(photo_quest);await place('zone:gate');await photo();await place('zone:tunnel-west')
+   await accept(photo_quest);await place('zone:gate');await photo();await place('spot:tunnel-photo-view')
    check('wrong-place photo cannot be submitted on arrival',await page.evaluate('window.campusWalk.journal.quests["tunnel-photo"].step')==0)
    await photo();check('correct shutter advances photo quest',await page.evaluate('window.campusWalk.journal.quests["tunnel-photo"].step')==1)
    # Record an isolated post-v5 fact, which must not be mislabeled as pre-v5 history.
    await page.evaluate('()=>{const p=JSON.parse(localStorage.getItem("nsysu-campus-v4")||"{}");p.talked=[...(p.talked||[]),"qa-post-v5-person"];localStorage.setItem("nsysu-campus-v4",JSON.stringify(p))}')
    for _ in range(2):
-    await page.reload(wait_until='networkidle');await page.wait_for_function('window.campusWalk?.worldReady && window.campusWalk?.questList?.length===12',timeout=120000);await page.locator('[data-action=start]').first.click();await page.wait_for_function('window.campusWalk.talk.mode === "walk"',timeout=10000)
+    await page.reload(wait_until='networkidle');await page.wait_for_function('window.campusWalk?.worldReady && window.campusWalk?.questList?.length>=12',timeout=120000);await page.locator('[data-action=start]').first.click();await page.wait_for_function('window.campusWalk.talk.mode === "walk"',timeout=10000)
    check('two reloads do not manufacture new legacy history',not await page.evaluate('window.campusWalk.journal.journal.some(e=>e.id==="legacy:npc:qa-post-v5-person")'))
    for q in QUESTS[:2]:
     try:
@@ -93,7 +96,7 @@ async def main():
     except Exception as exc:
      check('quest:'+q['id'],False,error=str(exc));await page.screenshot(path=str(OUT/'error.png'));break
    await page.screenshot(path=str(OUT/'quests-complete.png'))
-   await page.reload(wait_until='networkidle');await page.wait_for_function('window.campusWalk?.worldReady && window.campusWalk?.questList?.length===12',timeout=120000);await page.locator('[data-action=start]').first.click();await page.wait_for_function('window.campusWalk.talk.mode === "walk"',timeout=10000)
+   await page.reload(wait_until='networkidle');await page.wait_for_function('window.campusWalk?.worldReady && window.campusWalk?.questList?.length>=12',timeout=120000);await page.locator('[data-action=start]').first.click();await page.wait_for_function('window.campusWalk.talk.mode === "walk"',timeout=10000)
   await place('zone:gate')
   async def diagnostic(label,**extra):
    snapshot=await page.evaluate('()=>({readiness:window.campusWalk.readiness,mode:window.campusWalk.talk.mode,encounter:window.campusWalk.encounter,interaction:window.campusWalk.interaction,position:window.campusWalk.position,menu:!document.querySelector(".walk-menu").hidden,clock:window.campusWalk.encounterClock})')

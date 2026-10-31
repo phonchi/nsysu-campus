@@ -78,7 +78,7 @@ describe('six-chapter tour walked in physics', () => {
       ['c2 inside the tunnel', zone('tunnel-inside'), zones.zones['tunnel-inside'].r - 1],
       ['c3 guide at admin', npc('guide', 'admin'), 2.5],
       ['c3 service desk', npc('s2'), 2.2],
-      ['c4 guide at library', npc('guide', 'library'), 2.5],
+      ['c4 guide at library', npc('guide', 'library-door'), 2.5],
       ['c4 library desk', npc('s3'), 2.2],
       ['c5 arcade', zone('arcade'), zones.zones.arcade.r - 1],
       ['c5 room SC2001', room('SC2001'), 1.2],

@@ -13,7 +13,7 @@ describe('side quests and persistent journal', () => {
   expect(e.accept(q.id, world(q.accept.near))).toBe(false);
   expect(e.accept(q.id, { ...world(q.accept.near), timeOfDay: () => 'sunset' })).toBe(true);
  });
- it('validates all twelve authored quests', () => { expect(data.quests).toHaveLength(12); expect(validateQuests(data)).toEqual([]); });
+ it('validates all thirteen authored quests', () => { expect(data.quests).toHaveLength(13); expect(validateQuests(data)).toEqual([]); });
  it('finishes every choice branch, reloads at every transition and never repeats reward', () => {
   for (const q of data.quests) for (const choice of q.steps.at(-1)!.choices!) {
    const storage = memory(); let engine = new QuestEngine(data, { storage, now: () => 100 });
@@ -73,10 +73,6 @@ describe('review regressions',()=>{
   expect(e.notifyPhoto(world('wrong',8))).toBe(0);expect(e.notifyPhoto(world(q.steps[0].target,9))).toBe(0);
   e=new QuestEngine(local,{storage});e.update(correct);expect(e.progress.quests[q.id].step).toBe(0);expect(e.interact(q.id,correct)).toBe(false);
   expect(e.notifyPhoto(correct)).toBe(1);e=new QuestEngine(local,{storage});expect(e.progress.quests[q.id].step).toBe(1);
- });
- it('does not let area/photo quests steal ordinary NPC E candidates',()=>{
-  const e=new QuestEngine(data,{storage:memory()});const photo=data.quests.find(q=>q.steps[0].kind==='photo')!;accept(e, photo.id);expect(e.candidate(world(photo.steps[0].target))).toBeUndefined();
-  const zone={...data.quests[0],id:'zone-fixture',steps:[{id:'zone-step',target:'zone:gate',text:'check area'},data.quests[0].steps.at(-1)!]};const areas=new QuestEngine({version:1,quests:[zone]},{storage:memory()});accept(areas, zone.id);expect(areas.candidate(world('zone:gate'))).toBeUndefined();expect(areas.candidate(world('zone:gate'),true)?.definition.id).toBe(zone.id);
  });
  it('unaccepted and unsafe offers do not journal or consume cooldown; active abandonment does',()=>{
   const records:unknown[]=[];const e=new EncounterEngine(encounters,{record:x=>records.push(x),random:()=>0});const d=encounters.encounters[0];

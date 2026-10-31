@@ -1,15 +1,16 @@
 /** Persistent side quests and journal; never touches the v3/v4 player saves. */
 import { readSave, removeSave, writeSave } from './save-guard';
+import type { QuestSpot } from '../world/quest-spots';
 export interface QuestChoice { id: string; label: string; result: string }
 export interface QuestStep { id: string; target: string; text: string; lines?: { who: string; text: string }[]; radius?: number; kind?: 'interact' | 'photo'; choices?: QuestChoice[]; when?: string }
 export interface QuestDefinition { id: string; title: string; zone: string; npc: string; description: string; reward: string; accept: { near: string; chapterDone?: string; lines?: { who: string; text: string }[] }; absent?: Record<string, string>; steps: QuestStep[] }
-export interface QuestData { version: number; quests: QuestDefinition[] }
+export interface QuestData { version: number; quests: QuestDefinition[]; spots?: Record<string, QuestSpot> }
 export interface QuestState { status: 'active' | 'completed'; step: number; choices: Record<string, string>; photoBaseline?: number }
 export interface JournalEntry { id: string; kind: 'quest' | 'encounter' | 'legacy'; title: string; text: string; at: number; zone: string; npc: string; choice?: string; result?: string; reward?: string }
 export interface QuestProgress { version: 1; quests: Record<string, QuestState>; journal: JournalEntry[]; rewards: string[]; tracked?: string; legacySnapshotTaken?: boolean }
 export interface QuestWorld { distanceTo(target: string): number; timeOfDay(): string; photoCount?: number; chapterDone?(id: string): boolean }
 export interface QuestView { definition: QuestDefinition; state?: QuestState; step?: QuestStep }
-export interface QuestOptions { storage?: Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>; now?: () => number; onChange?: () => void; onStorageError?: () => void }
+export interface QuestOptions { storage?: Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>; now?: () => number; onChange?: () => void; onStorageError?: () => void; onStep?: (quest: QuestDefinition, next: QuestStep | undefined) => void }
 export const QUEST_KEY = 'nsysu-campus-journal-v5';
 const fresh = (): QuestProgress => ({ version: 1, quests: {}, journal: [], rewards: [] });
 export function validateQuests(data: QuestData): string[] {
@@ -73,11 +74,16 @@ export class QuestEngine {
     this.progress.tracked = id;
     this.entry({ id: `${id}:accepted`, kind: 'quest', title: q.title, text: q.description, zone: q.zone, npc: q.npc }); this.save(); return true;
   }
-  track(id?: string) { if (id && (!this.data.quests.some(q => q.id === id) || this.progress.quests[id]?.status === 'completed')) return false; this.progress.tracked = id; this.save(); return true; }
-  private reachable(step: QuestStep, world: QuestWorld) { return world.distanceTo(step.target) <= (step.radius ?? 4) && (!step.when || step.when === world.timeOfDay()); }
-  candidate(world: QuestWorld, includeZones = false): QuestView | undefined {
-    return this.list().filter(v => v.step && v.step.kind !== 'photo' && (includeZones || v.step.target.startsWith('npc:')) && this.reachable(v.step, world)).sort((a, b) => Number(b.definition.id === this.progress.tracked) - Number(a.definition.id === this.progress.tracked) || world.distanceTo(a.step!.target) - world.distanceTo(b.step!.target))[0];
+  /** With `world`, a quest not yet offered cannot be tracked; undefined means back to the main story. */
+  track(id?: string, world?: QuestWorld) {
+    if (id) { const q = this.data.quests.find(q => q.id === id); if (!q || this.progress.quests[id]?.status === 'completed' || (world && this.locked(q, world))) return false; }
+    this.progress.tracked = id; this.save(); return true;
   }
+  /** Not accepted and its chapter not done yet. An accepted quest is never locked, whatever an old save's chapters say. */
+  locked(q: QuestDefinition, world: QuestWorld) { return !this.progress.quests[q.id] && !this.unlocked(q, world); }
+  /** Older builds could track a quest still locked: such a save starts on the main story. Call once the chapters are known. */
+  settle(world: QuestWorld) { const q = this.data.quests.find(q => q.id === this.progress.tracked); if (q && this.locked(q, world)) { this.progress.tracked = undefined; this.save(); } }
+  private reachable(step: QuestStep, world: QuestWorld) { return world.distanceTo(step.target) <= (step.radius ?? 4) && (!step.when || step.when === world.timeOfDay()); }
   interact(id: string, world: QuestWorld) {
     const v = this.list().find(v => v.definition.id === id);
     if (!v?.step || !v.state || !this.reachable(v.step, world) || v.step.choices?.length) return false;
@@ -103,6 +109,7 @@ export class QuestEngine {
     const completed = s.step >= q.steps.length;
     if (completed) { s.status = 'completed'; if (!this.progress.rewards.includes(q.reward)) this.progress.rewards.push(q.reward); if (this.progress.tracked === q.id) this.progress.tracked = undefined; }
     this.entry({ id: `${q.id}:${step.id}`, kind: 'quest', title: q.title, text: step.text, zone: q.zone, npc: q.npc, choice: choice?.label, result: choice?.result ?? (completed ? '任務完成，謝謝你的幫忙！' : '完成這一步，接著前往下一個地點。'), reward: completed ? q.reward : undefined }); this.save();
+    this.options.onStep?.(q, completed ? undefined : q.steps[s.step]);
   }
   record(entry: Omit<JournalEntry, 'at'>) { if (this.progress.journal.some(e => e.id === entry.id)) return false; if (entry.reward && !this.progress.rewards.includes(entry.reward)) this.progress.rewards.push(entry.reward); this.entry(entry); this.save(); return true; }
   private entry(entry: Omit<JournalEntry, 'at'>) { if (!this.progress.journal.some(e => e.id === entry.id)) this.progress.journal.push({ ...entry, at: this.now() }); }
