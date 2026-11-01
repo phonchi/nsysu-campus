@@ -16,7 +16,7 @@ const moved = (start: T.Vector3, degrees: number) => {
 };
 
 it('slides past the SC-B1 corner from every glancing direction', () => {
-  const corner = new T.Vector3(-20.711139678955078, -3.620487089157104, 118.59700012207031);
+  const corner = new T.Vector3(-20.711139678955078, -3.620487089157104, 121.18700012207031);
   for (let a = -180; a < 180; a += 5) if (a < -115 || a > -65) expect(moved(corner, a), `direction ${a}`).toBeGreaterThan(.2);
   expect(moved(corner, -90)).toBeLessThan(1);
 }, 60000);

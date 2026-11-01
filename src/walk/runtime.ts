@@ -1441,6 +1441,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       });
     },
     qaObstacles: (x: number, z: number, r: number) => QA ? obstacleField.obstacles.filter(o => Math.hypot(o.center[0] - x, o.center[2] - z) < r + Math.max(o.half[0], o.half[2])).map(o => ({ id: o.id, shape: o.shape, center: o.center, half: o.half, yaw: o.yaw ?? 0 })) : [],
+    /** QA only: the navmesh path between two points, as [x, y, z] triples. */
+    qaNavPath: (a: number[], b: number[]) => QA && navigation ? navigation.findPath(new T.Vector3(a[0], a[1], a[2]), new T.Vector3(b[0], b[1], b[2])).map(p => p.toArray()) : [],
     qaPlace: (x: number, z: number, y?: number, face?: [number, number]) => QA ? teleportTo(new T.Vector3(x, y ?? 0, z), face && new T.Vector3(face[0], y ?? 0, face[1]), y !== undefined) : false,
     plan(to?: string) {
       const g = to ? walkGoal(to) : director?.goal(); const nav = g && navigation ? navigation.findPath(physics.position, g).length : -1; const out = g && routes ? routes.path(physics.position, g).length : -1;

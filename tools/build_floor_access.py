@@ -85,11 +85,16 @@ def _inside_clearance(poly,core,position,tangent,radius=.36):
     return best or {'passed':False,'insidePosition':None,'inwardNormal':None,'distanceToRoomCore':None,'coreRadius':radius}
 
 
-def _reviewed_override(entry,rooms,cores,vertical_obstacles):
+def _reviewed_override(entry,rooms,cores,vertical_obstacles,free_cores=None,room_parts=None):
     a,b=entry.get('roomId'),entry.get('neighborRoomId')
     spec=entry.get('suggestedPortal',{})
-    if not entry.get('sourceReview') or not all(r in rooms for r in [a,b]):return None,'missing-evidence-or-room'
-    positions=spec.get('perRoomPosition',{});width=spec.get('width',0);depth=.65
+    positions=dict(spec.get('perRoomPosition',{}))
+    # A door read from the plan may open onto public space: resolve to the free node at the far side of the wall.
+    if b=='@public' and free_cores and b in positions:
+        far=Point(positions[b]);node=min(free_cores,key=lambda n:free_cores[n].distance(far));positions[node]=positions.pop(b);b=node
+    is_free=lambda r:bool(free_cores) and r in free_cores
+    if not entry.get('sourceReview') or not all(r in rooms or is_free(r) for r in [a,b]):return None,'missing-evidence-or-room'
+    width=spec.get('width',0);depth=.65
     if width<.9 or width>1.2 or not all(r in positions for r in [a,b]):return None,'invalid-reviewed-portal-specification'
     pa,pb=positions[a],positions[b];dx,dz=pb[0]-pa[0],pb[1]-pa[1];gap=math.hypot(dx,dz)
     if gap<.001 or gap>1.3:return None,'reviewed-wall-gap-out-of-bounds'
@@ -97,18 +102,22 @@ def _reviewed_override(entry,rooms,cores,vertical_obstacles):
     band=Polygon([(center[0]+sx*ux*(gap/2+depth)+sz*tx*width/2,center[1]+sx*uz*(gap/2+depth)+sz*tz*width/2) for sx,sz in [(-1,-1),(-1,1),(1,1),(1,-1)]])
     standing={};checks={}
     for rid in [a,b]:
-        core=cores[rid]
+        core=free_cores[rid] if is_free(rid) else cores[rid]
+        # A plan door may open into a smaller part of a room the trace merged with its neighbours.
+        if entry.get('planDoor') and room_parts and rid in room_parts:core=unary_union(room_parts[rid])
         if core.is_empty:return None,f'no-room-body-core:{rid}'
         point=nearest_points(core,Point(positions[rid]))[0];segment=LineString([positions[rid],(point.x,point.y)])
-        if segment.length>1.2:return None,f'core-more-than-1.2m-away:{rid}'
-        outside=segment.difference(rooms[rid].buffer(.002))
+        # A door-arc notch in the trace can push a plan door's standing point further in.
+        if segment.length>(1.8 if entry.get('planDoor') else 1.2):return None,f'core-more-than-1.2m-away:{rid}'
+        outside=segment.difference(rooms[rid].buffer(.002)) if rid in rooms else LineString()
         if outside.difference(band.buffer(.002)).length>.005:return None,f'trace-correction-exceeds-reviewed-door-band:{rid}'
         if not vertical_obstacles.is_empty and segment.intersection(vertical_obstacles).length>.005:return None,'crosses-vertical-service'
         for other,poly in rooms.items():
             if other not in [a,b] and segment.intersection(poly.buffer(-.002)).length>.01:return None,f'crosses-unreviewed-room:{other}'
         standing[rid]=_point((point.x,point.y))
+        if rid not in rooms:continue
         checks[rid]={'passed':True,'insidePosition':standing[rid],'distanceToRoomCore':round(segment.length,5),'traceCorrection':outside.length>.005,'reviewedDoorBandOnly':True}
-    return {'nodes':[a,b],'position':center,'a':pa,'b':pb,'span':width,'gap':gap,'preferred':None,'tangent':[tx,tz],'width':width,'insideChecks':checks,'clearancePositions':standing,'basis':'schematic','preserved':False,'rank':-1,'sourceReview':entry['sourceReview'],'cutDepth':depth,'traceCorrection':{'basis':'schematic','note':entry.get('geometryWarning','Source-reviewed door-leaf tracing artifact; correction limited to this opening band.'),'parallelLeafLines':entry.get('parallelLeafLines',[])}},None
+    return {'nodes':[a,b],'position':center,'a':pa,'b':pb,'span':width,'gap':gap,'preferred':None,'tangent':[tx,tz],'width':width,'insideChecks':checks,'clearancePositions':standing,'basis':entry.get('basis','schematic'),'preserved':False,'rank':-1,'sourceReview':entry['sourceReview'],'planDoorOwner':a if entry.get('planDoor') else None,'cutDepth':depth,'traceCorrection':{'basis':'schematic','note':entry.get('geometryWarning','Source-reviewed door-leaf tracing artifact; correction limited to this opening band.'),'parallelLeafLines':entry.get('parallelLeafLines',[])}},None
 
 
 def plan_floor_access(floor:dict,portal_width:float=1.2,max_gap:float=.4,service_stair:list|None=None,clearance:float=.42,gallery_width:float=1.4,portal_overrides:list|None=None,_core_preferences:dict|None=None,_allow_core_fallback:bool=True,vertical_entry:list|None=None)->dict:
@@ -119,10 +128,15 @@ def plan_floor_access(floor:dict,portal_width:float=1.2,max_gap:float=.4,service
     if not outline.is_valid or outline.area<.1:
         result['report']={'status':'invalid-outline','issues':[{'type':'invalid-outline'}],'reachableRoomCount':0,'roomCount':len(floor.get('rooms',[]))};return result
     outer_walk=Polygon(outline.exterior).buffer(gallery_width,join_style=3)
+    # A building drawn only as its plans show gets no gallery: just the stubs where a link between buildings lands.
+    if floor.get('noGallery'):
+        shell=Polygon(outline.exterior);parts=[shell]
+        parts+=[Polygon(landing) for landing in floor.get('linkLandings',[])]
+        merged=unary_union(parts);outer_walk=Polygon(max(_polygons(merged),key=lambda g:g.area).exterior)
     planning_outline=Polygon(outer_walk.exterior,floor.get('holes',[]))
     result['walkOutline']=[_point(p) for p in list(outer_walk.exterior.coords)[:-1]]
     result['walkOutlineBasis']='schematic'
-    result['walkOutlineNote']=f'Virtual exterior gallery widened by {gallery_width:g} illustrative metres; source outline, room polygons and holes unchanged.'
+    result['walkOutlineNote']='Source outline only, plus link landings.' if floor.get('noGallery') else f'Virtual exterior gallery widened by {gallery_width:g} illustrative metres; source outline, room polygons and holes unchanged.'
     for room in floor.get('rooms',[]):
         rid=room['id'];poly=Polygon(room.get('polygon',[]))
         if not poly.is_valid or poly.area<.02:
@@ -256,17 +270,26 @@ def plan_floor_access(floor:dict,portal_width:float=1.2,max_gap:float=.4,service
     if overlaps:issues.extend({'type':'overlapping-room-polygons',**o} for o in overlaps)
     reviewed_count=0
     for entry_override in [*(portal_overrides or []),*floor.get('virtualPortalOverrides',[])]:
-        candidate,error=_reviewed_override(entry_override,rooms,room_cores,vertical_obstacles)
+        candidate,error=_reviewed_override(entry_override,rooms,room_cores,vertical_obstacles,core_by_free,room_components)
         if error:
             issues.append({'type':'reviewed-portal-override-rejected','roomId':entry_override.get('roomId'),'reason':error,'sourceReview':entry_override.get('sourceReview')})
         else:candidates.append(candidate);reviewed_count+=1
+    # A door read from the plan replaces every other wall contact of its room.
+    plan_rooms={c['planDoorOwner'] for c in candidates if c.get('planDoorOwner')}
+    candidates=[c for c in candidates if c.get('planDoorOwner') or c.get('sourceReview') or not plan_rooms.intersection(c['nodes'])]
     adjacency=defaultdict(list)
     for index,c in enumerate(candidates):
         a,b=c['nodes'];weight=c['rank']*.3+1+c['gap']*.1
         adjacency[a].append((weight,b,index));adjacency[b].append((weight,a,index))
     # Prim tree retains original room geometry; validated manual portals are kept even if redundant.
-    visited={root};selected=set();parents={};queue=[]
-    for weight,n,index in adjacency[root]:heapq.heappush(queue,(weight,root,n,index))
+    seeds=[root]
+    # Without a gallery a wing's corridor may join the rest of the storey only through the stairs it opens onto.
+    if floor.get('noGallery'):
+        stairs=[Point(a['position']) for a in annotations if a.get('kind')=='stairs' and a.get('source') and a.get('position')]
+        seeds+=[n for n in free_ids if n!=root and any(nodes[n].distance(s)<.75 for s in stairs)]
+    visited=set(seeds);selected=set();parents={};queue=[]
+    for seed in seeds:
+        for weight,n,index in adjacency[seed]:heapq.heappush(queue,(weight,seed,n,index))
     while queue:
         weight,parent,node,index=heapq.heappop(queue)
         if node in visited:continue
@@ -274,7 +297,7 @@ def plan_floor_access(floor:dict,portal_width:float=1.2,max_gap:float=.4,service
         for w,n,edge in adjacency[node]:
             if n not in visited:heapq.heappush(queue,(w,node,n,edge))
     for index,c in enumerate(candidates):
-        if c['preferred'] and c['preserved']:selected.add(index)
+        if (c['preferred'] and c['preserved']) or c.get('planDoorOwner'):selected.add(index)
     # The route endpoint must be on the exterior, not at a corridor centroid.
     # An outer room may be the only honest entrance when rooms wrap the public space.
     target=service_stair or [(outline.bounds[0]+outline.bounds[2])/2,outline.bounds[3]+3]
@@ -349,6 +372,7 @@ def plan_floor_access(floor:dict,portal_width:float=1.2,max_gap:float=.4,service
         if c['preferred']:portal['preferredDoorRoomId']=c['preferred']['roomId'];portal['sourceDoorPreserved']=c['preserved'];portal['sourceDoorProjectionOffset']=round(c.get('sourceOffset',0),5)
         result['portals'].append(portal)
     for rid,c in blocked_manual.items():
+        if rid in plan_rooms:continue
         if any(p.get('preferredDoorRoomId')==rid and p.get('sourceDoorPreserved') for p in result['portals']):continue
         ref=c['preferred'];room_ids=[n for n in c['nodes'] if n in rooms]
         result['portals'].append({'id':f'{fid}-source-door-{rid}','position':_point(ref['position']),'width':ref['width'],'roomIds':room_ids,'nodeIds':c['nodes'],'basis':'map-derived','sourceDoorPreserved':True,'preferredDoorRoomId':rid,'insideClearanceChecks':c['insideChecks'],'clearancePositions':c['clearancePositions'],'traversableProposal':False,'perRoomPosition':{n:_point(c['a'] if n==c['nodes'][0] else c['b']) for n in room_ids}})
@@ -357,6 +381,9 @@ def plan_floor_access(floor:dict,portal_width:float=1.2,max_gap:float=.4,service
         chosen=parents.get(rid)
         trusted=[i for i in selected if rid in candidates[i]['nodes'] and candidates[i]['basis']=='map-derived']
         if trusted:chosen=trusted[0]
+        # A room with its own plan door is entered there, not through a closet door it also holds.
+        own=[i for i in selected if candidates[i].get('planDoorOwner')==rid]
+        if own:chosen=own[0]
         if chosen is not None:result['primaryPortalByRoom'][rid]=portal_ids[chosen]
     unreachable=[n for n in rooms if n not in visited]
     for rid in unreachable:
@@ -365,7 +392,7 @@ def plan_floor_access(floor:dict,portal_width:float=1.2,max_gap:float=.4,service
             'nearestRestoredFreeDistance':round(min(rooms[rid].boundary.distance(nodes[n]) for n in free_ids),5),
             'nearestBodyCoreDistance':round(min(rooms[rid].boundary.distance(core_by_free[n]) for n in free_ids),5)})
     preserved_rooms={candidates[i]['preferred']['roomId'] for i in selected if candidates[i]['preferred'] and candidates[i]['preserved']}
-    preserved_rooms.update(blocked_manual)
+    preserved_rooms.update(blocked_manual);preserved_rooms.update(plan_rooms)
     for rid in preferred:
         if rid not in preserved_rooms:issues.append({'type':'manual-door-not-preserved','roomId':rid,'sourcePosition':preferred[rid]['position'],'reason':'source point lacks a width-qualified shared wall span; any alternative is schematic'})
     # Save island membership, including disconnected free-space components, for repair.
@@ -403,6 +430,9 @@ def plan_floor_access(floor:dict,portal_width:float=1.2,max_gap:float=.4,service
     return result
 
 
+NO_GALLERY={'SC'}
+
+
 def _rect(center,length,width,angle):
     ux,uz=math.cos(angle),math.sin(angle);vx,vz=-uz,ux;cx,cz=center;hl,hw=length/2,width/2
     return [[cx-ux*hl-vx*hw,cz-uz*hl-vz*hw],[cx+ux*hl-vx*hw,cz+uz*hl-vz*hw],[cx+ux*hl+vx*hw,cz+uz*hl+vz*hw],[cx-ux*hl+vx*hw,cz-uz*hl+vz*hw]]
@@ -417,6 +447,9 @@ def _apply_structure(floor,building_id,structure):
     """Room clipping, stair/lift bodies and landing annotations from campus-structure.json."""
     if not structure:return floor,None
     floor=json.loads(json.dumps(floor));fid=floor['id']
+    if building_id in NO_GALLERY:
+        floor['noGallery']=True
+        floor['linkLandings']=[c['landing'] for c in structure.get('connectors',[]) if fid in c.get('openings',{}) and c.get('landing')]
     overrides=structure.get('roomOverrides',{}).get(fid,{})
     rooms=[]
     for room in floor.get('rooms',[]):

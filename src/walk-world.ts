@@ -181,7 +181,7 @@ export function buildWalkWorld(data:WalkBuilding[],structure:CampusStructure,ter
    const keepClear=[...joins.map(o=>({p:o.p,r:o.width/2+.6})),...(f.level===1?[{p:perimeterEntry,r:1.7}]:[])];
    for(let i=0;i<walkOutline.length;i++){const a=walkOutline[i],bb=walkOutline[(i+1)%walkOutline.length],L=Math.hypot(bb[0]-a[0],bb[1]-a[1]);
     // Guards first: every edge, however short, is protected on upper floors and walled below ground.
-    if(ordinal>1)cutWall(fg,fc,a,bb,y,1.0,'#7c8b7b',joins,false);
+    if(ordinal>1)cutWall(fg,fc,a,bb,y,f.enclosedWalls?3.2:1.0,'#7c8b7b',joins,false);
     else if(f.level<0)cutWall(fg,fc,a,bb,y,3.4,'#a99f8c',joins,false);
     if(L<2)continue;wall(fg,a,bb,y-.2,.2,palette.trim,.27);wall(fg,a,bb,y+3.23,.25,palette.trim,.28);
     for(let t=0;t<L;t+=4.2){const u=t/L,x=a[0]+(bb[0]-a[0])*u,z=a[1]+(bb[1]-a[1])*u;if(keepClear.some(k=>Math.hypot(x-k.p[0],z-k.p[1])<k.r))continue;const col=box(fg,.22,3.4,.22,x,y+1.7,z,palette.trim);fc.add(col.clone());}}

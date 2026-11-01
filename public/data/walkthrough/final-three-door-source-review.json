@@ -1,7 +1,7 @@
 {
   "scope": "only final three source cases",
   "sourceBuildingSHA256": {
-    "SC": "49f50d107d6c736bcf04d25936f2d472853fed8ada4b3acc13c1b8604793543a",
+    "SC": "cf5e3601ef630efe51fa1613b07e47979f51e45a7cd526457769d18ad565b7b3",
     "EV": "fc334b9b8a997dfb17adcbf0c70b6437883032686805caaf6c13570d8c698d11"
   },
   "entries": [
@@ -34,11 +34,11 @@
         ],
         "perRoomPosition": {
           "SC-B1-region-053": [
-            -81.6849,
+            -79.8349,
             20.6629
           ],
           "SC-B1-region-031": [
-            -82.1492,
+            -80.2992,
             20.6629
           ]
         },
@@ -184,6 +184,8 @@
       }
     },
     "v9: SC.json courtyard void, SC2001/SC3001 doors, SC4010 room, display names; reviewed B1 entry unaffected.",
-    "v9: SC.json courtyard void, SC2001/SC3001 doors, SC4010 room, display names; reviewed B1 entry unaffected."
+    "v9: SC.json courtyard void, SC2001/SC3001 doors, SC4010 room, display names; reviewed B1 entry unaffected.",
+    "v9.1: SC.json 3F/4F/B1 doors from plan door arcs; reviewed B1 entry unaffected.",
+    "v9.1: SC.json 3F/4F/B1 doors from plan door arcs; reviewed B1 entry unaffected."
   ]
 }
