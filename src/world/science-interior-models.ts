@@ -1,6 +1,7 @@
 /** Display-only furniture models. Collision and navigation use science-interiors.ts envelopes. */
 import * as T from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { createCatTeacherPlush } from './cat-teacher-plush';
 import type { InteriorItem } from './science-interiors';
 
 const BASE_C = { wood: '#bd9467', edge: '#e3c59e', dark: '#35484c', teal: '#337d80', fabric: '#688e84', cream: '#f4eee1', white: '#ebeee7', paper: '#d9dfce', board: '#294e49', brass: '#c6a15e', blue: '#83bdc7', clay: '#bc7963' };
@@ -79,6 +80,20 @@ export function furnishScienceItem(item: InteriorItem, parent: T.Group, office =
   } else if (kind === 'lecture-seat') {
     box(.08,.42,.24,0,.21,.12,C.dark);box(.47,.09,.41,0,.46,.12,C.teal);box(.48,.46,.075,0,.71,.36,C.teal);
     box(.52,.05,.23,0,.73,-.31,C.wood);box(.035,.7,.035,w/2-.04,.35,-.31,C.dark);
+  } else if(kind==='plush-cat') {
+    g.add(createCatTeacherPlush());
+  } else if(kind==='sofa-back'||kind==='sofa-wing') {
+    soft(w-.08,.16,d-.08,0,.17,0,C.wood);soft(w,.25,d,0,.34,0,C.fabric);
+    soft(w-.035,.49,.16,0,.62,d/2-.08,C.fabric);
+    if(kind==='sofa-back')for(const sign of [-1,1])soft(.16,.49,d-.16,sign*(w/2-.08),.62,-.08,C.fabric);
+    const padding=kind==='sofa-back'?.20:.07,count=kind==='sofa-back'?3:1,seatW=(w-2*padding)/count-.025;
+    for(let k=0;k<count;k++){
+      const x=-w/2+padding+(k+.5)*(w-2*padding)/count;
+      soft(seatW,.13,d-.22,x,.49,-.055,C.teal);
+      if(kind==='sofa-back'){
+        const pillow=soft(.31,.30,.12,x,.68,d/2-.22,k%2?C.edge:C.cream,.055);pillow.rotation.z=(k-1)*.08;
+      }
+    }
   } else if (kind === 'sofa') {
     if(luxury){
       soft(w-.12,.16,d-.1,0,.17,0,C.wood);soft(w,.25,d,0,.34,0,C.fabric);soft(w-.06,.49,.17,0,.62,d/2-.09,C.fabric);

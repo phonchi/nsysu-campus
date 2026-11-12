@@ -32,5 +32,13 @@ async def main():
     await page.wait_for_function('document.querySelectorAll(".q-banner").length === 0',timeout=20000)
     await page.screenshot(path=str(OUT/(r['code']+'.png')),timeout=120000)
     row={'code':r['code'],'placed':ok,'position':await page.evaluate('window.campusWalk.position'),'camera':await page.evaluate('window.campusWalk.camera'),'mode':await page.evaluate('window.campusWalk.mode'),'render':await page.evaluate('window.campusWalk.renderStats'),'visible':await page.evaluate('window.campusWalk.drawBreakdown()')};rows.append(row);print(r['code'],ok,flush=True)
+  if os.environ.get('SC_LOUNGE_DETAILS')=='1':
+   floor=next(f for f in S['floors'] if f['id']=='SC-2F');room=next(r for r in floor['rooms'] if r.get('code')=='SC2002-4');xs=[q[0] for q in room['polygon']];zs=[q[1] for q in room['polygon']];scale=P['scale'];depth=(max(zs)-min(zs))*scale;y=3.78
+   for name,offset,target,pitch in [('lounge',(3.15,.8),(3.15,3.3),-.18),('plush',(1.98,1.8),(1.88,depth-1.484),-.55)]:
+    x,z=world([min(xs)+offset[0]/scale,min(zs)+offset[1]/scale]);face=world([min(xs)+target[0]/scale,min(zs)+target[1]/scale]);ok=await page.evaluate('([x,z,y])=>campusWalk.qaPlace(x,z,y)',[x,z,y]);await page.wait_for_timeout(400)
+    yaw=math.atan2(-(face[0]-x),-(face[1]-z))
+    await page.evaluate('([yaw,pitch])=>{const s=campusWalk.camera,d=Math.atan2(Math.sin(yaw-s.yaw),Math.cos(yaw-s.yaw));document.querySelector(".walkthrough canvas").dispatchEvent(new PointerEvent("pointermove",{movementX:-d/.004,movementY:(s.pitch-pitch)/.003,bubbles:true}));}',[yaw,pitch]);await page.wait_for_timeout(1000)
+    await page.wait_for_function('document.querySelectorAll(".q-banner").length===0',timeout=20000);await page.screenshot(path=str(OUT/('SC2002-4-'+name+'.png')),timeout=120000)
+    rows.append({'code':'SC2002-4','view':name,'placed':ok,'position':await page.evaluate('campusWalk.position'),'camera':await page.evaluate('campusWalk.camera'),'mode':await page.evaluate('campusWalk.mode'),'render':await page.evaluate('campusWalk.renderStats')});print('SC2002-4',name,ok,flush=True)
   (OUT/'result.json').write_text(json.dumps({'rooms':rows,'errors':errs,'networkFailures':network},ensure_ascii=False,indent=2));await browser.close()
 asyncio.run(main())

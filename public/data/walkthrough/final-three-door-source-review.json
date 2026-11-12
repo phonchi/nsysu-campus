@@ -1,7 +1,7 @@
 {
   "scope": "only final three source cases",
   "sourceBuildingSHA256": {
-    "SC": "cf5e3601ef630efe51fa1613b07e47979f51e45a7cd526457769d18ad565b7b3",
+    "SC": "ae5690ff7fa159a91661ec246416575019ef531a97da52b7ddb6bd762ec4a4e9",
     "EV": "fc334b9b8a997dfb17adcbf0c70b6437883032686805caaf6c13570d8c698d11"
   },
   "entries": [
@@ -186,6 +186,13 @@
     "v9: SC.json courtyard void, SC2001/SC3001 doors, SC4010 room, display names; reviewed B1 entry unaffected.",
     "v9: SC.json courtyard void, SC2001/SC3001 doors, SC4010 room, display names; reviewed B1 entry unaffected.",
     "v9.1: SC.json 3F/4F/B1 doors from plan door arcs; reviewed B1 entry unaffected.",
-    "v9.1: SC.json 3F/4F/B1 doors from plan door arcs; reviewed B1 entry unaffected."
+    "v9.1: SC.json 3F/4F/B1 doors from plan door arcs; reviewed B1 entry unaffected.",
+    {
+      "date": "2026-11-12T15:36:42.210720+00:00",
+      "building": "SC",
+      "oldSHA256": "cf5e3601ef630efe51fa1613b07e47979f51e45a7cd526457769d18ad565b7b3",
+      "newSHA256": "ae5690ff7fa159a91661ec246416575019ef531a97da52b7ddb6bd762ec4a4e9",
+      "reason": "使用者指定的虛擬辦公室擴充：2002-4 加深，2002-1～3 及門位南移；非官方平面圖或現地尺寸。 Reviewed SC-B1 rooms and neighbour geometry unchanged."
+    }
   ]
 }

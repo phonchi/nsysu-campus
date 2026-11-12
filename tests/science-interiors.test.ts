@@ -26,7 +26,8 @@ it('furnishes named SC rooms deterministically and protects actual door cores',(
  }
  expect(layouts.filter(l=>!l.code).every(l=>l.items.length===0)).toBe(true);
  const office=named.find(l=>l.code==='SC2002-4')!;
- for(const kind of ['sofa','computer','chair','bookcase','coffee-table','tv','wall-panel','rug','plant','wall-art','desk-accessories','shelf-plant'])expect(office.items.filter(i=>i.kind===kind).length,kind).toBe(1);
+ for(const kind of ['sofa-back','computer','chair','bookcase','coffee-table','tv','wall-panel','rug','plant','wall-art','desk-accessories','shelf-plant','plush-cat'])expect(office.items.filter(i=>i.kind===kind).length,kind).toBe(1);
+ expect(office.items.filter(i=>i.kind==='sofa-wing').length).toBe(2);
  expect(named.find(l=>l.code==='SC2004')!.items.filter(i=>i.kind==='computer').length).toBeGreaterThanOrEqual(13);
 });
 it('all four lecture halls have dense supported seats, continuous risers and sufficient headroom',()=>{
@@ -74,10 +75,10 @@ it('walks up and down every tiered centre aisle without jumping or ceiling colli
 },60000);
 it('sofa and bookshelves block walking and camera rays',()=>{
  const l=layouts.find(l=>l.code==='SC2002-4')!,f=world.floors.find(f=>f.data.id===l.floorId)!;
- for(const kind of ['sofa','bookcase']){
+ for(const kind of ['sofa-back','bookcase']){
   const i=l.items.find(i=>i.kind===kind)!;
   const [x0,z0,x1,z1]=itemBounds(i);
-  const from=kind==='sofa'?v(l,i.x,z0-.6,f.y+.65):v(l,x0-.6,i.z,f.y+1.45);
+  const from=kind==='sofa-back'?v(l,i.x,z0-.6,f.y+.65):v(l,x0-.6,i.z,f.y+1.45);
   const to=v(l,i.x,i.z,from.y);
   expect(physics.sweep(from,to,.16),kind).toBeLessThan(from.distanceTo(to)-.2);
  }
@@ -96,7 +97,7 @@ it('renders every item kind and limits new accessories to the fifteen requested 
 it('keeps a continuous 1.1 m clear route through the upgraded lounge into the work area',()=>{
  const l=layouts.find(l=>l.code==='SC2002-4')!,f=world.floors.find(f=>f.data.id===l.floorId)!;
  const x0=Math.min(...l.polygon.map(p=>p[0])),z0=Math.min(...l.polygon.map(p=>p[1]));
- const path:[[number,number],[number,number],...[number,number][]]=[[.51,1.55],[1.6,1.55],[1.8,.78],[4,.78],[4,1.55],[4.55,1.55]];
+ const path:[[number,number],[number,number],...[number,number][]]=[[.51,1.55],[4.55,1.55]];
  for(let j=1;j<path.length;j++){
   const a:[number,number]=[x0+path[j-1][0],z0+path[j-1][1]],b:[number,number]=[x0+path[j][0],z0+path[j][1]];
   for(const item of l.items.filter(i=>i.solid))expect(blocksProtected(item,[{a,b,radius:.55}]),`${item.kind} blocks segment ${j}`).toBe(false);
@@ -115,4 +116,40 @@ it('uses 教室 for unnamed SC rooms while preserving unique destination and doo
  for(const d of destinations){expect(d.label).toBe('教室');expect(d.displayName).toBeUndefined();}
  for(const d of world.doors.filter(d=>d.buildingId==='SC'))expect(d.label).not.toMatch(/未編號|候選|圖面未標|undefined/);
  for(const code of ['SC2001','SC2002-4','SC2004','SC4010','SC4009'])expect(world.destinations.filter(d=>d.label===code).length).toBe(1);
+});
+
+it('leaves the U-sofa hollow walkable and seats the plush on a real cushion',()=>{
+ const l=layouts.find(l=>l.code==='SC2002-4')!,f=world.floors.find(f=>f.data.id===l.floorId)!;
+ const x0=Math.min(...l.polygon.map(p=>p[0])),z0=Math.min(...l.polygon.map(p=>p[1]));
+ const toy=l.items.find(i=>i.kind==='plush-cat')!,wing=l.items.find(i=>i.kind==='sofa-wing'&&i.turn===3)!;
+ expect(toy.solid).toBe(false);expect(toy.y).toBeCloseTo(.555,6);
+ const cushion={x:wing.x+.055,z:wing.z,w:wing.d-.22,d:wing.w-.14-.025};
+ const bounds=itemBounds(toy);
+ expect(bounds[0]).toBeGreaterThan(cushion.x-cushion.w/2);expect(bounds[2]).toBeLessThan(cushion.x+cushion.w/2);
+ expect(bounds[1]).toBeGreaterThan(cushion.z-cushion.d/2);expect(bounds[3]).toBeLessThan(cushion.z+cushion.d/2);
+ const origin=v(l,x0+.51,z0+1.55,f.y);physics.teleport(origin);for(let k=0;k<60;k++)physics.step(new T.Vector3(),1/60,false);
+ for(const x of [2.51,3.79]){
+  for(const [u,z] of [[3.15,2.2],[x,2.4],[x,3.05],[x,2.4],[3.15,2.2]])expect(travel(v(l,x0+u,z0+z,f.y)),`U opening ${u},${z}`).toBe(true);
+ }
+ expect(travel(origin)).toBe(true);
+});
+it('keeps the local extension roof solid and all three translated office doors',()=>{
+ const f=b.floors.find(f=>f.id==='SC-2F')!;
+ expect(f.roofPatches?.length).toBeGreaterThan(0);
+ const patch=f.roofPatches![0],x=patch.reduce((n,p)=>n+p[0],0)/patch.length,z=patch.reduce((n,p)=>n+p[1],0)/patch.length;
+ const floor=world.floors.find(f=>f.data.id==='SC-2F')!,point=new T.Vector3(x,floor.y+3.45,z).applyMatrix4(world.frames.get('SC')!);
+ expect(physics.supportAt(point.x,point.z,point.y)).toBeCloseTo(point.y,1);
+ const newFloor=new T.Vector3(11.3,floor.y,9.9).applyMatrix4(world.frames.get('SC')!);
+ expect(physics.supportAt(newFloor.x,newFloor.z,floor.y)).toBeCloseTo(floor.y,1);
+ const entry=f.access!.portals.find(p=>p.roomIds.includes('SC-2F-SC2002-1'))!.clearancePositions!['SC-2F-SC2002-1'];
+ const inside=new T.Vector3(entry[0],floor.y,entry[1]).applyMatrix4(world.frames.get('SC')!);
+ physics.teleport(inside);for(let k=0;k<60;k++)physics.step(new T.Vector3(),1/60,false);
+ expect(travel(newFloor),'new floor extension').toBe(true);expect(physics.position.y).toBeCloseTo(floor.y,1);
+ expect(travel(inside),'return from extension').toBe(true);
+
+ for(const [code,doorZ] of [['SC2002-3',4.455],['SC2002-2',6.628],['SC2002-1',8.939]] as const){
+  const room=f.rooms.find(r=>r.code===code)!;expect(room.door.position[1]).toBeCloseTo(doorZ,5);
+  expect(world.destinations.some(d=>d.roomId===room.id)).toBe(true);
+ }
+ expect(layouts.find(l=>l.code==='SC2001')!.seats).toBe(76);
 });

@@ -9,7 +9,7 @@ ROOT=Path(__file__).resolve().parents[1]
 OUT=Path(os.environ['SC_QA_OUT']);OUT.mkdir(parents=True,exist_ok=True)
 URL=os.environ.get('CAMPUS_WALK_URL','http://127.0.0.1:4192/')+'?view=walk&quality=C&qa=1'
 D=ROOT/'public/data/walkthrough';S=json.loads((D/'SC.json').read_text());A=json.loads((D/'access-plan.json').read_text());P=json.loads((D/'campus-structure.json').read_text())['placements']['SC']
-CODES=['SC2002-4','SC2002-1','SC3002-1','SC4010','SC-2F-unnumbered-1','SC-4F-region-002']
+CODES=os.environ.get('SC_QA_CODES','SC2002-4,SC2002-1,SC3002-1,SC4010,SC-2F-unnumbered-1,SC-4F-region-002').split(',')
 def world(p):
  x,z=p;c,s=math.cos(P['rotation']),math.sin(P['rotation']);return [P['x']+(x*c+z*s)*P['scale'],P['z']+(-x*s+z*c)*P['scale']]
 async def main():
@@ -72,7 +72,12 @@ async def main():
   destinations=await page.evaluate('campusWalk.destinations')
   assert all(not any(word in d['label'] for word in ['未編號','候選','圖面未標']) for d in destinations if d['buildingId']=='SC')
   for pick in [0,1]:
-   await page.keyboard.press('/');await page.locator('.walk-search input').fill('教室');await page.wait_for_timeout(400)
+   await page.wait_for_function('!campusWalk.story.dialogue && !campusWalk.steering.blocking',timeout=10000)
+   # Input mode follows the animation loop. Wait for it after dialogue/menu transitions.
+   await page.evaluate('()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
+   await page.keyboard.press('/')
+   await page.locator('.walk-search input').wait_for(state='visible',timeout=10000)
+   await page.locator('.walk-search input').fill('教室');await page.wait_for_timeout(400)
    buttons=page.locator('.walk-results button[data-destination]');assert await buttons.count()>1
    button=buttons.nth(pick);target_id=await button.get_attribute('data-destination');label=await button.locator('strong').inner_text()
    expected=next(d for d in destinations if d['id']==target_id)

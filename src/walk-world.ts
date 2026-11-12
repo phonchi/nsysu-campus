@@ -228,6 +228,12 @@ export function buildWalkWorld(data:WalkBuilding[],structure:CampusStructure,ter
     if(size.x>3&&size.y>3)box(rg,Math.min(3,size.x-1),1.15,.06,(bounds.min.x+bounds.max.x)/2,y+1.6,bounds.min.y+.15,'#355b52');
     }
    }
+   // Local office extension has its own closed roof below the next storey's floor.
+   for(const patch of f.roofPatches??[]){
+    const geometry=new T.ExtrudeGeometry(shapeOf(patch),{depth:.25,bevelEnabled:false});geometry.rotateX(-Math.PI/2);
+    const cap=new T.Mesh(geometry,mat('#a27e68'));cap.position.y=y+3.2;cap.castShadow=true;cap.receiveShadow=true;fg.add(cap);fc.add(cap.clone());
+    plane(fg,patch,[],y+3.198,'#e6e1d4');
+   }
    const highest=f===floors.at(-1);if(highest){const roof=plane(fg,f.outline,holes,y+3.55,'#a27e68');roof.material.side=T.DoubleSide;}
   }
  }

@@ -4,7 +4,7 @@ import * as T from 'three';
 import { furnishScienceItem } from './science-interior-models';
 import type { WalkFloor, WalkRoom, Point2 } from '../walk-types';
 
-export type InteriorKind = 'sofa' | 'desk' | 'chair' | 'bookcase' | 'cabinet' | 'computer' | 'lecture-seat' | 'platform' | 'board' | 'screen' | 'counter' | 'table' | 'plant' | 'rug' | 'light' | 'tv' | 'coffee-table' | 'wall-panel' | 'wall-art' | 'desk-accessories' | 'shelf-plant';
+export type InteriorKind = 'sofa' | 'desk' | 'chair' | 'bookcase' | 'cabinet' | 'computer' | 'lecture-seat' | 'platform' | 'board' | 'screen' | 'counter' | 'table' | 'plant' | 'rug' | 'light' | 'tv' | 'coffee-table' | 'wall-panel' | 'wall-art' | 'desk-accessories' | 'shelf-plant' | 'sofa-back' | 'sofa-wing' | 'plush-cat';
 export interface InteriorItem {
   id: string; kind: InteriorKind; x: number; z: number; y: number;
   w: number; d: number; h: number; turn: number; solid: boolean;
@@ -53,7 +53,8 @@ export function blocksProtected(item: InteriorItem, paths: InteriorLayout['prote
 }
 function overlaps(a: InteriorItem, b: InteriorItem) {
   if (a.y >= b.y + b.h - .015 || b.y >= a.y + a.h - .015) return false;
-  const u = itemBounds(a, a.kind === 'platform' || b.kind === 'platform' ? 0 : .025), v = itemBounds(b);
+  const joint=[a.kind,b.kind].every(k=>k==='sofa-back'||k==='sofa-wing');
+  const u = itemBounds(a, a.kind === 'platform' || b.kind === 'platform' || joint ? 0 : .025), v = itemBounds(b);
   return u[0] < v[2] && u[2] > v[0] && u[1] < v[3] && u[3] > v[1];
 }
 export function planScienceInterior(room: WalkRoom, floor: WalkFloor, scale: number): InteriorLayout {
@@ -109,18 +110,21 @@ export function planScienceInterior(room: WalkRoom, floor: WalkFloor, scale: num
     }
   } else if (code === 'SC2002-4') {
     layout.use = 'office-lounge';
-    // West door remains clear. A 1.1 m route passes north of the lounge,
-    // then bends between the coffee table and desk into the work area.
-    add('sofa', x0 + 2.95, z1 - .59, 1.75, .84, .88);
-    desk(x1 - 1.22, z0 + .62, true, 0, 1.65);
-    chair(x1 - 1.22, z0 + 1.55);
-    shelf(x1 - .32, z1 - .86, 3, 1.2);
-    add('coffee-table', x0 + 2.95, z0 + 1.55, .9, .4, .46);
-    add('tv', x0 + 2.95, z0 + .18, 1.26, .06, .73, 0, 1.22);
-    add('wall-panel', x0 + 2.95, z0 + .15, 2.18, .035, 2.5, 0, .35, false);
-    add('rug', x0 + 2.95, z1 - 1.12, 2.5, 1.85, .015, 0, .012, false);
-    add('plant', x0 + 1.65, z1 - .42, .42, .42, 1.25);
-    add('wall-art', x1 - .18, z0 + .79, 1.05, .06, .72, 3, 1.62, false);
+    // The U is three solid sections; its centre and both sides of the table remain open.
+    const centre=x0+3.15,backZ=z1-.55,wingZ=z1-1.414;
+    add('sofa-back',centre,backZ,3.4,.82,.88);
+    add('sofa-wing',x0+1.825,wingZ,.90,.75,.88,3);
+    add('sofa-wing',x0+4.475,wingZ,.90,.75,.88,1);
+    desk(x1-1.22,z0+.62,true,0,1.65);chair(x1-1.22,z0+1.55);
+    shelf(x1-.32,z1-.86,3,1.2);
+    add('coffee-table',centre,z1-1.35,.66,.40,.46);
+    add('tv',centre,z0+.18,1.26,.06,.73,0,1.22);
+    add('wall-panel',centre,z0+.15,2.18,.035,2.5,0,.35,false);
+    add('rug',centre,z1-1.10,3.7,1.85,.015,0,.012,false);
+    add('plant',x0+1.35,z0+.40,.42,.42,1.25);
+    add('wall-art',x1-.18,z0+.79,1.05,.06,.72,3,1.62,false);
+    // .555 is the rendered cushion TOP, not the sofa collider's overall height.
+    add('plush-cat',x0+1.88,wingZ-.07,.42,.56,.38,2,.555,false);
   } else if (code === 'SC2004') {
     layout.use = 'computer-classroom';
     add('board', (x0 + x1) / 2, z0 + .3, 4.3, .1, 1.2, 0, 1.1, false);

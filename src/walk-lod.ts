@@ -163,6 +163,13 @@ export class CampusLod {
   const {brick,roof,arcade}=this.shellMaterials();
   const body=new T.Mesh(geometry,[floor.data.level===1?arcade:brick,roof]);
   body.name='依源outline簡化量體 · 紅磚立面示意';body.castShadow=true;body.receiveShadow=true;group.add(body);
+  // Retain the extension roof in distant/shell views as well as interior detail.
+  for(const patch of floor.data.roofPatches??[]){
+   const shape=new T.Shape(patch.map(([x,z])=>new T.Vector2(x,-z)));
+   const capGeometry=new T.ExtrudeGeometry(shape,{depth:.25,bevelEnabled:false});capGeometry.rotateX(-Math.PI/2);capGeometry.translate(0,3.2,0);
+   boxUV(capGeometry,frame.clone().multiply(new T.Matrix4().makeTranslation(0,floor.y,0)),4,4);
+   this.geometries.add(capGeometry);const cap=new T.Mesh(capGeometry,roof);cap.name='Office extension roof';cap.castShadow=true;cap.receiveShadow=true;group.add(cap);
+  }
   const fac=FACULTY[BUILDING_FACULTY[floor.buildingId]??'science'];
   const bands:T.Matrix4[]=[];const piece=new T.Object3D();
   const matrix=(x:number,y:number,z:number,w:number,h:number,d:number,rotation:number)=>{piece.position.set(x,y,z);piece.rotation.set(0,rotation,0);piece.scale.set(w,h,d);piece.updateMatrix();return piece.matrix.clone();};

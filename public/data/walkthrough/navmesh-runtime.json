@@ -1,10 +1,10 @@
 {
   "status": "ready",
   "scope": "campus-science-engineering-v2",
-  "createdAt": "2026-11-12T14:29:32.786Z",
+  "createdAt": "2026-11-12T15:48:18.765Z",
   "validationPassed": true,
-  "binaryBytes": 28000204,
-  "binarySha256": "2e72dc0205336bc63a9375db0575fcaced39bbe17e8eab7d6dc3fad691a68e8c",
+  "binaryBytes": 28004468,
+  "binarySha256": "7dfc5e7b3f4db554e7b7dde387f2a9e4b09d41904176d77e11a106b63e6603b7",
   "surfaceVersion": "terrain-triangles-v2:c0aecf0d:990a6e0d",
   "coverage": {
     "total": 932,
