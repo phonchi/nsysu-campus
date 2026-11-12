@@ -16,7 +16,7 @@ const prototype=process.argv.includes('--prototype');
 const ids:readonly string[]=prototype?['SC']:WALK_BUILDING_IDS;
 const scope=prototype?'prototype-SC-1F-2F':'campus-science-engineering-v2';
 const inputs=[...ids.map(id=>`public/data/walkthrough/${id}.json`),...(prototype?[]:['public/data/walkthrough/index.json']),
- 'public/data/walkthrough/access-plan.json','public/data/walkthrough/campus-structure.json','src/walk-world.ts','src/walk-types.ts','src/walk-nav.ts','tools/bake_walk_nav.ts',
+ 'public/data/walkthrough/access-plan.json','public/data/walkthrough/campus-structure.json','src/walk-world.ts','src/world/science-interiors.ts','src/walk-types.ts','src/walk-nav.ts','tools/bake_walk_nav.ts',
  'public/data/terrain/terrain.json','public/data/terrain/terrain.bin','src/world/terrain.ts','src/world/road-surface.ts','public/data/story-zones.json',...RUNTIME_WORLD_INPUTS];
 const sha=(b:Uint8Array|string)=>createHash('sha256').update(b).digest('hex');
 const hashes:Record<string,string>={};

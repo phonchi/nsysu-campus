@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+import { effectiveRooms } from '../src/walk-world';
+import { planScienceInterior } from '../src/world/science-interiors';
+import type { WalkBuilding,CampusStructure } from '../src/walk-types';
+const b=JSON.parse(fs.readFileSync('public/data/walkthrough/SC.json','utf8')) as WalkBuilding;
+const s=JSON.parse(fs.readFileSync('public/data/walkthrough/campus-structure.json','utf8')) as CampusStructure;
+const a=JSON.parse(fs.readFileSync('public/data/walkthrough/access-plan.json','utf8'));
+const layouts=b.floors.flatMap(f=>{f.access=a.floors[f.id];return effectiveRooms(f,s).map(r=>planScienceInterior(r,f,s.placements.SC.scale));});
+const out=process.argv[2];if(!out)throw new Error('Specify output path');fs.writeFileSync(out,JSON.stringify(layouts,null,2)+'\n');
+console.log(JSON.stringify(layouts.filter(l=>l.code).map(l=>({room:l.code,use:l.use,seats:l.seats,rows:l.rows,top:l.highestPlatform,items:l.items.length,skipped:l.skipped})),null,2));

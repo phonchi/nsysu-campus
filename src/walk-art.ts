@@ -10,6 +10,7 @@ import { buildTrees, familyFor, assignTreeYaw, filterTreeSpots, type TreeBore, t
 import { groundMask, lawnMaterial, setLawnMask } from './render/ground';
 import { seaMaterial } from './render/sea';
 import type { Obstacle, SupportAt } from './walk/obstacles';
+import type { InteriorLayout } from './world/science-interiors';
 import { PALETTE, FACULTY, BUILDING_FACULTY, surfaceOf, facadeTextures, patternTexture, boxUV, nightGlow, splitRoof, NIGHT_MATERIALS, NIGHT_FADE, FACADE_TILE } from './walk-materials';
 
 const solid=(color:string,roughness=.82,extra:T.MeshStandardMaterialParameters={})=>new T.MeshStandardMaterial({color,roughness,...extra});
@@ -89,7 +90,10 @@ export function decorateCampus(world:WalkWorld,structure:CampusStructure,terrain
    case 'rail':m=material('rail',()=>{const t=brick.map.clone();t.needsUpdate=true;return textured(t,'#ffffff',.88);});uv=[FACADE_TILE.w,FACADE_TILE.h];break;
    case 'stair':m=material('stair',()=>solid('#e4dccb',.82));break;
    case 'roof':m=material('roof',()=>textured(tex.roof,'#ffffff',.9));uv=[4,4];break;
-   case 'cutawayCeiling':m=material('ceiling',()=>solid(PALETTE.ceiling,.95));break;
+   case 'cutawayCeiling': {
+    let science=false;for(let p:T.Object3D|null=object.parent;p;p=p.parent)if(p.name==='SC')science=true;
+    m=material(science?'ceiling-sc':'ceiling',()=>{const c=solid(PALETTE.ceiling,.95);if(science)c.side=T.DoubleSide;return c;});break;
+   }
    case 'ground':m=material('ground',()=>lawnMaterial(undefined,tex.grass) as unknown as T.MeshStandardMaterial);object.castShadow=false;break;
    case 'paving':m=material('paving',()=>textured(tex.paving,'#ffffff',.9));uv=[3,3];object.castShadow=false;break;
    case 'sea':case 'road':object.visible=false;return;
@@ -99,6 +103,18 @@ export function decorateCampus(world:WalkWorld,structure:CampusStructure,terrain
   m.userData.surface=s;object.material=m;
   if(uv){object.updateWorldMatrix(true,false);boxUV(object.geometry,inB?object.matrixWorld:undefined,uv[0],uv[1],s==='rail'?.08:0);}
  });
+ // The office task light fits inside the desk's existing solid envelope; display only.
+ for(const floor of world.floors){
+  if(floor.buildingId!=='SC')continue;
+  const layouts=(floor.group.userData.interiors??[]) as InteriorLayout[];
+  const desk=layouts.find(l=>l.code==='SC2002-4')?.items.find(i=>i.kind==='computer');
+  if(!desk)continue;
+  const scale=world.scales.get('SC')??1,group=new T.Group();group.name='SC office desk light';
+  group.position.set(desk.x/scale,floor.y+.80,desk.z/scale);group.scale.set(1/scale,1,1/scale);floor.group.add(group);
+  const geometry=new T.BoxGeometry(1,1,1);
+  instances(group,geometry,solid('#394e50'),[piece(.57,.012,.08,.16,.024,.15),piece(.57,.14,.08,.025,.25,.025),piece(.52,.28,.08,.19,.09,.16)],'Desk lamp frame');
+  instances(group,geometry,solid('#fff0c9',.8,{emissive:'#fff0c9',emissiveIntensity:.7}),[piece(.52,.234,.08,.16,.014,.13)],'Desk lamp light',false);
+ }
  // The walk-world road ribbon group is replaced below by UV-mapped roads.
  world.display.traverse(o=>{if(o.name==='Campus roads (OSM)')o.visible=false;});
  // 2. OSM landmarks/background: brick or cream facades with night windows.

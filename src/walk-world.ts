@@ -3,6 +3,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import type { WalkBuilding,WalkFloor,WalkRoom,Point2,WalkDestination,CampusStructure,StairCore,LiftSpec } from './walk-types';
 import { GROUND_Y, PLAY_BOUNDS, type Terrain } from './world/terrain';
 import { projectRoadGeometry } from './world/road-surface';
+import { planScienceInterior, addScienceInterior } from './world/science-interiors';
 export const FLOOR_HEIGHT=3.7;
 export const floorY=(level:number)=>(level<0?level:level-1)*FLOOR_HEIGHT+.08;
 export interface WorldDoor {id:string;position:T.Vector3;outside:T.Vector3;inside:T.Vector3;group:T.Group;panel:T.Object3D;closedBox:T.Box3;normal?:T.Vector3;open:number;target:number;label:string;buildingId:string;floorId:string;}
@@ -211,9 +212,15 @@ export function buildWalkWorld(data:WalkBuilding[],structure:CampusStructure,ter
      if(o.id===primary){primaryDoor={...door,outside:outsidePoint,inside:insidePoint};}
     }
     if(primaryDoor)out.destinations.push({id:room.id,label:room.code??`${b.id} ${f.label} · 未編號空間 ${f.rooms.indexOf(room)+1}`,displayName:room.displayName,buildingId:b.id,floorId:f.id,roomId:room.id,doorId:primaryDoor.id,position:primaryDoor.outside.toArray(),level:f.level});
+    if(b.id==='SC'){
+     const layout=planScienceInterior(room,f,scale);
+     (fg.userData.interiors??=[]).push(layout);
+     addScienceInterior(layout,rg,fc,y,scale);
+    }else{
     const cols=Math.min(3,Math.max(1,Math.floor((size.x-2)/2))),rows=Math.min(3,Math.max(1,Math.floor((size.y-2)/2)));
     for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){const x=bounds.min.x+1.2+c*2.1,z=bounds.min.y+1.5+r*2;let inside=false;for(let i=0,j=p.length-1;i<p.length;j=i++){if((p[i][1]>z)!==(p[j][1]>z)&&x<(p[j][0]-p[i][0])*(z-p[i][1])/(p[j][1]-p[i][1])+p[i][0])inside=!inside;}if(!inside||openings.some(o=>Math.hypot(x-o.p[0],z-o.p[1])<2.0)||x>bounds.max.x-.7||z>bounds.max.y-.7)continue;box(rg,1.25,.09,.65,x,y+.77,z,'#ac9675');for(const sign of [-1,1])box(rg,.07,.7,.07,x+sign*.48,y+.35,z,'#69756c');box(rg,.45,.08,.45,x,y+.45,z+.75,'#6e877a');box(rg,.45,.5,.06,x,y+.68,z+.96,'#6e877a');}
     if(size.x>3&&size.y>3)box(rg,Math.min(3,size.x-1),1.15,.06,(bounds.min.x+bounds.max.x)/2,y+1.6,bounds.min.y+.15,'#355b52');
+    }
    }
    const highest=f===floors.at(-1);if(highest){const roof=plane(fg,f.outline,holes,y+3.55,'#a27e68');roof.material.side=T.DoubleSide;}
   }
