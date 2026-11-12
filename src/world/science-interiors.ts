@@ -1,9 +1,10 @@
 /** Deterministic SC room layouts. Horizontal coordinates/dimensions are metres in the
  * building's axes; rendering and collision consume the same authored placements. */
 import * as T from 'three';
+import { furnishScienceItem } from './science-interior-models';
 import type { WalkFloor, WalkRoom, Point2 } from '../walk-types';
 
-export type InteriorKind = 'sofa' | 'desk' | 'chair' | 'bookcase' | 'cabinet' | 'computer' | 'lecture-seat' | 'platform' | 'board' | 'screen' | 'counter' | 'table' | 'plant' | 'rug' | 'light';
+export type InteriorKind = 'sofa' | 'desk' | 'chair' | 'bookcase' | 'cabinet' | 'computer' | 'lecture-seat' | 'platform' | 'board' | 'screen' | 'counter' | 'table' | 'plant' | 'rug' | 'light' | 'tv' | 'coffee-table' | 'wall-panel' | 'wall-art' | 'desk-accessories' | 'shelf-plant';
 export interface InteriorItem {
   id: string; kind: InteriorKind; x: number; z: number; y: number;
   w: number; d: number; h: number; turn: number; solid: boolean;
@@ -14,14 +15,9 @@ export interface InteriorLayout {
   seats: number; rows: number; highestPlatform: number; skipped?: string;
 }
 const LECTURES = new Set(['SC1005', 'SC1001', 'SC2001', 'SC3001']);
-const C = { wood: '#bd9467', edge: '#e3c59e', dark: '#35484c', teal: '#337d80', fabric: '#688e84', cream: '#f4eee1', white: '#ebeee7', paper: '#d9dfce', board: '#294e49', brass: '#c6a15e', blue: '#83bdc7', clay: '#bc7963' };
-const materials = new Map<string, T.MeshStandardMaterial>();
 const unit = new T.BoxGeometry(1, 1, 1);
-function material(color: string, glow = false) {
-  const key = color + glow;
-  if (!materials.has(key)) materials.set(key, new T.MeshStandardMaterial({ color, roughness: .8, emissive: color, emissiveIntensity: glow ? .65 : .08 }));
-  return materials.get(key)!;
-}
+const solidMaterial = new T.MeshBasicMaterial({color:'#35484c'});
+export const isDecoratedOffice = (code: string) => /^SC[23]002-[1-7]$/.test(code) || code === 'SC4010';
 export function inRoom(p: Point2, polygon: Point2[]) {
   let inside = false;
   for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
@@ -113,13 +109,18 @@ export function planScienceInterior(room: WalkRoom, floor: WalkFloor, scale: num
     }
   } else if (code === 'SC2002-4') {
     layout.use = 'office-lounge';
-    // Door at west; the 3.1 m room width leaves a continuous middle passage.
-    add('sofa', x0 + 3.0, z1 - .59, 1.75, .84, .88);
+    // West door remains clear. A 1.1 m route passes north of the lounge,
+    // then bends between the coffee table and desk into the work area.
+    add('sofa', x0 + 2.95, z1 - .59, 1.75, .84, .88);
     desk(x1 - 1.22, z0 + .62, true, 0, 1.65);
     chair(x1 - 1.22, z0 + 1.55);
-    shelf(x0 + 2.35, z0 + .37, 0, 1.65);
-    add('rug', x0 + 2.6, (z0 + z1) / 2 + .05, 2.7, 1.4, .015, 0, .012, false);
-    add('plant', x1 - .45, z1 - .45, .44, .44, 1.25);
+    shelf(x1 - .32, z1 - .86, 3, 1.2);
+    add('coffee-table', x0 + 2.95, z0 + 1.55, .9, .4, .46);
+    add('tv', x0 + 2.95, z0 + .18, 1.26, .06, .73, 0, 1.22);
+    add('wall-panel', x0 + 2.95, z0 + .15, 2.18, .035, 2.5, 0, .35, false);
+    add('rug', x0 + 2.95, z1 - 1.12, 2.5, 1.85, .015, 0, .012, false);
+    add('plant', x0 + 1.65, z1 - .42, .42, .42, 1.25);
+    add('wall-art', x1 - .18, z0 + .79, 1.05, .06, .72, 3, 1.62, false);
   } else if (code === 'SC2004') {
     layout.use = 'computer-classroom';
     add('board', (x0 + x1) / 2, z0 + .3, 4.3, .1, 1.2, 0, 1.1, false);
@@ -164,62 +165,36 @@ export function planScienceInterior(room: WalkRoom, floor: WalkFloor, scale: num
     // Irregular outlines: find at least one valid desk rather than furnishing the bounding box blindly.
     if (!layout.items.some(i => i.kind === 'desk')) outer: for (let z = z0 + .8; z < z1 - .8; z += .6) for (let x = x0 + 1; x < x1 - 1; x += .6) if (desk(x, z)) { chair(x, z + .85);break outer; }
   }
+  // Office decoration stays on furniture or walls; it creates no floor obstacles.
+  if (isDecoratedOffice(code)) {
+    for (const furniture of [...layout.items]) {
+      if (['desk','computer','counter'].includes(furniture.kind)) {
+        const turn=furniture.turn*Math.PI/2,dx=furniture.w/2-.2;
+        add('desk-accessories', furniture.x+dx*Math.cos(turn), furniture.z-dx*Math.sin(turn), .32, .54, .4, furniture.turn, furniture.kind==='counter'?1.05:.8, false);
+      }
+      if (furniture.kind==='bookcase'||furniture.kind==='cabinet') {
+        const turn=furniture.turn*Math.PI/2,dx=furniture.w/2-.22;
+        add('shelf-plant', furniture.x+dx*Math.cos(turn), furniture.z-dx*Math.sin(turn), .27, .27, .32, 0, furniture.h, false);
+      }
+    }
+    if (code !== 'SC2002-4') {
+      const w=Math.min(1.2,W-1.2);
+      if (!add('wall-art',(x0+x1)/2,z0+.18,w,.06,.72,0,1.6,false)) add('wall-art',(x0+x1)/2,z1-.18,w,.06,.72,2,1.6,false);
+    }
+  }
   // Recessed-looking luminaires are emissive geometry, not hundreds of extra lights.
   for (let z = z0 + 1.5; z < z1 - .8; z += 3.2) for (let x = x0 + 1.5; x < x1 - .8; x += 3.5) add('light', x, z, 1.05, .27, .02, 0, 3.17, false);
   if (!layout.items.some(i => i.solid)) layout.skipped = '房間有效輪廓或入口淨空不足，未強塞家具';
   return layout;
 }
 
-/** Furniture remains within its declared footprint. Desk accessories are visual only;
- * the closed solid envelope prevents walking through the table/chair from any side. */
-function furnish(item: InteriorItem, parent: T.Group) {
-  const g = new T.Group();g.position.set(item.x, item.y, item.z);g.rotation.y = item.turn * Math.PI / 2;parent.add(g);
-  const box = (w: number, h: number, d: number, x: number, y: number, z: number, color: string, glow = false) => { const m = new T.Mesh(unit, material(color, glow));m.scale.set(w,h,d);m.position.set(x,y,z);m.castShadow = !glow;m.receiveShadow = true;g.add(m);return m; };
-  const { w, d, h, kind } = item;
-  const legs = (height: number) => { for (const x of [-1,1]) for (const z of [-1,1]) box(.045,height,.045,x*(w/2-.09),height/2,z*(d/2-.09),C.dark); };
-  if (kind === 'desk' || kind === 'table' || kind === 'computer' || kind === 'counter') {
-    const top = kind === 'counter' ? 1 : .74;legs(top);box(w,.07,d,0,top,0,C.wood);box(w,.025,.025,0,top+.035,d/2-.013,C.edge);
-    if (kind === 'counter') box(w-.1,.8,.08,0,.53,d/2-.08,C.teal);
-    if (kind === 'computer') {
-      box(.2,.025,.16,0,top+.05,-.11,C.dark);box(.04,.16,.04,0,top+.14,-.16,C.dark);
-      box(.57,.37,.055,0,top+.32,-.19,C.dark);box(.52,.31,.008,0,top+.32,-.158,C.blue,true);
-      box(.36,.025,.13,-.03,top+.06,.16,C.dark);box(.07,.025,.1,.27,top+.06,.16,C.cream);
-      for(let i=0;i<3;i++) box(.22-i*.04,.018,.006,-.1,top+.37-i*.065,-.15,C.cream,true);
-    } else if(kind === 'desk') { box(.25,.04,.18,w*.24,top+.06,0,C.teal);box(.2,.025,.18,w*.24,top+.09,0,C.paper); }
-  } else if (kind === 'chair') {
-    legs(.43);box(w,.08,d*.8,0,.46,0,C.fabric);box(w,.4,.065,0,.69,d/2-.04,C.fabric);
-  } else if (kind === 'lecture-seat') {
-    box(.08,.42,.24,0,.21,.12,C.dark);box(.47,.09,.41,0,.46,.12,C.teal);box(.48,.46,.075,0,.71,.36,C.teal);
-    box(.52,.05,.23,0,.73,-.31,C.wood);box(.035,.7,.035,w/2-.04,.35,-.31,C.dark);
-  } else if (kind === 'sofa') {
-    box(w-.14,.17,d-.12,0,.18,0,C.dark);box(w,.25,d,0,.35,0,C.fabric);box(w,.47,.15,0,.64,d/2-.075,C.fabric);
-    for (const x of [-1,1]) box(.15,.42,d,x*(w/2-.075),.53,0,C.fabric);
-    for (const x of [-1,1]) { box(w/2-.19,.12,d-.22,x*w/4,.53,-.04,C.teal);box(.3,.29,.12,x*w*.28,.73,d/2-.2,C.edge); }
-  } else if (kind === 'bookcase' || kind === 'cabinet') {
-    box(w,h,.045,0,h/2,-d/2+.023,C.wood);
-    for (const sign of [-1,1]) box(.06,h,d,sign*(w/2-.03),h/2,0,C.wood);
-    for (let row=0;row<5;row++) box(w,.045,d,0,.08+row*(h-.12)/4,0,C.edge);
-    if(kind==='bookcase') for(let row=0;row<4;row++) for(let i=0;i<Math.floor((w-.16)/.115);i++) {
-      const colors=[C.teal,C.clay,C.cream,C.blue,C.brass],bh=.2+((i*7+row*3)%5)*.025;
-      box(.075,bh,d*.63,-w/2+.13+i*.115,.11+row*(h-.12)/4+bh/2,0,colors[(i+row)%colors.length]);
-    } else for(const sign of [-1,1]) { box(w/2-.08,h-.14,.035,sign*w/4,h/2,d/2-.018,C.cream);box(.025,.12,.035,sign*.06,h*.54,d/2+.002,C.dark); }
-  } else if(kind==='board'||kind==='screen') {
-    box(w,h,d,0,h/2,0,kind==='board'?C.wood:C.dark);box(w-.08,h-.08,.012,0,h/2,d/2+.002,kind==='board'?C.board:C.cream);
-    if(kind==='board') for(let i=0;i<4;i++) box(w*(.25+.08*(i%2)),.012,.008,-w*.15,h*.7-i*.16,d/2+.011,C.paper);
-  } else if(kind==='platform') {
-    box(w,h,d,0,h/2,0,'#b3a895');box(w,.018,.035,0,h+.002,-d/2+.018,C.brass);
-  } else if(kind==='plant') {
-    box(w*.65,.36,d*.65,0,.18,0,C.clay);box(.045,h*.65,.045,0,h*.5,0,C.wood);
-    for(let i=0;i<3;i++) box(w*(.9-i*.15),.2,d*(.9-i*.15),0,h*.6+i*.14,0,['#6b9562','#82ac72','#92b77d'][i]);
-  } else if(kind==='rug') box(w,h,d,0,h/2,0,'#c5c3aa');
-  else if(kind==='light') {box(w+.06,h,d+.06,0,h/2,0,C.dark);box(w,.015,d,0,-.004,0,C.cream,true);}
-}
 export function addScienceInterior(layout: InteriorLayout, display: T.Group, collision: T.Group, floorY: number, scale: number) {
   const visual = new T.Group(), solid = new T.Group();visual.name = `Interior ${layout.code}`;solid.name = visual.name;
   for (const g of [visual,solid]) {g.position.y=floorY;g.scale.set(1/scale,1,1/scale);}
   display.add(visual);collision.add(solid);
   for(const item of layout.items) {
-    furnish(item,visual);
-    if(item.solid) {const mesh=new T.Mesh(unit,material(C.dark));mesh.position.set(item.x,item.y+item.h/2,item.z);mesh.scale.set(item.w,item.h,item.d);mesh.rotation.y=item.turn*Math.PI/2;solid.add(mesh);}
+    const variant=[...layout.code].reduce((n,c)=>(n*31+c.charCodeAt(0))>>>0,0)%3;
+    furnishScienceItem(item,visual,isDecoratedOffice(layout.code),layout.code==='SC2002-4',variant);
+    if(item.solid) {const mesh=new T.Mesh(unit,solidMaterial);mesh.position.set(item.x,item.y+item.h/2,item.z);mesh.scale.set(item.w,item.h,item.d);mesh.rotation.y=item.turn*Math.PI/2;solid.add(mesh);}
   }
 }
