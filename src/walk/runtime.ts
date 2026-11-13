@@ -55,7 +55,7 @@ import { Quiz, Chase, judgeSunset, type Question } from '../games/minigames';
 import { TalkDirector, type NpcData, type CollectionData } from '../story/talk';
 import { PALETTES, modelFor, recolor } from './player-look';
 import { planRoute as plan, followRoute, validateRoutes as validatePaths, sightLine } from './autopilot';
-import { NpcManager, disposeObject, NPC_CAP, type StoryZones, type Preset } from '../world/npc';
+import { NpcManager, disposeObject, NPC_CAP, type CharacterWarmupSamples, type StoryZones, type Preset } from '../world/npc';
 import { StoryDirector, type GuideOverride } from '../story/director';
 import { trackedTarget } from '../story/guide-goal';
 import { nextFocus, storyPriority, destinationDistance, findDestination, floorLabel, walkResumes } from '../story/focus';
@@ -273,6 +273,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   const startupJobs:Promise<unknown>[]=[];
   let shaderWarmupMs=0;
   let shaderWarmupStages:ShaderWarmupTiming|undefined,shaderWarmupPostMs=0;
+  let characterWarmup:CharacterWarmupSamples|undefined,characterWarmupPrepareMs=0;
   const buildingHulls: T.Mesh[] = [];
   const obstacleField = new ObstacleField(); let propsReady = false, legacyPropsReady = false, bikeStandReady = false;
   const featureStatus: Record<string,string> = { props:'loading', legacyProps:'loading', quests:'loading', encounters:'loading', landmarks:'loading', bike:'loading',warmup:'loading' };
@@ -908,7 +909,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     input.dispose(); window.removeEventListener('keydown',captureRhythmKey,{capture:true});document.removeEventListener('visibilitychange', soundVisibility); window.removeEventListener('campus-storage-error',storageFailed); window.removeEventListener('resize', resize); orbit.dispose(); navigation?.dispose();
     eventQueue.clear(); npcs?.releaseAllBorrowed(); eventInvite.remove();
     encounterScene.dispose();
-    notebook?.dispose(); director?.dispose(); npcs?.dispose(); photo.dispose(); spotField?.dispose();
+    notebook?.dispose(); director?.dispose(); characterWarmup?.dispose();npcs?.dispose(); photo.dispose(); spotField?.dispose();
     lod.dispose(); physics.dispose(); avatar.dispose(); post.dispose(); sound.dispose(); renderer.dispose();
     for (const sign of signs.values()) disposeTree(sign); signs.clear();
     Reflect.deleteProperty(window, 'campusWalk'); sky.dispose();
@@ -1387,6 +1388,11 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       zoneLabels = Object.fromEntries(Object.entries(zones.zones).map(([id,z]) => [id,z.label]));
       validateRoutes();
       npcs = new NpcManager(zones, routes, terrainRef, asset, npcData); scene.add(npcs.group);
+      const characterWarmupAt=performance.now();
+      startupJobs.push(npcs.prepareWarmupSamples().then(samples=>{
+        characterWarmupPrepareMs=performance.now()-characterWarmupAt;
+        if(!alive){samples.dispose();return;}characterWarmup=samples;
+      }));
       startupJobs.push((async()=>{try {
       // Rendering and simplified collisions register together, independently of story feature loads.
       const occ = world.display.userData.occupancy as { at(x: number, z: number): number } | undefined;
@@ -1808,7 +1814,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     get chapterCard() { return !!host.querySelector('.q-chapter'); },
     get navReady() { return !sceneLoading && !!navigation && routesValidated; },
     get worldReady() { return !sceneLoading && routesValidated; },
-    get shaderWarmup() { return {status:featureStatus.warmup,ms:shaderWarmupMs,loading:sceneLoading,...shaderWarmupStages,postMs:shaderWarmupPostMs}; },
+    get shaderWarmup() { return {status:featureStatus.warmup,ms:shaderWarmupMs,loading:sceneLoading,...shaderWarmupStages,postMs:shaderWarmupPostMs,
+      characterPrepareMs:characterWarmupPrepareMs,characterModels:characterWarmup?.modelIds??[],characterVariants:characterWarmup?.variants.length??0,characterMissing:characterWarmup?.failedModels??[],characterSamplesAttached:!!characterWarmup?.group.parent}; },
     get featureStatus() { return {...featureStatus}; },
     get landmarkUi() { return QA ? campusUi?.landmarkDiagnostics : undefined; },
     get tunnelProfile() { if (!QA || !uiPlacements?.tunnel || !terrainRef) return undefined; const p=fullTunnelProfile(uiPlacements.tunnel,(x,z)=>terrainRef!.heightAt(x,z)); return {length:p.length,sections:p.sections.map(s=>({position:s.position.toArray(),tangent:s.tangent.toArray(),right:s.right.toArray(),distance:s.distance}))}; },
@@ -1837,16 +1844,19 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   try {
     lod.update(physics.position,{overview,buildingId:inspectedBuilding,floorId:floorSelect.value});
     scene.add(warmupSamples());
+    if(characterWarmup)scene.add(characterWarmup.group);
     shaderWarmupStages=await warmupWalkScene(renderer,scene,camera,TIERS[tier].post);
+    characterWarmup?.removeFromScene();
     if(!alive)return;
     if(TIERS[tier].post){
       // Warm the small post-processing shader set as well, behind the loading cover.
       post.setSize(1,1);const postAt=performance.now();
       try {post.render(scene,camera);} finally {shaderWarmupPostMs=performance.now()-postAt;post.setSize(innerWidth*renderer.getPixelRatio(),innerHeight*renderer.getPixelRatio());}
     }
-    featureStatus.warmup='ready';
+    featureStatus.warmup=characterWarmup?.failedModels.length?'degraded':'ready';
+    if(characterWarmup?.failedModels.length)console.warn('character shader warmup: unavailable models',characterWarmup.failedModels);
   } catch(error) {featureStatus.warmup='degraded';console.warn('shader warmup',error);}
-  finally {shaderWarmupMs=performance.now()-warmupAt;}
+  finally {characterWarmup?.removeFromScene();shaderWarmupMs=performance.now()-warmupAt;}
   if(!alive)return;
   sceneLoading=false;stopLoadingTips();get('.walk-loading').hidden=true;input.release();input.mode='walk';
   lastTime=performance.now();

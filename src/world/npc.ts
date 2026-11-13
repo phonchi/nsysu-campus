@@ -7,7 +7,7 @@ import { addOutlines } from '../render/outline';
 import type { OutdoorRoutes } from '../walk/route';
 import type { Terrain } from './terrain';
 import type { NpcData, NpcDef } from '../story/talk';
-import { recolor, type Look } from '../walk/player-look';
+import { recolor, modelFor, type Look } from '../walk/player-look';
 import type { ActorBody, SupportAt } from '../walk/obstacles';
 
 /** Sweeps body centres, excluding the named NPC itself. */
@@ -53,6 +53,70 @@ type P2 = [number, number];
 export interface ZoneSpec { label: string; sub?: string; p: P2; r: number; y?: number }
 export interface NpcSpec { model: string; at: string; offset?: P2; activity?: string }
 export interface StoryZones { zones: Record<string, ZoneSpec>; npcs: Record<string, NpcSpec>; ambient?: { students: string[]; monkeys: number } }
+
+/** Include every scheduled/ambient model even if its anchor is missing or its schedule is absent.
+ * Player body swaps and EncounterScene's separately loaded macaque are independent of NPC spawning. */
+export function characterWarmupModelIds(zones:StoryZones,data?:Pick<NpcData,'npcs'>):string[] {
+  return [...new Set([
+    ...Object.values(zones.npcs).map(n=>n.model),...(zones.ambient?.students??[]),
+    ...(data?.npcs??[]).map(n=>n.model),modelFor('m'),modelFor('f'),'monkey',
+  ])].sort();
+}
+export interface CharacterWarmupVariant {model:string;shader:'source'|'npc-recolored';transparent:boolean}
+/** Temporary skinned objects are removed after drawing; only their material references survive.
+ * Disposing those materials immediately would evict any program used only by a future character. */
+export class CharacterWarmupSamples {
+  readonly group=new T.Group();
+  readonly modelIds:string[]=[];
+  readonly failedModels:string[]=[];
+  readonly variants:CharacterWarmupVariant[]=[];
+  private materials=new Set<T.Material>();
+  private skeletons=new Set<T.Skeleton>();
+  constructor(){this.group.name='Character shader warmup';this.group.visible=false;}
+  get retainedMaterialCount(){return this.materials.size;}
+  add(model:string,source:T.Object3D,recolored:boolean) {
+    for(const shader of (recolored?['source','npc-recolored']:['source']) as CharacterWarmupVariant['shader'][])for(const transparent of [false,true]){
+      const copy=cloneSkinned(source),variant={model,shader,transparent};
+      copy.name=`Warmup ${model} ${shader} ${transparent?'fade':'opaque'}`;copy.userData.characterWarmup=variant;
+      // Faded characters hide their hulls, so only the opaque variant needs an outline program.
+      if(!transparent)addOutlines(copy,'character');
+      const clones=new Map<T.Material,T.Material>();
+      copy.traverse(object=>{
+        if(object instanceof T.SkinnedMesh)this.skeletons.add(object.skeleton);
+        if(!(object instanceof T.Mesh))return;
+        const clone=(original:T.Material)=>{
+          let material=clones.get(original);if(material)return material;
+          material=original.clone();
+          // Npc.spawn's recoloring clone currently has the default shader hooks. The raw source,
+          // player, encounter and outline paths preserve their custom toon/outline patches.
+          if(shader==='source'||object.userData.outlineHull){material.onBeforeCompile=original.onBeforeCompile;material.customProgramCacheKey=original.customProgramCacheKey;}
+          material.transparent=original.transparent||transparent;
+          material.opacity=original.opacity*(transparent?.5:1);material.depthWrite=original.depthWrite&&!transparent;
+          clones.set(original,material);this.materials.add(material);return material;
+        };
+        object.material=Array.isArray(object.material)?object.material.map(clone):clone(object.material);
+        if(!object.userData.outlineHull)object.castShadow=true;
+      });
+      this.group.add(copy);this.variants.push(variant);
+    }
+    this.modelIds.push(model);
+  }
+  removeFromScene(){
+    this.group.removeFromParent();this.group.clear();
+    for(const skeleton of this.skeletons)skeleton.dispose();this.skeletons.clear();
+  }
+  dispose(){this.removeFromScene();for(const material of this.materials)material.dispose();this.materials.clear();}
+}
+
+/** `load` supplies the existing toonified GLB source; geometry/textures remain owned by that cache.
+ * Palette recoloring changes texture pixels, not map/UV/fog/gradientMap/skinning shader defines. */
+export async function prepareCharacterWarmup(zones:StoryZones,data:Pick<NpcData,'npcs'>|undefined,load:(model:string)=>Promise<T.Object3D>) {
+  const samples=new CharacterWarmupSamples(),recolored=new Set((data?.npcs??[]).filter(n=>n.look).map(n=>n.model));
+  await Promise.all(characterWarmupModelIds(zones,data).map(async model=>{
+    try {samples.add(model,await load(model),recolored.has(model));}catch{samples.failedModels.push(model);}
+  }));
+  samples.modelIds.sort();samples.failedModels.sort();return samples;
+}
 export type Preset = 'day' | 'sunset' | 'night';
 export type Placement = { at: string | P2; offset?: P2; activity?: string } | null;
 
@@ -252,6 +316,13 @@ export class NpcManager {
       this.sources.set(model, s);
     }
     return s;
+  }
+
+  /** Reuse each cached GLB promise; sample preparation runs alongside ordinary NPC spawning. */
+  prepareWarmupSamples() {
+    return prepareCharacterWarmup(this.zones,this.data,async model=>{
+      const source=await this.source(model);if(this.disposed)throw new Error('npc manager disposed');return source.scene;
+    });
   }
 
   private async spawn(id: string, model: string, x: number, z: number, look?: Look, referenceY?: number) {
