@@ -1,3 +1,5 @@
+import type { RhythmFrame } from '../audio/rhythm';
+import { staySecondsRemaining } from '../walk/interaction-events';
 import type { Chapter, Line } from './schema';
 import type { Choice, Face, TalkLine } from './dialogue';
 import { portraitSvg, type PortraitSpec } from './portraits';
@@ -17,6 +19,16 @@ const STORY_CAST: Record<string, CastEntry> = {
   m1: { name: '獼猴', portrait: { kind: 'monkey' } },
 };
 const faceOf = (l: TalkLine): Face => l.face ?? 'neutral';
+
+/** Judge a touch on contact, not on release; the following click must not score it twice.
+ * detail=0 preserves native keyboard and assistive-technology button activation. */
+export function bindRhythmClap(button: HTMLElement, clap: (eventTimestamp?:number) => void) {
+  button.addEventListener('pointerdown', e => {
+    if (e.button !== 0 || (button as HTMLButtonElement).disabled) return;
+    e.preventDefault(); clap(e.timeStamp);
+  });
+  button.addEventListener('click', e => { if (e.detail === 0 && !(button as HTMLButtonElement).disabled) clap(e.timeStamp); });
+}
 
 /** Paper-and-ink story overlay: dialogue, objective, zone banner, chapter card, progress dots, edge arrow. */
 export class StoryUi {
@@ -286,17 +298,53 @@ ${fact ? `<p class="fact"><b>校史小知識</b>${esc(fact)}${source ? ` <a href
 
   private eventObjectiveEl?: HTMLElement;
   private eventCancel?:()=>void;
+  private eventGo?:()=>void;
   /** Nonmodal event objective; the main/side objective reappears when cleared or paused. */
   eventObjective(text?:string,cancel?:()=>void) {
     this.eventCancel=cancel;
     if(!this.eventObjectiveEl && text) {
       const el=document.createElement('div');el.className='q-objective q-event-objective';
-      el.innerHTML='<small>校園活動</small><strong></strong><button type="button">先離開</button>';
-      el.querySelector('button')!.addEventListener('click',()=>this.eventCancel?.());this.root.append(el);this.eventObjectiveEl=el;
+      el.innerHTML='<small>校園活動</small><strong></strong><span class="q-stay-progress" role="status" hidden></span><button type="button" data-event-go hidden>G 自動前往</button><button type="button" data-event-cancel>先離開</button>';
+      el.querySelector('[data-event-go]')!.addEventListener('click',()=>this.eventGo?.());
+      el.querySelector('[data-event-cancel]')!.addEventListener('click',()=>this.eventCancel?.());this.root.append(el);this.eventObjectiveEl=el;
     }
     this.root.classList.toggle('has-event-objective',!!text);
     if(this.eventObjectiveEl){this.eventObjectiveEl.hidden=!text;if(text)this.eventObjectiveEl.querySelector('strong')!.textContent=text;}
   }
+  eventGuidance(go?:()=>void,following=false,arrived=false) {
+    this.eventGo=go;
+    const button=this.eventObjectiveEl?.querySelector<HTMLButtonElement>('[data-event-go]');if(!button)return;
+    button.hidden=!go;button.disabled=arrived;
+    const text=arrived?'已抵達':following?'停止帶路':'G 自動前往';
+    if(button.textContent!==text)button.textContent=text;
+  }
+  stayProgress(progress?:{held:number;hold:number}) {
+    const el=this.eventObjectiveEl?.querySelector<HTMLElement>('.q-stay-progress');if(!el)return;
+    el.hidden=!progress;
+    if(progress){const text=`還有 ${staySecondsRemaining(progress)} 秒 · 移動會重新計時`;if(el.textContent!==text)el.textContent=text;}
+  }
+  private rhythmEl?:HTMLElement;
+  private rhythmClap?:(eventTimestamp?:number)=>void;
+  /** Fixed screen-space cue and touch button, independent of world-anchored hints. */
+  rhythm(frame:RhythmFrame|null,clap?:(eventTimestamp?:number)=>void) {
+    this.rhythmClap=clap;
+    if(!this.rhythmEl && frame) {
+      const el=document.createElement('div');el.className='q-rhythm';el.setAttribute('role','group');el.setAttribute('aria-label','跟著吉他拍手');
+      el.innerHTML='<div class="q-rhythm-cue" aria-hidden="true"><i class="q-rhythm-target"></i><i class="q-rhythm-ring"></i><b>拍</b></div><p class="q-rhythm-count"></p><p class="q-rhythm-feedback" role="status"></p><div class="q-rhythm-actions"><button type="button" data-rhythm="clap">拍手<span class="q-rhythm-key"> E</span></button></div>';
+      bindRhythmClap(el.querySelector<HTMLElement>('[data-rhythm=clap]')!,at=>this.rhythmClap?.(at));
+      this.root.append(el);this.rhythmEl=el;
+    }
+    if(!this.rhythmEl)return;this.rhythmEl.hidden=!frame;if(!frame)return;
+    const el=this.rhythmEl,ring=el.querySelector<HTMLElement>('.q-rhythm-ring')!;
+    el.dataset.feedback=frame.feedback;
+    ring.style.transform=`scale(${1+frame.ring*1.8})`;ring.style.visibility=frame.visible?'visible':'hidden';
+    const count=`第 ${frame.cue}／${frame.cues} 拍 · 已拍中 ${frame.hits} 拍`;
+    const countEl=el.querySelector('.q-rhythm-count')!;if(countEl.textContent!==count)countEl.textContent=count;
+    const feedback=frame.paused?'已暫停':frame.feedback==='hit'?'拍中了！':frame.feedback==='miss'?'這一拍錯過了':frame.feedback==='offbeat'?'等光圈合上再拍':'光圈合上時拍手';
+    const feedbackEl=el.querySelector('.q-rhythm-feedback')!;if(feedbackEl.textContent!==feedback)feedbackEl.textContent=feedback;
+    (el.querySelector('[data-rhythm=clap]') as HTMLButtonElement).disabled=frame.paused||frame.done;
+  }
+
   private npcSpeechEls=new Map<string,HTMLElement>();
   npcSpeech(bubbles:readonly {id:string;text:string;x:number;y:number}[]) {
     const ids=new Set(bubbles.map(b=>b.id));

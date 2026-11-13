@@ -36,7 +36,11 @@ ADD_ZONES = {  # beside the daytime macaque home (86,56) and the volunteer (82,6
  'macaque-path': {'label': '生科館旁步道', 'sub': 'MACAQUE PATH', 'p': [79.0, 66.0], 'r': 6},
  'macaque-slope': {'label': '生科館邊坡', 'sub': 'SLOPE', 'p': [90.0, 52.0], 'r': 6},
 }
-n = json.loads(NPCS.read_text()); n['events'] = EVENTS
+n = json.loads(NPCS.read_text())
+# Merge by event id: fields defined here win, anything else already in the file (for example the v10.1 sunset and
+# night-song activities written by WP-B) is kept, so re-running this tool never wipes later work.
+current = {e['id']: e for e in n.get('events', [])}
+n['events'] = [{**current.get(e['id'], {}), **e} for e in EVENTS] + [e for i, e in current.items() if i not in {x['id'] for x in EVENTS}]
 NPCS.write_text(json.dumps(n, ensure_ascii=False, indent=1) + '\n')
 z = json.loads(ZONES.read_text()); zs = z['zones'] if 'zones' in z else z
 zs.update(ADD_ZONES)

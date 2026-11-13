@@ -1,6 +1,6 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { WalkInput } from '../src/walk/input';
-const element=()=>Object.assign(new EventTarget(),{style:{},setPointerCapture:()=>{}}) as unknown as HTMLElement;
+const element=()=>Object.assign(new EventTarget(),{style:{},classList:{remove:()=>{}},setPointerCapture:()=>{}}) as unknown as HTMLElement;
 afterEach(()=>vi.unstubAllGlobals());
 it('routes numbers to the list and dialogue; arrow keys always walk, even with a list open',()=>{
  const win=new EventTarget(),doc=Object.assign(new EventTarget(),{pointerLockElement:null});

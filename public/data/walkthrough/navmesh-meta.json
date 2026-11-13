@@ -1,7 +1,7 @@
 {
   "status": "ready",
   "scope": "campus-science-engineering-v2",
-  "createdAt": "2026-11-13T09:52:59.967Z",
+  "createdAt": "2026-11-13T14:25:22.857Z",
   "agent": {
     "radius": 0.28,
     "height": 1.7
@@ -43,7 +43,7 @@
     "public/data/terrain/terrain.bin": "bc9a8003c40e8b86ab6b23b1a7d2df6f81bfc6d62e648408540210b9f6fe6e9c",
     "src/world/terrain.ts": "092d7404f792198a9f227191e41ff50a8c72f19ba51f83897491da3fb860a3c3",
     "src/world/road-surface.ts": "da836965e71b5eb39a0274fa533f77a4865b9df0116c8399f3b8bf086a5d617d",
-    "public/data/story-zones.json": "2c7c33ee97539d75fb9c9c130a9a20d8caf2bf85a3b79013e714354494d0db28",
+    "public/data/story-zones.json": "3e1b1983205ab85218eca29a7ba1d93102aadca186a5ee5dd026fb405a94b17e",
     "public/models/landmarks/placements.json": "cb47a03abcee39bcdef484e49efee112d5b13c8e75dcacb570f04c2835a3f55e",
     "public/models/landmarks/admin.collision.json": "9b4dd577fc793d73f9df68630882643a2345a9691e66f87cce2b8cab86055c91",
     "public/models/landmarks/library.collision.json": "a1ad53a6e9d2fc37436020a202fb4059b8d498cc1c875ecc28d505c256423792",

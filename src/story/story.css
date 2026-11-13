@@ -145,3 +145,25 @@
 .q-event-objective small,.q-event-objective strong{grid-column:1/-1}
 .q-event-objective button{margin-top:8px;min-height:44px;border:1px solid var(--ui-line);border-radius:8px;background:var(--ui-paper-2);color:var(--ui-ink);font:inherit;cursor:pointer}
 .q-event-objective button:focus-visible{outline:3px solid var(--ui-sea)}
+.q-event-objective button[hidden]{display:none}
+.q-event-objective button:disabled{opacity:.65;cursor:default}
+
+/* v10.1 activities: quiet countdown and a single screen-space rhythm target. */
+.q-stay-progress{grid-column:1/-1;font-size:14px;color:var(--ui-sea);font-variant-numeric:tabular-nums}
+.q-stay-progress[hidden],.q-rhythm[hidden]{display:none}
+.q-rhythm{position:absolute;z-index:6;bottom:calc(24px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:min(320px,calc(100vw - 32px));text-align:center;pointer-events:none}
+.q-rhythm-cue{position:relative;display:grid;place-items:center;width:124px;height:124px;margin:0 auto 6px}
+.q-rhythm-cue i{position:absolute;left:42px;top:42px;width:40px;height:40px;box-sizing:border-box;border-radius:50%}
+.q-rhythm-target{border:3px solid var(--ui-paper);background:var(--ui-sea);box-shadow:0 0 0 2px var(--ui-line)}
+.q-rhythm-ring{border:3px solid var(--ui-gold);will-change:transform}
+.q-rhythm-cue b{z-index:1;color:var(--ui-paper);font-size:15px}
+.q-rhythm p{width:fit-content;max-width:100%;margin:3px auto;padding:4px 12px;border-radius:12px;background:var(--ui-paper);font-size:13px;line-height:1.5}
+.q-rhythm[data-feedback=hit] .q-rhythm-target{background:var(--ui-leaf)}
+.q-rhythm[data-feedback=miss] .q-rhythm-target,.q-rhythm[data-feedback=offbeat] .q-rhythm-target{background:var(--ui-brick)}
+.q-rhythm-actions{display:flex;justify-content:center;gap:8px;margin-top:8px;pointer-events:auto}
+.q-rhythm button{min-height:48px;min-width:92px;padding:10px 18px;border:2px solid var(--ui-line);border-radius:12px;background:var(--ui-gold);color:var(--ui-ink);font:700 15px 'Noto Sans TC',sans-serif;cursor:pointer;touch-action:manipulation}
+.q-rhythm button:focus-visible{outline:3px solid var(--ui-sea);outline-offset:2px}
+.q-rhythm button:disabled{opacity:.6;cursor:default}
+@media(max-width:759px){.q-rhythm{width:min(200px,calc(100vw - 32px))}.q-rhythm-cue{width:110px;height:110px}.q-rhythm-cue i{left:35px;top:35px}.q-rhythm button{min-height:48px;padding:10px 14px}}
+.has-touch .q-rhythm-key{display:none}
+@media(pointer:coarse){.q-rhythm-key{display:none}}

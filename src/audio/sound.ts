@@ -1,5 +1,7 @@
 /** Synthesised ambience and cues (spec §10). Muted by default; no AudioContext exists until the player
- * turns sound on, so a silent visit never touches the audio device. No audio files are shipped. */
+ * turns sound on, so ordinary silent exploration never touches the audio device. An accepted rhythm activity may use a muted audio clock. No audio files are shipped. */
+import { RhythmPerformance } from './rhythm-performance';
+import type { RhythmSpec } from './rhythm';
 import { GenerativeMusic, type MusicMood } from './music';
 
 const KEY = 'nsysu-walk-sound';
@@ -12,6 +14,8 @@ export class CampusSound {
   private wind?: GainNode;
   private stepTimer = 0;
   private music?: GenerativeMusic;
+  private performance?:RhythmPerformance;
+  private activityPrepared = false;
   private mood: MusicMood = 'day';
   private gen = 0;
   enabled = false;
@@ -27,20 +31,44 @@ export class CampusSound {
     try { localStorage.setItem(KEY, this.enabled ? 'on' : 'off'); } catch { /* per visit */ }
     // A later toggle or dispose supersedes this one: never restart music after an await that lost the race.
     const gen = ++this.gen;
-    if (this.enabled) { this.start(); await this.ctx!.resume(); if (gen === this.gen && this.enabled && this.ctx) this.music?.start(); }
-    else { this.music?.stop(); await this.ctx?.suspend(); }
+    if (this.enabled) { this.start(); this.master!.gain.value=.5;await this.ctx!.resume(); if (gen === this.gen && this.enabled && this.ctx && !this.performance) this.music?.start(); }
+    else { this.music?.stop();if(this.master)this.master.gain.value=0;if(!this.performance)await this.ctx?.suspend(); }
     return this.enabled;
   }
 
-  /** A hidden tab goes quiet; returning resumes only if sound is still on. */
+  /** A hidden tab pauses playback and judgement; a muted round still needs its clock on return. */
   setHidden(hidden: boolean) {
+    if(hidden)this.performance?.update(true,false);
     if (!this.ctx || this.ctx.state === 'closed') return;
-    if (hidden) void this.ctx.suspend();
-    else if (this.enabled) void this.ctx.resume();
+    if (hidden) {void this.ctx.suspend();}
+    else if (this.enabled || this.performance) void this.ctx.resume();
   }
 
   /** Called on the first gesture when sound was left on last visit. */
-  resumeIfEnabled() { if (this.enabled) { this.start(); void this.ctx!.resume(); this.music?.start(); } }
+  resumeIfEnabled() { if (this.enabled) { this.start(); void this.ctx!.resume(); if(!this.performance)this.music?.start(); } }
+
+  /** Called by the invitation's user gesture. Muted activities use a zero-gain clock. */
+  prepareActivity() { this.activityPrepared=true;try {this.start();void this.ctx!.resume().catch(()=>{});}catch{/* visual timing remains available */} }
+  startRhythm(spec:RhythmSpec) {
+    this.performance?.dispose();this.performance=undefined;this.music?.stop();try{this.start();}catch{/* no Web Audio: visual-only */}
+    if(this.ctx && this.ctx.state!=='running')void this.ctx.resume().catch(()=>{});
+    const ctx=this.ctx;let elapsed=0,lastWall=performance.now()/1000,lastAudio:number|undefined;
+    const clock=()=>{
+      const wall=performance.now()/1000;
+      if(ctx?.state==='running'){const audio=ctx.currentTime;if(lastAudio!==undefined)elapsed+=Math.max(0,audio-lastAudio);lastAudio=audio;}
+      else {elapsed+=Math.max(0,wall-lastWall);lastAudio=undefined;}
+      lastWall=wall;return elapsed;
+    };
+    this.performance=new RhythmPerformance(spec,clock,ctx,this.master);return this.performance;
+  }
+  updateRhythm(paused:boolean,at?:number) { return this.performance?.update(paused,this.enabled && this.ctx?.state==='running',at); }
+  stopRhythm() {
+    const had=!!this.performance,prepared=this.activityPrepared;this.activityPrepared=false;
+    this.performance?.dispose();this.performance=undefined;
+    if(had && this.enabled)this.music?.start();
+    // Also release a muted context prepared by an accepted invitation that was later cancelled.
+    if((had||prepared)&&!this.enabled)void this.ctx?.suspend();
+  }
 
   /** Music follows the lighting preset; it changes key and tempo at the next bar. */
   setMood(mood: MusicMood) { this.mood = mood; this.music?.setMood(mood); }
@@ -57,7 +85,7 @@ export class CampusSound {
   private start() {
     if (this.ctx) return;
     const ctx = this.ctx = new AudioContext();
-    this.master = ctx.createGain(); this.master.gain.value = .5; this.master.connect(ctx.destination);
+    this.master = ctx.createGain(); this.master.gain.value = this.enabled ? .5 : 0; this.master.connect(ctx.destination);
     // Sea: filtered noise with a slow swell.
     this.sea = ctx.createGain(); this.sea.gain.value = 0;
     const seaSrc = this.noise(4), lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 700;
@@ -114,5 +142,5 @@ export class CampusSound {
     });
   }
 
-  dispose() { this.gen++; this.enabled = false; this.music?.dispose(); this.music = undefined; void this.ctx?.close(); this.ctx = undefined; }
+  dispose() { this.gen++; this.enabled = false;this.performance?.dispose();this.performance=undefined; this.music?.dispose(); this.music = undefined; void this.ctx?.close(); this.ctx = undefined; }
 }

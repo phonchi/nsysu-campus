@@ -18,7 +18,8 @@ import { Avatar } from './avatar';
 import { surfaceRouteSegments } from './surface-route';
 import { WalkInput } from './input';
 import { CampusEventEngine, type CampusEventWorld } from '../story/campus-events';
-import { EventCommandQueue, EventCompletionStorage, connectNpcPathStart, campusEventAction, campusEventWorld, campusEventsPaused } from './interaction-events';
+import { EventCommandQueue, EventCompletionStorage, EventPlayerPose, activityPresentation, campusActivityGuide, eventSeatHeading, submitRhythmResult, routeEventE, connectNpcPathStart, type RhythmCommand, type RuntimeEventWorld, campusEventAction, campusEventWorld, campusEventsPaused } from './interaction-events';
+import type { RhythmPerformance } from '../audio/rhythm-performance';
 import { npcQuestStatuses } from './interaction-status';
 import { doorSignPose, buildDoorSignWalls } from './door-sign';
 import { selectInteraction, cycleInteraction, encounterReach, orderInteractions, numberedInteractions, revalidateInteraction, interactionPriority, type InteractionAction } from './interaction-choice';
@@ -28,7 +29,7 @@ import { ContextTips, FirstRunGuide, helpShortcut, type TipId } from './help';
 import { startLoadingTips } from './loading-tips';
 import { showInAppBrowserNotice } from './in-app-browser';
 import { lockedSaves } from '../story/save-guard';
-import { toonify } from '../render/toon';
+import { toonify, toonMaterial } from '../render/toon';
 import { PostPipeline, POST_LOOKS, lerpLook } from '../render/post';
 import { AdaptiveQuality, TIERS, initialTier, type Tier } from '../render/quality';
 import { addOutlines, OUTLINE_UNIFORMS } from '../render/outline';
@@ -73,7 +74,7 @@ const WALK_SPEED = 3.6, RUN_SPEED = 7.2;
 const NPC_ARRIVE = 1.8, ARRIVAL_OFFSET = .32;
 /** Frame time cap. `?qa=1` lets slow software-rendered test browsers keep real-time simulation (physics still
  * sub-steps at 1/120 s, so movement and collisions are identical, only fewer frames are drawn). */
-const QA = new URLSearchParams(location.search).get('qa') === '1';
+const QA = new URLSearchParams(typeof location==='undefined'?'':location.search).get('qa') === '1';
 const maxFrame = QA ? .25 : .065;
 const base = import.meta.env.BASE_URL;
 const asset = (s: string) => base + s.replace(/^\//, '');
@@ -102,6 +103,93 @@ function capsuleFigure() {
 
 export interface WalkOptions { target?: string; story?: boolean; overview?: boolean }
 
+export function configureShaderChecks(renderer:{debug:Pick<T.WebGLRenderer['debug'],'checkShaderErrors'>},dev=import.meta.env.DEV) {
+  renderer.debug.checkShaderErrors=dev;
+}
+
+/** Some scene jobs (story -> props) enqueue more work after awaiting their own data. */
+export async function waitForSceneAssets(jobs:Promise<unknown>[]) {
+  for(let taken=0;taken<jobs.length;) {
+    const end=jobs.length;await Promise.allSettled(jobs.slice(taken,end));taken=end;
+  }
+}
+
+type WarmupRenderer=Pick<T.WebGLRenderer,'compile'|'render'|'getRenderTarget'|'setRenderTarget'|'getActiveCubeFace'|'getActiveMipmapLevel'|'getViewport'|'setViewport'|'getScissor'|'setScissor'|'getScissorTest'|'setScissorTest'|'shadowMap'> & {
+  compileAsync?:(scene:T.Object3D,camera:T.Camera)=>Promise<unknown>;
+  info?:Pick<T.WebGLRenderer['info'],'programs'>;
+};
+export interface ShaderWarmupTiming {compileMs:number;firstUseMs:number;renderPasses:number}
+/** Run only while normal rendering is stopped. Keep hidden material samples alive afterwards:
+ * disposing their last material reference would evict the very programs we just warmed. */
+export async function warmupWalkScene(renderer:WarmupRenderer,scene:T.Scene,camera:T.Camera,postprocessed=true) {
+  const target=new T.WebGLRenderTarget(1,1),oldTarget=renderer.getRenderTarget();
+  const face=renderer.getActiveCubeFace(),mip=renderer.getActiveMipmapLevel();
+  const viewport=renderer.getViewport(new T.Vector4()),scissor=renderer.getScissor(new T.Vector4()),scissorTest=renderer.getScissorTest();
+  const restore:(()=>void)[]=[];
+  const materials=new Set<T.Material>();
+  const timing:ShaderWarmupTiming={compileMs:0,firstUseMs:0,renderPasses:0};
+  const shadowAuto=renderer.shadowMap.autoUpdate,shadowNeeds=renderer.shadowMap.needsUpdate;
+  try {
+    scene.traverse(object=>{
+      const visible=object.visible,culled=object.frustumCulled;
+      restore.push(()=>{object.visible=visible;object.frustumCulled=culled;});
+      object.visible=true;object.frustumCulled=false;
+      if(object instanceof T.LOD){const auto=object.autoUpdate;restore.push(()=>{object.autoUpdate=auto;});object.autoUpdate=false;}
+      if(object instanceof T.Mesh || object instanceof T.Line || object instanceof T.Points){
+        for(const material of [object.material].flat())if(!materials.has(material)){
+          materials.add(material);const visible=material.visible;restore.push(()=>{material.visible=visible;});material.visible=true;
+        }
+      }
+      if((object instanceof T.DirectionalLight || object instanceof T.SpotLight || object instanceof T.PointLight) && object.castShadow){
+        const shadow=object.shadow,size=shadow.mapSize.clone(),map=shadow.map,mapPass=shadow.mapPass,auto=shadow.autoUpdate,needs=shadow.needsUpdate;
+        restore.push(()=>{shadow.map?.dispose();shadow.mapPass?.dispose();shadow.map=map;shadow.mapPass=mapPass;shadow.mapSize.copy(size);shadow.autoUpdate=auto;shadow.needsUpdate=needs||!map;});
+        shadow.map=null;shadow.mapPass=null;shadow.mapSize.set(1,1);shadow.autoUpdate=true;shadow.needsUpdate=true;
+      }
+    });
+    renderer.shadowMap.autoUpdate=true;renderer.shadowMap.needsUpdate=true;
+    renderer.setRenderTarget(target);renderer.setScissorTest(false);
+    const compile=async()=>{
+      const at=performance.now();
+      if(typeof renderer.compileAsync==='function')await renderer.compileAsync(scene,camera);else renderer.compile(scene,camera);
+      timing.compileMs+=performance.now()-at;
+    };
+    const firstUse=()=>{
+      const at=performance.now();renderer.render(scene,camera);timing.renderPasses++;
+      // Zero-count/empty drawables can be compiled without reaching renderBufferDirect. Initialize
+      // reflection for their cached programs too; r186 lazily queries uniforms/attributes here.
+      for(const program of renderer.info?.programs??[]){program.getUniforms();program.getAttributes();}
+      timing.firstUseMs+=performance.now()-at;
+    };
+    // Use the full scene: preserve every material group, draw range and instance count.
+    // Linear offscreen output matches PostPipeline; rendering also initializes shadow programs.
+    await compile();firstUse();
+    if(!postprocessed){
+      // Direct-screen shaders have different output defines. Compiling alone leaves their uniform
+      // reflection lazy; draw them into one covered canvas pixel as well, never the full viewport.
+      renderer.setRenderTarget(null);renderer.setViewport(new T.Vector4(0,0,1,1));renderer.setScissor(new T.Vector4(0,0,1,1));renderer.setScissorTest(true);
+      renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=false;
+      await compile();firstUse();
+    }
+    return timing;
+  } finally {
+    for(const undo of restore.reverse())undo();
+    renderer.shadowMap.autoUpdate=shadowAuto;renderer.shadowMap.needsUpdate=shadowNeeds;
+    renderer.setRenderTarget(oldTarget,face,mip);renderer.setViewport(viewport);renderer.setScissor(scissor);renderer.setScissorTest(scissorTest);
+    target.dispose();
+  }
+}
+
+/** Same constructors/flags as the deferred drawables. Badges and edge arrows are DOM, not shaders. */
+function warmupSamples() {
+  const group=new T.Group();group.name='Shader warmup samples';group.visible=false;
+  group.add(makeDoorSign('SC2001 普通教室'));
+  const plain=new T.Mesh(new T.BoxGeometry(.1,.1,.1),new T.MeshToonMaterial());plain.castShadow=true;group.add(plain);
+  const colored=new T.BoxGeometry(.1,.1,.1);colored.setAttribute('color',new T.Float32BufferAttribute(new Float32Array(colored.attributes.position.count*3).fill(1),3));
+  const spot=new T.Mesh(colored,toonMaterial({vertexColors:true,name:'quest-spots'}));spot.castShadow=spot.receiveShadow=true;group.add(spot);
+  for(const transparent of [false,true])group.add(new T.Line(new T.BufferGeometry().setFromPoints([new T.Vector3(),new T.Vector3(1,0,0)]),new T.LineBasicMaterial({transparent,opacity:transparent?.85:1,depthWrite:false})));
+  return group;
+}
+
 export async function openWalkthrough(opts: WalkOptions = {}) {
   if (document.querySelector('.walkthrough')) return;
   const host = document.createElement('section');
@@ -120,6 +208,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   let encounters: EncounterEngine | undefined;
   let zoneLabels: Record<string,string> = {};
   let spotField: QuestSpotField | undefined;
+  let rhythm:RhythmPerformance|undefined,rhythmOwner:string|undefined,movementRequested=false,playerMoved=false;
   let campusEvents: CampusEventEngine | undefined, eventStorage: EventCompletionStorage | undefined, eventCommitted: ReturnType<CampusEventEngine['snapshot']> | undefined, miniGameActive=false;
   let quests: QuestEngine | undefined, notebook: JournalView | undefined, npcDefinitions: NpcData | undefined, storageNotice = '';
   let refreshNotebook = () => {};
@@ -136,6 +225,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   let tier: Tier = initialTier();
   try { renderer = new T.WebGLRenderer({ antialias: !TIERS[tier].post, powerPreference: 'high-performance' }); }
   catch { exitToMap(); return; }
+  configureShaderChecks(renderer);
   const coarse = matchMedia('(pointer:coarse)').matches;
   renderer.setSize(innerWidth, innerHeight);
   renderer.localClippingEnabled = true; renderer.shadowMap.enabled = true;
@@ -179,10 +269,13 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   }
   const quality = new AdaptiveQuality(tier, t => { applyTier(t); say(`畫質自動調整為 ${t} 級以維持流暢`, 2500); });
 
-  let world: WalkWorld, physics: RapierController, lod: CampusLod, alive = true;
+  let world: WalkWorld, physics: RapierController, lod: CampusLod, alive = true,sceneLoading=true;
+  const startupJobs:Promise<unknown>[]=[];
+  let shaderWarmupMs=0;
+  let shaderWarmupStages:ShaderWarmupTiming|undefined,shaderWarmupPostMs=0;
   const buildingHulls: T.Mesh[] = [];
   const obstacleField = new ObstacleField(); let propsReady = false, legacyPropsReady = false, bikeStandReady = false;
-  const featureStatus: Record<string,string> = { props:'loading', legacyProps:'loading', quests:'loading', encounters:'loading', landmarks:'loading', bike:'loading' };
+  const featureStatus: Record<string,string> = { props:'loading', legacyProps:'loading', quests:'loading', encounters:'loading', landmarks:'loading', bike:'loading',warmup:'loading' };
   let failEncounterScene = false;
   let terrainRef: Terrain | undefined, replacedOsm = new Set<string>(), landmarksReady = false;
   let campusData: WalkBuilding[] = [], structure: CampusStructure, uiStructure: CampusStructure, campusInfo: CampusInfo | undefined;
@@ -237,12 +330,12 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     physics.constrain = (position,velocity,h)=>{ doors(position,velocity,h); shore(position,velocity,h); };
     physics.teleport(world.spawn);
     terrainRef = terrain;
-    void addCampusProps(world, url => new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync(url), asset, () => alive, (x,z,y)=>physics.supportAt(x,z,y))
+    startupJobs.push(addCampusProps(world, url => new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync(url), asset, () => alive, (x,z,y)=>physics.supportAt(x,z,y))
       .then(specs => { if (!alive) return; physics.addObstacles(specs ?? []); obstacleField.add(specs ?? []); growable?.setVolumes('legacy-props', vegetationBoxes(specs ?? [])); toonify(world.display); featureStatus.legacyProps='ready'; })
       .catch(e => { featureStatus.legacyProps='degraded'; console.warn('campus props',e); })
-      .finally(()=>{ legacyPropsReady=true;validateRoutes(); });
+      .finally(()=>{ legacyPropsReady=true;validateRoutes(); }));
     if (!placements) { landmarksReady = true; featureStatus.landmarks='degraded'; growable?.setReady(true); }
-    if (placements) void loadLandmarks(asset, placements, terrain).then(lm => {
+    if (placements) startupJobs.push(loadLandmarks(asset, placements, terrain).then(lm => {
       if (!alive) { disposeObject(lm.display); disposeObject(lm.collision); return; }
       // Hand-modelled landmarks replace the OSM blocks and the v2 procedural features at those sites.
       world.display.traverse(o => { if (o.name.startsWith('Landmark features')) o.visible = false; });
@@ -266,7 +359,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       growable?.setVolumes('landmarks', lm.vegetationVolumes);
       growable?.setReady(true);
       landmarksReady = true; featureStatus.landmarks='ready'; validateRoutes();
-    }).catch(e => { console.warn('landmarks', e); landmarksReady = true; featureStatus.landmarks='degraded'; validateRoutes(); });
+    }).catch(e => { console.warn('landmarks', e); landmarksReady = true; featureStatus.landmarks='degraded'; validateRoutes(); }));
   } catch (e) {
     stopLoadingTips();
     get('.walk-loading').textContent = '校園圖資暫時無法開啟，請回到校園地圖。';
@@ -274,8 +367,6 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     get('[data-action=exit]').addEventListener('click', () => { alive = false; renderer.dispose(); orbit.dispose(); exitToMap(); }, { once: true });
     console.error(e); return;
   }
-  stopLoadingTips();
-  get('.walk-loading').hidden = true;
 
   // ---- character -------------------------------------------------------------------------
   const avatar = new Avatar(); scene.add(avatar.root);
@@ -292,18 +383,18 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   const loadCharacter = () => {
     const key = modelFor(look().body), palette = look().palette, token = `${key}:${palette}`;
     loading = token;
-    gltf.load(asset(`models/characters/${key}.glb`), g => {
+    return gltf.loadAsync(asset(`models/characters/${key}.glb`)).then(g => {
       if (!alive || loading !== token) { disposeObject(g.scene); return; }
       // glTF characters face +Z; the avatar's facing math assumes -Z.
       g.scene.rotation.y = Math.PI;
       toonify(g.scene); recolor(g.scene, PALETTES[look().body][palette].look, true); addOutlines(g.scene, 'character');
       avatar.setModel(g.scene, g.animations);
-    }, undefined, () => say('角色模型載入失敗，改用簡易人物。', 3000));
+    }).catch(() => say('角色模型載入失敗，改用簡易人物。', 3000));
   };
   const nick = get<HTMLInputElement>('.walk-nick input');
   nick.value = look().nickname;
   nick.addEventListener('change', () => { campus.setPlayer({ nickname: nick.value }); nick.value = look().nickname; });
-  markChar(); loadCharacter();
+  markChar(); startupJobs.push(loadCharacter());
 
   // ---- camera & modes --------------------------------------------------------------------
   const rig = new CameraRig(camera, (a, b, r) => physics.sweep(a, b, r));
@@ -312,6 +403,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   const buildingSelect = get<HTMLSelectElement>('[data-building]'), floorSelect = get<HTMLSelectElement>('[data-floor]');
 
   function chooseMode(isOverview: boolean) {
+    if(sceneLoading)return;
     overview = isOverview; walking = true;
     host.classList.toggle('is-overview', isOverview); get('.walk-welcome').hidden = true;
     orbit.enabled = isOverview;
@@ -431,7 +523,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   let selectedInteraction: string | undefined;
   let shownInteractions: Candidate[] = [];
   function interactionCandidates(): Candidate[] {
-    if (notebook?.open || menuOpen() || overview || !walking || photo.active || quiz?.open || director?.blocking || guide.open) return [];
+    if (eventPose.sitting || rhythm || notebook?.open || menuOpen() || overview || !walking || photo.active || quiz?.open || director?.blocking || guide.open) return [];
     const p=physics.position, out:Candidate[]=[];
     const add=(id:string,label:string,priority:number,point:T.Vector3|undefined,run:()=>void,targetId=id,actionId=id)=>{if(point)out.push({id,targetId,actionId,targetLabel:targetId.startsWith('npc:')?npcs?.displayName(targetId.slice(4)):undefined,label,priority,point:point.clone(),distance:p.distanceTo(point),run});};
     const focused=quests?.progress.tracked;
@@ -477,7 +569,11 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     if (current) { selectedInteraction=current.id; current.run(); }
     else say('這個項目已不在互動範圍或狀態已改變，請重新選擇。',2500);
   }
-  function interact() {
+  function interact(eventTimestamp?:number) {
+    routeEventE(!!rhythm,()=>clapRhythm(eventTimestamp),interactNormally);
+  }
+  function interactNormally() {
+    if(eventPose.sitting)return;
     if(director?.blocking) { director.press(); return; }
     const candidate=shownInteractions.find(c=>c.id===selectedInteraction);
     if(candidate) executeInteraction(candidate);
@@ -554,9 +650,10 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   function toggleBike() {
     if (!bike.riding && !avatar.rideReady) { say('腳踏車與人物姿勢仍在準備，請稍候。', 2500); return; }
     bike.toggle(physics.position);
+    if(bike.riding && (eventPose.requested || rhythm))cancelCampusActivity();
   }
   scene.add(bike.standGroup);
-  void new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync(asset('models/campus/bicycle.glb')).then(g => {
+  startupJobs.push(new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync(asset('models/campus/bicycle.glb')).then(g => {
     if (!alive) { disposeObject(g.scene); return; }
     toonify(g.scene);
     // Stand: three parked bikes and a sign; the ridden bike is a fourth copy under the avatar.
@@ -568,7 +665,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     growable?.setVolumes('bike-stand', vegetationBoxes(obstacles));
     const ride = g.scene.clone(); ride.rotation.y = 0; ride.position.y = 0;
     const holder = new T.Group(); holder.name = 'Ridden bike'; holder.add(ride); avatar.setVehicle(holder);
-  }).catch(e => {featureStatus.bike='degraded';console.warn('bike', e);}).finally(()=>{bikeStandReady=true;validateRoutes();});
+  }).catch(e => {featureStatus.bike='degraded';console.warn('bike', e);}).finally(()=>{bikeStandReady=true;validateRoutes();}));
 
   // ---- input -----------------------------------------------------------------------------
   // H / the `?` icon: open the menu's 操作說明 tab, or close the menu when that tab is already showing.
@@ -581,6 +678,10 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   }, { coarse });
   const tips = new ContextTips(host, coarse);
   get('[data-action=tips-reset]').addEventListener('click', () => { tips.reset(); say('提示已重設，用得到時會再出現。', 3000); });
+  // Register before WalkInput's capture listener, which owns/stops the event. Keep input.ts untouched.
+  let rhythmKeyTimestamp:number|undefined;
+  const captureRhythmKey=(event:KeyboardEvent)=>{if(event.key.toLowerCase()==='e')rhythmKeyTimestamp=event.timeStamp;};
+  window.addEventListener('keydown',captureRhythmKey,{capture:true});
   const input = new WalkInput(renderer.domElement, get('.walk-joystick'), get('.walk-stick'), {
     modal(k, mode) {
       if (guide.open) { guide.key(k); return; }
@@ -602,7 +703,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       if (k === 'm') { chooseMode(walking ? !overview : true); return; }
       if (k === 'v') { setFirstPerson(!rig.firstPerson); return; }
       if (k === 'l') { toggleLock(); return; }
-      if (k === 'e') { interact(); return; }
+      if (k === 'e') { interact(rhythmKeyTimestamp);rhythmKeyTimestamp=undefined;return; }
       if (k === 'n') cycleSky();
       if (k === 'p') enterPhoto();
       if (k === 'b') toggleBike();
@@ -612,11 +713,12 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       if (/^[1-4]$/.test(k)) { const row=numberedInteractions(shownInteractions,selectedInteraction)[Number(k)-1]; if(row)executeInteraction(row); }
     },
     interactionListOpen: () => shownInteractions.length > 1,
-    moveStarted() { if (!walking || overview) chooseMode(false); clearAuto(true); },
+    moveStarted() { movementRequested=true;eventPose.update(true,false);if(rhythm)cancelCampusActivity();if (!walking || overview) chooseMode(false); clearAuto(true); },
     look(dx, dy) { if (photo.active) photo.look(dx, dy); else rig.rotate(dx, dy); },
     zoom(d) { if (photo.active) photo.zoom(d); else rig.zoom(d); },
     canLook: () => !overview,
   });
+  input.mode='menu';
   renderer.domElement.addEventListener('click', () => { if (rig.firstPerson && !overview && !coarse && !document.pointerLockElement) renderer.domElement.requestPointerLock?.(); });
   host.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') host.classList.add('has-touch'); });
   if (coarse) {
@@ -731,7 +833,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     mapFrame = fitCampusFrame(box.width, box.height);
     mapMarkers = collectMarkers().filter(m => !mapHidden.has(m.kind));
     if (mapSelected && !mapMarkers.some(m => m.id === mapSelected!.id)) mapSelected = undefined;
-    minimapSheet.drawOverview(ctx, mapFrame, mapMarkers, mapSelected?.id, physics.position, rig.yaw, trackedGuide()?.point ?? director?.goal());
+    minimapSheet.drawOverview(ctx, mapFrame, mapMarkers, mapSelected?.id, physics.position, rig.yaw, guideOverride?.point ?? director?.goal());
     mapPick.querySelector('span')!.textContent = mapSelected?.label ?? '點地圖上的標記查看地點。';
     mapGo.hidden = !mapSelected;
   };
@@ -802,8 +904,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   }
 
   function close() {
-    alive = false; campusUi?.dispose(); clearTimeout(statusTimer); cancelAnimationFrame(frameId);
-    input.dispose(); document.removeEventListener('visibilitychange', soundVisibility); window.removeEventListener('campus-storage-error',storageFailed); window.removeEventListener('resize', resize); orbit.dispose(); navigation?.dispose();
+    alive = false; stopLoadingTips(); campusUi?.dispose(); clearTimeout(statusTimer); cancelAnimationFrame(frameId);
+    input.dispose(); window.removeEventListener('keydown',captureRhythmKey,{capture:true});document.removeEventListener('visibilitychange', soundVisibility); window.removeEventListener('campus-storage-error',storageFailed); window.removeEventListener('resize', resize); orbit.dispose(); navigation?.dispose();
     eventQueue.clear(); npcs?.releaseAllBorrowed(); eventInvite.remove();
     encounterScene.dispose();
     notebook?.dispose(); director?.dispose(); npcs?.dispose(); photo.dispose(); spotField?.dispose();
@@ -869,6 +971,14 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   const eventInvite=document.createElement('div');
   eventInvite.className='encounter-card campus-event-invite';eventInvite.hidden=true;
   eventInvite.setAttribute('role','group');eventInvite.setAttribute('aria-label','校園活動邀請');host.append(eventInvite);
+  const eventPose=new EventPlayerPose(sitting=>{
+    if(sitting){bike.riding=false;avatar.riding=false;physics.setRiding(false,avatar.heading);clearAuto();autoFollow=false;}
+    const host=campusEvents?.activity?.definition.host;
+    const point=host && !npcs?.isAbsent(host)?npcs?.get(host)?.position:undefined;
+    const heading=sitting?eventSeatHeading(physics.position,point):undefined;
+    avatar.setSeated(sitting,heading);rig.setSeated(sitting,heading);
+  });
+  const questChoice=(quest:string,step:string)=>quests?.progress.quests[quest]?.choices[step];
   const eventSpeech=new Map<string,{text:string;until:number}>();
   let eventMoveFailed=false,eventWalkSeconds=0;
   const eventQueue=new EventCommandQueue({
@@ -892,6 +1002,13 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     say:(id,text)=>{if(npcs && !npcs.isAbsent(id))eventSpeech.set(id,{text,until:performance.now()+7000});},
     invite:c=>{eventInvite.innerHTML=`<strong>${safe(npcs?.displayName(c.host)??c.host)}</strong><p>${safe(c.text)}</p><button type="button" data-event-answer="yes">${safe(c.accept)}</button><button type="button" data-event-answer="no">${safe(c.decline)}</button>`;},
     objective:text=>director?.ui.eventObjective(text,()=>cancelCampusActivity()),
+    pose:(pose,at)=>eventPose.request(pose,at),
+    rhythm:command=>startRhythm(command),stopRhythm:()=>stopRhythm(),questChoice,
+    achievement:id=>{
+      const fresh=!campus.progress.achievements.includes(id);campus.achieve(id);
+      // Album already listens to Campus.achieve and owns the normal toast and fanfare.
+      if(fresh&&!album)director?.ui.toast('achievement',id==='silence'?'一分鐘':id==='audience'?'聽眾':id);
+    },
     counter:id=>{campus.count(id);album?.evaluate();},reward:id=>director?.ui.toast('stamp',id),
     moveFailed:()=>{eventMoveFailed=true;say('步道暫時不通，這次活動先停下，稍後再來。',4000);},
   });
@@ -905,12 +1022,12 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     return !!npcs && !npcs.isAbsent(id) && !npcs.get(id)?.talking && !storyUsesNpc(id) && !(id==='m3-thief' && (chase.active || miniGameActive));
   }
   function eventPaused() {
-    return campusEventsPaused({walking:walking && storyStarted && routesValidated,overview,dialogue:!!director?.ui.dialogueOpen,
+    return document.hidden || campusEventsPaused({walking:walking && storyStarted && routesValidated,overview,dialogue:!!director?.ui.dialogueOpen,
       menu:menuOpen(),notebook:!!notebook?.open,photo:photo.active,game:miniGameActive||chase.active||!!quiz?.open,
       blocking:!!director?.blocking,encounter:!!encounters?.active,guide:guide.open});
   }
-  function eventWorld():CampusEventWorld {
-    return campusEventWorld({timeOfDay:()=>sky.preset,distanceTo:questDistance,hasItem:id=>campus.progress.items.includes(id),npcPresent:id=>!!npcs&&!npcs.isAbsent(id)},npcDefinitions?.events??[],eventNpcAvailable);
+  function eventWorld():RuntimeEventWorld {
+    return campusEventWorld({playerMoving:()=>movementRequested||playerMoved||movementIntent()||(eventPose.requested&&!eventPose.sitting),questChoice,timeOfDay:()=>sky.preset,distanceTo:questDistance,hasItem:id=>campus.progress.items.includes(id),npcPresent:id=>!!npcs&&!npcs.isAbsent(id)},npcDefinitions?.events??[],eventNpcAvailable);
   }
   function cancelCampusActivity() {
     eventQueue.clear();eventStorage?.discard();if(eventCommitted)campusEvents?.restore(eventCommitted);
@@ -921,6 +1038,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   eventInvite.addEventListener('click',e=>{
     const answer=(e.target as HTMLElement).closest<HTMLElement>('[data-event-answer]')?.dataset.eventAnswer;
     if(!answer || eventPaused() || !campusEvents?.activity || !eventNpcAvailable(campusEvents.activity.definition.host))return;
+    if(answer==='yes' && activityPresentation(campusEvents)?.definition.steps.some(s=>s.kind==='rhythm'))sound.prepareActivity();
     eventQueue.push(campusEvents.respond(answer==='yes'));eventQueue.flush();eventInvite.hidden=true;
   });
   function updateCampusActivity(dt:number,time:number) {
@@ -934,12 +1052,55 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     eventQueue.flush(paused);
     eventQueue.push(campusEvents.update(dt,eventWorld(),paused || eventQueue.busy));eventQueue.flush(paused);
     if(eventMoveFailed){eventMoveFailed=false;cancelCampusActivity();return;}
+    updateActivityPresentation(paused);
     if(!eventQueue.busy && !campusEvents.activity) {try{eventStorage?.commit();eventCommitted=campusEvents.snapshot();}catch{eventStorage?.discard();storageFailed();}}
     eventInvite.hidden=paused || campusEvents.activity?.phase!=='invited';
     host.classList.toggle('has-campus-event-invite',!eventInvite.hidden);
     director.ui.root.classList.toggle('event-paused',paused);
     void time;
   }
+  function movementIntent() {
+    return input.stick.lengthSq()>.01 || input.jump || ['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].some(k=>input.keys.has(k)) || autoPath.length>0;
+  }
+  function updatePlayerPose() {
+    const activity=campusEvents && activityPresentation(campusEvents),step=activity?.definition.steps[activity.step];
+    const reach=step?.kind==='stay'?step.max:2;
+    const near=!eventPose.target || questDistance(eventPose.target)<=reach;
+    const moving=movementRequested||playerMoved||movementIntent()||!physics.onGround;
+    eventPose.update(moving,near);
+    if(rhythm && moving)cancelCampusActivity();
+  }
+  function startRhythm(command:RhythmCommand) {
+    clearAuto();autoFollow=false;
+    rhythmOwner=campusEvents?.activity?.instance;
+    rhythm=sound.startRhythm(command);
+    director?.ui.rhythm(rhythm.round.sample(),clapRhythm);
+  }
+  function stopRhythm() { sound.stopRhythm();rhythm=undefined;rhythmOwner=undefined;director?.ui.rhythm(null); }
+  function clapRhythm(eventTimestamp?:number) {
+    if(!rhythm)return;
+    const at=rhythm.captureTime(eventTimestamp),paused=eventPaused();
+    sound.prepareActivity();sound.updateRhythm(paused,at);
+    if(!paused)rhythm.clap(at);
+    director?.ui.rhythm(rhythm.round.sample(),clapRhythm);
+  }
+  function updateActivityPresentation(paused:boolean) {
+    const activity=campusEvents && activityPresentation(campusEvents);
+    director?.ui.stayProgress(activity?.stepProgress);
+    if(rhythm) {
+      if(!activity || activity.instance!==rhythmOwner){stopRhythm();}
+      else {
+        const frame=sound.updateRhythm(paused)!;
+        director?.ui.rhythm(frame,clapRhythm);
+        if(frame.done&&!paused) {
+          const id=rhythm.round.spec.id,hits=frame.hits;stopRhythm();
+          eventQueue.push(submitRhythmResult(campusEvents!,id,hits));eventQueue.flush();
+        }
+      }
+    }
+    if(!campusEvents?.activity && !eventQueue.busy){eventPose.request('stand');sound.stopRhythm();director?.ui.stayProgress();}
+  }
+
   function updateEventSpeech(time:number) {
     const bubbles:Parameters<NonNullable<typeof director>['ui']['npcSpeech']>[0][number][]=[];
     for(const [id,line] of eventSpeech) {
@@ -983,8 +1144,13 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   }
   /** Objects appear only with their step, and only once the collision world can say what floor they stand on. */
   function syncSpots() { if (routesValidated && quests) spotField?.sync(activeSpotIds(quests.list())); }
+  let activityGuideTarget:string|undefined;
   function syncFocus() {
-    guideOverride = trackedGuide(); director?.setGuideOverride(guideOverride, sideSummary());
+    const activityGuide=campusActivityGuide(campusEvents?.activity,questPoint);
+    if(activityGuide?.target!==activityGuideTarget && autoFollow && (activityGuide || autoTarget===activityGuideTarget)){clearAuto();autoFollow=false;}
+    activityGuideTarget=activityGuide?.target;
+    guideOverride = activityGuide ?? trackedGuide(); director?.setGuideOverride(guideOverride, sideSummary());
+    director?.ui.eventGuidance(activityGuide?toggleFollow:undefined,autoFollow&&autoTarget===activityGuide?.target,!!activityGuide&&questDistance(activityGuide.target)<=activityGuide.max);
     const target = guideOverride?.target ?? director?.goalTarget;
     npcs?.setFocus(target?.startsWith('npc:') ? target.slice(4) : undefined);
   }
@@ -1118,7 +1284,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     album?.evaluate(); // chapters count toward achievements
   }
   function startStoryWhenReady() {
-    if(!director || storyStarted || !routesValidated || !(opts.story || (walking && !overview)))return;
+    if(sceneLoading || !director || storyStarted || !routesValidated || !(opts.story || (walking && !overview)))return;
     storyStarted=true;director.start(placeTour);scheduleNpcs(true);
   }
   /** Once both the path network and the landmark collision exist, remove path edges the real world blocks. */
@@ -1151,12 +1317,15 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   /** Auto-walk to the current quest goal: indoor navmesh where it reaches, else the outdoor path network. */
   function followQuest() {
     if(!routesValidated) { say('場景碰撞與步道仍在準備，請稍候再開始帶路。');return; }
+    syncFocus(); // A G press can arrive between respond() and the next animation frame.
     routes?.avoid.splice(0); // stuck spots only matter within one auto-walk
-    const tracked = trackedQuest(), target = tracked ? trackedTarget(tracked) : director?.goalTarget ?? undefined;
+    const activityGuide=campusActivityGuide(campusEvents?.activity,questPoint);
+    if(activityGuide && questDistance(activityGuide.target)<=activityGuide.max){clearAuto();autoFollow=false;say('已抵達活動地點。',2500);return;}
+    const tracked = trackedQuest(), target = activityGuide?.target ?? (tracked ? trackedTarget(tracked) : director?.goalTarget ?? undefined);
     const goal = target ? walkGoal(target) : undefined;
     if(tracked && !goal) { autoFollow = false; say(target?.startsWith('npc:') ? '這位人物目前不在校園；請在手帳選擇『切換至人物出現時段』後再前往。' : '這個地點目前還沒有路線。',6000);return; }
     if (!goal || director?.blocking) { autoFollow = false; say('目前沒有需要前往的地點。', 2500); return; }
-    autoFollow = walkToPoint(goal, tracked?.definition.title ?? (director!.objectiveText || '任務地點'));
+    autoFollow = walkToPoint(goal, activityGuide?.title ?? tracked?.definition.title ?? (director!.objectiveText || '任務地點'));
     if (autoFollow) autoTarget = target;
   }
   /** G and the objective card: set off, or call off the walk under way. */
@@ -1202,7 +1371,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     const yaw=face?Math.atan2(-(face.x-p.x),-(face.z-p.z)):rig.yaw;
     avatar.face(yaw);rig.yaw=yaw;rig.snap(physics.position);return true;
   }
-  void (async () => {
+  startupJobs.push((async () => {
     try {
       const [graph, zones, story, npcData, collection, quizData] = await Promise.all([
         OutdoorRoutes.load(asset('data/walkthrough/outdoor-graph.json')),
@@ -1218,7 +1387,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       zoneLabels = Object.fromEntries(Object.entries(zones.zones).map(([id,z]) => [id,z.label]));
       validateRoutes();
       npcs = new NpcManager(zones, routes, terrainRef, asset, npcData); scene.add(npcs.group);
-      void (async()=>{try {
+      startupJobs.push((async()=>{try {
       // Rendering and simplified collisions register together, independently of story feature loads.
       const occ = world.display.userData.occupancy as { at(x: number, z: number): number } | undefined;
       const keep = [...Object.values(zones.zones).map(z => ({ x: z.p[0], z: z.p[1], r: 2.5 })),
@@ -1232,7 +1401,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
         seaLevel: terrainRef?.seaLevel ?? -.4, keepClear: keep,
       }), TIERS[tier].detail.props), asset, (x, z) => terrainRef ? terrainRef.heightAt(x, z) : -.055, () => alive).then(group => { if (!alive) return; const specs = (group.userData.obstacles ?? []) as Obstacle[]; physics.addObstacles(specs); obstacleField.add(specs); growable?.setVolumes('campus-props', vegetationBoxes(specs)); featureStatus.props='ready'; });
       } catch(e) { featureStatus.props='degraded'; console.warn('props',e); }
-      finally { propsReady=true;validateRoutes(); } })();
+      finally { propsReady=true;validateRoutes(); } })());
       npcDefinitions = npcData;
       npcs.setCollision((id,a,b,r,h) => physics.sweepActor(id,a,b,r,h), (x,z,y) => physics.supportAt(x,z,y));
       npcs.cap = NPC_CAP[tier];
@@ -1301,9 +1470,9 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       // The tour begins when the player starts walking (or straight away from the map's 'start the tour').
       // A fresh tour starts at the school gate beside 阿灣 (not 475 m away at the arcade); arrivals from the
       // map's "take me there" keep their place.
-      startStoryWhenReady();
+      await questReady;startStoryWhenReady();
     } catch (e) { if (!alive) return; console.warn('story', e); say('故事模式暫時無法載入；仍可自由探索。', 4000); }
-  })();
+  })());
 
   // ---- mini-games (spec-v4 §9.3–9.5) --------------------------------------------------------
   let quiz: Quiz | undefined;
@@ -1426,7 +1595,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       if (director?.blocking && autoPath.length) clearAuto();
       if (walkResumes({ wasBlocking, blocking: !!director?.blocking, follow: autoFollow, walking: autoPath.length > 0 })) followQuest();
       wasBlocking = !!director?.blocking;
-      const jump = input.takeJump() && !bike.riding; if (jump) clearAuto(true);
+      const jump = input.takeJump() && !bike.riding; if (jump) {movementRequested=true;clearAuto(true);}
       const wasGround = physics.onGround;
       bike.update(physics.position);
       if (bike.riding && !avatar.rideReady) { bike.riding = false; say('腳踏車與人物姿勢仍在準備，請稍候。', 2500); }
@@ -1439,6 +1608,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     }
     const speed = Math.hypot(physics.position.x - previous.x, physics.position.z - previous.z) / Math.max(dt, 1e-3);
     const surfaceHeight = physics.supportAt(physics.position.x, physics.position.z, physics.position.y);
+    playerMoved=speed>.05 || Math.abs(physics.position.y-previous.y)>.03;
+    updatePlayerPose();
     avatar.update(dt, { foot: physics.position, onGround: physics.onGround, airborneFor: physics.airborneFor, speed, intendedSpeed: physics.intendedSpeed, heading: direction, jumped, runSpeed: RUN_SPEED, surfaceHeight, supportAt: routeSurface.support });
     if (bike.riding && !avatar.riding) { bike.riding = false; physics.setRiding(false, avatar.heading); say('前後輪無法同時貼住路面，已下車步行。', 2500); }
     animateDoors(world.doors, physics.position, dt);
@@ -1449,7 +1620,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     chase.update(dt, physics.position);
     // Waits for the tour placement: the player still stands on the default spawn (the arcade) until then.
     if (!overview && walking && storyStarted) album?.update(time, physics.position);
-    updateCampusActivity(dt,time);
+    updateCampusActivity(dt,time);movementRequested=false;
     syncFocus();
     if (guideOverride && !pocket.hidden && time - pocketAt > 500) {
       pocketAt = time;
@@ -1464,6 +1635,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     }
     if (!overview && storyStarted && !photo.active && !notebook?.open && !menuOpen()) director?.update(time, dt);
     else director?.ui.badge(null);
+    if(eventPose.sitting || rhythm){director?.ui.badge(null);director?.ui.pointer(null);}
     updateEventSpeech(time);
     // This is exactly the candidate that E and the touch button will execute.
     if (director) {
@@ -1472,7 +1644,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       const chosen=selectInteraction(candidates,selectedInteraction,pickedByHand);
       shownInteractions=candidates; selectedInteraction=chosen?.id;
       const badges:Parameters<typeof director.ui.npcBadges>[0][number][]=[];
-      if(quests && npcs && !overview && walking && !director.blocking && !menuOpen() && !notebook?.open && !photo.active && !guide.open) {
+      if(quests && npcs && !eventPose.sitting && !rhythm && !overview && walking && !director.blocking && !menuOpen() && !notebook?.open && !photo.active && !guide.open) {
         for(const [id,status] of npcQuestStatuses(quests,questWorld())) {
           const npc=npcs.get(id);if(!npc || npcs.isAbsent(id) || !npc.root.visible || npc.position.distanceTo(physics.position)>25)continue;
           const point=npc.position.clone().add(new T.Vector3(0,2.5,0)).project(camera);
@@ -1534,17 +1706,6 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   host.classList.add('is-overview'); orbit.enabled = true;
   camera.position.set(-560, 260, 330); orbit.target.set(-40, 0, 20); orbit.update();
   get('[data-action=walk]').classList.remove('is-active'); get('[data-action=overview]').classList.add('is-active');
-  frameId = requestAnimationFrame(animate);
-  // Arrivals from the campus map.
-  if (opts.target) {
-    const d = world.destinations.find(d => d.id === `${opts.target}-1F-entrance`);
-    chooseMode(false);
-    // One waiter until navigation / routes are ready; runs once at entry, never per frame.
-    const wait = () => { if (!alive) return; if (routesValidated && (d ? navigation : routes)) { if (d) goTo(d); else walkOutdoor(opts.target!); } else window.setTimeout(wait, 300); };
-    wait();
-  } else if (opts.overview) chooseMode(true);
-  else if (opts.story) chooseMode(false);
-
   // Read-only acceptance hooks: observations and real input paths, never hidden teleport navigation.
   (window as unknown as { campusWalk: unknown }).campusWalk = {
     get position() { return physics.position.toArray(); },
@@ -1637,7 +1798,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     /** QA only: hide scene groups by name prefix to measure their draw cost. */
     qaHide: (prefix: string, hidden = true) => { if (!QA) return 0; let n = 0; scene.traverse(o => { if (o.name.startsWith(prefix)) { o.visible = !hidden; n++; } }); return n; },
     get photo() { return { active: photo.active, yaw: photo.yaw, pitch: photo.pitch, goal: host.querySelector('.photo-goal:not([hidden])')?.textContent ?? null, sun: sky.sunDir.toArray() }; },
-    get campusEvents() { return {activity:campusEvents?.activity,progress:campusEvents?.snapshot(),commandsPending:eventQueue.busy}; },
+    get campusEvents() { return {seated:eventPose.sitting,rhythm:rhythm?.round.sample(),activity:campusEvents?.activity,progress:campusEvents?.snapshot(),commandsPending:eventQueue.busy}; },
     get game() { return { quiz: quiz?.open ?? false, chase: chase.active, timer: host.querySelector('.q-timer:not([hidden])')?.textContent ?? null, monkey: npcs?.get('m3-thief')?.position.toArray() }; },
     get sound() { return { enabled: sound.enabled, state: sound.state, music: sound.musicPlaying }; },
     get destinations() { return world.destinations; },
@@ -1645,8 +1806,9 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     goTo: (code: string) => { const d = world.destinations.find(d => d.label === code); if (d) goTo(d); },
     get route() { return autoPath.map(p => p.toArray()); },
     get chapterCard() { return !!host.querySelector('.q-chapter'); },
-    get navReady() { return !!navigation && routesValidated; },
-    get worldReady() { return routesValidated; },
+    get navReady() { return !sceneLoading && !!navigation && routesValidated; },
+    get worldReady() { return !sceneLoading && routesValidated; },
+    get shaderWarmup() { return {status:featureStatus.warmup,ms:shaderWarmupMs,loading:sceneLoading,...shaderWarmupStages,postMs:shaderWarmupPostMs}; },
     get featureStatus() { return {...featureStatus}; },
     get landmarkUi() { return QA ? campusUi?.landmarkDiagnostics : undefined; },
     get tunnelProfile() { if (!QA || !uiPlacements?.tunnel || !terrainRef) return undefined; const p=fullTunnelProfile(uiPlacements.tunnel,(x,z)=>terrainRef!.heightAt(x,z)); return {length:p.length,sections:p.sections.map(s=>({position:s.position.toArray(),tangent:s.tangent.toArray(),right:s.right.toArray(),distance:s.distance}))}; },
@@ -1668,4 +1830,34 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       return [...groups].sort((a, b) => b[1].draws - a[1].draws).slice(0, 40);
     },
   };
+  // Keep the loading cover until all existing concurrent scene jobs (including nested props) settle.
+  await waitForSceneAssets(startupJobs);
+  if(!alive)return;
+  const warmupAt=performance.now();
+  try {
+    lod.update(physics.position,{overview,buildingId:inspectedBuilding,floorId:floorSelect.value});
+    scene.add(warmupSamples());
+    shaderWarmupStages=await warmupWalkScene(renderer,scene,camera,TIERS[tier].post);
+    if(!alive)return;
+    if(TIERS[tier].post){
+      // Warm the small post-processing shader set as well, behind the loading cover.
+      post.setSize(1,1);const postAt=performance.now();
+      try {post.render(scene,camera);} finally {shaderWarmupPostMs=performance.now()-postAt;post.setSize(innerWidth*renderer.getPixelRatio(),innerHeight*renderer.getPixelRatio());}
+    }
+    featureStatus.warmup='ready';
+  } catch(error) {featureStatus.warmup='degraded';console.warn('shader warmup',error);}
+  finally {shaderWarmupMs=performance.now()-warmupAt;}
+  if(!alive)return;
+  sceneLoading=false;stopLoadingTips();get('.walk-loading').hidden=true;input.release();input.mode='walk';
+  lastTime=performance.now();
+  frameId = requestAnimationFrame(animate);
+  // Arrivals from the campus map.
+  if (opts.target) {
+    const d = world.destinations.find(d => d.id === `${opts.target}-1F-entrance`);
+    chooseMode(false);
+    // One waiter until navigation / routes are ready; runs once at entry, never per frame.
+    const wait = () => { if (!alive) return; if (routesValidated && (d ? navigation : routes)) { if (d) goTo(d); else walkOutdoor(opts.target!); } else window.setTimeout(wait, 300); };
+    wait();
+  } else if (opts.overview) chooseMode(true);
+  else if (opts.story) chooseMode(false);
 }

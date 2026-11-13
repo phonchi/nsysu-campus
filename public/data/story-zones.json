@@ -92,6 +92,24 @@
     52.0
    ],
    "r": 6
+  },
+  "seawall-seat": {
+   "label": "蘿蔔坑旁的座位",
+   "sub": "SEAWALL SEAT",
+   "p": [
+    -313.5,
+    469.3
+   ],
+   "r": 3
+  },
+  "arcade-seat": {
+   "label": "柱廊旁的位子",
+   "sub": "ARCADE SEAT",
+   "p": [
+    -78.5,
+    127.5
+   ],
+   "r": 3
   }
  },
  "npcs": {

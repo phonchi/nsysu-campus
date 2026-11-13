@@ -20,6 +20,11 @@ export interface RigFrame {
 /** Third-person follow camera with a damped pivot, a collision-safe arm and a hard lock.
  * Manual walking never rotates the view; only drags (unlocked) and auto-routes do. */
 export class CameraRig {
+  seated = false;
+  private seatedHeading?:number;
+  setSeated(seated:boolean,heading?:number){this.seated=seated;this.seatedHeading=seated?heading:undefined;}
+  /** A seated eye/pivot is 45 cm lower; stand restores the same camera settings. */
+  private get poseOffset(){return this.seated ? -.45 : 0;}
   yaw = -Math.PI / 2;
   pitch = -.18;
   /** Arm length the player asked for (wheel / pinch). */
@@ -44,6 +49,7 @@ export class CameraRig {
 
   rotate(dx: number, dy: number) {
     if (this.locked) return;
+    this.seatedHeading=undefined; // A deliberate camera drag takes over after sitting down.
     this.yaw = wrap(this.yaw - dx * .004);
     this.pitch = MathUtils.clamp(this.pitch - dy * .003, PITCH_MIN, PITCH_MAX);
   }
@@ -56,7 +62,7 @@ export class CameraRig {
   toggleLock() { this.locked = !this.locked; return this.locked; }
 
   /** Snap the pivot after a teleport so the camera does not sweep across the campus. */
-  snap(foot: Vector3) { this.pivot.copy(foot).y += PIVOT; this.arm = this.distance; this.placed = true; }
+  snap(foot: Vector3) { this.pivot.copy(foot).y += PIVOT+this.poseOffset; this.arm = this.distance; this.placed = true; }
 
   update(dt: number, f: RigFrame) {
     const cam = this.camera;
@@ -65,16 +71,17 @@ export class CameraRig {
     const kx = damp(14, dt), ky = damp(7, dt);
     this.pivot.x += (f.foot.x - this.pivot.x) * kx;
     this.pivot.z += (f.foot.z - this.pivot.z) * kx;
-    this.pivot.y += (f.foot.y + PIVOT - this.pivot.y) * ky;
+    this.pivot.y += (f.foot.y + PIVOT + this.poseOffset - this.pivot.y) * ky;
     // A smoothed pivot can cut across a corner even while the player's capsule is safe.
     // Keep the pivot on the player's side of the wall before sweeping the camera arm.
-    this.anchor.copy(f.foot).y += PIVOT;
+    this.anchor.copy(f.foot).y += PIVOT+this.poseOffset;
     const offset = this.want.copy(this.pivot).sub(this.anchor), span = offset.length();
     if (span > 1e-5) {
       const free = Math.max(0, this.sweep(this.anchor, this.pivot, .16) - .01);
       if (free < span) this.pivot.copy(this.anchor).addScaledVector(offset, free / span);
     }
-    if (f.followHeading !== undefined && !this.locked) this.yaw = wrap(this.yaw + wrap(f.followHeading - this.yaw) * damp(2, dt));
+    if(this.seated && this.seatedHeading!==undefined)this.yaw=wrap(this.yaw+wrap(this.seatedHeading-this.yaw)*damp(6,dt));
+    else if (f.followHeading !== undefined && !this.locked) this.yaw = wrap(this.yaw + wrap(f.followHeading - this.yaw) * damp(2, dt));
     this.look.set(-Math.sin(this.yaw) * Math.cos(this.pitch), Math.sin(this.pitch), -Math.cos(this.yaw) * Math.cos(this.pitch));
     const targetFov = f.running && f.moving && !this.firstPerson ? 64 : 58;
     this.fov += (targetFov - this.fov) * damp(4, dt);

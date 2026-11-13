@@ -1,7 +1,7 @@
 import * as T from 'three';
 import { RideRig, soleSide, type RideDiagnostics } from './ride-rig';
 
-export type AvatarState = 'idle' | 'walk' | 'run' | 'jump' | 'fall' | 'land' | 'wave' | 'talk' | 'ride';
+export type AvatarState = 'idle' | 'walk' | 'run' | 'jump' | 'fall' | 'land' | 'wave' | 'talk' | 'ride' | 'sit';
 
 /** Clip names tried per state, first match wins (our Blender rigs and the CC0 packs differ). */
 const CLIPS: Record<AvatarState, string[]> = {
@@ -14,6 +14,7 @@ const CLIPS: Record<AvatarState, string[]> = {
   wave: ['Wave', 'Wave_Loop'],
   talk: ['Talk', 'Talking', 'Idle'],
   ride: ['Ride'],
+  sit: ['Sit','Sit_Idle','Sitting'],
 };
 const ONE_SHOT: AvatarState[] = ['jump', 'land', 'wave'];
 const damp = (k: number, dt: number) => 1 - Math.exp(-k * dt);
@@ -62,6 +63,16 @@ export class Avatar {
   private lastFrame?: AvatarInput;
   /** On the rental bike: seated pose, raised onto the saddle, the bike drawn under the avatar. */
   riding = false;
+  seated = false;
+  private seatedHeading?:number;
+  /** Both shipped student rigs have Sit. State is paired and never changes the physics footpoint. */
+  setSeated(value:boolean,heading?:number) {
+    if(value===this.seated)return;
+    this.seated=value;
+    this.seatedHeading=value?heading:undefined;
+    if(value){this.riding=false;this.wasRiding=false;this.rideRig?.reset();this.mixer?.stopAllAction();this.current=undefined;this.setState('sit');}
+    else {this.mixer?.stopAllAction();this.current=undefined;this.setState('idle');this.mixer?.update(0);if(this.model)this.model.position.y=0;}
+  }
   /** Saddle height above the feet for the seated clip. */
   seatLift = .42;
 
@@ -88,7 +99,7 @@ export class Avatar {
     }
     this.current = undefined;
     this.play(this.state, 0);
-    this.mixer?.update(0);this.rebuildRide();
+    this.mixer?.update(0);this.rebuildRide();if(this.seated){this.mixer?.stopAllAction();this.current=undefined;this.play('sit',0);}
   }
 
   get rideReady() { return this.rideRig?.ready ?? false; }
@@ -114,7 +125,7 @@ export class Avatar {
   face(angle: number) { this.facing = angle; this.root.rotation.y = angle; }
 
   /** Play a gesture (wave/talk) until movement resumes. */
-  gesture(state: 'wave' | 'talk') { this.setState(state); }
+  gesture(state: 'wave' | 'talk') { if(!this.seated)this.setState(state); }
 
   setOpacity(alpha: number) {
     this.root.visible = alpha > .02;
@@ -153,8 +164,15 @@ export class Avatar {
       const target = Math.atan2(-f.heading.x, -f.heading.z);
       this.facing = wrap(this.facing + wrap(target - this.facing) * damp(12, dt));
     }
+    if(this.seated && this.seatedHeading!==undefined)this.facing=wrap(this.facing+wrap(this.seatedHeading-this.facing)*damp(6,dt));
     this.root.rotation.y = this.facing;
 
+    // Sitting uses the authored pose; normal locomotion and ground-foot IK must not undo it.
+    if(this.seated) {
+      this.state='sit';this.root.scale.set(1,1,1);this.root.rotation.x=0;
+      if(this.vehicle)this.vehicle.visible=false;
+      this.mixer?.update(dt);this.wasGround=f.onGround;return;
+    }
     // State machine.
     const moving = Math.min(f.speed, f.intendedSpeed) > .25;
     if(this.riding&&!this.rideReady)this.riding=false;

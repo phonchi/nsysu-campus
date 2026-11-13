@@ -4780,7 +4780,42 @@
      "who": "photo-ju",
      "text": "夕陽這時候最好拍。"
     }
-   ]
+   ],
+   "activity": {
+    "id": "sunset-minute",
+    "host": "poet-wen",
+    "invite": "蘿蔔坑旁有位子。坐下，一分鐘，不講話。",
+    "accept": "好，我不講話",
+    "decline": "我再走走",
+    "inviteDelay": 2,
+    "steps": [
+     {
+      "kind": "stay",
+      "target": "zone:seawall-seat",
+      "max": 3,
+      "hold": 60,
+      "still": true,
+      "sit": true,
+      "text": "坐到蘿蔔坑旁的座位，安靜看夕陽 60 秒"
+     }
+    ],
+    "onDone": [
+     {
+      "kind": "say",
+      "who": "poet-wen",
+      "text": "念一句：「海把一天收走，留下光。」"
+     }
+    ],
+    "timeout": 180,
+    "cooldown": 120,
+    "journal": {
+     "title": "與阿文看一分鐘夕陽",
+     "done": "和阿文在蘿蔔坑旁安靜看了一分鐘夕陽。",
+     "abandoned": "這次沒有坐滿一分鐘。",
+     "declined": "這次先走走，阿文說位子會等。"
+    },
+    "achievement": "silence"
+   }
   },
   {
    "id": "ev-macaque-alert-sunset",
@@ -4810,7 +4845,73 @@
      "who": "guitar-yun",
      "text": "坐下聽一首吧。"
     }
-   ]
+   ],
+   "activity": {
+    "id": "night-song-beat",
+    "host": "guitar-yun",
+    "invite": "練一首新的。坐旁邊，拍點跟著拍手，行嗎？",
+    "accept": "好，我來拍",
+    "decline": "下次再聽",
+    "inviteDelay": 2,
+    "steps": [
+     {
+      "kind": "stay",
+      "target": "zone:arcade-seat",
+      "max": 2,
+      "hold": 2,
+      "sit": true,
+      "keepSeated": true,
+      "text": "坐到柱廊旁的位子"
+     },
+     {
+      "kind": "rhythm",
+      "id": "clap",
+      "cues": 8,
+      "interval": 3.6,
+      "lead": 2,
+      "window": 0.2,
+      "need": 5,
+      "text": "光圈縮到最小時拍手，拍到 5 拍"
+     }
+    ],
+    "onDone": [
+     {
+      "kind": "say",
+      "who": "guitar-yun",
+      "text": "有人拍手，練習就變表演了。"
+     },
+     {
+      "kind": "say",
+      "who": "guitar-yun",
+      "text": "開場用輕快小調，是你們在海堤決定的。",
+      "if": {
+       "quest": "sea-stage",
+       "step": "return",
+       "choice": "a"
+      }
+     },
+     {
+      "kind": "say",
+      "who": "guitar-yun",
+      "text": "慢慢的海風旋律，阿柏說是你選的。",
+      "if": {
+       "quest": "sea-stage",
+       "step": "return",
+       "choice": "b"
+      }
+     }
+    ],
+    "timeout": 180,
+    "cooldown": 120,
+    "journal": {
+     "title": "長廊夜唱的拍手",
+     "done": "跟著允哲的拍點拍手，聽完了一整首。",
+     "partial": "跟著拍了 {hits} 拍，歌還是聽完了。",
+     "abandoned": "這次沒有聽到最後。",
+     "declined": "這次先不坐下，允哲說他會一直練。"
+    },
+    "achievement": "audience"
+   }
   }
  ]
 }

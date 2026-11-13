@@ -1,6 +1,7 @@
 import { Vector2, Vector3 } from 'three';
 
 const MOVE_KEYS = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
+const STICK_RUN_THRESHOLD = .85;
 /** Keys the walkthrough owns while focus is not in a text field. */
 const OWNED = [...MOVE_KEYS, ' ', 'e', 'g', 'v', 'm', 'n', 'l', 'p', 'b', 'j', 'r', 'h', 'shift', '/', 'escape', '1', '2', '3', '4'];
 
@@ -28,7 +29,19 @@ export interface InputHooks {
 export class WalkInput {
   readonly keys = new Set<string>();
   readonly stick = new Vector2();
-  runToggle = false;
+  private _runToggle = false;
+  private runButton: HTMLButtonElement | null;
+  get runToggle() { return this._runToggle; }
+  set runToggle(value: boolean) {
+    this._runToggle = value;
+    // Runtime's is-running/aria-pressed reports all run sources; keep the latch separate.
+    if (this.runButton) {
+      this.runButton.dataset.toggle = value ? 'on' : 'off';
+      this.runButton.setAttribute('aria-label', `持續奔跑：${value ? '已開啟，再按關閉' : '已關閉，按下開啟'}`);
+      const state = this.runButton.querySelector('[data-run-toggle-state]');
+      if (state) state.textContent = value ? '開' : '關';
+    }
+  }
   jump = false;
   private lookId = -1;
   private stickId = -1;
@@ -40,7 +53,8 @@ export class WalkInput {
   /** Switching modes drops held keys, so a key held into a dialogue never keeps walking afterwards. */
   set mode(m: InputMode) { if (m !== this._mode) { this._mode = m; this.release(); } }
 
-  constructor(canvas: HTMLElement, joystick: HTMLElement, knob: HTMLElement, private hooks: InputHooks) {
+  constructor(canvas: HTMLElement, private joystick: HTMLElement, private knob: HTMLElement, private hooks: InputHooks) {
+    this.runButton = joystick.parentElement?.querySelector<HTMLButtonElement>('[data-action=run]') ?? null;
     const signal = this.abort.signal;
     window.addEventListener('keydown', e => {
       const k = e.key.toLowerCase();
@@ -87,19 +101,31 @@ export class WalkInput {
       const v = new Vector2(e.clientX - r.left - r.width / 2, e.clientY - r.top - r.height / 2).divideScalar(38);
       if (v.length() > 1) v.normalize();
       this.stick.copy(v);
+      joystick.classList.toggle('is-stick-running', this.stickRunning);
       knob.style.transform = `translate(${v.x * 30}px,${v.y * 30}px)`;
     };
     joystick.addEventListener('pointerdown', e => {
-      if (this.stickId !== -1) return;
+      if (this._mode !== 'walk' || this.stickId !== -1) return;
       this.stickId = e.pointerId; joystick.setPointerCapture(e.pointerId); moveStick(e); hooks.moveStarted();
     }, { signal });
     joystick.addEventListener('pointermove', e => { if (e.pointerId === this.stickId) moveStick(e); }, { signal });
-    const endStick = (e: PointerEvent) => { if (e.pointerId === this.stickId) { this.stickId = -1; this.stick.set(0, 0); knob.style.transform = ''; } };
+    const endStick = (e: PointerEvent) => { if (e.pointerId === this.stickId) this.releaseStick(); };
     joystick.addEventListener('pointerup', endStick, { signal });
     joystick.addEventListener('pointercancel', endStick, { signal });
+    joystick.addEventListener('lostpointercapture', endStick, { signal });
   }
 
-  get running() { return this.runToggle || this.keys.has('shift'); }
+  private get stickRunning() { return this.stick.lengthSq() >= STICK_RUN_THRESHOLD ** 2; }
+  get running() { return this.runToggle || this.keys.has('shift') || this.stickRunning; }
+
+  private releaseStick() {
+    const id = this.stickId;
+    this.stickId = -1;
+    this.stick.set(0, 0);
+    this.knob.style.transform = '';
+    this.joystick.classList.remove('is-stick-running');
+    if (id !== -1 && this.joystick.hasPointerCapture(id)) this.joystick.releasePointerCapture(id);
+  }
 
   /** Requested movement relative to the camera's ground forward; length ≤ 1. */
   direction(forward: Vector3, out = new Vector3()) {
@@ -114,7 +140,7 @@ export class WalkInput {
   /** Read-and-clear the jump press. */
   takeJump() { const j = this.jump; this.jump = false; return j; }
 
-  release() { this.keys.clear(); this.stick.set(0, 0); this.jump = false; this.lookId = -1; this.stickId = -1; }
+  release() { this.keys.clear(); this.releaseStick(); this.jump = false; this.lookId = -1; }
 
-  dispose() { this.abort.abort(); if (document.pointerLockElement) document.exitPointerLock(); }
+  dispose() { this.abort.abort(); this.release(); if (document.pointerLockElement) document.exitPointerLock(); }
 }
