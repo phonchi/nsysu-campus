@@ -2,7 +2,7 @@ import { Vector2, Vector3 } from 'three';
 
 const MOVE_KEYS = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
 /** Keys the walkthrough owns while focus is not in a text field. */
-const OWNED = [...MOVE_KEYS, ' ', 'e', 'g', 'v', 'm', 'n', 'l', 'p', 'b', 'j', 'r', 'h', 'shift', '/', 'escape'];
+const OWNED = [...MOVE_KEYS, ' ', 'e', 'g', 'v', 'm', 'n', 'l', 'p', 'b', 'j', 'r', 'h', 'shift', '/', 'escape', '1', '2', '3', '4'];
 
 /** Who owns the keyboard (spec-v4 §15.4). Outside "walk" no movement is recorded and no walk shortcut fires;
  * every key goes to `modal` instead (photo mode still records movement keys for its camera). */
@@ -15,6 +15,8 @@ export interface InputHooks {
   press(key: string): void;
   /** The player started moving by hand (keys or stick). */
   moveStarted(): void;
+  /** Up/down belong to the visible interaction list while it has multiple rows. */
+  interactionListOpen?(): boolean;
   /** Camera drag in pixels (unlocked third person / first person). */
   look(dx: number, dy: number): void;
   zoom(delta: number): void;

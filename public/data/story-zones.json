@@ -74,6 +74,24 @@
     468.7
    ],
    "r": 20
+  },
+  "macaque-path": {
+   "label": "生科館旁步道",
+   "sub": "MACAQUE PATH",
+   "p": [
+    79.0,
+    66.0
+   ],
+   "r": 6
+  },
+  "macaque-slope": {
+   "label": "生科館邊坡",
+   "sub": "SLOPE",
+   "p": [
+    90.0,
+    52.0
+   ],
+   "r": 6
   }
  },
  "npcs": {

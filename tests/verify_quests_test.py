@@ -76,6 +76,57 @@ class VerifyQuestsTests(unittest.TestCase):
         for text in ('step IDs/count changed', 'reward changed', 'old template result'):
             self.assertTrue(any(text in e for e in errors), errors)
 
+    def test_save_contract_catches_moves_without_a_legacy_order(self):
+        quests = self.data[0]['quests']
+        mia = next(q for q in quests if q['id'] == 'gate-mia')
+        self.assertEqual(mia['revision'], 2)
+        self.assertEqual(mia['legacyStepOrder'], self.data[0]['saveContract']['quests']['gate-mia']['steps'])
+        del mia['legacyStepOrder']
+        lost = next(q for q in quests if q['id'] == 'gate-lost')
+        lost['steps'][1], lost['steps'][2] = lost['steps'][2], lost['steps'][1]
+        lost['revision'] = 1
+        errors = self.errors()
+        self.assertTrue(any('gate-mia: legacyStepOrder must equal' in e for e in errors), errors)
+        self.assertTrue(any('gate-lost: steps moved without a revision bump' in e for e in errors), errors)
+        self.assertTrue(any('gate-lost: legacyStepOrder must equal' in e for e in errors), errors)
+
+    def test_save_contract_covers_every_quest_and_choice(self):
+        quests = self.data[0]['quests']
+        del self.data[0]['saveContract']['quests']['math-day']
+        self.data[0]['saveContract']['quests']['ghost'] = {'steps': ['return'], 'reward': 'x', 'gate': 'c1-gate', 'choices': {}}
+        quests[0]['steps'][-1]['choices'][0]['id'] = 'z'
+        errors = self.errors()
+        self.assertTrue(any('math-day: quest missing from the save contract' in e for e in errors), errors)
+        self.assertTrue(any('ghost: quest in the save contract no longer exists' in e for e in errors), errors)
+        self.assertTrue(any('gate-lost/return: saved choice ids' in e for e in errors), errors)
+
+    def test_rewritten_quests_end_on_return_with_choices(self):
+        for q in self.data[0]['quests']:
+            self.assertEqual(q['steps'][-1]['id'], 'return', q['id'])
+            self.assertGreaterEqual(len(q['steps'][-1]['choices']), 2, q['id'])
+        q = self.data[0]['quests'][0]
+        q['steps'].append({'id': 'extra', 'target': 'npc:guard-chung', 'text': 'x', 'lines': [{'who': 'guard-chung', 'text': 'x'}]})
+        self.assertTrue(any('gate-lost: delivery must be last' in e for e in self.errors()))
+
+    def test_route_warnings_report_long_legs_and_retracing(self):
+        quests, _, npcs, zones, chapters, graph, _ = self.data
+        warnings = module.route_warnings(quests, npcs, zones, chapters, graph)
+        self.assertTrue(any(w.startswith('tunnel-leaflet: npc:s1 → spot:tunnel-leaflets-mouth is 4') for w in warnings), warnings)
+        self.assertTrue(any(w.startswith('library-bookmark: retrace') for w in warnings), warnings)
+        self.assertFalse(any(w.startswith('gate-lost:') or w.startswith('arcade-coffee:') for w in warnings), warnings)
+        legs, total, net = module.quest_route(next(q for q in quests['quests'] if q['id'] == 'gate-lost'), quests['spots'], module.placements(npcs, zones, chapters, graph)[2], len(chapters['chapters']))
+        self.assertLess(total, 25)
+        self.assertEqual([a for a, _, _ in legs], ['npc:guard-chung', 'npc:guard-chung', 'spot:gate-notice', 'spot:gate-lost-ledger'])
+        # A warning never fails the build: verify() ignores distances.
+        lost = next(q for q in quests['quests'] if q['id'] == 'gate-lost')
+        lost['steps'][2]['target'] = 'npc:clerk-jie'
+        lost['steps'][2]['lines'] = [{'who': 'clerk-jie', 'text': '還沒有人來認領。'}]
+        del quests['spots']['gate-lost-ledger']
+        self.assertEqual(self.errors(), [])
+        warnings = module.route_warnings(quests, npcs, zones, chapters, graph)
+        self.assertTrue(any(w.startswith('gate-lost: spot:gate-notice → npc:clerk-jie is 7') for w in warnings), warnings)
+        self.assertTrue(any(w.startswith('gate-lost: retrace 100%') for w in warnings), warnings)
+
     def test_chapter_gate_and_encounter_schedule(self):
         self.data[0]['quests'][0]['accept']['chapterDone'] = 'missing'
         next(e for e in self.data[1]['encounters'] if e['id'] == 'rolling-ball')['when'] = 'sunset'

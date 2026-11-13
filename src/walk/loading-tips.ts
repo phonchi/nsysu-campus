@@ -1,7 +1,7 @@
 /** Rotating lines on the loading screen: controls, then campus facts already sourced in the story and campus data. */
 
 export const LOADING_TIP_MS = 4000;
-const CONTROL_TIPS = ['靠近人物按 E 交談，有人可能正需要你幫忙。', '迷路時按 G，人物會自動走到目標。', '有些人只在特定時段出現，按 N 切換白天、夕陽與夜晚。', '按 ? 隨時可以看操作說明。'];
+const CONTROL_TIPS = ['靠近人物按 E 交談；多個項目會自動列出，可點選或按 1–4。', '迷路時按 G，人物會自動走到目標。', '有些人只在特定時段出現，按 N 切換白天、夕陽與夜晚。', '按 ? 隨時可以看操作說明。'];
 const FACT_MARK = '【校史小知識】';
 
 interface LoadingSources {

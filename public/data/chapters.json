@@ -256,13 +256,18 @@
     ]
   },
   "sideQuests": [
-    {"id": "story-sunset", "fromCampusInfo": "sunset", "title": "海堤的兩人座", "hint": "校碑旁的海堤，找一個凹進去的位子。"},
+    {"id": "story-sunset", "fromCampusInfo": "sunset", "title": "海堤的蘿蔔坑", "hint": "校碑旁的海堤，找學校說的海邊雅座。"},
     {"id": "story-tunnel", "fromCampusInfo": "tunnel", "title": "洞口的回音", "hint": "回到隧道校園側的洞口看看拱圈。"},
     {"id": "story-lions", "fromCampusInfo": "lions", "title": "摸獅頭", "hint": "行政大樓正門階梯前，有兩隻在等你。"},
     {"id": "story-zoo", "fromCampusInfo": "zoo", "title": "動物園搬走以後", "hint": "行政大樓附近，以前住過另一群鄰居。"},
     {"id": "story-bodhi", "fromCampusInfo": "bodhi", "title": "菩提樹下的投票", "hint": "去中庭的老菩提樹那邊走走。"},
-    {"id": "story-library", "fromCampusInfo": "library", "title": "高樓對海", "hint": "圖資大樓前，抬頭看看那頂皇冠。"},
-    {"id": "story-monkeys", "fromCampusInfo": "monkeys", "title": "猴學長的規矩", "hint": "長廊東側常有猴學長，記得食物收好。"},
-    {"id": "story-gallery", "fromCampusInfo": "gallery", "title": "海邊的老房子", "hint": "還有一顆在海邊很遠的地方，去過的人不多。"}
+    {"id": "story-library", "fromCampusInfo": "library", "title": "戴皇冠的大樓", "hint": "圖資大樓前，抬頭看看那頂皇冠。"},
+    {"id": "story-monkeys", "fromCampusInfo": "monkeys", "title": "猴學長的規矩", "hint": "生科館旁的邊坡常有猴學長，記得食物收好。"},
+    {"id": "story-gallery", "fromCampusInfo": "gallery", "title": "海邊的老房子", "hint": "還有一顆在海邊很遠的地方，去過的人不多。"},
+    {"id": "story-tunnel-drama", "fromCampusInfo": "tunnel-drama", "title": "洞裡的一齣戲", "hint": "隧道校園側的洞口旁。"},
+    {"id": "story-macaque-subsidy", "fromCampusInfo": "macaque-subsidy", "title": "一餐一百元", "hint": "理工長廊的取餐桌旁。"},
+    {"id": "story-yu-dean", "fromCampusInfo": "yu-dean", "title": "詩人院長", "hint": "圖資大樓前的廣場。"},
+    {"id": "story-macaque-jacks", "fromCampusInfo": "macaque-jacks", "title": "系辦的不速之客", "hint": "理學院中庭的報到桌旁。"},
+    {"id": "story-macaque-burger", "fromCampusInfo": "macaque-burger", "title": "早八的漢堡", "hint": "理工長廊的攤位旁。"}
   ]
 }

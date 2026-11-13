@@ -3,6 +3,7 @@ import { runTalk, entryNode, type Effect, type Facts, type MinigameId, type Tree
 import type { Campus } from './collection';
 import type { StoryEngine } from './engine';
 import type { StoryUi, CastEntry } from './ui';
+import type { CampusEventDefinition } from './campus-events';
 import type { PortraitSpec } from './portraits';
 
 type Sched = { at: string | [number, number]; offset?: [number, number]; activity?: string } | null;
@@ -10,7 +11,7 @@ export interface NpcDef {
   id: string; name: string; role: string; model: string; look?: Record<string, string>; portrait: PortraitSpec;
   schedule: Record<'day' | 'sunset' | 'night', Sched>; talk?: string; minigame?: MinigameId; observe?: boolean;
 }
-export interface NpcData { version: number; npcs: NpcDef[]; trees: Record<string, Tree>; events?: { id: string; when: string; npcs: string[]; banner: string }[] }
+export interface NpcData { version: number; npcs: NpcDef[]; trees: Record<string, Tree>; events?: CampusEventDefinition[] }
 export interface CollectionData {
   version: number;
   items: { id: string; name: string; desc: string }[];
@@ -23,6 +24,8 @@ export interface TalkWorld {
   /** Nearest NPC within reach that has a talk tree (or is observable). */
   nearest(player: T.Vector3, reach: number): string | undefined;
   position(id: string): T.Vector3 | undefined;
+  present?(id: string): boolean;
+  playerPosition?(): T.Vector3;
   setTalking(id: string | undefined): void;
   timeOfDay(): string;
   cue(id: string): void;
@@ -55,17 +58,24 @@ export class TalkDirector {
     count: c => this.campus.progress.counters[c] ?? 0,
   };
 
-  /** Who would answer an E press right now (for the "E 交談" hint). */
-  candidate(player: T.Vector3) {
-    if (this.busy) return undefined;
-    const id = this.world.nearest(player, 3);
-    const n = id ? this.byId.get(id) : undefined;
-    return n && (n.talk || n.observe) ? n : undefined;
+  /** Every present talk/observe NPC in reach; never collapse a crowd to the nearest one. */
+  candidate(player: T.Vector3): NpcDef[] {
+    if (this.busy) return [];
+    return [...this.byId.values()].filter(n => {
+      const p = this.world.position(n.id);
+      return (n.talk || n.observe) && this.world.present?.(n.id) !== false && p && p.distanceTo(player) <= 3;
+    }).sort((a,b) => this.world.position(a.id)!.distanceTo(player)-this.world.position(b.id)!.distanceTo(player) || a.id.localeCompare(b.id));
   }
 
-  /** E pressed in walk mode after the story declined it; returns true when a conversation starts. */
   press(player: T.Vector3) {
-    const n = this.candidate(player);
+    const n = this.candidate(player)[0];
+    return n ? this.pressId(n.id, player) : false;
+  }
+
+  /** The UI-selected identity survives movement by other NPCs. Revalidate immediately before opening. */
+  pressId(npcId: string, player = this.world.playerPosition?.()) {
+    if (!player) return false;
+    const n = this.candidate(player).find(n => n.id === npcId);
     if (!n) return false;
     if (n.observe || !n.talk) { this.world.toast(`${n.name}：${n.role}（遠遠看就好，不要靠近）`); return true; }
     void this.talk(n.id);

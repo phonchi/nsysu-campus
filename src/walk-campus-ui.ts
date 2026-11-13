@@ -8,7 +8,9 @@ import { PLAY_BOUNDS } from './world/terrain';
 import { landmarkUiLabels, nearbyLandmarkUi, type LandmarkUiOptions } from './campus-label-catalog';
 
 interface Link {label:string;url:string;}
-export interface CampusInfo {buildings:Record<string,{name:string;college:string;summary:string;facts:string[];links:Link[]}>;stories:{id:string;title:string;pos:Point2;text:string;sources:Link[]}[];}
+export interface CampusInfo {buildings:Record<string,{name:string;college:string;summary:string;facts:string[];links:Link[]}>;stories:{id:string;title:string;pos:Point2;text:string;sources:Link[];category?:'history'|'news'|'legend'}[];}
+export const storyCategoryLabel=(category?:string)=>category==='news'?'新聞記載':category==='legend'?'校園趣聞':'校史';
+const categoryTag=(category?:string)=>`<span class="walk-story-category">${storyCategoryLabel(category)}</span>`;
 interface Hooks {goToBuilding(id:string):void;inspectBuilding(id:string):void;focusLandmark?(id:string):void;say(text:string,ms?:number):void;}
 const safe=(s:string)=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 const STORE='nsysu-walk-stories-v1';
@@ -65,14 +67,14 @@ export class CampusUi {
   this.card.hidden=false;this.storyCard.hidden=true;
  }
  private listStories(){
-  this.storyCard.innerHTML=`<button class="walk-card-close" data-card="close" aria-label="關閉">×</button><div class="walk-card-chip">校園故事收集</div><h2>${this.collected.size} ／ ${this.info.stories.length}</h2><ol class="walk-story-list">${this.info.stories.map(s=>`<li class="${this.collected.has(s.id)?'is-found':''}">${this.collected.has(s.id)?safe(s.title):'？？？（在校園裡找找發光的寶石）'}</li>`).join('')}</ol>`;
+  this.storyCard.innerHTML=`<button class="walk-card-close" data-card="close" aria-label="關閉">×</button><div class="walk-card-chip">校園故事收集</div><h2>${this.collected.size} ／ ${this.info.stories.length}</h2><ol class="walk-story-list">${this.info.stories.map(s=>`<li class="${this.collected.has(s.id)?'is-found':''}">${this.collected.has(s.id)?safe(s.title):'？？？（在校園裡找找發光的寶石）'} ${categoryTag(s.category)}</li>`).join('')}</ol><p class="walk-story-note">怪談類傳說查無可引用來源，暫不收錄。</p>`;
   this.storyCard.hidden=false;this.card.hidden=true;
  }
  /** E key: read a nearby story. Returns true when handled. */
  interact(foot:T.Vector3){
   const s=this.nearStory;if(!s)return false;
   const isNew=!this.collected.has(s.id);this.collected.add(s.id);writeCollected(this.collected);this.refreshCounter();
-  this.storyCard.innerHTML=`<button class="walk-card-close" data-card="close" aria-label="關閉">×</button><div class="walk-card-chip">${isNew?'新收集・':''}校園故事 ${this.collected.size}／${this.info.stories.length}</div><h2>${safe(s.title)}</h2><p>${safe(s.text)}</p><div class="walk-card-links">${s.sources.map(l=>`<a href="${safe(l.url)}" target="_blank" rel="noopener">${safe(l.label)} ↗</a>`).join('')}</div>`;
+  this.storyCard.innerHTML=`<button class="walk-card-close" data-card="close" aria-label="關閉">×</button><div class="walk-card-chip">${isNew?'新收集・':''}校園故事 ${this.collected.size}／${this.info.stories.length}</div><h2>${safe(s.title)} ${categoryTag(s.category)}</h2><p>${safe(s.text)}</p><div class="walk-card-links">${s.sources.map(l=>`<a href="${safe(l.url)}" target="_blank" rel="noopener">${safe(l.label)} ↗</a>`).join('')}</div>`;
   this.storyCard.hidden=false;this.card.hidden=true;void foot;return true;
  }
  private readonly dummy=new T.Object3D();private lastAvoid=-1e9;private avoid:DOMRect[]=[];

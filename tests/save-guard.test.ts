@@ -69,6 +69,12 @@ describe('quest save', () => {
     expect(s.seed[QUEST_KEY]).toBe(newer);
     removeSave(s, QUEST_KEY);
   });
+  it('writes the step id and revision with every quest state, under the save version', () => {
+    const s = memory();
+    const e = new QuestEngine(data, { storage: s });
+    expect(e.accept('q', { distanceTo: () => 0, timeOfDay: () => 'day' })).toBe(true);
+    expect(JSON.parse(s.seed[QUEST_KEY])).toMatchObject({ saveVersion: SAVE_VERSION, quests: { q: { status: 'active', step: 0, stepId: 's', revision: 1 } } });
+  });
   it('recovers accepted quests from the backup', () => {
     const s = memory();
     const e = new QuestEngine(data, { storage: s });

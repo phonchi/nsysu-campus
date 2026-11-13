@@ -34,9 +34,27 @@ export type DoorResult = { kind: 'opened' | 'closed'; door: WorldDoor } | { kind
 
 /** Toggle the nearest door; refuses to close it on someone standing in the doorway. */
 export function toggleDoor(world: WalkWorld, foot: Vector3): DoorResult {
-  const d = nearestDoor(world, foot);
-  if (!d) return { kind: 'none' };
+  return toggleDoorById(world, foot, nearestDoor(world, foot)?.id ?? '');
+}
+
+/** Execute the named door only, rechecking reach and doorway occupancy. */
+export function toggleDoorById(world: WalkWorld, foot: Vector3, doorId: string, expectedTarget?: number): DoorResult {
+  const d = world.doors.find(d => d.id === doorId);
+  if (!d || d.position.distanceTo(foot) >= 2.15 || (expectedTarget !== undefined && d.target !== expectedTarget)) return { kind: 'none' };
   if (d.target && occupiesDoor(d, foot)) return { kind: 'blocked', door: d };
   d.target = d.target ? 0 : 1;
   return { kind: d.target ? 'opened' : 'closed', door: d };
+}
+
+/** Consecutive steps at the same target remain one conversation, but never skip a photo,
+ * repeat an unchanged step, or bypass its current distance/time requirements. */
+export function continueQuestAtTarget(previous: import('../story/quests').QuestStep, next: import('../story/quests').QuestStep | undefined, world: import('../story/quests').QuestWorld): boolean {
+  return !!next && next.id!==previous.id && next.target===previous.target && next.kind!=='photo'
+    && world.distanceTo(next.target)<=(next.radius??4) && (!next.when || next.when===world.timeOfDay());
+}
+
+/** Future availability is the authored schedule, independent of story placement or culling now. */
+export function npcPresentAt(definitions: readonly import('../story/talk').NpcDef[], id:string, time:string): boolean {
+  const npc=definitions.find(n=>n.id===id);
+  return !!npc && (time==='day'||time==='sunset'||time==='night') && npc.schedule[time]!=null;
 }

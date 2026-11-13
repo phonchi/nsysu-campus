@@ -921,6 +921,19 @@
     },
     {
      "if": {
+      "all": [
+       {
+        "chapterDone": "c6-sunset"
+       },
+       {
+        "notFlag": "guide.story-told"
+       }
+      ]
+     },
+     "node": "v10-stories"
+    },
+    {
+     "if": {
       "chapterDone": "c6-sunset"
      },
      "node": "free"
@@ -1341,6 +1354,24 @@
        "text": "再五分鐘。阿忠伯會來趕，到時再走。"
       }
      ]
+    },
+    "v10-stories": {
+     "lines": [
+      {
+       "who": "guide",
+       "text": "學校說海堤邊的座位是我們的海邊雅座，叫蘿蔔坑。"
+      },
+      {
+       "who": "guide",
+       "text": "傍晚來坐，就懂為什麼。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "guide.story-told"
+      }
+     ],
+     "next": "free"
     }
    }
   },
@@ -1606,6 +1637,10 @@
         "notFlag": "s1.friend"
        },
        "next": "friend"
+      },
+      {
+       "text": "「有什麼校園故事？」",
+       "next": "v10-stories"
       }
      ]
     },
@@ -1649,11 +1684,44 @@
        "setFlag": "s1.friend"
       }
      ]
+    },
+    "v10-stories": {
+     "lines": [
+      {
+       "who": "s1",
+       "text": "聽說有堂早八，獼猴衝進教室搶走漢堡！"
+      },
+      {
+       "who": "s1",
+       "text": "新聞都有報。我的早餐現在都收在包包裡。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "s1.story-told"
+      }
+     ]
     }
    }
   },
   "s2": {
    "entries": [
+    {
+     "if": {
+      "all": [
+       {
+        "chapterDone": "c3-admin"
+       },
+       {
+        "flag": "s2.met"
+       },
+       {
+        "notFlag": "s2.story-told"
+       }
+      ]
+     },
+     "node": "v10-stories"
+    },
     {
      "if": {
       "all": [
@@ -1784,11 +1852,56 @@
        "text": "或者你又把學生證弄丟。"
       }
      ]
+    },
+    "v10-stories": {
+     "lines": [
+      {
+       "who": "s2",
+       "text": "2018 年全校網路公投過銅像去留。"
+      },
+      {
+       "who": "s2",
+       "text": "結果是孫中山像留下，蔣中正像移到校內別處。"
+      },
+      {
+       "who": "s2",
+       "text": "門口那兩隻銅獅，2024 年耶誕還戴過紅白毛帽。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "s2.story-told"
+      }
+     ],
+     "next": "root"
     }
    }
   },
   "s3": {
    "entries": [
+    {
+     "if": {
+      "all": [
+       {
+        "chapterDone": "c4-library"
+       },
+       {
+        "any": [
+         {
+          "flag": "s3.recommend"
+         },
+         {
+          "flag": "s3.yu"
+         }
+        ]
+       },
+       {
+        "notFlag": "s3.story-told"
+       }
+      ]
+     },
+     "node": "v10-stories"
+    },
     {
      "if": {
       "all": [
@@ -1936,6 +2049,24 @@
        "text": "到期前記得還。"
       }
      ]
+    },
+    "v10-stories": {
+     "lines": [
+      {
+       "who": "s3",
+       "text": "這棟圖資大樓是 1989 年開館的。"
+      },
+      {
+       "who": "s3",
+       "text": "從海堤看過來，頂上那圈斜頂像不像皇冠？"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "s3.story-told"
+      }
+     ],
+     "next": "root"
     }
    }
   },
@@ -2295,6 +2426,19 @@
     },
     {
      "if": {
+      "all": [
+       {
+        "flag": "clerk-jie.met"
+       },
+       {
+        "notFlag": "clerk-jie.story-told"
+       }
+      ]
+     },
+     "node": "v10-stories"
+    },
+    {
+     "if": {
       "flag": "clerk-jie.met"
      },
      "node": "again"
@@ -2453,6 +2597,24 @@
        "text": "雨衣很重要，這裡的雨說來就來。"
       }
      ]
+    },
+    "v10-stories": {
+     "lines": [
+      {
+       "who": "clerk-jie",
+       "text": "海邊那棟行館，原本是 1935 年博覽會的高雄觀光館。"
+      },
+      {
+       "who": "clerk-jie",
+       "text": "2023 年底修好，連以前的溫浴池遺構都復原了。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "clerk-jie.story-told"
+      }
+     ],
+     "next": "menu"
     }
    }
   },
@@ -2844,6 +3006,19 @@
    "entries": [
     {
      "if": {
+      "all": [
+       {
+        "flag": "quiz-dian.met"
+       },
+       {
+        "notFlag": "quiz-dian.story-told"
+       }
+      ]
+     },
+     "node": "v10-stories"
+    },
+    {
+     "if": {
       "flag": "quiz-dian.won"
      },
      "node": "again-won"
@@ -2999,11 +3174,42 @@
        "setFlag": "quiz-dian.failed"
       }
      ]
+    },
+    "v10-stories": {
+     "lines": [
+      {
+       "who": "quiz-dian",
+       "text": "西子灣隧道又叫壽山洞，1927 年 8 月貫通。"
+      },
+      {
+       "who": "quiz-dian",
+       "text": "二戰末期改作防空洞，2004 年登錄成歷史建築。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "quiz-dian.story-told"
+      }
+     ],
+     "next": "menu"
     }
    }
   },
   "monkey-volunteer-man": {
    "entries": [
+    {
+     "if": {
+      "all": [
+       {
+        "flag": "monkey-volunteer-man.met"
+       },
+       {
+        "notFlag": "monkey-volunteer-man.story-told"
+       }
+      ]
+     },
+     "node": "v10-stories"
+    },
     {
      "if": {
       "flag": "monkey-volunteer-man.chase-done"
@@ -3184,6 +3390,28 @@
        "text": "追太近了。牠跑進山裡，袋子也沒了。再來一次。"
       }
      ]
+    },
+    "v10-stories": {
+     "lines": [
+      {
+       "who": "monkey-volunteer-man",
+       "text": "記住四不：不外露食物、不餵食、不接觸、不攻擊。"
+      },
+      {
+       "who": "monkey-volunteer-man",
+       "text": "2024 年學校還試辦過被搶食補償，每餐最多一百元。"
+      },
+      {
+       "who": "monkey-volunteer-man",
+       "text": "十七個人申請過。食物收好，最省事。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "monkey-volunteer-man.story-told"
+      }
+     ],
+     "next": "menu"
     }
    }
   },
@@ -3712,6 +3940,19 @@
     },
     {
      "if": {
+      "all": [
+       {
+        "flag": "ta-lin.met"
+       },
+       {
+        "notFlag": "ta-lin.story-told"
+       }
+      ]
+     },
+     "node": "v10-stories"
+    },
+    {
+     "if": {
       "flag": "ta-lin.usb-returned"
      },
      "node": "thanks-again"
@@ -3839,6 +4080,24 @@
        "text": "看你的課表，不是看我。下一堂是實驗。"
       }
      ]
+    },
+    "v10-stories": {
+     "lines": [
+      {
+       "who": "ta-lin",
+       "text": "新聞說有隻「中山賈克斯」闖進系辦偷普渡供品。"
+      },
+      {
+       "who": "ta-lin",
+       "text": "辦公室門窗記得關。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "ta-lin.story-told"
+      }
+     ],
+     "next": "menu"
     }
    }
   },
@@ -4125,6 +4384,10 @@
       {
        "text": "「為什麼不念別人的詩？」",
        "next": "why"
+      },
+      {
+       "text": "「有什麼校園故事？」",
+       "next": "v10-stories"
       }
      ]
     },
@@ -4162,6 +4425,31 @@
       {
        "who": "poet-wen",
        "text": "念了就不是我的了。"
+      }
+     ]
+    },
+    "v10-stories": {
+     "lines": [
+      {
+       "who": "poet-wen",
+       "text": "余光中 1985 年來中山當文學院院長。"
+      },
+      {
+       "who": "poet-wen",
+       "text": "在海邊寫詩的人，我們這裡有前輩。"
+      },
+      {
+       "who": "poet-wen",
+       "text": "2021 年有學生劇團在隧道防空洞演《昭和二十》。"
+      },
+      {
+       "who": "poet-wen",
+       "text": "戲在真的坑道裡演，聲音會不一樣。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "poet-wen.story-told"
       }
      ]
     }
@@ -4373,52 +4661,156 @@
   {
    "id": "ev-club-fair",
    "when": "day",
+   "anchor": "npc:club-ocean-ting",
+   "radius": 20,
    "npcs": [
     "club-ocean-ting",
     "coffee-kai"
    ],
-   "banner": "社團擺攤，長廊中段熱鬧起來"
+   "banner": "社團擺攤，長廊中段熱鬧起來",
+   "title": "長廊的社團擺攤",
+   "journal": "白天的理工長廊，海洋社的攤位擺出來了。",
+   "lines": [
+    {
+     "who": "club-ocean-ting",
+     "text": "來猜一題海洋冷知識吧！"
+    },
+    {
+     "who": "coffee-kai",
+     "text": "攤位旁記得留走道。"
+    }
+   ]
   },
   {
    "id": "ev-macaque-alert-day",
    "when": "day",
+   "anchor": "npc:m3-thief",
+   "radius": 25,
    "npcs": [
     "monkey-volunteer-man",
-    "m3-thief",
-    "m1"
+    "m3-thief"
    ],
-   "banner": "哨聲響起，大膽從樹上下來了"
+   "banner": "哨聲響起，大膽沿著邊坡走下來了",
+   "title": "白天的獼猴警戒",
+   "journal": "生科館旁的邊坡，阿滿姐吹哨提醒大家：大膽要下來了。",
+   "zone": "macaque-path",
+   "lines": [
+    {
+     "who": "monkey-volunteer-man",
+     "text": "大膽下來了，食物先收好。"
+    }
+   ],
+   "activity": {
+    "id": "macaque-coexist",
+    "host": "monkey-volunteer-man",
+    "invite": "牠要從這條路過。點心收進包包，退開幾步讓路，好嗎？",
+    "accept": "好，我讓路",
+    "decline": "我先走了",
+    "prepare": [
+     {
+      "kind": "move",
+      "npc": "m3-thief",
+      "to": "zone:macaque-path"
+     }
+    ],
+    "inviteDelay": 5,
+    "steps": [
+     {
+      "kind": "action",
+      "id": "stash",
+      "text": "把點心收進包包",
+      "needs": "item-bread"
+     },
+     {
+      "kind": "keepAway",
+      "npc": "m3-thief",
+      "min": 4,
+      "hold": 2,
+      "text": "退到 4 公尺外，讓大膽過去",
+      "then": [
+       {
+        "kind": "move",
+        "npc": "m3-thief",
+        "to": "zone:macaque-slope"
+       }
+      ]
+     }
+    ],
+    "onDone": [
+     {
+      "kind": "say",
+      "who": "monkey-volunteer-man",
+      "text": "不餵食、不接觸，食物收好，牠就會自己走。"
+     }
+    ],
+    "onEnd": [
+     {
+      "kind": "release",
+      "npc": "m3-thief"
+     }
+    ],
+    "timeout": 90,
+    "cooldown": 600,
+    "journal": {
+     "title": "與大膽共處",
+     "done": "點心收好、退開讓路，大膽自己走回邊坡了。",
+     "abandoned": "這次沒有留到最後。",
+     "declined": "這次先離開，阿滿姐說下次再一起。"
+    },
+    "reward": "與大膽共處見聞",
+    "counter": "whistle"
+   }
   },
   {
    "id": "ev-sunset-crowd",
    "when": "sunset",
+   "anchor": "zone:seawall",
+   "radius": 30,
    "npcs": [
     "photo-ju",
     "guide",
     "poet-wen",
-    "jogger-po",
-    "intl-mia"
+    "jogger-po"
    ],
-   "banner": "夕陽時間，蘿蔔坑坐滿了人"
+   "banner": "夕陽時間，蘿蔔坑坐滿了人",
+   "title": "海堤的夕陽人潮",
+   "journal": "傍晚的西子灣海堤，蘿蔔坑坐滿了看夕陽的人。",
+   "lines": [
+    {
+     "who": "photo-ju",
+     "text": "夕陽這時候最好拍。"
+    }
+   ]
   },
   {
    "id": "ev-macaque-alert-sunset",
    "when": "sunset",
+   "anchor": "npc:m3-thief",
+   "radius": 25,
    "npcs": [
-    "monkey-volunteer-man",
-    "m3-thief",
-    "m1"
+    "m3-thief"
    ],
-   "banner": "哨聲響起，食物收好"
+   "banner": "大膽在海堤晃，食物收好",
+   "title": "海堤上的大膽",
+   "journal": "傍晚大膽跑到海堤，盯著大家手上的點心。"
   },
   {
    "id": "ev-night-song",
    "when": "night",
+   "anchor": "zone:arcade",
+   "radius": 25,
    "npcs": [
-    "guitar-yun",
-    "guard-chung"
+    "guitar-yun"
    ],
-   "banner": "長廊夜唱，柱廊燈全亮"
+   "banner": "長廊夜唱，柱廊燈全亮",
+   "title": "長廊夜唱",
+   "journal": "夜裡的理工長廊，允哲彈起吉他，柱廊燈全亮。",
+   "lines": [
+    {
+     "who": "guitar-yun",
+     "text": "坐下聽一首吧。"
+    }
+   ]
   }
  ]
 }

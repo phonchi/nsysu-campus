@@ -3,16 +3,28 @@ import { readSave, removeSave, writeSave } from './save-guard';
 import type { QuestSpot } from '../world/quest-spots';
 export interface QuestChoice { id: string; label: string; result: string }
 export interface QuestStep { id: string; target: string; text: string; lines?: { who: string; text: string }[]; radius?: number; kind?: 'interact' | 'photo'; choices?: QuestChoice[]; when?: string }
-export interface QuestDefinition { id: string; title: string; zone: string; npc: string; description: string; reward: string; accept: { near: string; chapterDone?: string; lines?: { who: string; text: string }[] }; absent?: Record<string, string>; steps: QuestStep[] }
-export interface QuestData { version: number; quests: QuestDefinition[]; spots?: Record<string, QuestSpot> }
-export interface QuestState { status: 'active' | 'completed'; step: number; choices: Record<string, string>; photoBaseline?: number }
-export interface JournalEntry { id: string; kind: 'quest' | 'encounter' | 'legacy'; title: string; text: string; at: number; zone: string; npc: string; choice?: string; result?: string; reward?: string }
+/** `revision` counts content rewrites (1 = the original); a rewrite that reordered steps also lists `legacyStepOrder`, the step
+ * ids in revision-1 order, so a save made before `stepId` existed (it only knew its index) still lands on the same step. */
+export interface QuestDefinition { id: string; title: string; zone: string; npc: string; description: string; reward: string; revision?: number; legacyStepOrder?: string[]; accept: { near: string; chapterDone?: string; lines?: { who: string; text: string }[] }; absent?: Record<string, string>; steps: QuestStep[] }
+/** What a revision-1 save may refer to, kept with the data so that `tools/verify_quests.py` checks every rewrite against it. */
+export interface QuestSaveContract { revision: 1; quests: Record<string, { steps: string[]; reward: string; gate: string; choices: Record<string, string[]> }> }
+export interface QuestData { version: number; quests: QuestDefinition[]; spots?: Record<string, QuestSpot>; saveContract?: QuestSaveContract }
+/** `step` is the index into the current steps; `stepId` is what survives a rewrite (steps keep their id when they move). */
+export interface QuestState { status: 'active' | 'completed'; step: number; stepId?: string; revision?: number; choices: Record<string, string>; photoBaseline?: number }
+export interface JournalEntry { id: string; kind: 'quest' | 'encounter' | 'legacy' | 'event'; title: string; text: string; at: number; zone: string; npc: string; choice?: string; result?: string; reward?: string }
+export const JOURNAL_KINDS: readonly JournalEntry['kind'][] = ['quest', 'encounter', 'legacy', 'event'];
 export interface QuestProgress { version: 1; quests: Record<string, QuestState>; journal: JournalEntry[]; rewards: string[]; tracked?: string; legacySnapshotTaken?: boolean }
-export interface QuestWorld { distanceTo(target: string): number; timeOfDay(): string; photoCount?: number; chapterDone?(id: string): boolean }
+/** `npcPresent` (spec-v10 §8): is this person on campus at the current time of day? Missing means yes.
+ * `npcPresentAt` is the same question for another time of day; with it, `acceptableTimes()` can say when a blocked quest opens. */
+export interface QuestWorld { distanceTo(target: string): number; timeOfDay(): string; photoCount?: number; chapterDone?(id: string): boolean; npcPresent?(npcId: string): boolean; npcPresentAt?(npcId: string, time: string): boolean }
 export interface QuestView { definition: QuestDefinition; state?: QuestState; step?: QuestStep }
 export interface QuestOptions { storage?: Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>; now?: () => number; onChange?: () => void; onStorageError?: () => void; onStep?: (quest: QuestDefinition, next: QuestStep | undefined) => void }
 export const QUEST_KEY = 'nsysu-campus-journal-v5';
+export const TIMES_OF_DAY = ['day', 'sunset', 'night'] as const;
 const fresh = (): QuestProgress => ({ version: 1, quests: {}, journal: [], rewards: [] });
+export const questRevision = (q: QuestDefinition) => q.revision ?? 1;
+/** People a quest's steps talk to, after the one it is accepted from. */
+export const chainNpcs = (q: QuestDefinition) => [...new Set(q.steps.flatMap(s => s.target.startsWith('npc:') ? [s.target.slice(4)] : []))];
 export function validateQuests(data: QuestData): string[] {
   const errors: string[] = [], ids = new Set<string>();
   for (const q of data.quests) {
@@ -21,8 +33,21 @@ export function validateQuests(data: QuestData): string[] {
     if (!q.steps.some(s => (s.choices?.length ?? 0) >= 2)) errors.push(`missing choice ${q.id}`);
     if (new Set(q.steps.map(s => s.id)).size !== q.steps.length) errors.push(`duplicate step ${q.id}`);
     for (const s of q.steps) if (s.choices && new Set(s.choices.map(c => c.id)).size !== s.choices.length) errors.push(`duplicate choice ${q.id}/${s.id}`);
+    if (q.revision !== undefined && (!Number.isInteger(q.revision) || q.revision < 1)) errors.push(`bad revision ${q.id}`);
+    if (q.legacyStepOrder) {
+      if (questRevision(q) < 2) errors.push(`legacy order without a rewrite ${q.id}`);
+      for (const id of q.legacyStepOrder) if (!q.steps.some(s => s.id === id)) errors.push(`legacy step ${q.id}/${id} no longer exists`);
+    }
   }
   return errors;
+}
+/** Which current step an old save's position means: by id first, by revision-1 index second, nothing when neither fits. */
+export function resolveStep(q: QuestDefinition, s: { step?: unknown; stepId?: unknown }): number | undefined {
+  if (typeof s.stepId === 'string') { const i = q.steps.findIndex(x => x.id === s.stepId); return i < 0 ? undefined : i; }
+  if (!Number.isInteger(s.step) || (s.step as number) < 0) return undefined;
+  const order = q.legacyStepOrder ?? q.steps.map(x => x.id), id = order[Math.min(s.step as number, order.length - 1)];
+  const i = q.steps.findIndex(x => x.id === id);
+  return i < 0 ? undefined : i;
 }
 export class QuestEngine {
   readonly progress: QuestProgress = fresh();
@@ -43,18 +68,25 @@ export class QuestEngine {
     if (!raw || typeof raw !== 'object') return;
     const p = raw as Partial<QuestProgress>;
     this.progress.legacySnapshotTaken = p.legacySnapshotTaken === true;
+    if (Array.isArray(p.journal)) {
+      const seen = new Set<string>();
+      this.progress.journal = p.journal.filter((x): x is JournalEntry => !!x && typeof x.id === 'string' && !seen.has(x.id) && !!seen.add(x.id) && typeof x.title === 'string' && typeof x.text === 'string' && Number.isFinite(x.at) && typeof x.zone === 'string' && typeof x.npc === 'string' && JOURNAL_KINDS.includes(x.kind));
+    }
     for (const q of this.data.quests) {
       const s = p.quests?.[q.id];
       if (!s || !['active', 'completed'].includes(s.status) || !Number.isInteger(s.step) || s.step < 0 || s.step > q.steps.length) continue;
       const choices: Record<string, string> = {};
       for (const step of q.steps) if (step.choices?.some(c => c.id === s.choices?.[step.id])) choices[step.id] = s.choices[step.id];
-      this.progress.quests[q.id] = { status: s.status, step: s.status === 'completed' ? q.steps.length : Math.min(s.step, q.steps.length - 1), choices, photoBaseline: typeof s.photoBaseline === 'number' ? s.photoBaseline : 0 };
+      // A finished quest stays finished whatever its steps became; an active one follows its step id across a rewrite.
+      let step = q.steps.length;
+      if (s.status === 'active') {
+        const resolved = resolveStep(q, s);
+        step = resolved ?? 0;
+        if (resolved === undefined) this.entry({ id: `${q.id}:reset:${questRevision(q)}`, kind: 'quest', title: q.title, text: '任務內容更新後，先前的進度對不上新的步驟，從第一步重新開始。', zone: q.zone, npc: q.npc });
+      }
+      this.progress.quests[q.id] = { status: s.status, step, stepId: q.steps[step]?.id, revision: questRevision(q), choices, photoBaseline: typeof s.photoBaseline === 'number' ? s.photoBaseline : 0 };
     }
     if (Array.isArray(p.rewards)) this.progress.rewards = [...new Set(p.rewards.filter(x => typeof x === 'string'))];
-    if (Array.isArray(p.journal)) {
-      const seen = new Set<string>();
-      this.progress.journal = p.journal.filter((x): x is JournalEntry => !!x && typeof x.id === 'string' && !seen.has(x.id) && !!seen.add(x.id) && typeof x.title === 'string' && typeof x.text === 'string' && Number.isFinite(x.at) && typeof x.zone === 'string' && typeof x.npc === 'string' && ['quest', 'encounter', 'legacy'].includes(x.kind));
-    }
     // Pre-marker v5 builds may already have mislabeled current facts as 'before the update'.
     // Retain the evidence and stable IDs, but do not assert an unknowable source version.
     if (p.legacySnapshotTaken !== true) this.progress.journal = this.progress.journal.map(entry =>
@@ -63,14 +95,21 @@ export class QuestEngine {
   }
   list(): QuestView[] { return this.data.quests.map(definition => { const state = this.progress.quests[definition.id]; return { definition, state, step: state?.status === 'active' ? definition.steps[state.step] : undefined }; }); }
   unlocked(q: QuestDefinition, world: QuestWorld) { return !q.accept.chapterDone || world.chapterDone?.(q.accept.chapterDone) === true; }
+  /** People the quest will need who are not on campus right now (spec-v10 §3): accepting it would mean a walk to nobody. */
+  missingNpcs(q: QuestDefinition, world: QuestWorld) { return chainNpcs(q).filter(id => world.npcPresent?.(id) === false); }
+  /** Times of day when every person the quest needs is on campus; undefined when the world cannot say. */
+  acceptableTimes(q: QuestDefinition, world: QuestWorld): string[] | undefined {
+    if (!world.npcPresentAt) return undefined;
+    return TIMES_OF_DAY.filter(time => chainNpcs(q).every(id => world.npcPresentAt!(id, time) !== false) && q.steps.every(s => !s.when || s.when === time));
+  }
   acceptable(world: QuestWorld): QuestView[] {
     // A first step spoken by the same NPC plays on acceptance, so it must be possible right now.
-    return this.list().filter(v => { const first = v.definition.steps[0]; return !v.state && this.unlocked(v.definition, world) && world.distanceTo(v.definition.accept.near) <= 4 && (first.target !== v.definition.accept.near || !first.when || first.when === world.timeOfDay()); });
+    return this.list().filter(v => { const first = v.definition.steps[0]; return !v.state && this.unlocked(v.definition, world) && world.distanceTo(v.definition.accept.near) <= 4 && (first.target !== v.definition.accept.near || !first.when || first.when === world.timeOfDay()) && !this.missingNpcs(v.definition, world).length; });
   }
   accept(id: string, world?: QuestWorld) {
     const q = this.data.quests.find(q => q.id === id);
     if (!q || !world || !this.acceptable(world).some(v => v.definition.id === id)) return false;
-    this.progress.quests[id] = { status: 'active', step: 0, choices: {}, photoBaseline: world?.photoCount ?? 0 };
+    this.progress.quests[id] = { status: 'active', step: 0, stepId: q.steps[0].id, revision: questRevision(q), choices: {}, photoBaseline: world?.photoCount ?? 0 };
     this.progress.tracked = id;
     this.entry({ id: `${id}:accepted`, kind: 'quest', title: q.title, text: q.description, zone: q.zone, npc: q.npc }); this.save(); return true;
   }
@@ -105,7 +144,7 @@ export class QuestEngine {
   private advance(v: QuestView, choice?: QuestChoice, photoCount?: number) {
     const q = v.definition, s = v.state!, step = v.step!;
     if (choice) s.choices[step.id] = choice.id;
-    s.step++; s.photoBaseline = photoCount ?? 0;
+    s.step++; s.stepId = q.steps[s.step]?.id; s.revision = questRevision(q); s.photoBaseline = photoCount ?? 0;
     const completed = s.step >= q.steps.length;
     if (completed) { s.status = 'completed'; if (!this.progress.rewards.includes(q.reward)) this.progress.rewards.push(q.reward); if (this.progress.tracked === q.id) this.progress.tracked = undefined; }
     this.entry({ id: `${q.id}:${step.id}`, kind: 'quest', title: q.title, text: step.text, zone: q.zone, npc: q.npc, choice: choice?.label, result: choice?.result ?? (completed ? '任務完成，謝謝你的幫忙！' : '完成這一步，接著前往下一個地點。'), reward: completed ? q.reward : undefined }); this.save();

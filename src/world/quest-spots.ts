@@ -7,7 +7,7 @@ import type { ActorBody } from '../walk/obstacles';
  * campus pays nothing and a step costs one draw call (plus its shadow). Low-poly and built here, reusing the street-prop
  * GLBs where the kind already exists. `stand` is where a walk stops, in front of the object, so that a solid object never
  * sits on the end of a route; +Z of an object faces `stand`. */
-export type SpotKind = 'notice' | 'sign' | 'planters' | 'stall' | 'shade' | 'reading' | 'bookmark' | 'drink' | 'leaflets' | 'marks' | 'checkin' | 'viewpoint';
+export type SpotKind = 'notice' | 'sign' | 'planters' | 'stall' | 'shade' | 'reading' | 'bookmark' | 'drink' | 'leaflets' | 'marks' | 'checkin' | 'viewpoint' | 'ledger' | 'dropbox' | 'board';
 export interface QuestSpot { kind: SpotKind; label: string; at: number[]; stand: number[]; /** About where the floor is, where the terrain above is not it: indoors, or in the tunnel under the hill. */ y?: number; /** What a viewpoint looks at. */ face?: number[] }
 
 interface Part { box?: [number, number, number]; cyl?: [number, number, number, number]; ring?: [number, number]; at: [number, number, number]; color: string; ry?: number; rx?: number }
@@ -31,6 +31,12 @@ export const SPOT_RECIPES: Record<SpotKind, Recipe> = {
   marks: { parts: [...cone(-1.1, -.5), ...cone(1.1, -.5), ...cone(-1.1, .7), ...cone(1.1, .7), { box: [2.2, .012, .1], at: [0, .01, -.5], color: GOLD }, { box: [2.2, .012, .1], at: [0, .01, .7], color: GOLD }] },
   checkin: { solid: [[-.6, 0, .4], [.6, 0, .4]], parts: [...table(.75, 1.7, .6), { box: [.5, .04, .34], at: [-.4, .8, 0], color: PAPER }, { box: [.5, .02, .34], at: [.3, .79, 0], color: GOLD }, { box: [.06, 1.5, .06], at: [.92, .75, -.24], color: DARK }, { box: [.7, .46, .04], at: [.92, 1.5, -.22], color: SEA }] },
   viewpoint: { parts: [{ ring: [.5, .68], at: [0, .03, 0], color: GOLD, rx: -Math.PI / 2 }, { box: [.05, 1.25, .05], at: [0, .62, -.1], color: DARK, rx: -.12 }, { box: [.05, 1.25, .05], at: [-.1, .62, .08], color: DARK, ry: .4 }, { box: [.05, 1.25, .05], at: [.1, .62, .08], color: DARK, ry: -.4 }, { box: [.3, .2, .16], at: [0, 1.32, 0], color: DARK }, { cyl: [.07, .07, .12, 10], at: [0, 1.32, .12], color: SEA, rx: Math.PI / 2 }] },
+  // v10 (spec §3): a lost-property ledger on a lectern beside the guardhouse; an open book, a pen and a small bell.
+  ledger: { solid: [[0, 0, .35]], parts: [{ box: [.5, .04, .4], at: [0, .02, 0], color: DARK }, { box: [.08, 1, .08], at: [0, .52, 0], color: WOOD }, { box: [.56, .04, .42], at: [0, 1.04, .02], color: WOOD, rx: -.25 }, { box: [.24, .02, .34], at: [-.13, 1.08, .02], color: PAPER, rx: -.25 }, { box: [.24, .02, .34], at: [.13, 1.08, .02], color: PAPER, rx: -.25 }, { cyl: [.012, .012, .16, 6], at: [.08, 1.11, -.04], color: SEA, rx: -.25 }, { cyl: [.05, .04, .06, 10], at: [-.2, 1.1, -.14], color: GOLD }] },
+  // A post box for orientation forms at the tunnel mouth: a slot, a sign on top and a folder on the shelf beside it.
+  dropbox: { solid: [[0, 0, .35]], parts: [{ box: [.5, .04, .4], at: [0, .02, 0], color: DARK }, { box: [.1, .9, .1], at: [0, .47, 0], color: DARK }, { box: [.46, .5, .3], at: [0, 1.15, 0], color: SEA }, { box: [.3, .03, .04], at: [0, 1.32, .16], color: DARK }, { box: [.4, .14, .02], at: [0, 1.48, .14], color: GOLD }, { box: [.34, .02, .26], at: [.42, .76, 0], color: WOOD }, { box: [.05, .4, .05], at: [.42, .55, 0], color: DARK }, { box: [.26, .04, .2], at: [.42, .8, 0], color: PAPER }] },
+  // A corridor feedback board: a slim board on two legs with a row of sticky notes; narrow enough for an indoor corridor.
+  board: { solid: [[0, 0, .35]], parts: [{ box: [.05, 1.6, .05], at: [-.6, .8, -.04], color: DARK }, { box: [.05, 1.6, .05], at: [.6, .8, -.04], color: DARK }, { box: [1.3, 1, .03], at: [0, 1.25, 0], color: PAPER }, { box: [1.3, .12, .035], at: [0, 1.8, 0], color: SEA }, ...[-.45, -.15, .15, .45].map((x, i): Part => ({ box: [.2, .2, .012], at: [x, 1.45 - (i % 2) * .05, .02], color: i % 2 ? GOLD : BRICK, ry: 0 })), ...[-.3, 0, .3].map((x): Part => ({ box: [.2, .2, .012], at: [x, 1.05, .02], color: PAPER, rx: 0 })), { box: [.18, .18, .012], at: [.42, 1.02, .02], color: SEA }] },
 };
 
 /** Spots the current steps need: each appears for its step and goes with it. Pure, so the lifecycle runs in node tests. */

@@ -15,7 +15,7 @@ describe('campusClues', () => {
   it('lists only unlocked clues, in chapter order, with done from the collected campus stories', () => {
     const clues = campusClues(['story-tunnel', 'story-sunset'], new Set(['tunnel']), data);
     expect(clues).toEqual([
-      { id: 'story-sunset', title: '海堤的兩人座', hint: '校碑旁的海堤，找一個凹進去的位子。', done: false },
+      { id: 'story-sunset', title: '海堤的蘿蔔坑', hint: '校碑旁的海堤，找學校說的海邊雅座。', done: false },
       { id: 'story-tunnel', title: '洞口的回音', hint: '回到隧道校園側的洞口看看拱圈。', done: true },
     ]);
   });

@@ -207,6 +207,28 @@ export class NpcManager {
   private disposed = false;
   private defs = new Map<string, NpcDef>();
   private placed = new Map<string, string>();
+  private gameReserved=new Set<string>();
+  reserveForGame(id:string,reserved:boolean) { if(reserved)this.gameReserved.add(id);else{this.gameReserved.delete(id);this.placed.delete(id);} }
+  private borrowed = new Map<string,{speed:number;activity:string}>();
+  isBorrowed(id:string) { return this.borrowed.has(id); }
+  get borrowedMoving() { return [...this.borrowed.keys()].some(id=>!!this.npcs.get(id)?.path.length); }
+  /** Runtime supplies a validated path starting at the live footpoint. Reject unconnected
+   * projected starts instead of snapping to them. No teleport fallback, including off-screen. */
+  borrowPath(id:string,path:T.Vector3[]):boolean {
+    const npc=this.npcs.get(id);
+    if(!npc || npc.absent || npc.talking || this.gameReserved.has(id) || path.length<2 || path[0].distanceTo(npc.position)>1e-6 || path.some(p=>!p.toArray().every(Number.isFinite)))return false;
+    if(!this.borrowed.has(id))this.borrowed.set(id,{speed:npc.speed,activity:npc.activity});
+    npc.path=path.map(p=>p.clone());npc.speed=npc.monkey?1.6:1.4;npc.activity='Idle';
+    this.targets.set(id,path[path.length-1].clone());return true;
+  }
+  /** Release only after the requested path has finished. Caller then reapplies the current schedule. */
+  releaseBorrowed(id:string):boolean {
+    const saved=this.borrowed.get(id),npc=this.npcs.get(id);
+    if(!saved || !npc || npc.path.length)return false;
+    npc.speed=saved.speed;npc.activity=saved.activity;this.borrowed.delete(id);this.placed.delete(id);return true;
+  }
+  cancelBorrowedMoves() { for(const id of this.borrowed.keys()){const npc=this.npcs.get(id);if(npc)npc.path=[];} }
+  releaseAllBorrowed() { this.cancelBorrowedMoves();for(const id of [...this.borrowed.keys()])this.releaseBorrowed(id); }
   private sweep?: NpcSweep;
   private support?: SupportAt;
   /** Where each scheduled NPC is heading (for QA and the minimap). */
@@ -314,6 +336,7 @@ export class NpcManager {
   schedule(preset: Preset, tourDone: boolean, storyAt: Record<string, string>, player?: T.Vector3) {
     this.preset = preset;
     for (const [id, npc] of this.npcs) {
+      if(this.borrowed.has(id) || this.gameReserved.has(id))continue;
       const def = this.defs.get(id);
       if (!def && !STORY_NPCS.includes(id)) continue;
       const place = resolveNpcPlacement(id, def, preset, tourDone, this.zones, storyAt);
@@ -342,7 +365,7 @@ export class NpcManager {
   /** Walk an NPC to an anchor along the path network; teleport if the route is unknown or it is far off-screen. */
   moveTo(id: string, anchor: string, player?: T.Vector3) {
     const npc = this.npcs.get(id), dest = this.anchorPoint(anchor, this.zones.npcs[id]?.offset);
-    if (!npc || !dest) return;
+    if (!npc || !dest || this.borrowed.has(id) || this.gameReserved.has(id)) return;
     const far = player && npc.position.distanceTo(player) > 60 && dest.distanceTo(player) > 60;
     const path = !far && this.routes ? this.routes.path(npc.position, dest) : [];
     if (path.length) { npc.path = path; npc.speed = 3.2; }
@@ -370,7 +393,7 @@ export class NpcManager {
 
   setTalking(id: string | undefined) { for (const n of this.npcs.values()) n.talking = n.id === id; }
 
-  update(dt: number, player: T.Vector3) {
+  update(dt: number, player: T.Vector3, borrowedPaused=false) {
     // Visible cap: nearest people first (talking and story NPCs always count), macaques separately.
     const night = this.preset === 'night', people: [number, Npc][] = [], monkeys: [number, Npc][] = [];
     for (const n of [...this.npcs.values(), ...this.ambient]) if (!n.absent) (n.monkey ? monkeys : people).push([n.position.distanceTo(player), n]);
@@ -382,21 +405,22 @@ export class NpcManager {
     for (const n of [...this.npcs.values(), ...this.ambient]) {
       const d = n.position.distanceTo(player);
       // Far characters freeze (no mixer) and very far ones hide (spec §7).
-      n.root.visible = d < 120 && keep.has(n);
+      n.root.visible = !n.absent && d < 120 && (keep.has(n) || this.gameReserved.has(n.id) || this.borrowed.has(n.id) || (this.npcs.has(n.id) && d <= 4));
       // Hidden walkers skip to where they were going, so schedules settle even off screen.
-      if (!n.root.visible) { if (n.path.length) { n.root.position.copy(n.path[n.path.length - 1]); n.root.position.y = this.ground(n.root.position.x, n.root.position.z, n.root.position.y); n.path = []; } continue; }
+      if (this.borrowed.has(n.id) && borrowedPaused) continue;
+      if (!n.root.visible && !this.borrowed.has(n.id) && !this.gameReserved.has(n.id)) { if (n.path.length) { n.root.position.copy(n.path[n.path.length - 1]); n.root.position.y = this.ground(n.root.position.x, n.root.position.z, n.root.position.y); n.path = []; } continue; }
       if (d > 60 && !n.path.length) continue;
       if (this.ambient.includes(n)) this.wander(n); // story NPCs only move when the story sends them
       n.update(dt, this.movementGround, player, d < 4, this.sweep);
     }
   }
 
-  /** Nearest visible NPC within reach (for E). */
-  nearest(player: T.Vector3, reach = 3) {
-    let best: string | undefined, d = reach;
-    for (const [id, n] of this.npcs) { if (n.absent || !n.root.visible) continue; const dd = n.position.distanceTo(player); if (dd < d) { d = dd; best = id; } }
-    return best;
+  /** All present NPCs in reach, including people sharing the same interaction area. */
+  nearby(player: T.Vector3, reach = 3): string[] {
+    return [...this.npcs].filter(([,n]) => !n.absent && n.position.distanceTo(player) <= reach)
+      .sort(([a,x],[b,y]) => x.position.distanceTo(player)-y.position.distanceTo(player) || a.localeCompare(b)).map(([id]) => id);
   }
+  nearest(player: T.Vector3, reach = 3) { return this.nearby(player,reach)[0]; }
 
   distanceTo(id: string, player: T.Vector3) { const n = this.npcs.get(id); return n ? n.position.distanceTo(player) : Infinity; }
 

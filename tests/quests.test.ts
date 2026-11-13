@@ -82,6 +82,71 @@ describe('review regressions',()=>{
   e.offer(d.id);e.accept();e.giveUp();expect(records).toHaveLength(1);e.update(30,world('zone:'+d.zone));expect(e.active).toBeUndefined();
  });
 });
+describe('stable step ids (v10)', () => {
+ const legacySave = (id: string, step: number) => { const storage = memory(); storage.setItem(QUEST_KEY, JSON.stringify({ version: 1, quests: { [id]: { status: 'active', step, choices: {} } }, journal: [], rewards: [] })); return storage; };
+ const local = (steps: string[], extra: Partial<QuestData['quests'][number]> = {}): QuestData => ({ version: 1, quests: [{ id: 'q', title: 'Q', zone: 'gate', npc: 'guide', description: '', reward: 'r', accept: { near: 'npc:guide' }, ...extra, steps: steps.map((id, i) => ({ id, target: `spot:${id}`, text: id, ...(i === steps.length - 1 ? { choices: [{ id: 'a', label: 'a', result: 'a' }, { id: 'b', label: 'b', result: 'b' }] } : {}) })) }] });
+ it('a revision-1 save at every step position of every quest lands on the step with that id', () => {
+  const contract = data.saveContract!;
+  expect(Object.keys(contract.quests).sort()).toEqual(data.quests.map(q => q.id).sort());
+  for (const q of data.quests) {
+   const old = contract.quests[q.id].steps;
+   for (let i = 0; i < old.length; i++) {
+    const e = new QuestEngine(data, { storage: legacySave(q.id, i) }), v = e.list().find(v => v.definition.id === q.id)!;
+    expect(v.step?.id, `${q.id}@${i}`).toBe(old[i]);
+    expect(v.state).toMatchObject({ status: 'active', stepId: old[i], revision: q.revision ?? 1 });
+    expect(e.progress.journal).toEqual([]);
+   }
+   if ((q.revision ?? 1) > 1 && q.steps.map(s => s.id).join() !== old.join()) expect(q.legacyStepOrder).toEqual(old);
+  }
+ });
+ it('the save carries stepId and revision, and a reload follows the id when steps have moved', () => {
+  const storage = memory(), before = local(['a', 'b', 'c', 'return']);
+  let e = new QuestEngine(before, { storage });
+  expect(e.accept('q', world('npc:guide'))).toBe(true);
+  expect(e.interact('q', world('spot:a'))).toBe(true);
+  expect(JSON.parse(storage.getItem(QUEST_KEY)!).quests.q).toMatchObject({ step: 1, stepId: 'b', revision: 1 });
+  const after = local(['a', 'c', 'b', 'return'], { revision: 2, legacyStepOrder: ['a', 'b', 'c', 'return'] });
+  e = new QuestEngine(after, { storage });
+  expect(e.list()[0].step?.id).toBe('b'); expect(e.list()[0].state?.step).toBe(2);
+  expect(JSON.parse(storage.getItem(QUEST_KEY)!).quests.q).toMatchObject({ step: 1 });
+  expect(e.interact('q', world('spot:b'))).toBe(true);
+  expect(JSON.parse(storage.getItem(QUEST_KEY)!).quests.q).toMatchObject({ step: 3, stepId: 'return', revision: 2 });
+  // An index-only save (no stepId) goes through the legacy order of the rewritten quest.
+  e = new QuestEngine(after, { storage: legacySave('q', 2) });
+  expect(e.list()[0].step?.id).toBe('c'); expect(e.list()[0].state?.step).toBe(1);
+ });
+ it('a step id that no longer exists restarts the quest at its first step, says so once in the journal, and keeps choices and completion', () => {
+  const storage = memory();
+  storage.setItem(QUEST_KEY, JSON.stringify({ version: 1, quests: { q: { status: 'active', step: 2, stepId: 'gone', choices: { return: 'b' } } }, journal: [], rewards: [] }));
+  const next = local(['a', 'b', 'c', 'return'], { revision: 2 });
+  let e = new QuestEngine(next, { storage });
+  expect(e.list()[0].state).toMatchObject({ status: 'active', step: 0, stepId: 'a', choices: { return: 'b' } });
+  expect(e.progress.journal.map(x => x.id)).toEqual(['q:reset:2']);
+  expect(e.progress.journal[0]).toMatchObject({ kind: 'quest', title: 'Q' });
+  e = new QuestEngine(next, { storage: legacySave('q', 4) });
+  expect(e.list()[0].state?.step).toBe(3);
+  const done = memory(); done.setItem(QUEST_KEY, JSON.stringify({ version: 1, quests: { q: { status: 'completed', step: 4, stepId: 'gone', choices: { return: 'a' } } }, journal: [], rewards: ['r'] }));
+  e = new QuestEngine(next, { storage: done });
+  expect(e.list()[0].state).toMatchObject({ status: 'completed', step: 4, choices: { return: 'a' } }); expect(e.progress.journal).toEqual([]);
+ });
+ it('validates revisions and legacy orders', () => {
+  expect(validateQuests(local(['a', 'return'], { revision: 2, legacyStepOrder: ['return', 'a'] }))).toEqual([]);
+  expect(validateQuests(local(['a', 'return'], { legacyStepOrder: ['a', 'return'] }))).toEqual(['legacy order without a rewrite q']);
+  expect(validateQuests(local(['a', 'return'], { revision: 2, legacyStepOrder: ['a', 'zz', 'return'] }))).toEqual(['legacy step q/zz no longer exists']);
+  expect(validateQuests(local(['a', 'return'], { revision: 0 }))).toEqual(['bad revision q']);
+ });
+ it('a quest cannot be accepted while someone in its step chain is off campus, and says when it can be', () => {
+  const q = data.quests.find(q => q.id === 'sea-stage')!, e = new QuestEngine(data, { storage: memory() });
+  const sunset = { ...world(q.accept.near), timeOfDay: () => 'sunset' };
+  expect(e.acceptable({ ...sunset, npcPresent: id => id !== 'jogger-po' }).map(v => v.definition.id)).toEqual([]);
+  expect(e.accept(q.id, { ...sunset, npcPresent: id => id !== 'jogger-po' })).toBe(false);
+  expect(e.missingNpcs(q, { ...sunset, npcPresent: id => id !== 'jogger-po' })).toEqual(['jogger-po']);
+  expect(e.acceptableTimes(q, sunset)).toBeUndefined();
+  expect(e.acceptableTimes(q, { ...sunset, npcPresentAt: (id, time) => !(id === 'jogger-po' && time === 'night') })).toEqual(['sunset']);
+  expect(e.acceptableTimes(data.quests.find(q => q.id === 'gate-lost')!, { ...sunset, npcPresentAt: (id, time) => !(id === 'guard-chung' && time === 'night') })).toEqual(['day', 'sunset']);
+  expect(e.accept(q.id, { ...sunset, npcPresent: () => true })).toBe(true);
+ });
+});
 it('neutralizes unversioned legacy labels without deleting their evidence',()=>{
  const storage=memory();const old={id:'legacy:c1-gate',kind:'legacy',title:'更新前的導覽紀錄',text:'c1-gate：更新前已完成，無詳細經過。',at:123,zone:'gate',npc:'guide',result:'已完成',choice:'原選擇',reward:'原紀念'};
  storage.setItem(QUEST_KEY,JSON.stringify({version:1,quests:{},journal:[old],rewards:['原紀念']}));const e=new QuestEngine(data,{storage});e.importLegacy(['c1-gate','new'],[]);

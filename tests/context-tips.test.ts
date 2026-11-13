@@ -47,3 +47,11 @@ describe('loading tips', () => {
     expect(loadingTips([]).length).toBeGreaterThan(0);
   });
 });
+
+it('explains the visible list on desktop and touch without the removed switch-target button',()=>{
+ const help=readFileSync('src/walk/help.ts','utf8'),hud=readFileSync('src/walk/hud.ts','utf8');
+ expect(help).toContain('直接點一項');expect(help).toContain('1–4');
+ expect(hud).not.toContain('cycle-target');expect(hud).not.toContain('切換目標 R');
+ expect(hud).toContain('數字鍵只選對話選項');
+ expect(loadingTips([]).some(t=>t.includes('多個項目會自動列出'))).toBe(true);
+});

@@ -1,6 +1,15 @@
 #!/usr/bin/env python3
-"""Validate quest references, scheduled speakers and the v5 save compatibility contract.
+"""Validate quest references, scheduled speakers and the save compatibility contract.
 Read-only: no caches, generated data or navmesh changes. Run from any directory.
+
+The contract (`saveContract` in quests.json) is the revision-1 snapshot of what a save can refer to: quest ids, step ids in
+their original order, rewards (saved as strings), chapter gates and choice ids. A rewrite may move steps and change targets or
+lines, but every revision-1 step id must still exist, a reordered quest must carry `revision >= 2` and `legacyStepOrder` equal
+to the snapshot, and the last step must stay `return` with choices (the runtime's delivery contract).
+
+Route audit (warnings only, never a failure): straight-line distance between consecutive steps over ROUTE_LEG_WARN metres, or
+a retrace share over ROUTE_RETRACE_WARN. Distances are 2D straight lines from the same placement rules as the speaker check
+(zone anchor + offset, spot `at`); `dest:` rooms have no outdoor coordinate here and end a leg chain.
 """
 import json
 import math
@@ -10,13 +19,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 TIMES = ('day', 'sunset', 'night')
-IDS = ['gate-lost', 'gate-mia', 'tunnel-leaflet', 'tunnel-photo', 'admin-list', 'admin-garden',
-       'library-bookmark', 'library-corner', 'arcade-coffee', 'arcade-club', 'sea-postcard', 'sea-stage', 'math-day']
-TITLES = ['阿忠伯的失物招領', 'Mia 的第一天', '迎新傳單飛走了', '洞口攝影練習', '小禾的報到清單', '海伯的園藝幫手',
-          '遺落的書籤', '靠海閱讀角', '阿凱的咖啡訂單', '社團攤位救援', '小橘的夕陽明信片', '允哲的海風小舞台', '高中人才培育班的一天']
 RESULTS = 26
-GATES = ['c1-gate', 'c4-library', 'c2-tunnel', 'c4-library', 'c4-library', 'c4-library',
-         'c4-library', 'c4-library', 'c5-arcade', 'c5-arcade', 'c5-arcade', 'c5-arcade', 'c5-arcade']
+ROUTE_LEG_WARN, ROUTE_RETRACE_WARN, ROUTE_MIN_TOTAL = 300, .4, 100
 
 
 # A spot must be close enough to the stand point to interact, and near the walking network unless it is indoors.
@@ -58,15 +62,11 @@ def load():
     return read('quests.json'), read('encounters.json'), read('npcs.json'), read('story-zones.json'), read('chapters.json'), read('walkthrough/outdoor-graph.json'), read('walkthrough/campus-structure.json')
 
 
-def verify(quests, encounters, npcs, zones, chapters, graph, structure):
-    errors, results = [], set()
-    def check(ok, message):
-        if not ok:
-            errors.append(message)
+def placements(npcs, zones, chapters, graph, errors=None):
+    """NPC position per time of day and completed-chapter count, and the anchor resolver, shared by checks and the route audit."""
     people = {n['id']: n for n in npcs['npcs']}
     zone_map, anchors = zones['zones'], graph['anchors']
     chapters_list = chapters['chapters']
-    chapter_ids = [c['id'] for c in chapters_list]
     # Match the actual ownership list, rather than guessing that story NPCs always use schedules.
     source = (ROOT / 'src/world/npc.ts').read_text()
     story_npcs = set(re.findall(r"'([^']+)'", re.search(r'export const STORY_NPCS = \[(.*?)\]', source, re.S).group(1)))
@@ -79,9 +79,6 @@ def verify(quests, encounters, npcs, zones, chapters, graph, structure):
             p = graph['nodes'][a['node']]['p']
             return [p[0], p[2]]  # routes.anchor uses the graph node, never an invented zone.
         return None
-
-    for name in ('IL', 'ACTIVITY'):
-        check(name in anchors and anchor(name) is not None, f'routes.anchor({name}) does not resolve')
 
     def placement(npc, time, done_count):
         if npc not in people:
@@ -101,10 +98,27 @@ def verify(quests, encounters, npcs, zones, chapters, graph, structure):
         at = spec['at']
         p = anchor(at) if isinstance(at, str) else at
         if p is None:
-            errors.append(f'NPC {npc}/{time}: unresolved anchor {at}')
+            if errors is not None:
+                errors.append(f'NPC {npc}/{time}: unresolved anchor {at}')
             return None
         offset = spec.get('offset', [0, 0])
         return [p[0] + offset[0], p[1] + offset[1]]
+
+    return people, anchor, placement
+
+
+def verify(quests, encounters, npcs, zones, chapters, graph, structure):
+    errors, results = [], set()
+    def check(ok, message):
+        if not ok:
+            errors.append(message)
+    people, anchor, placement = placements(npcs, zones, chapters, graph, errors)
+    zone_map, anchors = zones['zones'], graph['anchors']
+    chapters_list = chapters['chapters']
+    chapter_ids = [c['id'] for c in chapters_list]
+
+    for name in ('IL', 'ACTIVITY'):
+        check(name in anchors and anchor(name) is not None, f'routes.anchor({name}) does not resolve')
 
     spots = quests.get('spots', {})
     kinds = set(re.search(r'export type SpotKind = (.*?);', (ROOT / 'src/world/quest-spots.ts').read_text(), re.S).group(1).replace("'", '').replace(' ', '').split('|'))
@@ -136,19 +150,45 @@ def verify(quests, encounters, npcs, zones, chapters, graph, structure):
         known = (kind == 'npc' and name in people) or (kind == 'zone' and anchor(name) is not None) or (kind == 'spot' and name in spots) or (kind == 'dest' and name in building_rooms(name))
         check(known, f'{label}: unknown target {target}')
 
+    # ---- save compatibility contract ----------------------------------------------------------------------------------
     check(quests.get('version') == 1, 'quest data version must stay 1')
-    check([q['id'] for q in quests['quests']] == IDS, 'quest IDs/order changed')
-    for index, q in enumerate(quests['quests']):
+    contract = quests.get('saveContract') or {}
+    check(contract.get('revision') == 1 and isinstance(contract.get('quests'), dict), 'saveContract must be the revision-1 snapshot')
+    legacy = contract.get('quests', {})
+    current_ids = [q['id'] for q in quests['quests']]
+    check(len(set(current_ids)) == len(current_ids), 'duplicate quest id')
+    for qid in legacy:
+        check(qid in current_ids, f'{qid}: quest in the save contract no longer exists')
+    for q in quests['quests']:
         label = q['id']
-        if label not in IDS:
+        snapshot = legacy.get(label)
+        check(snapshot is not None, f'{label}: quest missing from the save contract')
+        revision = q.get('revision', 1)
+        check(isinstance(revision, int) and revision >= 1, f'{label}: revision must be a positive integer')
+        ids = [s['id'] for s in q['steps']]
+        check(len(set(ids)) == len(ids), f'{label}: duplicate step id')
+        check(ids and ids[-1] == 'return' and len(q['steps'][-1].get('choices', [])) >= 2, f'{label}: delivery must be last, as `return` with choices')
+        if snapshot is None:
             continue
-        index = IDS.index(label)
-        check(q['reward'] == TITLES[index] + '紀念章', f'{label}: reward changed')
-        expected = ['explore', 'return'] if label in ('tunnel-photo', 'library-corner', 'sea-postcard') else ['errand-1', 'errand-2', 'return'] if label == 'arcade-coffee' else ['check-in', 'lecture', 'classroom', 'office', 'math-library', 'return'] if label == 'math-day' else ['errand-1', 'errand-2', 'errand-3', 'return']
-        check([s['id'] for s in q['steps']] == expected, f'{label}: save step IDs/count changed')
-        check(q['steps'][-1]['id'] == 'return', f'{label}: delivery must be last')
+        check(q['reward'] == snapshot['reward'], f'{label}: reward changed')
         gate = q.get('accept', {}).get('chapterDone')
-        check(gate in chapter_ids and gate == GATES[index], f'{label}: incorrect chapter gate {gate}')
+        check(gate in chapter_ids and gate == snapshot['gate'], f'{label}: incorrect chapter gate {gate}')
+        missing = [sid for sid in snapshot['steps'] if sid not in ids]
+        check(not missing, f'{label}: save step IDs/count changed against the revision-1 contract (missing {missing})')
+        order = q.get('legacyStepOrder')
+        if ids != snapshot['steps']:
+            check(revision >= 2, f'{label}: steps moved without a revision bump')
+            check(order == snapshot['steps'], f'{label}: legacyStepOrder must equal the revision-1 step order {snapshot["steps"]}')
+        else:
+            check(order in (None, snapshot['steps']), f'{label}: legacyStepOrder disagrees with the revision-1 order')
+        for sid, choice_ids in snapshot['choices'].items():
+            step = next((s for s in q['steps'] if s['id'] == sid), None)
+            have = [c['id'] for c in step.get('choices', [])] if step else []
+            check(all(c in have for c in choice_ids), f'{label}/{sid}: saved choice ids {choice_ids} must stay available')
+
+    for q in quests['quests']:
+        label = q['id']
+        gate = q.get('accept', {}).get('chapterDone')
         reference(q.get('accept', {}).get('near', ''), label + '/accept')
         check(q.get('accept', {}).get('near') == 'npc:' + q['npc'], f'{label}: acceptance must be at its NPC')
         check(q['steps'][0]['target'] == q['accept']['near'] or any(l.get('who') == q['npc'] for l in q['accept'].get('lines', [])), f'{label}: the NPC must ask on acceptance')
@@ -215,9 +255,56 @@ def verify(quests, encounters, npcs, zones, chapters, graph, structure):
     return errors
 
 
+def quest_route(quest, spots, placement, chapter_count):
+    """Straight-line legs of a quest, from its giver through every step, at each step's own time of day.
+    Returns (legs, total, net): legs are (from, to, metres) or (from, to, None) when a `dest:` room has no coordinate."""
+    def point(target, time):
+        kind, _, name = target.partition(':')
+        if kind == 'npc':
+            return placement(name, time, chapter_count)
+        if kind == 'spot':
+            return spots.get(name, {}).get('at')
+        return None
+    inherited = quest['steps'][0].get('when') or next((s['when'] for s in quest['steps'] if s.get('when')), 'day')
+    stops = [(quest['accept']['near'], point(quest['accept']['near'], inherited))]
+    for step in quest['steps']:
+        inherited = step.get('when', inherited)
+        stops.append((step['target'], point(step['target'], inherited)))
+    legs = []
+    for (a, pa), (b, pb) in zip(stops, stops[1:]):
+        legs.append((a, b, math.dist(pa, pb) if pa is not None and pb is not None else None))
+    known = [d for _, _, d in legs if d is not None]
+    total = sum(known)
+    first = next((p for _, p in stops if p is not None), None)
+    last = next((p for _, p in reversed(stops) if p is not None), None)
+    net = math.dist(first, last) if first is not None and last is not None else None
+    return legs, total, net
+
+
+def route_warnings(quests, npcs, zones, chapters, graph):
+    """Long legs and retracing, as text with the numbers (spec-v10 §3). Never fails a build."""
+    _, _, placement = placements(npcs, zones, chapters, graph)
+    spots = quests.get('spots', {})
+    out = []
+    for q in quests['quests']:
+        legs, total, net = quest_route(q, spots, placement, len(chapters['chapters']))
+        for a, b, d in legs:
+            if d is not None and d > ROUTE_LEG_WARN:
+                out.append(f'{q["id"]}: {a} → {b} is {d:.0f} m in a straight line (over {ROUTE_LEG_WARN} m)')
+        if net is not None and total >= ROUTE_MIN_TOTAL:
+            retrace = 1 - net / total if total else 0
+            if retrace > ROUTE_RETRACE_WARN:
+                out.append(f'{q["id"]}: retrace {retrace:.0%} of {total:.0f} m (net displacement {net:.0f} m, over {ROUTE_RETRACE_WARN:.0%})')
+    return out
+
+
 if __name__ == '__main__':
-    errors = verify(*load())
+    data = load()
+    errors = verify(*data)
     for error in errors:
         print(error, file=sys.stderr)
-    print(f'quests: {"FAIL" if errors else "OK"}（{len(IDS)} 個任務、{RESULTS} 個結果、實體目標、排程、錨點與舊存檔契約）')
+    quests, _, npcs, zones, chapters, graph, _ = data
+    for warning in route_warnings(quests, npcs, zones, chapters, graph):
+        print(f'warning: {warning}', file=sys.stderr)
+    print(f'quests: {"FAIL" if errors else "OK"}（{len(quests["quests"])} 個任務、{RESULTS} 個結果、實體目標、排程、錨點與舊存檔契約）')
     sys.exit(bool(errors))

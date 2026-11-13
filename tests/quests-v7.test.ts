@@ -17,9 +17,9 @@ it('requires completed chapter and live proximity; discovery tracking persists w
  expect(e.accept(q.id, at(q.accept.near))).toBe(true);
  expect(e.acceptable(at(q.accept.near)).some(v => v.definition.id === q.id)).toBe(false);
 });
-it('retains every old accepted step and choice even before the new gate is complete', () => {
+it('retains every accepted step and choice even before the new gate is complete', () => {
  for (const q of data.quests) for (let step = 0; step < q.steps.length; step++) {
-  const storage = memory(); storage.setItem(QUEST_KEY, JSON.stringify({ version: 1, quests: { [q.id]: { status: 'active', step, choices: {} } }, journal: [], rewards: [] }));
+  const storage = memory(); storage.setItem(QUEST_KEY, JSON.stringify({ version: 1, quests: { [q.id]: { status: 'active', step, stepId: q.steps[step].id, choices: {} } }, journal: [], rewards: [] }));
   const e = new QuestEngine(data, { storage }); const s = q.steps[step], w = at(s.target, false, s.when ?? 'day');
   expect(e.list().find(v => v.definition.id === q.id)?.state?.step).toBe(step);
   if (s.choices) expect(e.choose(q.id, s.choices[0].id, w)).toBe(true);

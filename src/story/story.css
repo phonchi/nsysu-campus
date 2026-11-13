@@ -121,3 +121,27 @@
 
 .q-safe-insets{position:absolute;width:0;height:0;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
 .q-hint{max-width:calc(100vw - 16px - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px));white-space:normal;text-align:center;overflow-wrap:anywhere;box-sizing:border-box}
+
+/* v10: the original paper hint grows into a visible, touchable action list. */
+.q-hint.has-choices{z-index:4;width:min(340px,calc(100vw - 24px));padding:8px;border-radius:16px;text-align:left;pointer-events:auto;white-space:normal}
+.q-interaction-rows{position:relative;max-height:min(224px,38vh);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;touch-action:pan-y}
+.q-interaction-group{padding:5px 8px 3px;font-size:12px;color:var(--ui-ink);opacity:.8}
+.q-interaction-rows button{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:9px 10px;border:1px solid transparent;border-radius:9px;background:transparent;color:var(--ui-ink);font:inherit;text-align:left;cursor:pointer;white-space:normal;overflow-wrap:anywhere}
+.q-interaction-rows button[aria-pressed=true]{background:var(--ui-gold);border-color:var(--ui-line)}
+.q-interaction-rows button:hover{border-color:var(--ui-line)}
+.q-interaction-rows button:focus-visible{outline:2px solid var(--ui-line);outline-offset:-2px}
+.q-interaction-rows button:active{transform:translateY(1px)}
+.q-interaction-rows kbd{flex:0 0 26px;text-align:center;font:inherit;font-size:12px}
+.q-interaction-help{display:block;padding:6px 4px 0;font-size:11px;font-weight:400;text-align:center}
+.q-npc-badge b{width:30px;height:30px;font-size:20px}
+.q-npc-badge[data-status=deliverable] b{background:var(--ui-sea);color:var(--ui-paper)}
+@media(pointer:coarse){.q-interaction-help{font-size:0}.q-interaction-help::after{content:'點選一項，或按「互動」執行高亮項';font-size:12px}}
+
+.q-npc-badge{z-index:1}
+.q-npc-speech{position:absolute;left:0;top:0;z-index:2;max-width:min(280px,70vw);padding:8px 12px;border:2px solid var(--ui-line);border-radius:14px;background:var(--ui-paper);font-size:13px;line-height:1.6;pointer-events:none}
+.q-npc-speech[hidden],.q-event-objective[hidden]{display:none}
+.q-layer.has-event-objective:not(.event-paused)>.q-objective:not(.q-event-objective),.q-layer.event-paused>.q-event-objective{display:none}
+.q-event-objective{cursor:default;z-index:2}
+.q-event-objective small,.q-event-objective strong{grid-column:1/-1}
+.q-event-objective button{margin-top:8px;min-height:44px;border:1px solid var(--ui-line);border-radius:8px;background:var(--ui-paper-2);color:var(--ui-ink);font:inherit;cursor:pointer}
+.q-event-objective button:focus-visible{outline:3px solid var(--ui-sea)}

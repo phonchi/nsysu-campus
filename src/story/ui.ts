@@ -2,6 +2,7 @@ import type { Chapter, Line } from './schema';
 import type { Choice, Face, TalkLine } from './dialogue';
 import { portraitSvg, type PortraitSpec } from './portraits';
 import './story.css';
+import { interactionListHtml, type InteractionRow } from '../walk/interaction-list';
 import { clampHint } from './hint-position';
 
 const esc = (s: unknown) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
@@ -47,7 +48,7 @@ export class StoryUi {
 <div class="q-pointer" hidden aria-hidden="true"><svg viewBox="0 0 40 40"><path d="M6 20h22m-9-10 10 10-10 10" stroke="#2a2c4a" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 20h22m-9-10 10 10-10 10" stroke="#e9b949" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
 <div class="q-edge" hidden aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h13m-5-6 6 6-6 6" stroke="#2a2c4a" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
 <div class="q-dialog" role="dialog" aria-live="polite" hidden><div class="portrait"></div><div class="q-body"><span class="name"></span><p class="text"></p><ol class="q-choices" hidden></ol></div><div class="q-tools"><button type="button" data-q="log">紀錄 L</button><button type="button" data-q="skip">快轉 Tab</button></div><span class="next">E／點擊 繼續</span></div>
-<div class="q-safe-insets" aria-hidden="true"></div><div class="q-hint" hidden aria-hidden="true"></div>
+<div class="q-safe-insets" aria-hidden="true"></div><div class="q-hint" hidden></div>
 <div class="q-log" role="dialog" aria-label="對話紀錄" hidden><h3>對話紀錄</h3><ol></ol><button type="button" data-q="log-close">關閉 Esc</button></div>`;
     host.append(this.root);
     window.addEventListener('resize', this.forgetHintBox);
@@ -58,6 +59,10 @@ export class StoryUi {
     this.pointerEl = this.root.querySelector('.q-pointer')!;
     this.badgeEl = this.root.querySelector('.q-badge')!;
     this.logEl = this.root.querySelector('.q-log')!;
+    this.root.querySelector('.q-hint')!.addEventListener('click',e=>{
+      const id=(e.target as HTMLElement).closest<HTMLElement>('[data-interaction]')?.dataset.interaction;
+      if(id) { e.stopPropagation(); this.hintSelect?.(id); }
+    });
     this.dialogueEl.addEventListener('click', e => {
       const t = e.target as HTMLElement, q = t.closest<HTMLElement>('[data-q]')?.dataset.q, c = t.closest<HTMLElement>('[data-choice]');
       if (q === 'log') { this.toggleLog(); return; }
@@ -279,6 +284,45 @@ ${fact ? `<p class="fact"><b>校史小知識</b>${esc(fact)}${source ? ` <a href
     if (foot.textContent !== meters) foot.textContent = meters;
   }
 
+  private eventObjectiveEl?: HTMLElement;
+  private eventCancel?:()=>void;
+  /** Nonmodal event objective; the main/side objective reappears when cleared or paused. */
+  eventObjective(text?:string,cancel?:()=>void) {
+    this.eventCancel=cancel;
+    if(!this.eventObjectiveEl && text) {
+      const el=document.createElement('div');el.className='q-objective q-event-objective';
+      el.innerHTML='<small>校園活動</small><strong></strong><button type="button">先離開</button>';
+      el.querySelector('button')!.addEventListener('click',()=>this.eventCancel?.());this.root.append(el);this.eventObjectiveEl=el;
+    }
+    this.root.classList.toggle('has-event-objective',!!text);
+    if(this.eventObjectiveEl){this.eventObjectiveEl.hidden=!text;if(text)this.eventObjectiveEl.querySelector('strong')!.textContent=text;}
+  }
+  private npcSpeechEls=new Map<string,HTMLElement>();
+  npcSpeech(bubbles:readonly {id:string;text:string;x:number;y:number}[]) {
+    const ids=new Set(bubbles.map(b=>b.id));
+    for(const [id,el] of this.npcSpeechEls)if(!ids.has(id))el.hidden=true;
+    for(const b of bubbles) {
+      let el=this.npcSpeechEls.get(b.id);
+      if(!el){el=document.createElement('div');el.className='q-npc-speech';el.setAttribute('role','status');this.root.append(el);this.npcSpeechEls.set(b.id,el);}
+      el.hidden=false;if(el.textContent!==b.text)el.textContent=b.text;
+      el.style.transform=`translate(${Math.round(b.x)}px,${Math.round(b.y)}px) translate(-50%,-100%)`;
+    }
+  }
+
+  private npcBadgeEls = new Map<string,HTMLElement>();
+  npcBadges(badges:readonly {id:string;x:number;y:number;status:'acceptable'|'deliverable';name:string}[]) {
+    const visible=new Set(badges.map(b=>b.id));
+    for(const [id,el] of this.npcBadgeEls) if(!visible.has(id))el.hidden=true;
+    for(const b of badges) {
+      let el=this.npcBadgeEls.get(b.id);
+      if(!el) { el=document.createElement('div');el.className='q-badge q-npc-badge';el.innerHTML='<b></b>';this.root.append(el);this.npcBadgeEls.set(b.id,el); }
+      el.hidden=false;el.dataset.status=b.status;
+      el.setAttribute('aria-label',`${b.name}：${b.status==='deliverable'?'可交付':'可接任務'}`);
+      el.firstElementChild!.textContent=b.status==='deliverable'?'？':'！';
+      el.style.transform=`translate(${Math.round(b.x)}px,${Math.round(b.y)}px) translate(-50%,-100%)`;
+    }
+  }
+
   pointer(p: { x: number; y: number; angle: number } | null) {
     this.pointerEl.hidden = !p;
     if (p) this.pointerEl.style.transform = `translate(${p.x - 20}px,${p.y - 20}px) rotate(${p.angle}rad)`;
@@ -316,16 +360,39 @@ ${fact ? `<p class="fact"><b>校史小知識</b>${esc(fact)}${source ? ` <a href
   }
   private giveUp?: () => void;
 
+  private hintSelect?: (id:string)=>void;
+  private hintContent = '';
+  private hintSelected?: string;
   private hintBox?: { width: number; height: number; rootWidth: number; rootHeight: number; insets: { top: number; right: number; bottom: number; left: number } };
   private forgetHintBox = () => { this.hintBox = undefined; };
   /** World-anchored interaction hint ("E 交談・阿凱"), or null to hide. */
-  hint(p: { x: number; y: number; text: string } | null) {
+  hint(p: { x: number; y: number; text: string; choices?:readonly InteractionRow[]; selectedId?:string; onSelect?:(id:string)=>void } | null) {
     const el = this.root.querySelector<HTMLElement>('.q-hint')!;
     el.hidden = !p;
+    this.hintSelect=p?.onSelect;
     if (!p) return;
+    const multi=!!p.choices?.length;
+    el.classList.toggle('has-choices',multi);
+    const content=multi?interactionListHtml(p.choices!,p.selectedId!):p.text;
+    if(this.hintContent!==content) {
+      const rows=el.querySelector('.q-interaction-rows'), scroll=rows?.scrollTop??0;
+      const focused=(document.activeElement as HTMLElement | null)?.dataset.interaction;
+      if(multi) el.innerHTML=content; else el.textContent=content;
+      this.hintContent=content; this.hintBox=undefined;
+      const nextRows=el.querySelector<HTMLElement>('.q-interaction-rows');
+      if(nextRows) {
+        nextRows.scrollTop=scroll;
+        const buttons=[...nextRows.querySelectorAll<HTMLButtonElement>('button')];
+        if(focused) buttons.find(b=>b.dataset.interaction===focused)?.focus({preventScroll:true});
+        if(this.hintSelected!==p.selectedId) {
+          const active=buttons.find(b=>b.dataset.interaction===p.selectedId);
+          if(active) { const top=active.offsetTop-nextRows.offsetTop; if(top<nextRows.scrollTop)nextRows.scrollTop=top; else if(top+active.offsetHeight>nextRows.scrollTop+nextRows.clientHeight)nextRows.scrollTop=top+active.offsetHeight-nextRows.clientHeight; }
+        }
+      }
+      this.hintSelected=p.selectedId;
+    }
     // Measure only when the text or the window changed: reading layout every frame forces a reflow every frame.
-    if (el.textContent !== p.text || !this.hintBox) {
-      el.textContent = p.text;
+    if (!this.hintBox) {
       const safe=getComputedStyle(this.root.querySelector<HTMLElement>('.q-safe-insets')!);
       this.hintBox={width:el.offsetWidth,height:el.offsetHeight,rootWidth:this.root.clientWidth,rootHeight:this.root.clientHeight,insets:{top:parseFloat(safe.paddingTop)||0,right:parseFloat(safe.paddingRight)||0,bottom:parseFloat(safe.paddingBottom)||0,left:parseFloat(safe.paddingLeft)||0}};
     }
