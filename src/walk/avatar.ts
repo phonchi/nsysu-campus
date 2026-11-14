@@ -1,4 +1,6 @@
+import {configureCharacterCoverage} from '../render/character-surface';
 import * as T from 'three';
+import { ChairPose, type Seat } from '../world/seats';
 import { RideRig, soleSide, type RideDiagnostics } from './ride-rig';
 
 export type AvatarState = 'idle' | 'walk' | 'run' | 'jump' | 'fall' | 'land' | 'wave' | 'talk' | 'ride' | 'sit';
@@ -65,26 +67,29 @@ export class Avatar {
   riding = false;
   seated = false;
   private seatedHeading?:number;
+  private chair?:ChairPose;
+  private seat?:Seat;
+  get seatView(){return this.chair?.view;}
+  get seatDiagnostics(){return this.chair?.diagnostics;}
   /** Both shipped student rigs have Sit. State is paired and never changes the physics footpoint. */
-  setSeated(value:boolean,heading?:number) {
+  setSeated(value:boolean,heading?:number,seat?:Seat) {
     if(value===this.seated)return;
+    this.chair?.release();this.seat=value?seat:undefined;
     this.seated=value;
     this.seatedHeading=value?heading:undefined;
     if(value){this.riding=false;this.wasRiding=false;this.rideRig?.reset();this.mixer?.stopAllAction();this.current=undefined;this.setState('sit');}
     else {this.mixer?.stopAllAction();this.current=undefined;this.setState('idle');this.mixer?.update(0);if(this.model)this.model.position.y=0;}
   }
-  /** Saddle height above the feet for the seated clip. */
-  seatLift = .42;
 
   /** Replace the model; animations are optional (a static fallback figure still turns and bobs). */
   setModel(model: T.Object3D, clips: T.AnimationClip[] = []) {
     this.disposeModel();
-    this.root.add(model); this.model = model;
+    this.root.add(model); this.model = model;this.chair=new ChairPose(model,this.root);
     model.traverse(o => {
       if (o instanceof T.Mesh) {
         o.castShadow = true;
         if (o.userData.outlineHull) return; // shared with other characters; hidden while fading instead
-        for (const m of Array.isArray(o.material) ? o.material : [o.material]) this.materials.push(m);
+        for (const m of Array.isArray(o.material) ? o.material : [o.material]) {configureCharacterCoverage(m);this.materials.push(m);}
       }
     });
     if (clips.length) {
@@ -139,14 +144,16 @@ export class Avatar {
 
   private fadeMaterials(materials: T.Material[], alpha: number) {
     for (const m of materials) {
-      const want = alpha < .999;
+      const coverage=m.userData.characterCoverage===true;
+      const want = !coverage&&alpha < .999;
       if (m.transparent !== want) { m.transparent = want; m.needsUpdate = true; }
       m.opacity = alpha;
-      m.depthWrite = !want;
+      m.depthWrite = coverage||!want;
     }
   }
 
   update(dt: number, f: AvatarInput) {
+    this.chair?.release();
     this.rideRig?.releaseGround();
     this.lastFrame=f;
     // Visual height: follows the feet closely, but filters millimetre contact noise and stair-step pops.
@@ -164,14 +171,15 @@ export class Avatar {
       const target = Math.atan2(-f.heading.x, -f.heading.z);
       this.facing = wrap(this.facing + wrap(target - this.facing) * damp(12, dt));
     }
-    if(this.seated && this.seatedHeading!==undefined)this.facing=wrap(this.facing+wrap(this.seatedHeading-this.facing)*damp(6,dt));
+    if(this.seated && this.seat)this.facing=this.seat.spec.yaw;
+    else if(this.seated && this.seatedHeading!==undefined)this.facing=wrap(this.facing+wrap(this.seatedHeading-this.facing)*damp(6,dt));
     this.root.rotation.y = this.facing;
 
     // Sitting uses the authored pose; normal locomotion and ground-foot IK must not undo it.
     if(this.seated) {
       this.state='sit';this.root.scale.set(1,1,1);this.root.rotation.x=0;
       if(this.vehicle)this.vehicle.visible=false;
-      this.mixer?.update(dt);this.wasGround=f.onGround;return;
+      this.mixer?.update(dt);if(this.seat)this.chair?.apply(this.seat,f.foot,f.supportAt??(()=>f.surfaceHeight??f.foot.y));this.wasGround=f.onGround;return;
     }
     // State machine.
     const moving = Math.min(f.speed, f.intendedSpeed) > .25;
@@ -223,6 +231,7 @@ export class Avatar {
         const material = source.clone();
         material.onBeforeCompile = source.onBeforeCompile;
         material.customProgramCacheKey = source.customProgramCacheKey;
+        if(!o.userData.outlineHull)configureCharacterCoverage(material);
         this.vehicleMaterials.push(material); return material;
       };
       o.material = Array.isArray(o.material) ? o.material.map(clone) : clone(o.material);
@@ -250,6 +259,7 @@ export class Avatar {
   }
 
   private disposeModel() {
+    this.chair?.dispose();this.chair=undefined;
     this.rideRig?.reset();this.rideRig=undefined;
     this.mixer?.stopAllAction();
     if (this.mixer) this.mixer.uncacheRoot(this.mixer.getRoot());

@@ -37,6 +37,7 @@ describe('v7 camera actor fading', () => {
     internal.updateCamera(new Vector3(.8, 1, 0));
     const faded = npc.root.children[0].children[0] as Mesh;
     expect((faded.material as MeshBasicMaterial).opacity).toBeCloseTo(5 / 9);
+    expect((faded.material as MeshBasicMaterial).transparent).toBe(false);expect((faded.material as MeshBasicMaterial).depthWrite).toBe(true);expect((faded.material as MeshBasicMaterial).userData.characterCoverage).toBe(true);
     expect((faded.children[0] as Mesh).material).not.toBe((neighbour.root.children[0].children[0].children[0] as Mesh).material);
     expect(shared.opacity).toBe(1);
     expect(faded.children[0].visible).toBe(false);
@@ -112,7 +113,7 @@ it('keeps the third person camera above feet and aimed at its pivot', () => {
   expect(camera.position.y).toBeGreaterThanOrEqual(foot.y + .5);
   const aim = new Vector3(0, foot.y + 1.45, 0).sub(camera.position).normalize();
   expect(camera.getWorldDirection(new Vector3()).distanceTo(aim)).toBeLessThan(1e-6);
-  rig.firstPerson = true;
+  rig.setMode('firstPerson');
   rig.update(1 / 60, { foot, running: false, moving: false });
   expect(camera.position.y).toBeCloseTo(foot.y + EYE - .01);
 });

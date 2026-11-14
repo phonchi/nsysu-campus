@@ -48,7 +48,8 @@
       2,
       1
      ],
-     "activity": "Sit"
+     "activity": "Sit",
+     "seat": "seawall-guide"
     },
     "night": {
      "at": "seawall",
@@ -56,7 +57,8 @@
       2,
       1
      ],
-     "activity": "Sit"
+     "activity": "Sit",
+     "seat": "seawall-guide"
     }
    },
    "talk": "guide"
@@ -103,7 +105,8 @@
       3,
       5
      ],
-     "activity": "Sit"
+     "activity": "Sit",
+     "seat": "admin-s1"
     }
    },
    "talk": "s1"
@@ -448,7 +451,8 @@
       6,
       5
      ],
-     "activity": "Sit"
+     "activity": "Sit",
+     "seat": "library-quiz-dian"
     },
     "sunset": {
      "at": "library",
@@ -456,7 +460,8 @@
       6,
       5
      ],
-     "activity": "Sit"
+     "activity": "Sit",
+     "seat": "library-quiz-dian"
     },
     "night": {
      "at": "IL",
@@ -636,7 +641,8 @@
       -5,
       6
      ],
-     "activity": "Sit"
+     "activity": "Sit",
+     "seat": "il-guitar-yun"
     },
     "sunset": {
      "at": "arcade",
@@ -644,7 +650,8 @@
       -12,
       8
      ],
-     "activity": "Sit"
+     "activity": "Sit",
+     "seat": "arcade-guitar-yun"
     },
     "night": {
      "at": "arcade",
@@ -652,7 +659,8 @@
       -12,
       8
      ],
-     "activity": "Sit"
+     "activity": "Sit",
+     "seat": "arcade-guitar-yun"
     }
    },
    "talk": "guitar-yun"
@@ -691,8 +699,8 @@
   },
   {
    "id": "ta-lin",
-   "name": "林老師",
-   "role": "理學院助教",
+   "name": "呂老師",
+   "role": "應數系老師",
    "model": "npc-teacher",
    "look": {
     "hair": "#2b2622",
@@ -730,6 +738,46 @@
    "talk": "ta-lin"
   },
   {
+   "id": "teacher-chen",
+   "name": "陳老師",
+   "role": "應數系老師",
+   "model": "npc-teacher",
+   "look": {
+    "hair": "#3b2a22",
+    "top": "#3d5a80",
+    "bottom": "#4a4a52",
+    "shoes": "#2a2c4a"
+   },
+   "portrait": {
+    "skin": "#e8bd94",
+    "hair": "#3b2a22",
+    "hairStyle": "short",
+    "top": "#3d5a80",
+    "topStyle": "shirt",
+    "accessory": "glasses"
+   },
+   "schedule": {
+    "day": {
+     "at": "arcade",
+     "offset": [
+      49.5,
+      -14.5
+     ],
+     "activity": "Idle"
+    },
+    "sunset": {
+     "at": "arcade",
+     "offset": [
+      49.5,
+      -14.5
+     ],
+     "activity": "Idle"
+    },
+    "night": null
+   },
+   "talk": "teacher-chen"
+  },
+  {
    "id": "gardener-hai",
    "name": "海伯",
    "role": "園丁",
@@ -761,7 +809,8 @@
       -67,
       -27
      ],
-     "activity": "Sit"
+     "activity": "Sit",
+     "seat": "bodhi-gardener-hai"
     },
     "night": null
    },
@@ -800,7 +849,8 @@
       -8,
       6
      ],
-     "activity": "Sit"
+     "activity": "Sit",
+     "seat": "seawall-poet-wen"
     },
     "night": {
      "at": "library",
@@ -931,6 +981,19 @@
       ]
      },
      "node": "v10-stories"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "chapterDone": "c6-sunset"
+       },
+       {
+        "notFlag": "guide.v11-story-told"
+       }
+      ]
+     },
+     "node": "v11-stories"
     },
     {
      "if": {
@@ -1369,6 +1432,24 @@
      "effects": [
       {
        "setFlag": "guide.story-told"
+      }
+     ],
+     "next": "free"
+    },
+    "v11-stories": {
+     "lines": [
+      {
+       "who": "guide",
+       "text": "1997 年的識別標誌，綠色山形是壽山。"
+      },
+      {
+       "who": "guide",
+       "text": "藍色那一筆，是西灣。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "guide.v11-story-told"
       }
      ],
      "next": "free"
@@ -1939,6 +2020,29 @@
         "chapterDone": "c4-library"
        },
        {
+        "any": [
+         {
+          "flag": "s3.recommend"
+         },
+         {
+          "flag": "s3.yu"
+         }
+        ]
+       },
+       {
+        "notFlag": "s3.v11-story-told"
+       }
+      ]
+     },
+     "node": "v11-stories"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "chapterDone": "c4-library"
+       },
+       {
         "flag": "quest.admin-list.return.a"
        },
        {
@@ -2217,6 +2321,24 @@
       }
      ],
      "next": "root"
+    },
+    "v11-stories": {
+     "lines": [
+      {
+       "who": "s3",
+       "text": "書香町是圖資處 103 年設的，給同學安靜自習。"
+      },
+      {
+       "who": "s3",
+       "text": "那篇報導也提到 24 小時智慧還書系統啟用。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "s3.v11-story-told"
+      }
+     ],
+     "next": "root"
     }
    }
   },
@@ -2367,6 +2489,19 @@
       ]
      },
      "node": "v102-gate-lost-return-b"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "flag": "guard-chung.met"
+       },
+       {
+        "notFlag": "guard-chung.v11-story-told"
+       }
+      ]
+     },
+     "node": "v11-stories"
     },
     {
      "if": {
@@ -2576,6 +2711,28 @@
       }
      ],
      "next": "menu"
+    },
+    "v11-stories": {
+     "lines": [
+      {
+       "who": "guard-chung",
+       "text": "以前隧道上有個中山大學山水牌樓。"
+      },
+      {
+       "who": "guard-chung",
+       "text": "常有人以為那是大門，開學時學長姐會在洞口說明。"
+      },
+      {
+       "who": "guard-chung",
+       "text": "牌樓 2008 年 7 月底拆了。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "guard-chung.v11-story-told"
+      }
+     ],
+     "next": "menu"
     }
    }
   },
@@ -2640,6 +2797,19 @@
       ]
      },
      "node": "v10-stories"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "flag": "clerk-jie.met"
+       },
+       {
+        "notFlag": "clerk-jie.v11-story-told"
+       }
+      ]
+     },
+     "node": "v11-stories"
     },
     {
      "if": {
@@ -2819,6 +2989,24 @@
       }
      ],
      "next": "menu"
+    },
+    "v11-stories": {
+     "lines": [
+      {
+       "who": "clerk-jie",
+       "text": "圖書館以前在行政大樓，你知道嗎？"
+      },
+      {
+       "who": "clerk-jie",
+       "text": "民國 77 年才搬到圖資大樓十樓。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "clerk-jie.v11-story-told"
+      }
+     ],
+     "next": "menu"
     }
    }
   },
@@ -2888,7 +3076,7 @@
      "lines": [
       {
        "who": "coffee-kai",
-       "text": "助教說的那杯？拿去。"
+       "text": "呂老師說的那杯？拿去。"
       }
      ],
      "effects": [
@@ -2905,7 +3093,7 @@
      "lines": [
       {
        "who": "coffee-kai",
-       "text": "藍色隨身碟？有人掉在車旁邊，拿去還助教。"
+       "text": "藍色隨身碟？有人掉在車旁邊，拿去還呂老師。"
       }
      ],
      "effects": [
@@ -3596,6 +3784,19 @@
     },
     {
      "if": {
+      "all": [
+       {
+        "flag": "monkey-volunteer-man.met"
+       },
+       {
+        "notFlag": "monkey-volunteer-man.v11-story-told"
+       }
+      ]
+     },
+     "node": "v11-stories"
+    },
+    {
+     "if": {
       "flag": "monkey-volunteer-man.chase-done"
      },
      "node": "done"
@@ -3793,6 +3994,28 @@
      "effects": [
       {
        "setFlag": "monkey-volunteer-man.story-told"
+      }
+     ],
+     "next": "menu"
+    },
+    "v11-stories": {
+     "lines": [
+      {
+       "who": "monkey-volunteer-man",
+       "text": "壽山以前叫打狗山。"
+      },
+      {
+       "who": "monkey-volunteer-man",
+       "text": "1923 年皇太子住過打水灣一帶的貴賓館。"
+      },
+      {
+       "who": "monkey-volunteer-man",
+       "text": "以此為契機，打狗山改名壽山。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "monkey-volunteer-man.v11-story-told"
       }
      ],
      "next": "menu"
@@ -4453,6 +4676,19 @@
      "if": {
       "all": [
        {
+        "flag": "ta-lin.met"
+       },
+       {
+        "notFlag": "ta-lin.v11-story-told"
+       }
+      ]
+     },
+     "node": "v11-stories"
+    },
+    {
+     "if": {
+      "all": [
+       {
         "flag": "quest.arcade-coffee.return.a"
        },
        {
@@ -4627,7 +4863,7 @@
      "lines": [
       {
        "who": "ta-lin",
-       "text": "看你的課表，不是看我。下一堂是實驗。"
+       "text": "看你的課表，不是看我。下一堂是習題課。"
       }
      ]
     },
@@ -4704,6 +4940,193 @@
       }
      ],
      "next": "menu"
+    },
+    "v11-stories": {
+     "lines": [
+      {
+       "who": "ta-lin",
+       "text": "學校的數理資優班民國 74 年就成立了。"
+      },
+      {
+       "who": "ta-lin",
+       "text": "民國 76 年應數系接下數學組。"
+      },
+      {
+       "who": "ta-lin",
+       "text": "那年十月來了第一批二十位高一學生。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "ta-lin.v11-story-told"
+      }
+     ],
+     "next": "menu"
+    }
+   }
+  },
+  "teacher-chen": {
+   "entries": [
+    {
+     "if": {
+      "all": [
+       {
+        "flag": "quest.math-freshman.return.a"
+       },
+       {
+        "notFlag": "teacher-chen.v11-math-freshman-return-a"
+       }
+      ]
+     },
+     "node": "v11-math-freshman-return-a"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "flag": "quest.math-freshman.return.b"
+       },
+       {
+        "notFlag": "teacher-chen.v11-math-freshman-return-b"
+       }
+      ]
+     },
+     "node": "v11-math-freshman-return-b"
+    },
+    {
+     "if": {
+      "flag": "teacher-chen.met"
+     },
+     "node": "again"
+    },
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "root": {
+     "lines": [
+      {
+       "who": "teacher-chen",
+       "text": "應數系的新生？我是陳老師。"
+      },
+      {
+       "who": "teacher-chen",
+       "text": "系辦、數學圖書館、電腦教室，第一週就該認得。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "teacher-chen.met"
+      }
+     ],
+     "next": "menu"
+    },
+    "again": {
+     "lines": [
+      {
+       "who": "teacher-chen",
+       "text": "摺頁還在吧？有事快問。"
+      }
+     ],
+     "next": "menu"
+    },
+    "menu": {
+     "lines": [
+      {
+       "who": "teacher-chen",
+       "text": "說吧。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「系辦在哪？」",
+       "next": "office"
+      },
+      {
+       "text": "「電腦教室呢？」",
+       "next": "lab"
+      },
+      {
+       "text": "「有什麼校園故事？」",
+       "if": {
+        "notFlag": "teacher-chen.v11-story-told"
+       },
+       "next": "v11-stories"
+      },
+      {
+       "text": "「沒事了。」"
+      }
+     ]
+    },
+    "office": {
+     "lines": [
+      {
+       "who": "teacher-chen",
+       "text": "理學院四樓，理 4010。"
+      },
+      {
+       "who": "teacher-chen",
+       "text": "系上的事先去那裡問，細節看官網。"
+      }
+     ]
+    },
+    "lab": {
+     "lines": [
+      {
+       "who": "teacher-chen",
+       "text": "二樓的理 2004。"
+      },
+      {
+       "who": "teacher-chen",
+       "text": "系所簡介寫著大學部和研究所各有一間。"
+      }
+     ]
+    },
+    "v11-math-freshman-return-a": {
+     "lines": [
+      {
+       "who": "teacher-chen",
+       "text": "中庭那塊立牌的小地圖，已經有新生照著走上四樓了。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "teacher-chen.v11-math-freshman-return-a"
+      }
+     ],
+     "next": "menu"
+    },
+    "v11-math-freshman-return-b": {
+     "lines": [
+      {
+       "who": "teacher-chen",
+       "text": "房號那三行很清楚，有人站在立牌前就把路線背起來了。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "teacher-chen.v11-math-freshman-return-b"
+      }
+     ],
+     "next": "menu"
+    },
+    "v11-stories": {
+     "lines": [
+      {
+       "who": "teacher-chen",
+       "text": "民國 76 年，應數系承辦數理資優班的數學組。"
+      },
+      {
+       "who": "teacher-chen",
+       "text": "那年十月，第一批二十位高一學生來上課。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "teacher-chen.v11-story-told"
+      }
+     ]
     }
    }
   },
@@ -4979,6 +5402,19 @@
      "if": {
       "all": [
        {
+        "chapterDone": "c6-sunset"
+       },
+       {
+        "notFlag": "poet-wen.v11-story-told"
+       }
+      ]
+     },
+     "node": "v11-stories"
+    },
+    {
+     "if": {
+      "all": [
+       {
         "flag": "quest.library-bookmark.return.a"
        },
        {
@@ -5166,6 +5602,36 @@
       }
      ],
      "next": "root"
+    },
+    "v11-stories": {
+     "lines": [
+      {
+       "who": "poet-wen",
+       "text": "聽說山上的藝術大樓，校園裡流傳過鬧鬼的事。"
+      },
+      {
+       "who": "poet-wen",
+       "text": "有人搭電梯到地下室，撞倒一個小女孩。"
+      },
+      {
+       "who": "poet-wen",
+       "text": "監視器畫面裡，根本沒有小女孩。"
+      },
+      {
+       "who": "poet-wen",
+       "text": "也聽說大劇場旁有「人」晚上敲窗。"
+      },
+      {
+       "who": "poet-wen",
+       "text": "那個位置，當時根本沒有人。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "poet-wen.v11-story-told"
+      }
+     ],
+     "next": "root"
     }
    }
   },
@@ -5258,7 +5724,7 @@
        "next": "told"
       },
       {
-       "text": "「問林助教。」",
+       "text": "「問呂老師。」",
        "next": "ask"
       }
      ]
@@ -5307,7 +5773,7 @@
       {
        "who": "intl-mia",
        "face": "troubled",
-       "text": "林助教？在哪裡？……好吧，我找找。"
+       "text": "呂老師？在哪裡？……好吧，我找找。"
       }
      ]
     },
@@ -5694,7 +6160,8 @@
     9.6,
     -5.6
    ],
-   "activity": "Sit"
+   "activity": "Sit",
+   "seat": "library-mia-desk"
   },
   {
    "npc": "intl-mia",
@@ -5707,7 +6174,8 @@
     11.5,
     -7
    ],
-   "activity": "Sit"
+   "activity": "Sit",
+   "seat": "library-mia-shade"
   }
  ]
 }

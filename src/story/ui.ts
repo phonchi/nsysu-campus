@@ -1,3 +1,4 @@
+import {contentLinksHtml,isContentLinkTarget,releasePointerLock,type TalkPresentation} from './content-links';
 import type { RhythmFrame } from '../audio/rhythm';
 import { staySecondsRemaining } from '../walk/interaction-events';
 import type { Chapter, Line } from './schema';
@@ -59,7 +60,7 @@ export class StoryUi {
 <div class="q-badge" hidden aria-hidden="true"><b></b><small></small></div>
 <div class="q-pointer" hidden aria-hidden="true"><svg viewBox="0 0 40 40"><path d="M6 20h22m-9-10 10 10-10 10" stroke="#2a2c4a" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 20h22m-9-10 10 10-10 10" stroke="#e9b949" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
 <div class="q-edge" hidden aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h13m-5-6 6 6-6 6" stroke="#2a2c4a" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-<div class="q-dialog" role="dialog" aria-live="polite" hidden><div class="portrait"></div><div class="q-body"><span class="name"></span><p class="text"></p><ol class="q-choices" hidden></ol></div><div class="q-tools"><button type="button" data-q="log">紀錄 L</button><button type="button" data-q="skip">快轉 Tab</button></div><span class="next">E／點擊 繼續</span></div>
+<div class="q-dialog" role="dialog" aria-live="polite" hidden><div class="portrait"></div><div class="q-body"><span class="name"></span><p class="text"></p><ol class="q-choices" hidden></ol><nav class="q-content-links" aria-label="官網連結" hidden></nav></div><div class="q-tools"><button type="button" data-q="log">紀錄 L</button><button type="button" data-q="skip">快轉 Tab</button></div><span class="next">E／點擊 繼續</span></div>
 <div class="q-safe-insets" aria-hidden="true"></div><div class="q-hint" hidden></div>
 <div class="q-log" role="dialog" aria-label="對話紀錄" hidden><h3>對話紀錄</h3><ol></ol><button type="button" data-q="log-close">關閉 Esc</button></div>`;
     host.append(this.root);
@@ -77,6 +78,7 @@ export class StoryUi {
       if(id) { e.stopPropagation(); this.hintSelect?.(id); }
     });
     this.dialogueEl.addEventListener('click', e => {
+      if(isContentLinkTarget(e.target))return;
       const t = e.target as HTMLElement, q = t.closest<HTMLElement>('[data-q]')?.dataset.q, c = t.closest<HTMLElement>('[data-choice]');
       if (q === 'log') { this.toggleLog(); return; }
       if (q === 'skip') { this.skip(); return; }
@@ -102,8 +104,8 @@ export class StoryUi {
   dialogue(lines: Line[], done: () => void) { this.begin(); void this.say(lines).then(() => { this.end(); done(); }); }
 
   /** Keep the box open across several say()/choose() calls (one NPC conversation). */
-  begin() { if (this.session++ === 0) { this.log = []; this.skipping = false; } }
-  end() { if (this.session > 0 && --this.session === 0) { this.dialogueEl.hidden = true; this.skipping = false; this.toggleLog(false); } }
+  begin() { releasePointerLock(); if (this.session++ === 0) { this.log = []; this.skipping = false; } }
+  end() { if(this.session>0)this.session--; if (this.session === 0) { this.dialogueEl.hidden = true; this.setLinks(); this.skipping = false; this.toggleLog(false); } }
 
   private speaker(who: string) {
     if (who === 'player') return { ...this.player(), right: true };
@@ -114,7 +116,13 @@ export class StoryUi {
 
   /** Typewriter lines. E, Space or a click advances (and first completes a line still typing). With `hold`,
    * the last line stays up and the promise resolves as soon as it is fully shown (choices follow). */
-  say(lines: TalkLine[], hold = false) {
+  private setLinks(presentation?:TalkPresentation){
+    const links=this.dialogueEl.querySelector<HTMLElement>('.q-content-links')!;
+    links.innerHTML=contentLinksHtml(presentation?.links);links.hidden=!links.innerHTML;
+    this.dialogueEl.querySelector<HTMLElement>('[data-q=skip]')!.textContent=links.hidden?'快轉 Tab':'快轉';
+  }
+  say(lines: TalkLine[], hold = false,presentation?:TalkPresentation) {
+    releasePointerLock();this.setLinks(presentation);
     return new Promise<void>(resolve => {
       if (!lines.length) { resolve(); return; }
       let i = 0;

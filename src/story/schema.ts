@@ -23,7 +23,7 @@ export type Action =
 export interface Step { id: string; when: Condition[]; then: Action[] }
 export interface Chapter { id: string; title: string; zone: string; objective: string; start: { when: Condition[] }; steps: Step[]; sources: string[] }
 export interface Line { who: string; text: string }
-export interface SideQuest { id: string; fromCampusInfo: string; title: string; hint: string }
+export interface SideQuest { id: string; fromCampusInfo: string; title: string; hint: string; unlockAfter?: string }
 export interface StoryData {
   version: number;
   guide: { id: string; name: string; model?: string };

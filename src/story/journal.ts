@@ -1,6 +1,8 @@
+import {contentLinksHtml,releasePointerLock} from './content-links';
+import type {ContentLink} from './quests';
 import './journal.css';
 const esc = (v: unknown) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
-export interface JournalCard { id: string; title: string; subtitle: string; text: string; meta?: string; actions?: { id: string; label: string }[] }
+export interface JournalCard { id: string; title: string; subtitle: string; text: string; meta?: string; actions?: { id: string; label: string }[]; links?:ContentLink[] }
 export interface JournalClue { id: string; title: string; hint: string; done: boolean }
 export interface JournalModel { tasks: JournalCard[]; events: JournalCard[]; people: JournalCard[]; notice?: string; clues?: JournalClue[] }
 /** One accessible modal: no world-input handlers while reading the notebook. */
@@ -13,10 +15,10 @@ export class JournalView {
   constructor(host: HTMLElement, private action: (id: string, action: string) => void, private changed: (open: boolean) => void) {
     this.root.addEventListener('keydown', e => {
       if (e.key !== 'Tab') return;
-      e.preventDefault(); e.stopPropagation();
-      const buttons = [...this.root.querySelectorAll<HTMLElement>('button:not([disabled])')];
-      const i = buttons.indexOf(document.activeElement as HTMLElement);
-      buttons[(i + (e.shiftKey ? -1 : 1) + buttons.length) % buttons.length]?.focus();
+      const controls=[...this.root.querySelectorAll<HTMLElement>('button:not([disabled]),a[data-content-link]')];
+      const first=controls[0],last=controls.at(-1);
+      if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}
+      else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}
     });
     this.root.className = 'campus-journal'; this.root.hidden = true; host.append(this.root);
     this.root.addEventListener('click', e => {
@@ -29,7 +31,7 @@ export class JournalView {
     });
   }
   get open() { return !this.root.hidden; }
-  show(model: JournalModel) { this.previous = document.activeElement as HTMLElement; this.model = model; this.root.hidden = false; this.render(); this.changed(true); this.root.querySelector<HTMLElement>('[data-journal=close]')?.focus(); }
+  show(model: JournalModel) { releasePointerLock(); this.previous = document.activeElement as HTMLElement; this.model = model; this.root.hidden = false; this.render(); this.changed(true); this.root.querySelector<HTMLElement>('[data-journal=close]')?.focus(); }
   update(model: JournalModel) { this.model = model; if (this.open) this.render(); }
   close() { if (!this.open) return; this.root.hidden = true; this.changed(false); this.previous?.focus(); }
   key(key: string) {
@@ -39,9 +41,11 @@ export class JournalView {
   private render() {
     const focused = document.activeElement as HTMLElement;
     const focusAction = focused?.dataset.journal, focusId = focused?.dataset.id;
+    const focusLink=focused?.getAttribute('href');
     const rows = this.model[this.tab];
     const item = rows.find(x => x.id === this.selected) ?? rows[0]; this.selected = item?.id ?? '';
-    this.root.innerHTML = `<section class="journal-book" role="dialog" aria-modal="true" aria-label="校園手帳"><header><div><small>山海之間 · CAMPUS NOTES</small><h2>校園手帳</h2></div><button data-journal="close" aria-label="關閉校園手帳">收起手帳 ×</button></header><nav aria-label="手帳分類">${([['tasks','任務'],['events','事件經過'],['people','人物見聞']] as const).map(([id,label]) => `<button data-journal="tab" data-id="${id}" aria-pressed="${id === this.tab}">${label}<small>${this.model[id].length}</small></button>`).join('')}</nav>${this.model.notice ? `<p class="journal-notice" role="status">${esc(this.model.notice)}</p>` : ''}<div class="journal-pages"><aside aria-label="條目清單">${rows.length ? rows.map(x => `<button data-journal="select" data-id="${esc(x.id)}" aria-current="${x.id === item?.id}"><strong>${esc(x.title)}</strong><small>${esc(x.subtitle)}</small></button>`).join('') : '<p>這一頁還空著。走進校園，讓故事慢慢填滿。</p>'}</aside><article>${item ? `<small class="journal-kicker">${esc(item.subtitle)}</small><h3>${esc(item.title)}</h3><p class="journal-copy">${esc(item.text)}</p>${item.meta ? `<p class="journal-meta">${esc(item.meta)}</p>` : ''}<div class="journal-actions">${(item.actions ?? []).map(a => `<button data-journal="${esc(a.id)}" data-id="${esc(item.id)}">${esc(a.label)}</button>`).join('')}</div>` : '<h3>今天想往哪裡走？</h3><p>任務與偶遇都會留在這裡，重新開啟網站也能繼續。</p>'}${this.model.clues?.length ? `<section aria-label="校史線索"><h3>校史線索</h3>${this.model.clues.map(c => `<div data-clue="${esc(c.id)}"><strong>${esc(c.title)}・${c.done ? '已完成' : '待探索'}</strong><p>${esc(c.hint)}</p></div>`).join('')}</section>` : ''}</article></div><footer>J 開啟手帳 · Esc 收起 · 進度只保存在這個瀏覽器</footer></section>`;
+    this.root.innerHTML = `<section class="journal-book" role="dialog" aria-modal="true" aria-label="校園手帳"><header><div><small>山海之間 · CAMPUS NOTES</small><h2>校園手帳</h2></div><button data-journal="close" aria-label="關閉校園手帳">收起手帳 ×</button></header><nav aria-label="手帳分類">${([['tasks','任務'],['events','事件經過'],['people','人物見聞']] as const).map(([id,label]) => `<button data-journal="tab" data-id="${id}" aria-pressed="${id === this.tab}">${label}<small>${this.model[id].length}</small></button>`).join('')}</nav>${this.model.notice ? `<p class="journal-notice" role="status">${esc(this.model.notice)}</p>` : ''}<div class="journal-pages"><aside aria-label="條目清單">${rows.length ? rows.map(x => `<button data-journal="select" data-id="${esc(x.id)}" aria-current="${x.id === item?.id}"><strong>${esc(x.title)}</strong><small>${esc(x.subtitle)}</small></button>`).join('') : '<p>這一頁還空著。走進校園，讓故事慢慢填滿。</p>'}</aside><article>${item ? `<small class="journal-kicker">${esc(item.subtitle)}</small><h3>${esc(item.title)}</h3><p class="journal-copy">${esc(item.text)}</p>${item.meta ? `<p class="journal-meta">${esc(item.meta)}</p>` : ''}<nav class="q-content-links" aria-label="官網連結">${contentLinksHtml(item.links)}</nav><div class="journal-actions">${(item.actions ?? []).map(a => `<button data-journal="${esc(a.id)}" data-id="${esc(item.id)}">${esc(a.label)}</button>`).join('')}</div>` : '<h3>今天想往哪裡走？</h3><p>任務與偶遇都會留在這裡，重新開啟網站也能繼續。</p>'}${this.model.clues?.length ? `<section aria-label="校史線索"><h3>校史線索</h3>${this.model.clues.map(c => `<div data-clue="${esc(c.id)}"><strong>${esc(c.title)}・${c.done ? '已完成' : '待探索'}</strong><p>${esc(c.hint)}</p></div>`).join('')}</section>` : ''}</article></div><footer>J 開啟手帳 · Esc 收起 · 進度只保存在這個瀏覽器</footer></section>`;
+    if(focusLink)[...this.root.querySelectorAll<HTMLAnchorElement>('a[data-content-link]')].find(a=>a.getAttribute('href')===focusLink)?.focus();
     if (focusAction) [...this.root.querySelectorAll<HTMLElement>('[data-journal]')].find(b => b.dataset.journal === focusAction && b.dataset.id === focusId)?.focus();
   }
   dispose() { this.root.remove(); }

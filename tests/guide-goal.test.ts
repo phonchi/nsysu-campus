@@ -27,7 +27,7 @@ describe('beacon fade', () => {
 });
 
 describe('badge glyph', () => {
-  it.each([['阿灣', '灣'], ['小禾', '禾'], ['林老師', '林'], ['建宇學長', '建'], ['海伯', '海'], ['Mia', 'M'], ['', '']])('%s reads as %s', (name, glyph) => {
+  it.each([['阿灣', '灣'], ['小禾', '禾'], ['呂老師', '呂'], ['建宇學長', '建'], ['海伯', '海'], ['Mia', 'M'], ['', '']])('%s reads as %s', (name, glyph) => {
     expect(badgeGlyph(name)).toBe(glyph);
   });
 });

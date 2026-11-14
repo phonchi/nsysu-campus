@@ -1,4 +1,4 @@
-/** v10.2 on the authored data: the thirteen quests' acceptable times against npcs.json, flags, works and keepsakes, and
+/** v10.2 on the authored data: the fourteen quests' acceptable times against npcs.json, flags, works and keepsakes, and
  * the revision-1 save contract after the rewrite (spec-v10.2 §2, §4). */
 import { describe, expect, it } from 'vitest';
 import { QuestEngine, QUEST_KEY, evalCond, questFlags, validateQuests, type QuestData, type QuestWorld, type TimeOfDay } from '../src/story/quests';
@@ -27,11 +27,11 @@ const complete = (e: QuestEngine, id: string, choice: string) => {
 const SPEC_TIMES: Record<string, TimeOfDay[]> = {
   'gate-lost': ['day', 'sunset'], 'gate-mia': ['day'], 'tunnel-leaflet': ['day'], 'tunnel-photo': ['day'], 'admin-list': ['day', 'sunset', 'night'],
   'admin-garden': ['day'], 'library-bookmark': ['day', 'night'], 'library-corner': ['day', 'night'], 'arcade-coffee': ['day', 'sunset'],
-  'arcade-club': ['day'], 'sea-postcard': ['sunset'], 'sea-stage': ['sunset'], 'math-day': ['day', 'sunset'],
+  'arcade-club': ['day'], 'sea-postcard': ['sunset'], 'sea-stage': ['sunset'], 'math-day': ['day', 'sunset'], 'math-freshman': ['day', 'sunset'],
 };
 const SPEC_GATES: Record<string, string> = { 'gate-lost': 'c1-gate', 'tunnel-leaflet': 'c2-tunnel', 'tunnel-photo': 'c2-tunnel' };
 
-describe('thirteen quests × three times of day', () => {
+describe('fourteen quests × three times of day', () => {
   it('matches spec §2 and is available exactly at those times with the authored schedules', () => {
     expect(validateQuests(data)).toEqual([]);
     expect(data.quests.map(q => q.id).sort()).toEqual(Object.keys(SPEC_TIMES).sort());
@@ -88,15 +88,15 @@ describe('choices leave flags, works and keepsakes', () => {
       }
     }
   });
-  it('the flag catalogue has 13 done flags and 26 choice flags, all distinct', () => {
+  it('the flag catalogue has 14 done flags and 28 choice flags, all distinct', () => {
     const flags = questFlags(data);
-    expect(new Set(flags).size).toBe(39);
-    expect(flags.filter(f => f.endsWith('.done'))).toHaveLength(13);
+    expect(new Set(flags).size).toBe(42);
+    expect(flags.filter(f => f.endsWith('.done'))).toHaveLength(14);
   });
   it('every quest names a collectible that exists once in collection.json, and nothing else is group quest', () => {
     const quest = (collection as { items: { id: string; group?: string }[] }).items.filter(i => i.group === 'quest').map(i => i.id).sort();
     expect(quest).toEqual(data.quests.map(q => `item-quest-${q.id}`).sort());
-    expect(new Set(quest).size).toBe(13);
+    expect(new Set(quest).size).toBe(14);
   });
 });
 
@@ -121,7 +121,8 @@ describe('revision-1 saves after the v10.2 rewrite', () => {
       const legacy = contract.quests[q.id].reward, storage = save(q.id, { status: 'completed', step: contract.quests[q.id].steps.length, choices: { return: 'b' } }, { rewards: [legacy] });
       let e = new QuestEngine(data, { storage });
       expect(e.list().find(v => v.definition.id === q.id)!.state, q.id).toMatchObject({ status: 'completed', step: q.steps.length, choices: { return: 'b' } });
-      expect(e.progress.rewards, q.id).toEqual([legacy]); expect(q.legacyRewards, q.id).toEqual([legacy]);
+      // A quest born after the keepsake rewrite (v11 math-freshman) has no older reward string: its contract reward is the current one.
+      expect(e.progress.rewards, q.id).toEqual([legacy]); expect(q.legacyRewards ?? [q.reward], q.id).toEqual([legacy]);
       expect(e.grants, q.id).toMatchObject([{ itemId: `item-quest-${q.id}`, variant: 'b' }]);
       expect(e.worksShown(world('day')).map(s => s.spot).sort(), q.id).toEqual((q.works ?? []).filter(w => evalCond(w.if, id => e.flag(id))).map(w => w.spot).sort());
       e.track(undefined); e = new QuestEngine(data, { storage });

@@ -62,7 +62,19 @@ export class StoryEngine {
 
   constructor(readonly data: StoryData, private world: StoryWorld, private fx: StoryEffects, saved?: StoryProgress) {
     this.progress = saved ? normalizeProgress(saved) : normalizeProgress({});
+    if (this.mergeUnlockedClues()) saveProgress(this.progress);
     if (this.progress.active && !data.chapters.some(c => c.id === this.progress.active)) this.progress.active = undefined;
+  }
+
+  /** Declarative migration: never replay chapter effects or emit unlock actions. */
+  private mergeUnlockedClues(): boolean {
+    let changed = false;
+    for (const q of this.data.sideQuests) {
+      if (q.unlockAfter && this.progress.done.includes(q.unlockAfter) && !this.progress.sideQuests.includes(q.id)) {
+        this.progress.sideQuests.push(q.id); changed = true;
+      }
+    }
+    return changed;
   }
 
   get active() { return this.data.chapters.find(c => c.id === this.progress.active); }
@@ -171,6 +183,7 @@ export class StoryEngine {
       else if ('unlockSideQuest' in a) { if (!this.progress.sideQuests.includes(a.unlockSideQuest)) this.progress.sideQuests.push(a.unlockSideQuest); this.fx.unlockSideQuest(a.unlockSideQuest); }
       else if ('completeChapter' in a) {
         if (!this.progress.done.includes(ch.id)) this.progress.done.push(ch.id);
+        this.mergeUnlockedClues();
         this.progress.active = undefined;
         this.fx.showArrow(null);
         const next = this.data.chapters.find(c => !this.progress.done.includes(c.id) && c.start.when.every(x => this.holds(x)));

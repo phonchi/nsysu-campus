@@ -16,3 +16,13 @@ it('routes numbers to the list and dialogue; arrow keys always walk, even with a
  input.mode='walk';list=false;key('ArrowUp');expect(input.keys.has('arrowup')).toBe(true);
  input.dispose();
 });
+it('dialogue link Tab and Enter remain native while other dialogue keys still route',()=>{
+ let focusedLink=false;
+ const win=Object.assign(new EventTarget(),{closest:()=>focusedLink?{}:null}),doc=Object.assign(new EventTarget(),{pointerLockElement:null,querySelector:()=>({})});
+ vi.stubGlobal('window',win);vi.stubGlobal('document',doc);
+ const modal=vi.fn(),input=new WalkInput(element(),element(),element(),{press:()=>{},modal,moveStarted:()=>{},look:()=>{},zoom:()=>{},canLook:()=>false});
+ input.mode='dialogue';
+ const key=(key:string)=>{const e=Object.assign(new Event('keydown',{cancelable:true}),{key,repeat:false});win.dispatchEvent(e);return e;};
+ expect(key('Tab').defaultPrevented).toBe(false);focusedLink=true;expect(key('Enter').defaultPrevented).toBe(false);expect(modal).not.toHaveBeenCalled();
+ expect(key('e').defaultPrevented).toBe(true);expect(modal).toHaveBeenCalledWith('e','dialogue');input.dispose();
+});

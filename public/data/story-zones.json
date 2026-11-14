@@ -1,5 +1,5 @@
 {
- "note": "Story anchors in world metres (x east, z south). Positions come from outdoor-graph anchors (tools/build_outdoor_graph.py, T3 alignment). r = zone radius. library is the plaza south of the hand-modelled pavilion; library-door is the building entrance the main story reaches. A zone may give `y` when its floor is not the terrain (tunnel-inside: the bore floor, under the hill).",
+ "note": "Story anchors in world metres (x east, z south). Positions come from outdoor-graph anchors (tools/build_outdoor_graph.py, T3 alignment). r = zone radius. library is the plaza south of the hand-modelled pavilion; library-door is the building entrance the main story reaches. A zone may give `y` when its floor is not the terrain (tunnel-inside: the bore floor, under the hill). v11: `seats` is the seat registry (SeatSpec, spec-v11 section 1 and round2-astra 3-E): foot = world x,z of the sitter, yaw as avatar.heading (front = local -Z), surfaceHeight = bench slat top (tools/create_props_v4.py bench, 0.475), approachRadius = exact seating range; the prop is spawned relative to the seat. NPC schedules reference a seat by `seat`; seawall-seat／arcade-seat zones name the player seat. Starting values only; Astra calibrates.",
  "zones": {
   "gate": {
    "label": "校門・蓮海路",
@@ -100,7 +100,8 @@
     -313.5,
     469.3
    ],
-   "r": 3
+   "r": 3,
+   "seat": "seawall-player"
   },
   "arcade-seat": {
    "label": "柱廊旁的位子",
@@ -109,7 +110,8 @@
     -78.5,
     127.5
    ],
-   "r": 3
+   "r": 3,
+   "seat": "arcade-player"
   }
  },
  "npcs": {
@@ -168,5 +170,216 @@
    "npc-student-6"
   ],
   "monkeys": 3
+ },
+ "seats": {
+  "seawall-guide": {
+   "foot": [
+    -306.0,
+    470.7
+   ],
+   "yaw": 2.87,
+   "pose": "chair",
+   "surfaceHeight": 0.475,
+   "approachRadius": 0.6,
+   "prop": {
+    "kind": "bench",
+    "offset": [
+     0,
+     0,
+     0.22
+    ],
+    "yaw": 3.141592653589793
+   }
+  },
+  "seawall-poet-wen": {
+   "foot": [
+    -316.0,
+    474.7
+   ],
+   "yaw": 2.87,
+   "pose": "chair",
+   "surfaceHeight": 0.475,
+   "approachRadius": 0.6,
+   "prop": {
+    "kind": "bench",
+    "offset": [
+     0,
+     0,
+     0.22
+    ],
+    "yaw": 3.141592653589793
+   }
+  },
+  "seawall-player": {
+   "foot": [
+    -313.5,
+    469.3
+   ],
+   "yaw": 2.87,
+   "pose": "chair",
+   "surfaceHeight": 0.475,
+   "approachRadius": 0.6,
+   "prop": {
+    "kind": "bench",
+    "offset": [
+     0,
+     0,
+     0.22
+    ],
+    "yaw": 3.141592653589793
+   }
+  },
+  "arcade-guitar-yun": {
+   "foot": [
+    -81.0,
+    127.0
+   ],
+   "yaw": 0.0,
+   "pose": "chair",
+   "surfaceHeight": 0.475,
+   "approachRadius": 0.6,
+   "prop": {
+    "kind": "bench",
+    "offset": [
+     0,
+     0,
+     0.22
+    ],
+    "yaw": 3.141592653589793
+   }
+  },
+  "arcade-player": {
+   "foot": [
+    -78.5,
+    127.5
+   ],
+   "yaw": 0.0,
+   "pose": "chair",
+   "surfaceHeight": 0.475,
+   "approachRadius": 0.6,
+   "prop": {
+    "kind": "bench",
+    "offset": [
+     0,
+     0,
+     0.22
+    ],
+    "yaw": 3.141592653589793
+   }
+  },
+  "il-guitar-yun": {
+   "foot": [
+    -90.04,
+    -69.8
+   ],
+   "yaw": -0.69,
+   "pose": "chair",
+   "surfaceHeight": 0.475,
+   "approachRadius": 0.6,
+   "prop": {
+    "kind": "bench",
+    "offset": [
+     0,
+     0,
+     0.22
+    ],
+    "yaw": 3.141592653589793
+   }
+  },
+  "admin-s1": {
+   "foot": [
+    -67.02,
+    99.39
+   ],
+   "yaw": 0.54,
+   "pose": "chair",
+   "surfaceHeight": 0.475,
+   "approachRadius": 0.6,
+   "prop": {
+    "kind": "bench",
+    "offset": [
+     0,
+     0,
+     0.22
+    ],
+    "yaw": 3.141592653589793
+   }
+  },
+  "library-quiz-dian": {
+   "foot": [
+    -57.0,
+    -30.0
+   ],
+   "yaw": 0.88,
+   "pose": "chair",
+   "surfaceHeight": 0.475,
+   "approachRadius": 0.6,
+   "prop": {
+    "kind": "bench",
+    "offset": [
+     0,
+     0,
+     0.22
+    ],
+    "yaw": 3.141592653589793
+   }
+  },
+  "bodhi-gardener-hai": {
+   "foot": [
+    -67,
+    -27
+   ],
+   "yaw": -0.46,
+   "pose": "chair",
+   "surfaceHeight": 0.475,
+   "approachRadius": 0.6,
+   "prop": {
+    "kind": "bench",
+    "offset": [
+     0,
+     0,
+     0.22
+    ],
+    "yaw": 3.141592653589793
+   }
+  },
+  "library-mia-desk": {
+   "foot": [
+    -53.4,
+    -40.6
+   ],
+   "yaw": 1.93,
+   "pose": "chair",
+   "surfaceHeight": 0.475,
+   "approachRadius": 0.6,
+   "prop": {
+    "kind": "bench",
+    "offset": [
+     0,
+     0,
+     0.22
+    ],
+    "yaw": 3.141592653589793
+   }
+  },
+  "library-mia-shade": {
+   "foot": [
+    -51.5,
+    -42.0
+   ],
+   "yaw": -2.21,
+   "pose": "chair",
+   "surfaceHeight": 0.475,
+   "approachRadius": 0.6,
+   "prop": {
+    "kind": "bench",
+    "offset": [
+     0,
+     0,
+     0.22
+    ],
+    "yaw": 3.141592653589793
+   }
+  }
  }
 }

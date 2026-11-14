@@ -1,6 +1,7 @@
 """Targeted negative cases ensure the build verifier catches the promised regressions."""
 import copy
 import importlib.util
+import json
 import unittest
 from pathlib import Path
 
@@ -99,7 +100,7 @@ class VerifyQuestsTests(unittest.TestCase):
         errors = self.errors()
         self.assertTrue(any('math-day: quest missing from the save contract' in e for e in errors), errors)
         self.assertTrue(any('ghost: quest in the save contract no longer exists' in e for e in errors), errors)
-        self.assertTrue(any('the thirteen quest ids must match the save contract' in e for e in errors), errors)
+        self.assertTrue(any('the fourteen quest ids must match the save contract' in e for e in errors), errors)
         self.assertTrue(any('gate-lost/return: saved choice ids' in e for e in errors), errors)
 
     def test_rewritten_quests_end_on_return_with_choices(self):
@@ -218,7 +219,7 @@ class VerifyQuestsTests(unittest.TestCase):
         for text in ('gate-lost: completionRewards must be the one item item-quest-gate-lost', 'collectible item-quest-gate-lost: no quest grants it',
                      'gate-mia: collectible item-quest-gate-mia needs variant b', 'tunnel-photo: variantBy explore is not a choice step', 'collectible item-quest-ghost: no quest grants it'):
             self.assertTrue(any(text in e for e in errors), (text, errors))
-        self.assertEqual(sum(1 for i in collection['items'] if i.get('group') == 'quest'), 14)
+        self.assertEqual(sum(1 for i in collection['items'] if i.get('group') == 'quest'), 15)
 
     def test_schedule_overrides_keep_the_base_zone_and_known_flags(self):
         npcs = self.data[2]
@@ -233,6 +234,86 @@ class VerifyQuestsTests(unittest.TestCase):
         for text in ('scheduleOverrides[1]: override must keep the base schedule zone library', 'scheduleOverrides[2]: override must keep the base schedule zone None',
                      'scheduleOverrides[3]: unknown npc nobody', 'scheduleOverrides[3]: invalid preset dusk', 'scheduleOverrides[3]: condition uses unknown quest flag quest.nope.done'):
             self.assertTrue(any(text in e for e in errors), (text, errors))
+
+    def test_link_whitelist_matches_the_shared_fixture(self):
+        # tests/fixtures/link-cases.json is the coordinator's; the front end (isAllowedLink) reads the same file.
+        cases = json.loads((Path(__file__).resolve().parent / 'fixtures/link-cases.json').read_text())
+        self.assertTrue(cases['ok'] and cases['bad'])
+        for url in cases['ok']:
+            self.assertTrue(module.allowed_link(url), url)
+        for url in cases['bad']:
+            self.assertFalse(module.allowed_link(url), url)
+        # Parser-parity cases both sides decide on the raw string (proposed additions to the fixture).
+        for url in ('https://MATH.NSYSU.EDU.TW/', 'https://sites.google.com/math.nsysu.edu.tw/', 'https://sites.google.com/math.nsysu.edu.tw?tab=1', 'https://math.nsysu.edu.tw/p/412-1183-915.php?Lang=zh-tw#top'):
+            self.assertTrue(module.allowed_link(url), url)
+        for url in ('https://math.nsysu.edu.tw:443/', ' https://math.nsysu.edu.tw/', 'https://math.nsysu.edu.tw/ ', 'https://sites.google.com/math.nsysu.edu.tw/../x', 'https://sites.google.com/./math.nsysu.edu.tw',
+                    'https://sites.google.com\\math.nsysu.edu.tw', 'https://sites.google.com/%2e%2e/math.nsysu.edu.tw', 'https://sites.google.com/math.nsysu.edu.tw%2Fx', 'https:///math.nsysu.edu.tw', 'HTTPS://math.nsysu.edu.tw:8443/',
+                    'https://sites.google.co%6d/math.nsysu.edu.tw', 'https://a%20b.nsysu.edu.tw/', 'https://_x.nsysu.edu.tw/', 'https://math.nsysu.edu.tw./', 
+                    'https://math.nsysu.edu.tw/頁', 'https://math.nsysu.edu.tw@attacker.com/', 'https://xn--nsysu.edu.tw/', 'https://.nsysu.edu.tw/', 'ftp://math.nsysu.edu.tw/', None, 7):
+            self.assertFalse(module.allowed_link(url), url)
+
+    def test_links_are_limited_and_whitelisted_per_quest_and_step(self):
+        quests = self.data[0]['quests']
+        freshman = next(q for q in quests if q['id'] == 'math-freshman')
+        self.assertEqual(freshman['links'], [{'label': '應數系首頁', 'url': 'https://math.nsysu.edu.tw/'}])
+        self.assertEqual([s['id'] for s in freshman['steps'] if s.get('links')], ['office', 'library', 'lab'])
+        self.assertEqual(next(q for q in quests if q['id'] == 'math-day')['links'][0]['url'], 'https://highschool-math.nsysu.edu.tw/')
+        self.assertEqual(self.errors(), [])
+        freshman['links'] = [{'label': 'a', 'url': 'https://math.nsysu.edu.tw/'}] * 3
+        freshman['steps'][1]['links'] = [{'label': '', 'url': 'https://math.nsysu.edu.tw/'}, {'label': 'x', 'url': 'http://math.nsysu.edu.tw/'}]
+        freshman['steps'][2]['links'] = {'label': 'x', 'url': 'https://math.nsysu.edu.tw/'}
+        errors = self.errors()
+        for text in ('math-freshman: more than 2 links', 'math-freshman/office: links[0] needs label and url', 'math-freshman/office: links[1] url not allowed http://math.nsysu.edu.tw/', 'math-freshman/library: links must be a list'):
+            self.assertTrue(any(text in e for e in errors), (text, errors))
+
+    def test_math_freshman_and_the_renamed_teacher(self):
+        quests, npcs, collection = self.data[0]['quests'], self.data[2], self.data[7]
+        self.assertEqual([q['id'] for q in quests][-2:], ['math-day', 'math-freshman'])
+        self.assertEqual(next(q for q in quests if q['id'] == 'math-day')['next'], ['math-freshman', 'arcade-club'])
+        freshman = next(q for q in quests if q['id'] == 'math-freshman')
+        self.assertEqual([s['id'] for s in freshman['steps']], ['leaflet', 'office', 'library', 'lab', 'return'])
+        self.assertEqual([s['target'] for s in freshman['steps']], ['npc:teacher-chen', 'dest:SC4010', 'dest:SC4009', 'dest:SC2004', 'spot:sc-courtyard-freshman-sign'])
+        self.assertEqual(freshman['next'], ['math-day'])
+        self.assertEqual(self.data[0]['saveContract']['quests']['math-freshman']['steps'], [s['id'] for s in freshman['steps']])
+        chen = next(n for n in npcs['npcs'] if n['id'] == 'teacher-chen')
+        self.assertEqual((chen['name'], chen['model'], chen['schedule']['night']), ('陳老師', 'npc-teacher', None))
+        self.assertEqual(chen['schedule']['day'], {'at': 'arcade', 'offset': [49.5, -14.5], 'activity': 'Idle'})
+        lin = next(n for n in npcs['npcs'] if n['id'] == 'ta-lin')
+        self.assertEqual((lin['name'], lin['role']), ('呂老師', '應數系老師'))
+        blob = json.dumps([quests, npcs, collection, self.data[0]['spots']], ensure_ascii=False)
+        self.assertNotIn('林老師', blob); self.assertNotIn('林助教', blob); self.assertNotIn('助教', blob)
+        self.assertIn('arcade-lin-desk', self.data[0]['spots'])  # the spot id stays; only its label changed
+        self.assertTrue(any(i['id'] == 'item-quest-math-freshman' and set(i['variants']) == {'a', 'b'} for i in collection['items']))
+
+    def test_seats_registry_and_references(self):
+        npcs, zones, graph = self.data[2], self.data[3], self.data[5]
+        self.assertEqual(module.verify_seats(npcs, zones, graph), [])
+        seats = zones['seats']
+        self.assertEqual(zones['zones']['seawall-seat']['seat'], 'seawall-player')
+        self.assertEqual(zones['zones']['arcade-seat']['seat'], 'arcade-player')
+        for n in npcs['npcs']:
+            for time, spec in n['schedule'].items():
+                if spec and spec.get('activity') == 'Sit':
+                    self.assertEqual(n['model'] != 'monkey', 'seat' in spec, (n['id'], time))
+        self.assertEqual(sorted(seats), ['admin-s1', 'arcade-guitar-yun', 'arcade-player', 'bodhi-gardener-hai', 'il-guitar-yun', 'library-mia-desk', 'library-mia-shade', 'library-quiz-dian', 'seawall-guide', 'seawall-player', 'seawall-poet-wen'])
+        # Negative cases: dangling reference, a human Sit without a seat, a seat too far, two seats too close, a shared player seat, bad numbers.
+        guide = next(n for n in npcs['npcs'] if n['id'] == 'guide')
+        guide['schedule']['sunset']['seat'] = 'nowhere'
+        del guide['schedule']['night']['seat']
+        next(n for n in npcs['npcs'] if n['id'] == 'poet-wen')['schedule']['sunset']['offset'] = [-8, 9]
+        seats['arcade-guitar-yun']['foot'] = [-78.9, 127.5]
+        zones['zones']['arcade-seat']['seat'] = 'arcade-guitar-yun'
+        seats['admin-s1']['yaw'] = float('nan')
+        seats['library-quiz-dian']['prop']['kind'] = 'stool'
+        npcs['scheduleOverrides'][0]['seat'] = 'il-guitar-yun'
+        errors = module.verify_seats(npcs, zones, graph)
+        for text in ('guide/sunset: human Sit needs an existing seat (have nowhere)', 'guide/night: human Sit needs an existing seat (have None)', 'poet-wen/sunset: seat seawall-poet-wen is over 1.5 m from the station',
+                     'seats arcade-guitar-yun and arcade-player are under 0.7 m apart', 'zone arcade-seat: player seat arcade-guitar-yun is also an NPC seat', 'seat admin-s1: yaw must be finite',
+                     'seat library-quiz-dian: prop.kind must be bench', 'seat il-guitar-yun: shared by', 'scheduleOverrides[0]: seat il-guitar-yun is over 1.5 m'):
+            self.assertTrue(any(text in e for e in errors), (text, errors))
+        # Monkeys never need a seat.
+        next(n for n in npcs['npcs'] if n['id'] == 'm1')['schedule']['day']['seat'] = 'nowhere'
+        self.assertFalse(any(e.startswith('m1/') for e in module.verify_seats(npcs, zones, graph)))
 
     def test_chapter_gate_and_encounter_schedule(self):
         self.data[0]['quests'][0]['accept']['chapterDone'] = 'missing'

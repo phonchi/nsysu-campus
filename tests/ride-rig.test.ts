@@ -11,6 +11,26 @@ async function bike(){return(await loadRideAsset('public/models/campus/bicycle.g
 const frame=(x:number,front=0,rear=0)=>({foot:new T.Vector3(x,0,0),surfaceHeight:0,onGround:true,airborneFor:0,speed:3.6,intendedSpeed:3.6,jumped:false,runSpeed:7.2,rideContacts:{front,rear}});
 describe('shipped student riding contacts',()=>{
  for(const gender of ['m','f'])it(`${gender}: both hands hold bars and both feet stay on pedals throughout one ride cycle`,async()=>{const a=new Avatar(),s=await student(gender);a.setModel(s.model,s.clips);a.setVehicle(await bike());a.face(-Math.PI/2);expect(a.rideReady).toBe(true);a.riding=true;let maxGrip=0,maxPedal=0;for(let i=0;i<=180;i++){a.update(1/60,frame(i*.04));const d=a.rideDiagnostics!;maxGrip=Math.max(maxGrip,...d.grips.map(g=>g.error));maxPedal=Math.max(maxPedal,...d.pedals.map(g=>g.error));expect(d.saddleError).toBeLessThan(1e-4);expect(Math.max(...d.wheels.map(w=>w.error))).toBeLessThan(.02);}console.log(gender,{maxGrip,maxPedal});expect(maxGrip).toBeLessThan(.02);expect(maxPedal).toBeLessThan(.03);a.riding=false;a.update(1/60,frame(7.2));expect(a.state).toBe('walk');expect(a.root.rotation.x).toBe(0);a.dispose();});
+ it('pedals move toward -Z after the top, stay half a cycle apart and remain level',async()=>{
+  const a=new Avatar(),s=await student('m'),b=await bike();a.setModel(s.model,s.clips);a.setVehicle(b);a.face(0);a.riding=true;
+  const find=(name:string)=>{const o=b.getObjectByName(name)??b.getObjectByName(name.replace('.',''));expect(o).toBeTruthy();return o!;};
+  const left=find('pedal.L'),right=find('pedal.R'),crank=find('crank');
+  a.update(1/60,frame(0));
+  const start=left.getWorldPosition(new T.Vector3()).sub(a.root.position);
+  a.update(1/60,frame(.02));
+  const after=left.getWorldPosition(new T.Vector3()).sub(a.root.position);
+  expect(after.z).toBeLessThan(start.z);
+  for(let i=1;i<=32;i++){
+   a.update(1/60,frame(i*.12));
+   const center=crank.getWorldPosition(new T.Vector3()),l=left.getWorldPosition(new T.Vector3()).sub(center),r=right.getWorldPosition(new T.Vector3()).sub(center);
+   expect(l.y).toBeCloseTo(-r.y,5);expect(l.z).toBeCloseTo(-r.z,5);
+   for(const pedal of [left,right]){
+    const normal=new T.Vector3(0,1,0).applyQuaternion(pedal.getWorldQuaternion(new T.Quaternion()));
+    expect(normal.distanceTo(new T.Vector3(0,1,0))).toBeLessThan(1e-6);
+   }
+  }
+  a.dispose();
+ });
  it('cadence depends on distance, not frame rate, and stopping retains the pose',async()=>{const phases=[];for(const fps of [15,30,60]){const a=new Avatar(),s=await student('m');a.setModel(s.model,s.clips);a.setVehicle(await bike());a.riding=true;for(let i=0;i<=fps;i++)a.update(1/fps,frame(i*3/fps));phases.push(a.rideDiagnostics!.phase);const phase=a.rideDiagnostics!.phase;for(let i=0;i<fps;i++)a.update(1/fps,{...frame(3),speed:0,intendedSpeed:0});expect(a.rideDiagnostics!.phase).toBeCloseTo(phase,8);expect(a.rideDiagnostics!.grips.every(g=>g.error<.02)).toBe(true);}expect(phases[0]).toBeCloseTo(phases[1],8);expect(phases[1]).toBeCloseTo(phases[2],8);});
  it('wheels meet a gentle sloped surface and invalid rigs cannot pretend to ride',async()=>{const a=new Avatar(),s=await student('f');a.setModel(s.model,s.clips);a.setVehicle(await bike());a.riding=true;a.update(1/30,frame(0,.052,-.052));expect(a.rideDiagnostics!.pitch).toBeGreaterThan(0);expect(a.rideDiagnostics!.wheels.every(w=>w.error<.02)).toBe(true);const fallback=new Avatar();fallback.setModel(new T.Group());fallback.setVehicle(await bike());expect(fallback.rideReady).toBe(false);fallback.riding=true;fallback.update(1/60,frame(0));expect(fallback.riding).toBe(false);});
  it('switching gender while mounted and starting far from origin preserves real skin contacts',async()=>{const a=new Avatar();a.root.position.set(200,4,-100);let s=await student('m');a.setModel(s.model,s.clips);a.setVehicle(await bike());a.riding=true;a.update(1/30,{...frame(200),foot:new T.Vector3(200,4,-100),surfaceHeight:4,rideContacts:{front:4,rear:4}});s=await student('f');a.setModel(s.model,s.clips);a.update(1/30,{...frame(200.1),foot:new T.Vector3(200.1,4,-100),surfaceHeight:4,rideContacts:{front:4,rear:4}});expect(a.riding).toBe(true);expect(a.rideDiagnostics!.grips.every(g=>g.error<.02)).toBe(true);expect(a.rideDiagnostics!.pedals.every(g=>g.error<.03)).toBe(true);a.riding=false;a.update(1/30,{...frame(200.1),foot:new T.Vector3(200.1,4,-100),surfaceHeight:4});expect(a.state).toBe('walk');expect(a.root.rotation.x).toBe(0);expect(a.root.position.y).toBeGreaterThanOrEqual(4);});

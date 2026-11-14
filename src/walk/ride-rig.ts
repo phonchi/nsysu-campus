@@ -128,7 +128,7 @@ export class RideRig {
     worldRotation(body,new T.Quaternion().setFromAxisAngle(leanAxis,-.32).multiply(body.getWorldQuaternion(new T.Quaternion())));
     const saddle=pos(this.markers.get('saddle')!),up=new T.Vector3(0,.07,0).applyQuaternion(this.root.getWorldQuaternion(new T.Quaternion()));
     worldPosition(body,pos(body).add(saddle.clone().add(up).sub(pos(hips))));
-    const crank=this.markers.get('crank')!;crank.rotation.x=phase;for(const s of ['L','R'])this.markers.get('pedal.'+s)!.rotation.x=-phase;this.bike.updateWorldMatrix(true,true);
+    const crank=this.markers.get('crank')!;crank.rotation.x=-phase;for(const s of ['L','R'])this.markers.get('pedal.'+s)!.rotation.x=phase;this.bike.updateWorldMatrix(true,true);
     const grips:RideContact[]=[],pedals:RideContact[]=[];
     const local=(x:number,y:number,z:number)=>this.root.localToWorld(new T.Vector3(x,y,z));
     for(const s of ['L','R']as const){const sign=this.signs.get(s)!,vehicleSide=sign>0?'L':'R';

@@ -14,10 +14,10 @@ export type RuntimeActivityStep=ActivityStep|({kind:'stay';target:string;max:num
 export type RuntimeActivity=Omit<ActiveActivity,'definition'>&{definition:Omit<ActiveActivity['definition'],'steps'>&{steps:RuntimeActivityStep[]};stepProgress?:{held:number;hold:number}};
 export function activityPresentation(engine:Pick<CampusEventEngine,'activity'>){return engine.activity as RuntimeActivity|undefined;}
 /** Activity guidance temporarily takes precedence over the tracked quest, without changing its save. */
-export function campusActivityGuide(activity:ActiveActivity|undefined,point:(target:string)=>Vector3|undefined): (GuideOverride & {max:number}) | undefined {
+export function campusActivityGuide(activity:ActiveActivity|undefined,point:(target:string)=>Vector3|undefined,seatReach?:(target:string)=>number|undefined): (GuideOverride & {max:number}) | undefined {
   const step=activity?.definition.steps[activity.step];
   if(activity?.phase!=='active' || !step || (step.kind!=='stay' && step.kind!=='near'))return undefined;
-  return {target:step.target,point:point(step.target),title:activity.definition.journal.title,text:step.text,max:step.max};
+  return {target:step.target,point:point(step.target),title:activity.definition.journal.title,text:step.text,max:seatReach?.(step.target)??step.max};
 }
 export function submitRhythmResult(engine:unknown,id:string,hits:number):RuntimeEventCommand[]|false {
   return (engine as {act(id:string,result:{hits:number}):RuntimeEventCommand[]|false}).act(id,{hits});

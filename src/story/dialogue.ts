@@ -1,3 +1,4 @@
+import type { TalkPresentation } from './content-links';
 /** NPC dialogue trees (spec-v4 §8, §15.2–§15.5): data types, the load-time validator and a pure runner.
  * A tree is entered at the first entry whose condition holds; a node shows its lines, applies its effects,
  * then offers choices (2–4, filtered by `if`) or follows `next`; a node with neither ends the talk.
@@ -54,7 +55,7 @@ export const choicesOf = (n: TalkNode, f: Facts) => (n.choices ?? []).filter(c =
 /** The presentation and world side of a conversation. */
 export interface TalkIO {
   /** Show lines; with `hold` the last line stays on screen (choices follow) and the promise resolves once it is shown. */
-  say(lines: TalkLine[], hold?: boolean): Promise<void>;
+  say(lines: TalkLine[], hold?: boolean, presentation?:TalkPresentation): Promise<void>;
   /** Resolves with the index into `choices`. */
   choose(choices: Choice[]): Promise<number>;
   apply(e: Effect): void;

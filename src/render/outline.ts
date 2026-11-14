@@ -1,3 +1,4 @@
+import {characterBodyStencil,characterHullStencil,CHARACTER_BODY_ORDER,CHARACTER_OUTLINE_ORDER} from './character-surface';
 import * as T from 'three';
 
 /** Screen-constant inverted-hull outlines (art-direction-v3 §3). One shared material per kind. */
@@ -17,6 +18,7 @@ function outlineMaterial(kind: OutlineKind, skinned: boolean) {
   if (m) return m;
   const s = SPEC[kind];
   m = new T.MeshBasicMaterial({ color: s.color, side: T.BackSide, fog: true });
+  if(kind==='character')characterHullStencil(m);
   m.onBeforeCompile = shader => {
     Object.assign(shader.uniforms, OUTLINE_UNIFORMS, { uPx: { value: s.px }, uMin: { value: s.min }, uMax: { value: s.max }, uFar: { value: s.far } });
     shader.vertexShader = shader.vertexShader
@@ -69,11 +71,12 @@ export function addOutlines(root: T.Object3D, kind: OutlineKind) {
   root.traverse(o => {
     if (!(o instanceof T.Mesh) || o.userData.outlineHull || o.userData.noOutline || o instanceof T.InstancedMesh) return;
     addOutlineNormals(o.geometry);
+    if(kind==='character'){o.renderOrder=CHARACTER_BODY_ORDER;for(const m of [o.material].flat())characterBodyStencil(m);}
     let hull: T.Mesh;
     if (o instanceof T.SkinnedMesh) { const s = new T.SkinnedMesh(o.geometry, outlineMaterial(kind, true)); s.bind(o.skeleton, o.bindMatrix); hull = s; }
     else hull = new T.Mesh(o.geometry, outlineMaterial(kind, false));
-    hull.userData.outlineHull = true; hull.castShadow = false; hull.receiveShadow = false; hull.raycast = () => {};
-    hull.name = 'outline';
+    hull.userData.outlineHull = true; hull.userData.outlineKind = kind; hull.castShadow = false; hull.receiveShadow = false; hull.raycast = () => {};
+    hull.name = 'outline';if(kind==='character')hull.renderOrder=CHARACTER_OUTLINE_ORDER;
     hulls.push(hull);
     o.add(hull);
   });

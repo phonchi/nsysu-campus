@@ -15,10 +15,10 @@ for(const body of ['m','f'])it(`${body}: the shipped Sit animation is paired wit
  avatar.setSeated(false);avatar.update(.1,frame);expect(avatar.state).toBe('idle');expect(avatar.seated).toBe(false);
  expect(avatar['current']?.getClip().name).toBe('Idle');expect(avatar.root.position.toArray()).toEqual(frame.foot.toArray());avatar.dispose();
 });
-for(const firstPerson of [true,false])it(`seated ${firstPerson?'first':'third'}-person camera lowers by 45 cm and standing restores the prior height and view settings`,()=>{
- const cam=new PerspectiveCamera(),rig=new CameraRig(cam,()=>100);rig.firstPerson=firstPerson;rig.yaw=.3;rig.pitch=-.2;
+for(const firstPerson of [true,false])it(`seated ${firstPerson?'first':'third'}-person camera uses the supplied pose eye and pivot heights and standing restores the view`,()=>{
+ const cam=new PerspectiveCamera(),rig=new CameraRig(cam,()=>100);rig.setMode(firstPerson?'firstPerson':'follow');rig.yaw=.3;rig.pitch=-.2;
  const f={foot:new Vector3(1,2,3),running:false,moving:false};rig.update(1,f);const initial=cam.position.clone();
- rig.seated=true;for(let i=0;i<120;i++)rig.update(1/60,f);expect(initial.y-cam.position.y).toBeCloseTo(.45,4);
+ rig.setSeated(true);rig.poseView={eyeHeight:1.23,pivotHeight:1.13,offsetX:0,offsetZ:0};for(let i=0;i<120;i++)rig.update(1/60,f);expect(initial.y-cam.position.y).toBeCloseTo(.32,4);
  rig.seated=false;for(let i=0;i<120;i++)rig.update(1/60,f);expect(cam.position.distanceTo(initial)).toBeLessThan(.0001);expect(rig.yaw).toBe(.3);expect(rig.pitch).toBe(-.2);
 });
 it('host-facing yaw uses the shared -Z convention and ignores missing or coincident hosts',()=>{

@@ -146,7 +146,16 @@ export async function loadPropGeometry(loader: GLTFLoader, asset: (p: string) =>
   g.scene.updateMatrixWorld(true);
   g.scene.traverse(m => {
     if (!(m instanceof T.Mesh) || out) return;
-    const geo = m.geometry.clone().applyMatrix4(m.matrixWorld);
+    const geo = m.geometry.clone();
+    // KHR_mesh_quantization positions can be normalized Int16. Writing metre-scale
+    // world coordinates into that array wraps them back to [-1,1]. Decode first.
+    for(const name of ['position','normal']){
+      const source=geo.getAttribute(name);if(!source)continue;
+      const values=new Float32Array(source.count*3);
+      for(let i=0;i<source.count;i++){values[i*3]=source.getX(i);values[i*3+1]=source.getY(i);values[i*3+2]=source.getZ(i);}
+      geo.setAttribute(name,new T.BufferAttribute(values,3));
+    }
+    geo.applyMatrix4(m.matrixWorld);
     for (const k of Object.keys(geo.attributes)) if (!['position', 'normal', 'color'].includes(k)) geo.deleteAttribute(k);
     if (geo.attributes.color && geo.attributes.color.itemSize === 4) { // keep RGB only, as float
       const c = geo.attributes.color, rgb = new Float32Array(c.count * 3);
@@ -190,4 +199,22 @@ export async function addProps(parent: T.Object3D, spots: PropSpot[], asset: (p:
   // Failed assets never leave invisible collision behind. Runtime registers these once loaded.
   group.userData.obstacles = propObstacles(spots.filter(s => geos.has(s.kind)), ground);
   return group;
+}
+
+/** Authored seats are always visible. Only the board and back are solid, leaving a front approach. */
+export async function addSeatProps(parent:T.Object3D,seats:import('./seats').SeatRegistry,asset:(p:string)=>string,alive:()=>boolean){
+ const {calibratedBenchOffset}=await import('./seats');
+ const spots:PropSpot[]=[],obstacles:Obstacle[]=[];
+ for(const id of Object.keys(seats.specs)){
+  const seat=seats.get(id);if(!seat)continue;const spec=seat.spec,scale=spec.prop.scale??1;
+  const offset=calibratedBenchOffset(spec).applyAxisAngle(new T.Vector3(0,1,0),spec.yaw),p=seat.foot.clone().add(offset);
+  p.y+=spec.surfaceHeight-.475*scale;
+  const yaw=spec.yaw+spec.prop.yaw;spots.push({kind:'bench',x:p.x,z:p.z,y:p.y,ry:yaw,s:scale});
+  for(const [part,y,z,h,d]of [['board',.45,0,.05,.36],['back',.69,-.25,.36,.08]] as const){
+   const center=new T.Vector3(0,y*scale,z*scale).applyAxisAngle(new T.Vector3(0,1,0),yaw).add(p);
+   obstacles.push({id:`seat:${id}:${part}`,shape:'box',center:center.toArray(),half:[.9*scale,h*scale/2,d*scale/2],yaw});
+  }
+ }
+ const group=await addProps(parent,spots,asset,()=>0,alive);group.name='Registered seats (v11)';
+ group.userData.obstacles=group.children.length?obstacles:[];group.userData.seatIds=group.children.length?Object.keys(seats.specs).filter(id=>seats.get(id)):[];return group;
 }

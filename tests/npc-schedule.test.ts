@@ -55,3 +55,9 @@ it('defers a quest placement until talking ends and re-evaluates after event/gam
  manager.releaseAllBorrowed();manager.schedule('day',true,{},undefined,f);expect(actor.position.x).toBe(10);
  done=false;manager.schedule('day',true,{},undefined,f);expect(actor.position.x).toBe(0);
 });
+
+it('v11 seat references survive overrides but never override unfinished main-story ownership',()=>{
+ const override:ScheduleOverride={npc:'s2',preset:'day',if:{flag:'seat'},at:'library',activity:'Sit',seat:'library-mia-desk'};
+ expect(resolveNpcPlacement('s2',def('s2',null),'day',true,zones,{},[override],facts(()=>true))?.seat).toBe('library-mia-desk');
+ expect(resolveNpcPlacement('s2',def('s2',null),'day',false,zones,{s2:'gate'},[override],facts(()=>true))?.seat).toBeUndefined();
+});

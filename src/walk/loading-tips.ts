@@ -6,13 +6,13 @@ const FACT_MARK = '【校史小知識】';
 
 interface LoadingSources {
   chapters?: { dialogues?: Record<string, { text: string }[]> };
-  campus?: { stories?: { text: string; sources?: unknown[] }[] };
+  campus?: { stories?: { text: string; sources?: unknown[]; category?: string }[] };
 }
 
 /** Only sentences that already carry a source in the data files; nothing is written here. */
 export function campusFacts({ chapters, campus }: LoadingSources) {
   const facts = Object.values(chapters?.dialogues ?? {}).flat().filter(l => l.text.startsWith(FACT_MARK)).map(l => l.text.slice(FACT_MARK.length));
-  for (const story of campus?.stories ?? []) if (story.sources?.length) facts.push(story.text.split('。')[0] + '。');
+  for (const story of campus?.stories ?? []) if (story.category !== 'lore' && story.sources?.length) facts.push(story.text.split('。')[0] + '。');
   return facts;
 }
 

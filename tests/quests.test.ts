@@ -13,7 +13,7 @@ describe('side quests and persistent journal', () => {
   expect(e.accept(q.id, world(q.accept.near))).toBe(false);
   expect(e.accept(q.id, { ...world(q.accept.near), timeOfDay: () => 'sunset' })).toBe(true);
  });
- it('validates all thirteen authored quests', () => { expect(data.quests).toHaveLength(13); expect(validateQuests(data)).toEqual([]); });
+ it('validates all fourteen authored quests', () => { expect(data.quests).toHaveLength(14); expect(validateQuests(data)).toEqual([]); });
  it('finishes every choice branch, reloads at every transition and never repeats reward', () => {
   for (const q of data.quests) for (const choice of q.steps.at(-1)!.choices!) {
    const storage = memory(); let engine = new QuestEngine(data, { storage, now: () => 100 });

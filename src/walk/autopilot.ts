@@ -24,7 +24,7 @@ export function planRoute(from: Vector3, to: Vector3, nav?: NavQuery, routes?: O
 /** Advance along a route: returns the next corner index and the horizontal direction to walk (zero on arrival).
  * A corner counts as reached when the walker is within reach of it or has already passed it (long frames move
  * the walker farther than the reach radius, which would otherwise make it hop back and forth over the corner). */
-export function followRoute(path: Vector3[], index: number, at: Vector3, out: Vector3) {
+export function followRoute(path: Vector3[], index: number, at: Vector3, out: Vector3, arrivalRadius=.34) {
   const passed = (i: number) => {
     if (i === 0) return false;
     const p = path[i], q = path[i - 1], ex = p.x - q.x, ez = p.z - q.z;
@@ -34,7 +34,7 @@ export function followRoute(path: Vector3[], index: number, at: Vector3, out: Ve
   while (index < path.length - 1 && reached(index, .36)) index++;
   const target = path[index];
   out.copy(target).sub(at); out.y = 0;
-  const arrived = index === path.length - 1 && reached(index, .34);
+  const arrived = index === path.length - 1 && (arrivalRadius<.34?Math.abs(target.y-at.y)<.2&&Math.hypot(target.x-at.x,target.z-at.z)<arrivalRadius:reached(index, arrivalRadius));
   if (arrived) out.set(0, 0, 0); else if (out.lengthSq() > 1e-8) out.normalize();
   return { index, arrived };
 }

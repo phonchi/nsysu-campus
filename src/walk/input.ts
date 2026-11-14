@@ -1,9 +1,22 @@
+import {nativeDialogueLinkKey} from '../story/content-links';
 import { Vector2, Vector3 } from 'three';
 
 const MOVE_KEYS = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
 const STICK_RUN_THRESHOLD = .85;
 /** Keys the walkthrough owns while focus is not in a text field. */
 const OWNED = [...MOVE_KEYS, ' ', 'e', 'g', 'v', 'm', 'n', 'l', 'p', 'b', 'j', 'r', 'h', 'shift', '/', 'escape', '1', '2', '3', '4'];
+
+/** Raw camera-relative intent, shared by movement and follow-camera policy. */
+export interface MoveAxes { forward: number; right: number }
+export function moveAxes(keys: ReadonlySet<string>, stick: { x: number; y: number }): MoveAxes {
+  return {
+    forward: (keys.has('w') || keys.has('arrowup') ? 1 : 0) - (keys.has('s') || keys.has('arrowdown') ? 1 : 0) - stick.y,
+    right: (keys.has('d') || keys.has('arrowright') ? 1 : 0) - (keys.has('a') || keys.has('arrowleft') ? 1 : 0) + stick.x,
+  };
+}
+export function isForwardMove({ forward: f, right: r }: MoveAxes, speed: number): boolean {
+  return speed > .25 && f > .1 && f / Math.hypot(f, r) >= .5;
+}
 
 /** Who owns the keyboard (spec-v4 §15.4). Outside "walk" no movement is recorded and no walk shortcut fires;
  * every key goes to `modal` instead (photo mode still records movement keys for its camera). */
@@ -61,6 +74,7 @@ export class WalkInput {
       const typing = (e.target as HTMLElement).matches?.('input,select,textarea');
       if (typing && k !== 'escape') return;
       const mode = this._mode;
+      if(mode==='dialogue'&&nativeDialogueLinkKey(k,e.target,!!document.querySelector?.('.q-dialog:not([hidden]) a[data-content-link]')))return;
       if (mode === 'dialogue' || mode === 'menu' || mode === 'photo') {
         // Menus keep native focus navigation (Tab, arrows, Enter, Space activate the focused control).
         const native = mode === 'menu' && (k === 'tab' || k === 'enter' || k === ' ' || k.startsWith('arrow'));
@@ -127,11 +141,11 @@ export class WalkInput {
     if (id !== -1 && this.joystick.hasPointerCapture(id)) this.joystick.releasePointerCapture(id);
   }
 
+  get axes(): MoveAxes { return moveAxes(this.keys, this.stick); }
+
   /** Requested movement relative to the camera's ground forward; length ≤ 1. */
   direction(forward: Vector3, out = new Vector3()) {
-    const k = this.keys;
-    const f = (k.has('w') || k.has('arrowup') ? 1 : 0) - (k.has('s') || k.has('arrowdown') ? 1 : 0) - this.stick.y;
-    const r = (k.has('d') || k.has('arrowright') ? 1 : 0) - (k.has('a') || k.has('arrowleft') ? 1 : 0) + this.stick.x;
+    const { forward: f, right: r } = this.axes;
     out.set(forward.x * f - forward.z * r, 0, forward.z * f + forward.x * r);
     if (out.lengthSq() > 1) out.normalize();
     return out;

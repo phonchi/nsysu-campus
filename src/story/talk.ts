@@ -7,12 +7,12 @@ import type { CampusEventDefinition } from './campus-events';
 import { questGrants, type QuestConsequences } from '../walk/interaction-quests';
 import type { PortraitSpec } from './portraits';
 
-type Sched = { at: string | [number, number]; offset?: [number, number]; activity?: string } | null;
+type Sched = { at: string | [number, number]; offset?: [number, number]; activity?: string; seat?:string } | null;
 export interface NpcDef {
   id: string; name: string; role: string; model: string; look?: Record<string, string>; portrait: PortraitSpec;
   schedule: Record<'day' | 'sunset' | 'night', Sched>; talk?: string; minigame?: MinigameId; observe?: boolean;
 }
-export interface ScheduleOverride { npc: string; preset: 'day' | 'sunset' | 'night'; if: Cond; at: string | [number, number]; offset?: [number, number]; activity?: string }
+export interface ScheduleOverride { npc: string; preset: 'day' | 'sunset' | 'night'; if: Cond; at: string | [number, number]; offset?: [number, number]; activity?: string; seat?:string }
 export interface NpcData { version: number; npcs: NpcDef[]; trees: Record<string, Tree>; events?: CampusEventDefinition[]; scheduleOverrides?: ScheduleOverride[] }
 export interface CollectionData {
   version: number;
@@ -96,7 +96,7 @@ export class TalkDirector {
     let game: Awaited<ReturnType<typeof runTalk>>;
     try {
       game = await runTalk(tree, node, this.facts, {
-        say: (lines, hold) => this.ui.say(lines, hold),
+        say: (lines, hold, presentation) => this.ui.say(lines, hold, presentation),
         choose: c => this.ui.choose(c),
         apply: e => this.apply(e),
       });

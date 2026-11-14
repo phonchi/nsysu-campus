@@ -8,9 +8,14 @@ import { PLAY_BOUNDS } from './world/terrain';
 import { landmarkUiLabels, nearbyLandmarkUi, type LandmarkUiOptions } from './campus-label-catalog';
 
 interface Link {label:string;url:string;}
-export interface CampusInfo {buildings:Record<string,{name:string;college:string;summary:string;facts:string[];links:Link[]}>;stories:{id:string;title:string;pos:Point2;text:string;sources:Link[];category?:'history'|'news'|'legend'}[];}
-export const storyCategoryLabel=(category?:string)=>category==='news'?'新聞記載':category==='legend'?'校園趣聞':'校史';
-const categoryTag=(category?:string)=>`<span class="walk-story-category">${storyCategoryLabel(category)}</span>`;
+export type StoryCategory = 'history' | 'news' | 'legend' | 'lore';
+export interface CampusStory { id:string; title:string; pos:Point2; y?:number; text:string; sources:Link[]; category?:StoryCategory }
+export interface CampusInfo {buildings:Record<string,{name:string;college:string;summary:string;facts:string[];links:Link[]}>;stories:CampusStory[];}
+export const storyCategoryLabel=(category?:string)=>category==='lore'?'校園口傳':category==='news'?'新聞記載':category==='legend'?'校園趣聞':'校史';
+const categoryTag=(category?:string)=>`<span class="walk-story-category${category==='lore'?' is-lore':''}">${storyCategoryLabel(category)}</span>`;
+export const LORE_NOTE = '此為公開記錄的校園口傳，不代表事件已獲證實。';
+export const storySupportHeight=(story:CampusStory,ground:(x:number,z:number)=>number)=>story.y??ground(...story.pos);
+export const nearStorySupport=(foot:T.Vector3,gem:T.Vector3)=>Math.hypot(gem.x-foot.x,gem.z-foot.z)<3&&Math.abs(foot.y-(gem.y-1.6))<2.5;
 interface Hooks {goToBuilding(id:string):void;inspectBuilding(id:string):void;focusLandmark?(id:string):void;say(text:string,ms?:number):void;}
 const safe=(s:string)=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 const STORE='nsysu-walk-stories-v1';
@@ -46,7 +51,7 @@ export class CampusUi {
   this.storyCard.addEventListener('click',e=>{if((e.target as HTMLElement).closest('[data-card=close]'))this.storyCard.hidden=true;});
   this.counter=document.createElement('button');this.counter.className='walk-stories';this.counter.type='button';host.append(this.counter);this.counter.addEventListener('click',()=>this.listStories());this.refreshCounter();
   // Story markers: floating gems, gold when uncollected.
-  this.storyPos=info.stories.map(s=>new T.Vector3(s.pos[0],1.6,s.pos[1]));
+  this.storyPos=info.stories.map(s=>new T.Vector3(s.pos[0],storySupportHeight(s,this.ground)+1.6,s.pos[1]));
   this.markers=new T.InstancedMesh(new T.OctahedronGeometry(.45,0),new T.MeshStandardMaterial({color:'#f2c94c',emissive:'#f2a93b',emissiveIntensity:.6,roughness:.4}),info.stories.length);this.markers.name='Story markers';this.markers.castShadow=false;scene.add(this.markers);
   this.drawCampusMap();
  }
@@ -67,14 +72,14 @@ export class CampusUi {
   this.card.hidden=false;this.storyCard.hidden=true;
  }
  private listStories(){
-  this.storyCard.innerHTML=`<button class="walk-card-close" data-card="close" aria-label="關閉">×</button><div class="walk-card-chip">校園故事收集</div><h2>${this.collected.size} ／ ${this.info.stories.length}</h2><ol class="walk-story-list">${this.info.stories.map(s=>`<li class="${this.collected.has(s.id)?'is-found':''}">${this.collected.has(s.id)?safe(s.title):'？？？（在校園裡找找發光的寶石）'} ${categoryTag(s.category)}</li>`).join('')}</ol><p class="walk-story-note">怪談類傳說查無可引用來源，暫不收錄。</p>`;
+  this.storyCard.innerHTML=`<button class="walk-card-close" data-card="close" aria-label="關閉">×</button><div class="walk-card-chip">校園故事收集</div><h2>${this.collected.size} ／ ${this.info.stories.length}</h2><ol class="walk-story-list">${this.info.stories.map(s=>`<li class="${this.collected.has(s.id)?'is-found':''}">${this.collected.has(s.id)?safe(s.title):'？？？（在校園裡找找發光的寶石）'} ${categoryTag(s.category)}</li>`).join('')}</ol><p class="walk-story-note">校園口傳依公開頁面收錄並附出處；查無出處的怪談不收。</p>`;
   this.storyCard.hidden=false;this.card.hidden=true;
  }
  /** E key: read a nearby story. Returns true when handled. */
  interact(foot:T.Vector3){
   const s=this.nearStory;if(!s)return false;
   const isNew=!this.collected.has(s.id);this.collected.add(s.id);writeCollected(this.collected);this.refreshCounter();
-  this.storyCard.innerHTML=`<button class="walk-card-close" data-card="close" aria-label="關閉">×</button><div class="walk-card-chip">${isNew?'新收集・':''}校園故事 ${this.collected.size}／${this.info.stories.length}</div><h2>${safe(s.title)} ${categoryTag(s.category)}</h2><p>${safe(s.text)}</p><div class="walk-card-links">${s.sources.map(l=>`<a href="${safe(l.url)}" target="_blank" rel="noopener">${safe(l.label)} ↗</a>`).join('')}</div>`;
+  this.storyCard.innerHTML=`<button class="walk-card-close" data-card="close" aria-label="關閉">×</button><div class="walk-card-chip">${isNew?'新收集・':''}校園故事 ${this.collected.size}／${this.info.stories.length}</div><h2>${safe(s.title)} ${categoryTag(s.category)}</h2><p>${safe(s.text)}</p>${s.category==='lore'?`<p class="walk-story-note is-lore">${LORE_NOTE}</p>`:''}<div class="walk-card-links">${s.sources.map(l=>`<a href="${safe(l.url)}" target="_blank" rel="noopener">${safe(l.label)} ↗</a>`).join('')}</div>`;
   this.storyCard.hidden=false;this.card.hidden=true;void foot;return true;
  }
  private readonly dummy=new T.Object3D();private lastAvoid=-1e9;private avoid:DOMRect[]=[];
@@ -84,7 +89,7 @@ export class CampusUi {
   this.labels.update(camera,innerWidth,innerHeight,overview,this.avoid);
   this.nearStory=undefined;
   this.info.stories.forEach((s,i)=>{const p=this.storyPos[i],found=this.collected.has(s.id);this.dummy.position.set(p.x,p.y+Math.sin(time*.002+i)*.18,p.z);this.dummy.rotation.set(0,time*.0012+i,0);const k=found?.55:1;this.dummy.scale.set(k,k*1.4,k);this.dummy.updateMatrix();this.markers.setMatrixAt(i,this.dummy.matrix);
-   if(!overview&&Math.hypot(p.x-foot.x,p.z-foot.z)<3&&Math.abs(foot.y)<2.5)this.nearStory=s;});
+   if(!overview&&nearStorySupport(foot,p))this.nearStory=s;});
   this.markers.instanceMatrix.needsUpdate=true;
  }
  // North-up campus minimap from OSM context (drawn once, panned per frame).

@@ -39,7 +39,11 @@ describe('campusClues', () => {
     expect(campusClues(engine.progress.sideQuests, [], data)).toEqual([]);
     engine.update(); engine.press(); engine.update();
     expect(engine.progress.done).toEqual(['c1-gate']);
-    expect(campusClues(engine.progress.sideQuests, [], data).map(c => [c.id, c.done])).toEqual([['story-sunset', false]]);
-    expect(campusClues(engine.progress.sideQuests, ['sunset'], data).map(c => [c.id, c.done])).toEqual([['story-sunset', true]]);
+    // v11: clues with unlockAfter: 'c1-gate' (校門 stories) join the seawall clue when chapter 1 completes.
+    const gateClues = data.sideQuests.filter(q => q.unlockAfter === 'c1-gate').map(q => q.id);
+    expect(gateClues.length).toBeGreaterThan(0);
+    const byId = (s: string[]) => campusClues(engine.progress.sideQuests, s, data).map(c => [c.id, c.done]).sort();
+    expect(byId([])).toEqual([['story-sunset', false], ...gateClues.map(id => [id, false])].sort());
+    expect(byId(['sunset'])).toContainEqual(['story-sunset', true]);
   });
 });

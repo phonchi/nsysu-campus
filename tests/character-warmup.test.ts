@@ -1,3 +1,4 @@
+import {configureCharacterCoverage} from '../src/render/character-surface';
 import {expect,it,vi} from 'vitest';
 import {readFileSync} from 'node:fs';
 import * as T from 'three';
@@ -47,8 +48,8 @@ it('samples the actual skinned, fog/map/gradient-map material families and their
       const mesh=body(object),material=mesh.material as T.MeshToonMaterial,original=body(sources.get(id)!).material as T.MeshToonMaterial;
       expect(mesh.isSkinnedMesh,id).toBe(true);expect(mesh.geometry.attributes.skinIndex,id).toBeDefined();
       expect(material.isMeshToonMaterial,id).toBe(true);expect(material.fog,id).toBe(true);expect(material.map,id).toBe(original.map);expect(material.gradientMap,id).toBe(RAMP);
-      expect(material.transparent,id).toBe(transparent);expect(material.depthWrite,id).toBe(!transparent);
-      expect(material.onBeforeCompile,id).toBe(original.onBeforeCompile);expect(material.customProgramCacheKey(),id).toBe(original.customProgramCacheKey());
+      expect(material.transparent,id).toBe(false);expect(material.depthWrite,id).toBe(true);expect(material.opacity,id).toBe(transparent?.5:1);
+      expect(material.userData.characterCoverage,id).toBe(true);expect(material.customProgramCacheKey(),id).toBe(original.customProgramCacheKey()+'|character-coverage-v1');
       expect(original.transparent,id).toBe(false);expect(mesh.skeleton,id).not.toBe(body(sources.get(id)!).skeleton);
     }
   }
@@ -58,7 +59,7 @@ it('samples the actual skinned, fog/map/gradient-map material families and their
     for(const object of variants){
       const material=body(object).material as T.MeshToonMaterial,original=body(sources.get(id)!).material as T.Material;
       // Match the existing recoloring clone, which currently does not copy the custom toon hooks.
-      expect(material.customProgramCacheKey()).toBe(original.clone().customProgramCacheKey());
+      expect(material.customProgramCacheKey()).toBe(original.clone().customProgramCacheKey()+'|character-coverage-v1');
       expect(material.gradientMap).toBe(RAMP);expect(material.map).toBeDefined();
     }
   }

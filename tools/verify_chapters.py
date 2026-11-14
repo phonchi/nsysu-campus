@@ -9,6 +9,10 @@ every line <= 40 chars (3-7 lines per scene), each chapter's closing dialogue
 carries a 校史小知識 line, chapterDone only refers to earlier chapters, every
 flag is set before it is used, sideQuests map to campus-info stories, and
 dialogue text uses full-width punctuation.
+
+v11: a sideQuest may declare `unlockAfter: <chapterId>` (the runtime merges it into progress once that chapter is done);
+the chapter must exist. campus-info stories carry a `category` from STORY_CATEGORIES; `lore` (校園口傳) text starts with
+「校園口傳：」 and `legend` (校園趣聞) with 「校園趣聞：」 (prompt-fable-2 §1; the UI adds the label and the disclaimer).
 """
 from __future__ import annotations
 
@@ -30,6 +34,8 @@ WHO_RE = re.compile(r'^(guide|player|narrator|s[1-6]|m[1-9])$')
 SKIES = {'dawn', 'day', 'sunset', 'night'}
 TIMES = SKIES
 SOUNDS = {'echo', 'chime'}
+STORY_CATEGORIES = {'history', 'news', 'legend', 'lore'}
+STORY_PREFIX = {'lore': '校園口傳：', 'legend': '校園趣聞：'}
 MAX_OBJECTIVE = 16
 MAX_LINE = 40
 FACT_MARK = '校史小知識'
@@ -97,7 +103,19 @@ def check_condition(where: str, cond, used_flags: list, used_chapters: list) -> 
 def main() -> int:
     path = Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT
     data = json.loads(path.read_text(encoding='utf-8'))
-    stories = {s['id'] for s in json.loads(CAMPUS_INFO.read_text(encoding='utf-8'))['stories']}
+    story_rows = json.loads(CAMPUS_INFO.read_text(encoding='utf-8'))['stories']
+    stories = {s['id'] for s in story_rows}
+    for s in story_rows:
+        category = s.get('category', 'history')
+        if category not in STORY_CATEGORIES:
+            err(f'story {s.get("id")!r}: unknown category {category!r}')
+        prefix = STORY_PREFIX.get(category)
+        if prefix and not str(s.get('text', '')).startswith(prefix):
+            err(f'story {s.get("id")!r}: {category} text must start with {prefix!r}')
+        if not isinstance(s.get('pos'), list) or len(s['pos']) != 2:
+            err(f'story {s.get("id")!r}: pos must be [x, z]')
+        if 'y' in s and not isinstance(s['y'], (int, float)):
+            err(f'story {s.get("id")!r}: y must be a number')
 
     for key in ('version', 'guide', 'chapters', 'dialogues', 'sideQuests'):
         if key not in data:
@@ -227,6 +245,8 @@ def main() -> int:
                 err(f'sideQuest {q.get("id")!r}: missing {key!r}')
         if q.get('fromCampusInfo') not in stories:
             err(f'sideQuest {q.get("id")!r}: unknown campus-info story {q.get("fromCampusInfo")!r}')
+        if 'unlockAfter' in q and q['unlockAfter'] not in chapter_ids:
+            err(f'sideQuest {q.get("id")!r}: unlockAfter names unknown chapter {q.get("unlockAfter")!r}')
         mapped.append(q.get('fromCampusInfo'))
     if set(mapped) != stories:
         err(f'sideQuests must cover campus-info stories exactly: missing {sorted(stories - set(mapped))}')

@@ -14,6 +14,13 @@ existing spots with variant kinds from quest-spots.ts and conditions on existing
 `completionRewards` name a `group: 'quest'` item in collection.json with an a/b variant per choice; npcs.json
 `scheduleOverrides` keep the base schedule's zone and use existing quest flags.
 
+v11 additions: `links` on a quest and on a step ({label, url}, at most MAX_LINKS each) pass `allowed_link`, the same rule as
+`isAllowedLink` in src/story/quests.ts (shared vectors: tests/fixtures/link-cases.json). `verify_seats` (run from __main__
+and the tests, not inside verify(), so fixture overrides without a seat still exercise the older checks) reads the
+`seats` registry in story-zones.json: every human `Sit` schedule or override names an existing seat within SEAT_REACH of
+its station, seats are SEAT_GAP apart, an event stay-step zone names a player seat inside its radius that no NPC uses,
+and every number is finite. Monkeys never need a seat.
+
 Route audit (warnings only, never a failure): for every acceptable time of day, straight-line distance between consecutive
 steps over ROUTE_LEG_WARN metres, or a retrace share over ROUTE_RETRACE_WARN. Distances are 2D straight lines from the same
 placement rules as the speaker check (zone anchor + offset, spot `at`); `dest:` rooms have no outdoor coordinate here and end
@@ -24,10 +31,13 @@ import math
 import re
 import sys
 from pathlib import Path
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 TIMES = ('day', 'sunset', 'night')
-RESULTS = 26
+RESULTS = 28
+MAX_LINKS = 2  # per step and per quest (spec-v11 §3)
+SEAT_GAP, SEAT_REACH = .7, 1.5  # metres between seats; seat to the schedule station (spec-v11 §1 坐姿)
 ROUTE_LEG_WARN, ROUTE_RETRACE_WARN, ROUTE_MIN_TOTAL = 300, .4, 100
 
 
@@ -92,6 +102,49 @@ def cond_flags(cond):
     if 'all' in cond or 'any' in cond:
         return [f for c in cond.get('all', cond.get('any', [])) for f in cond_flags(c)]
     return []
+
+
+def allowed_link(url):
+    """The v11 official-site whitelist; keep identical to isAllowedLink() in src/story/quests.ts. Raw-string checks first
+    (ASCII printable, no backslash, no %2e/%2f/%5c, https, a literal [A-Za-z0-9.-] host, no dot segments) so urlsplit and the
+    browser's URL parser cannot disagree; then the host must end with .nsysu.edu.tw, or be sites.google.com under
+    /math.nsysu.edu.tw. Story `sources` do not use it."""
+    if not isinstance(url, str) or not url or len(url) > 2048:
+        return False
+    if not re.fullmatch(r'[\x21-\x7e]+', url) or '\\' in url or re.search(r'%(2e|2f|5c)', url, re.I):
+        return False
+    if url[:8].lower() != 'https://':
+        return False
+    authority = re.split(r'[/?#]', url[8:], maxsplit=1)[0]
+    if not re.fullmatch(r'[A-Za-z0-9.-]+', authority):  # literal host only: no userinfo, port, percent-encoding or IDN
+        return False
+    raw_path = re.split(r'[?#]', url[8 + len(authority):], maxsplit=1)[0]
+    if re.search(r'(^|/)\.{1,2}(/|$)', raw_path):
+        return False
+    try:
+        parts = urlsplit(url)
+        host = (parts.hostname or '').lower()
+    except ValueError:
+        return False
+    path = parts.path
+    if len(host) > len('.nsysu.edu.tw') and host.endswith('.nsysu.edu.tw'):
+        return True
+    return host == 'sites.google.com' and (path == '/math.nsysu.edu.tw' or path.startswith('/math.nsysu.edu.tw/'))
+
+
+def check_links(links, label, check):
+    """`links` of a quest or a step: optional list of {label, url}, at most MAX_LINKS, every url allowed."""
+    if links is None:
+        return
+    if not isinstance(links, list):
+        check(False, f'{label}: links must be a list')
+        return
+    check(len(links) <= MAX_LINKS, f'{label}: more than {MAX_LINKS} links')
+    for i, link in enumerate(links):
+        ok = isinstance(link, dict) and isinstance(link.get('label'), str) and link['label'].strip() and isinstance(link.get('url'), str)
+        check(ok, f'{label}: links[{i}] needs label and url')
+        if ok:
+            check(allowed_link(link['url']), f'{label}: links[{i}] url not allowed {link["url"]}')
 
 
 def accept_times(quest):
@@ -199,7 +252,7 @@ def verify(quests, encounters, npcs, zones, chapters, graph, structure, collecti
     legacy = contract.get('quests', {})
     current_ids = [q['id'] for q in quests['quests']]
     check(len(set(current_ids)) == len(current_ids), 'duplicate quest id')
-    check(len(current_ids) == 13 and set(current_ids) == set(legacy), f'the thirteen quest ids must match the save contract (have {sorted(current_ids)})')
+    check(len(current_ids) == 14 and set(current_ids) == set(legacy), f'the fourteen quest ids must match the save contract (have {sorted(current_ids)})')
     for qid in legacy:
         check(qid in current_ids, f'{qid}: quest in the save contract no longer exists')
     for q in quests['quests']:
@@ -242,6 +295,7 @@ def verify(quests, encounters, npcs, zones, chapters, graph, structure, collecti
         count_min = chapter_ids.index(gate) + 1 if gate in chapter_ids else 0
         times = q.get('accept', {}).get('times')
         check(isinstance(times, list) and times and all(t in TIMES for t in times) and len(set(times)) == len(times), f'{label}: accept.times must list distinct times of day')
+        check_links(q.get('links'), label, check)
         for time in accept_times(q):
             for count in range(count_min, len(chapters_list) + 1):
                 check(placement(q['npc'], time, count) is not None, f'{label}/{time}/chapter-count={count}: acceptable while the giver is off campus')
@@ -268,6 +322,7 @@ def verify(quests, encounters, npcs, zones, chapters, graph, structure, collecti
             check(step.get('when', 'day') in TIMES, f'{sl}: invalid time')
             inherited = step.get('when', inherited)
             check(bool(step.get('lines')), f'{sl}: missing on-location lines')
+            check_links(step.get('links'), sl, check)
             for line in step.get('lines', []):
                 check(line['who'] == 'player' or line['who'] in people, f'{sl}: unknown speaker {line["who"]}')
                 check(bool(line['text']) and not re.search(r'[,!?:;]', line['text']), f'{sl}: use full-width punctuation')
@@ -355,6 +410,91 @@ def verify(quests, encounters, npcs, zones, chapters, graph, structure, collecti
     return errors
 
 
+def finite(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+
+
+def verify_seats(npcs, zones, graph):
+    """The v11 seat registry against the people and activities that sit on it. Returns error strings."""
+    errors = []
+    def check(ok, message):
+        if not ok:
+            errors.append(message)
+    seats = zones.get('seats') or {}
+    check(isinstance(seats, dict) and bool(seats), 'story-zones.json needs a non-empty `seats` registry')
+    if not isinstance(seats, dict):
+        return errors
+    _, anchor, _ = placements(npcs, zones, {'chapters': []}, graph)
+    for sid, s in seats.items():
+        sl = f'seat {sid}'
+        foot = s.get('foot')
+        check(isinstance(foot, list) and len(foot) == 2 and all(finite(v) for v in foot), f'{sl}: foot must be two finite numbers')
+        check(finite(s.get('yaw')), f'{sl}: yaw must be finite')
+        check(s.get('pose') == 'chair', f'{sl}: pose must be chair')
+        check(finite(s.get('surfaceHeight')) and s['surfaceHeight'] > 0, f'{sl}: surfaceHeight must be positive')
+        check(finite(s.get('approachRadius')) and s['approachRadius'] > 0, f'{sl}: approachRadius must be positive')
+        check('y' not in s or finite(s['y']), f'{sl}: y must be finite')
+        prop = s.get('prop')
+        check(isinstance(prop, dict) and prop.get('kind') == 'bench', f'{sl}: prop.kind must be bench')
+        if isinstance(prop, dict):
+            check(isinstance(prop.get('offset'), list) and len(prop['offset']) == 3 and all(finite(v) for v in prop['offset']), f'{sl}: prop.offset must be three finite numbers')
+            check(finite(prop.get('yaw')), f'{sl}: prop.yaw must be finite')
+            check('scale' not in prop or (finite(prop['scale']) and prop['scale'] > 0), f'{sl}: prop.scale must be positive')
+    good = {sid: s['foot'] for sid, s in seats.items() if isinstance(s.get('foot'), list) and len(s['foot']) == 2 and all(finite(v) for v in s['foot'])}
+    ids = sorted(good)
+    for i, a in enumerate(ids):
+        for b in ids[i + 1:]:
+            check(math.dist(good[a], good[b]) >= SEAT_GAP, f'seats {a} and {b} are under {SEAT_GAP} m apart')
+    def station(spec):
+        at = spec.get('at')
+        p = anchor(at) if isinstance(at, str) else at
+        if p is None:
+            return None
+        offset = spec.get('offset', [0, 0])
+        return [p[0] + offset[0], p[1] + offset[1]]
+    npc_seats = {}
+    def sitter(npc, spec, where):
+        if not spec or spec.get('activity') != 'Sit':
+            check('seat' not in spec if spec else True, f'{where}: seat without a Sit activity')
+            return
+        sid = spec.get('seat')
+        check(isinstance(sid, str) and sid in seats, f'{where}: human Sit needs an existing seat (have {sid})')
+        if sid in good:
+            npc_seats.setdefault(sid, set()).add(npc)
+            p = station(spec)
+            check(p is not None and math.dist(p, good[sid]) <= SEAT_REACH, f'{where}: seat {sid} is over {SEAT_REACH} m from the station')
+    for n in npcs['npcs']:
+        if n.get('model') == 'monkey':
+            continue
+        for time, spec in (n.get('schedule') or {}).items():
+            sitter(n['id'], spec, f'{n["id"]}/{time}')
+    people = {n['id']: n for n in npcs['npcs']}
+    for i, o in enumerate(npcs.get('scheduleOverrides') or []):
+        if people.get(o.get('npc'), {}).get('model') == 'monkey':
+            continue
+        sitter(o.get('npc'), o, f'scheduleOverrides[{i}]')
+    for sid, who in npc_seats.items():
+        check(len(who) == 1, f'seat {sid}: shared by {sorted(who)}')
+    zone_map = zones['zones']
+    for zid, z in zone_map.items():
+        sid = z.get('seat')
+        if sid is None:
+            continue
+        check(sid in seats, f'zone {zid}: unknown seat {sid}')
+        if sid in good:
+            check(math.dist(good[sid], z['p']) <= z['r'], f'zone {zid}: seat {sid} outside the zone radius')
+            check(sid not in npc_seats, f'zone {zid}: player seat {sid} is also an NPC seat')
+    for e in npcs.get('events') or []:
+        for j, step in enumerate((e.get('activity') or {}).get('steps', [])):
+            if not step.get('sit'):
+                continue
+            kind, _, name = step.get('target', '').partition(':')
+            check(kind == 'zone' and name in zone_map and zone_map[name].get('seat') in seats, f'{e["id"]}/steps[{j}]: a sit step needs a zone with a seat')
+            if kind == 'zone' and name in zone_map and zone_map[name].get('seat') in good and step.get('max') is not None:
+                check(math.dist(good[zone_map[name]['seat']], zone_map[name]['p']) <= step['max'], f'{e["id"]}/steps[{j}]: seat outside the stay radius')
+    return errors
+
+
 def quest_route(quest, spots, placement, chapter_count, time=None):
     """Straight-line legs of a quest, from its giver through every step, accepted at `time` (default: the first timed step's
     time, or day) and continued at each step's own `when` where it has one.
@@ -403,10 +543,11 @@ def route_warnings(quests, npcs, zones, chapters, graph):
 if __name__ == '__main__':
     data = load()
     errors = verify(*data)
+    errors += verify_seats(data[2], data[3], data[5])
     for error in errors:
         print(error, file=sys.stderr)
     quests, _, npcs, zones, chapters, graph, _, _ = data
     for warning in route_warnings(quests, npcs, zones, chapters, graph):
         print(f'warning: {warning}', file=sys.stderr)
-    print(f'quests: {"FAIL" if errors else "OK"}（{len(quests["quests"])} 個任務、{RESULTS} 個結果、實體目標、排程、錨點、成果、收藏品與舊存檔契約）')
+    print(f'quests: {"FAIL" if errors else "OK"}（{len(quests["quests"])} 個任務、{RESULTS} 個結果、實體目標、排程、錨點、成果、收藏品、官網連結、座位與舊存檔契約）')
     sys.exit(bool(errors))

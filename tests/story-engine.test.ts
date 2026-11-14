@@ -124,3 +124,32 @@ it('previews E without starting chapters, firing actions, creating arrays or ski
   expect(engine.canPress()).toBe(true);expect(engine.canPress()).toBe(true);expect(JSON.stringify(engine.progress)).toBe(afterAuto);expect(log.length).toBe(calls);
   expect(engine.press()).toBe(true);expect(engine.progress.flags).toContain('pressed');expect(engine.canPress()).toBe(false);
 });
+
+
+describe('declarative unlockAfter clues',()=>{
+ const fixture:StoryData={version:1,guide:{id:'g',name:'guide'},dialogues:{},chapters:[
+  {id:'c1',title:'c1',zone:'gate',objective:'',sources:[],start:{when:[]},steps:[{id:'finish',when:[{press:'E'}],then:[{playSound:'once'},{completeChapter:'c1'}]}]},
+ ],sideQuests:[
+  {id:'legacy',title:'',hint:'',fromCampusInfo:'s0'},
+  {id:'clue',title:'',hint:'',fromCampusInfo:'s1',unlockAfter:'c1'},
+  {id:'later',title:'',hint:'',fromCampusInfo:'s2',unlockAfter:'c2'},
+ ]};
+ it('merges old saves once without replaying chapter effects or mutating the save argument',()=>{
+  const saved={done:['c1'],flags:['old'],fired:{c1:['finish']},sideQuests:['legacy'],npcAt:{}};
+  const log:string[]=[];
+  const engine=new StoryEngine(fixture,new FakeWorld(),effects(log),saved);
+  expect(engine.progress.sideQuests).toEqual(['legacy','clue']);expect(saved.sideQuests).toEqual(['legacy']);
+  expect(log).toEqual([]);expect(engine.progress.flags).toEqual(['old']);
+  const again=new StoryEngine(fixture,new FakeWorld(),effects(log),engine.progress);
+  expect(again.progress.sideQuests).toEqual(['legacy','clue']);expect(log).toEqual([]);
+ });
+ it('adds clues at completion, preserves action unlocks and never replays them',()=>{
+  const log:string[]=[];const engine=new StoryEngine(fixture,new FakeWorld(),effects(log));
+  engine.update();expect(engine.progress.sideQuests).toEqual([]);
+  engine.unlockSideQuest('legacy');engine.press();engine.update();
+  expect(engine.progress.sideQuests).toEqual(['legacy','clue']);
+  expect(log.filter(x=>x==='sound:once')).toHaveLength(1);
+  expect(log.filter(x=>x==='side:legacy')).toHaveLength(1);
+  expect(log).not.toContain('side:clue');
+ });
+});

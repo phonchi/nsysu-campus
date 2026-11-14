@@ -41,7 +41,7 @@ it('renders the complete visible scene after compilation, initializes program re
     expect(f.hidden.visible&&f.mesh.visible&&f.material.visible).toBe(true);expect(f.mesh.frustumCulled).toBe(false);
     expect(f.lod.autoUpdate).toBe(false);expect(f.mesh.count).toBe(5);
     expect(f.geometry.groups).toBe(groups);expect(f.geometry.drawRange).toEqual(drawRange);
-    expect(f.renderer.getRenderTarget()?.width).toBe(1);expect(f.light.shadow.mapSize.toArray()).toEqual([1,1]);
+    expect(f.renderer.getRenderTarget()?.width).toBe(1);expect(f.renderer.getRenderTarget()?.stencilBuffer).toBe(true);expect(f.light.shadow.mapSize.toArray()).toEqual([1,1]);
   });
   f.renderer.render.mockImplementation(()=>{
     expect(f.renderer.compileAsync).toHaveBeenCalledOnce();expect(f.hidden.visible&&f.mesh.visible).toBe(true);

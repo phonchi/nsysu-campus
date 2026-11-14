@@ -49,10 +49,33 @@ export type QuestCond = { flag: string } | { notFlag: string } | { all: QuestCon
 export interface QuestWork { id: string; spot: string; if: QuestCond; variants?: { if: QuestCond; kind: SpotKind }[] }
 export interface QuestReward { kind: 'item'; itemId: string; /** The step whose choice picks the item's variant. */ variantBy?: string }
 export interface QuestChoice { id: string; label: string; result: string }
-export interface QuestStep { id: string; target: string; text: string; lines?: { who: string; text: string }[]; radius?: number; kind?: 'interact' | 'photo'; choices?: QuestChoice[]; when?: string }
+/** v11: an official web page a step or a quest points at (spec-v11 §3). Rendered as「開啟官網：<label>」; `isAllowedLink` is the only gate. */
+export interface ContentLink { label: string; url: string }
+/** At most this many links per step and per quest (spec-v11 §3). */
+export const MAX_CONTENT_LINKS = 2;
+/** The v11 official-site whitelist, identical to `tools/verify_quests.py:allowed_link` and checked against the shared
+ * `tests/fixtures/link-cases.json`: https only, a literal host of `[A-Za-z0-9.-]` (so no credentials, no explicit port, not even
+ * 443, no percent-encoding), printable ASCII only, no backslashes, dot segments or percent-encoded `.`/`/`/`\` (so the two URL
+ * parsers cannot disagree); then the hostname ends
+ * with `.nsysu.edu.tw`, or is `sites.google.com` with a path of `/math.nsysu.edu.tw` or below it. Story `sources` never use it. */
+export function isAllowedLink(url: unknown): boolean {
+  if (typeof url !== 'string' || !url || url.length > 2048) return false;
+  if (!/^[\x21-\x7e]+$/.test(url) || url.includes('\\') || /%(2e|2f|5c)/i.test(url)) return false;
+  if (url.slice(0, 8).toLowerCase() !== 'https://') return false;
+  const authority = url.slice(8).split(/[/?#]/, 1)[0];
+  if (!/^[A-Za-z0-9.-]+$/.test(authority)) return false; // no userinfo, port, percent-encoding or IDN: the host is literal
+  const rawPath = url.slice(8 + authority.length).split(/[?#]/, 1)[0];
+  if (/(^|\/)\.{1,2}(\/|$)/.test(rawPath)) return false;
+  let u: URL;
+  try { u = new URL(url); } catch { return false; }
+  const host = u.hostname.toLowerCase(), path = u.pathname;
+  if (host.length > '.nsysu.edu.tw'.length && host.endsWith('.nsysu.edu.tw')) return true;
+  return host === 'sites.google.com' && (path === '/math.nsysu.edu.tw' || path.startsWith('/math.nsysu.edu.tw/'));
+}
+export interface QuestStep { id: string; target: string; text: string; lines?: { who: string; text: string }[]; radius?: number; kind?: 'interact' | 'photo'; choices?: QuestChoice[]; when?: string; links?: ContentLink[] }
 /** `revision` counts content rewrites (1 = the original); a rewrite that reordered steps also lists `legacyStepOrder`, the step
  * ids in revision-1 order, so a save made before `stepId` existed (it only knew its index) still lands on the same step. */
-export interface QuestDefinition { id: string; title: string; zone: string; npc: string; description: string; reward: string; revision?: number; legacyStepOrder?: string[]; legacySteps?: Record<string, string>; legacyRewards?: string[]; accept: { near: string; chapterDone?: string; lines?: { who: string; text: string }[]; times?: TimeOfDay[] }; absent?: Record<string, string>; steps: QuestStep[]; works?: QuestWork[]; completionRewards?: QuestReward[]; next?: string[] }
+export interface QuestDefinition { id: string; title: string; zone: string; npc: string; description: string; reward: string; revision?: number; legacyStepOrder?: string[]; legacySteps?: Record<string, string>; legacyRewards?: string[]; accept: { near: string; chapterDone?: string; lines?: { who: string; text: string }[]; times?: TimeOfDay[] }; absent?: Record<string, string>; steps: QuestStep[]; works?: QuestWork[]; completionRewards?: QuestReward[]; next?: string[]; links?: ContentLink[] }
 /** What a revision-1 save may refer to, kept with the data so that `tools/verify_quests.py` checks every rewrite against it. */
 export interface QuestSaveContract { revision: 1; quests: Record<string, { steps: string[]; reward: string; gate: string; choices: Record<string, string[]> }> }
 export interface QuestData { version: number; quests: QuestDefinition[]; spots?: Record<string, QuestSpot>; saveContract?: QuestSaveContract }
@@ -94,9 +117,21 @@ export function validateQuests(data: QuestData): string[] {
     if (q.steps.length < 2) errors.push(`short quest ${q.id}`);
     if (!q.steps.some(s => (s.choices?.length ?? 0) >= 2)) errors.push(`missing choice ${q.id}`);
     if (new Set(q.steps.map(s => s.id)).size !== q.steps.length) errors.push(`duplicate step ${q.id}`);
+    const checkLinks = (links: unknown, where: string) => {
+      if (links === undefined) return;
+      if (!Array.isArray(links)) { errors.push(`links ${where}: not an array`); return; }
+      if (links.length > MAX_CONTENT_LINKS) errors.push(`links ${where}: more than ${MAX_CONTENT_LINKS}`);
+      links.forEach((l: unknown, i) => {
+        const link = l as Partial<ContentLink> | null;
+        if (!link || typeof link.label !== 'string' || !link.label.trim() || typeof link.url !== 'string') errors.push(`links ${where}[${i}]: needs label and url`);
+        else if (!isAllowedLink(link.url)) errors.push(`links ${where}[${i}]: url not allowed ${link.url}`);
+      });
+    };
+    checkLinks(q.links, q.id);
     for (const s of q.steps) {
       if (s.choices && new Set(s.choices.map(c => c.id)).size !== s.choices.length) errors.push(`duplicate choice ${q.id}/${s.id}`);
       if (s.when !== undefined && !isTimeOfDay(s.when)) errors.push(`bad step time ${q.id}/${s.id}`);
+      checkLinks(s.links, `${q.id}/${s.id}`);
     }
     if (q.revision !== undefined && (!Number.isInteger(q.revision) || q.revision < 1)) errors.push(`bad revision ${q.id}`);
     if (q.legacyStepOrder) {

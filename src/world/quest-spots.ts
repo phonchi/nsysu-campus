@@ -47,7 +47,7 @@ const BASE: Record<Exclude<SpotKind, `${string}-${string}`>, Recipe> = {
   binder: { solid: [[0, 0, .35]], parts: [...table(.8, .5, .4), { box: [.3, .05, .24], at: [0, .83, 0], color: SEA }, { box: [.03, .05, .24], at: [-.15, .83, 0], color: DARK }, { box: [.24, .012, .18], at: [.02, .86, .01], color: PAPER }] },
   // The reading-corner recommendation wall beside the counter: a board on two posts with a title strip and cards.
   wall: { solid: [[0, 0, .35]], parts: [{ box: [.05, 1.7, .05], at: [-.65, .85, -.04], color: DARK }, { box: [.05, 1.7, .05], at: [.65, .85, -.04], color: DARK }, { box: [1.4, 1.1, .03], at: [0, 1.25, 0], color: PAPER }, { box: [1.4, .12, .035], at: [0, 1.86, 0], color: BRICK }, { box: [.3, .22, .012], at: [-.45, 1.4, .02], color: PAPER }, { box: [.3, .22, .012], at: [-.45, 1.08, .02], color: PAPER }] },
-  // 林老師's table on the arcade: an order sheet and a cup; the delivered note or sticker goes beside the sheet.
+  // 呂老師's table on the arcade: an order sheet and a cup; the delivered note or sticker goes beside the sheet.
   desk: { solid: [[0, 0, .45]], parts: [...table(.75, .9, .6), { box: [.3, .02, .22], at: [-.15, .77, 0], color: PAPER }, { cyl: [.05, .04, .12, 10], at: [.25, .82, -.1], color: PAPER }] },
 };
 /** A variant shares its base recipe and adds what the player's choice changed. */

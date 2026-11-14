@@ -99,7 +99,7 @@ export class PostPipeline {
   constructor(private renderer: T.WebGLRenderer, samples = 4) {
     this.samples = Math.min(samples, renderer.capabilities.maxSamples);
     const opts = { type: T.HalfFloatType, depthBuffer: false, magFilter: T.LinearFilter, minFilter: T.LinearFilter } as const;
-    this.scene = new T.WebGLRenderTarget(1, 1, { type: T.HalfFloatType, samples: this.samples });
+    this.scene = new T.WebGLRenderTarget(1, 1, { type: T.HalfFloatType, samples: this.samples, stencilBuffer:true });
     for (let i = 0; i < 3; i++) { this.tight.push(new T.WebGLRenderTarget(1, 1, opts)); this.tightUp.push(new T.WebGLRenderTarget(1, 1, opts)); }
     for (let i = 0; i < 5; i++) { this.wide.push(new T.WebGLRenderTarget(1, 1, opts)); this.wideUp.push(new T.WebGLRenderTarget(1, 1, opts)); }
     const mat = (fragmentShader: string, uniforms: Record<string, T.IUniform>) =>

@@ -202,3 +202,8 @@
 .walk-story-note{font-size:12px;color:var(--ui-ink-soft)}
 
 @media(max-width:759px){.walkthrough.has-campus-event-invite .q-objective,.walkthrough.has-campus-event-invite .quest-pocket{display:none}}
+
+.walk-story-category.is-lore,.walk-story-note.is-lore{border:1px dashed var(--walk-line);border-radius:7px;padding:4px 8px}
+.walk-actions [data-action=camera]{display:none;white-space:normal}
+.has-touch .walk-actions [data-action=camera]{display:inline-flex}
+@media(pointer:coarse){.walk-actions [data-action=camera]{display:inline-flex}}

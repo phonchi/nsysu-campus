@@ -154,9 +154,13 @@ export class RapierController implements CharacterController {
   setActors(bodies: readonly ActorBody[]) {
     const keep = new Set(bodies.map(b => b.id));
     for (const [id, c] of this.actors) if (!keep.has(id)) { this.actorHandles.delete(c.handle); this.world.removeCollider(c, false); this.actors.delete(id); this.actorPoses.delete(id); this.queryDirty = true; }
-    for (const b of bodies) {
+    for (const b of bodies) this.setActor(b);
+  }
+
+  /** Update one actor immediately; other actors and encounter colliders remain registered. */
+  setActor(b:ActorBody) {
       const key = `${b.position.x},${b.position.y},${b.position.z},${b.radius},${b.height}`;
-      if (this.actorPoses.get(b.id) === key) continue;
+      if (this.actorPoses.get(b.id) === key) return;
       let c = this.actors.get(b.id);
       if (!c) {
         c = this.world.createCollider(RAPIER.ColliderDesc.capsule(Math.max(0, b.height / 2 - b.radius), b.radius).setCollisionGroups(ACTOR_GROUPS));
@@ -165,7 +169,6 @@ export class RapierController implements CharacterController {
       c.setShape(this.actorShape(b.radius, b.height));
       c.setTranslation({ x: b.position.x, y: b.position.y + b.height / 2 + OFFSET, z: b.position.z });
       this.actorPoses.set(b.id, key); this.queryDirty = true;
-    }
   }
 
   /** Moving door panels occlude the camera; the existing door constraint owns walking. */

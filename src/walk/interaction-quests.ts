@@ -57,7 +57,7 @@ export const QUEST_NEXT: Record<string, string[]> = {
   'gate-lost': ['tunnel-leaflet'], 'gate-mia': ['library-corner'], 'tunnel-leaflet': ['tunnel-photo'],
   'tunnel-photo': [], 'admin-list': ['library-bookmark'], 'admin-garden': ['admin-list'],
   'library-bookmark': ['library-corner'], 'library-corner': ['gate-mia'], 'arcade-coffee': ['math-day'],
-  'arcade-club': ['arcade-coffee'], 'sea-postcard': [], 'sea-stage': ['sea-postcard'], 'math-day': ['arcade-club'],
+  'arcade-club': ['arcade-coffee'], 'sea-postcard': [], 'sea-stage': ['sea-postcard'], 'math-day': ['math-freshman', 'arcade-club'], 'math-freshman': ['math-day'],
 };
 export function nextQuestRecommendation(completed: QuestDefinition, quests: QuestPresentationEngine, world: QuestWorld,
   zoneLabel: (zone: string) => string): string {

@@ -455,6 +455,252 @@
     }
    ],
    "category": "legend"
+  },
+  {
+   "id": "motto",
+   "title": "校訓五句",
+   "pos": [
+    -78,
+    99
+   ],
+   "text": "中山大學的校訓是「博學、審問、慎思、明辨、篤行」。",
+   "sources": [
+    {
+     "label": "中山大學・校史與校訓",
+     "url": "https://www.nsysu.edu.tw/p/412-1000-1497.php?Lang=zh-tw"
+    }
+   ],
+   "category": "history"
+  },
+  {
+   "id": "founding-day",
+   "title": "校慶是哪一天",
+   "pos": [
+    -90.5,
+    601
+   ],
+   "text": "中山大學的校慶是 11 月 12 日，也就是國父誕辰。",
+   "sources": [
+    {
+     "label": "中山大學・校史與校訓",
+     "url": "https://www.nsysu.edu.tw/p/412-1000-1497.php?Lang=zh-tw"
+    }
+   ],
+   "category": "history"
+  },
+  {
+   "id": "first-intake",
+   "title": "第一批新生",
+   "pos": [
+    -66,
+    122
+   ],
+   "text": "民國 69 年（1980）秋季開始招生，當時成立 4 個學系、2 個研究所。",
+   "sources": [
+    {
+     "label": "中山大學・校史與校訓",
+     "url": "https://www.nsysu.edu.tw/p/412-1000-1497.php?Lang=zh-tw"
+    }
+   ],
+   "category": "history"
+  },
+  {
+   "id": "library-move",
+   "title": "圖書館搬家",
+   "pos": [
+    -50,
+    -54
+   ],
+   "text": "圖書館原本在行政大樓，民國 77 年 8 月 1 日先遷到圖資大樓十樓，78 年 11 月 12 日全面開館。",
+   "sources": [
+    {
+     "label": "圖資處・圖書館沿革",
+     "url": "https://lis.nsysu.edu.tw/p/412-1001-1174.php?Lang=zh-tw"
+    }
+   ],
+   "category": "history"
+  },
+  {
+   "id": "library-architect",
+   "title": "設計圖上的署名",
+   "pos": [
+    -66,
+    -38.5
+   ],
+   "text": "一張圖資大樓的設計圖，日期是民國 73 年 10 月，署名建築師陳其寛。",
+   "sources": [
+    {
+     "label": "文化部典藏網・圖資大樓設計圖",
+     "url": "https://collections.culture.tw/Object?SYSUID=31&RNO=Q0NDSzI2MTIzMDQ1"
+    }
+   ],
+   "category": "history"
+  },
+  {
+   "id": "logo-1997",
+   "title": "山與海的標誌",
+   "pos": [
+    -86,
+    590
+   ],
+   "text": "1997 年的中山大學識別標誌：綠色山形是壽山，藍色筆觸是西灣。",
+   "sources": [
+    {
+     "label": "中山大學・識別標誌",
+     "url": "https://www.nsysu.edu.tw/p/412-1000-1508.php?Lang=zh-tw"
+    }
+   ],
+   "category": "history"
+  },
+  {
+   "id": "gate-arch",
+   "title": "隧道口的牌樓",
+   "pos": [
+    6,
+    149
+   ],
+   "text": "以前西子灣隧道上有大大的中山大學山水 Logo 牌樓，常讓人誤會是中山大學的大門，每年新生開學時總有校內社團學長姐在這裡引導，說明這是隧道口、並非大門。牌樓於 2008 年 7 月底拆除。",
+   "sources": [
+    {
+     "label": "中山新聞（隧道口牌樓）",
+     "url": "https://news.nsysu.edu.tw/p/404-1120-136659.php?Lang=zh-tw"
+    }
+   ],
+   "category": "history"
+  },
+  {
+   "id": "tunnel-starry",
+   "title": "隧道裡的燈光秀",
+   "pos": [
+    36,
+    152.5
+   ],
+   "text": "耶誕節適逢考試週，外籍師生無法回家過節，便透過隧道營造節慶氣氛，搭配逾 7 萬顆 LED 燈泡的耶誕燈光秀。",
+   "sources": [
+    {
+     "label": "1111 人力銀行新聞（隧道燈光秀）",
+     "url": "https://www.1111.com.tw/news/jobns/154325"
+    }
+   ],
+   "category": "news",
+   "y": 1
+  },
+  {
+   "id": "tunnel-dispositif",
+   "title": "部署壽山",
+   "pos": [
+    46,
+    155.5
+   ],
+   "text": "「部署壽山—西子灣隧道與全民防衛展」曾於 9 月 30 日至 10 月 23 日在西子灣隧道舉辦，「避災解厄」展場呈現 5 個民俗故事與鄉野奇談；這個展覽獲得美國繆思創意獎體驗式和沈浸式展場設計類金獎。",
+   "sources": [
+    {
+     "label": "中山新聞（部署壽山展）",
+     "url": "https://news.nsysu.edu.tw/p/406-1120-294563,r2910.php?Lang=zh-tw"
+    },
+    {
+     "label": "1111 人力銀行新聞（繆思創意獎）",
+     "url": "https://www.1111.com.tw/news/jobns/153278"
+    }
+   ],
+   "category": "news",
+   "y": 1
+  },
+  {
+   "id": "shoushan-rename",
+   "title": "打狗山改名",
+   "pos": [
+    92,
+    46
+   ],
+   "text": "1923 年，皇太子（後來的昭和天皇）曾在打水灣湧泉出水口一帶的貴賓館住過，以此為契機，打狗山被改名為「壽山」，貴賓館則成為「壽山館」。",
+   "sources": [
+    {
+     "label": "nippon.com（壽山館）",
+     "url": "https://www.nippon.com/hk/articles/-/29409"
+    }
+   ],
+   "category": "history"
+  },
+  {
+   "id": "math-gifted-class",
+   "title": "應數系的第一批高一生",
+   "pos": [
+    -21,
+    111
+   ],
+   "text": "中山大學的數理資優班於民國 74 年成立。民國 76 年應數系承辦數學組，那年 10 月迎來第一批 20 位高一學生，來自高雄縣市、屏東及台東等地。",
+   "sources": [
+    {
+     "label": "高中數學人才培育班・沿革",
+     "url": "https://highschool-math.nsysu.edu.tw/p/412-1186-123.php?Lang=zh-tw"
+    }
+   ],
+   "category": "history"
+  },
+  {
+   "id": "yixian-stage",
+   "title": "舞台上的 NSYSU",
+   "pos": [
+    -149,
+    162
+   ],
+   "text": "逸仙館的舞台大到可以停放一架 F-16 戰鬥機；由舞台面向觀眾席時，看得到以座椅顏色排列出的 NSYSU 縮寫。",
+   "sources": [
+    {
+     "label": "中山新聞（逸仙館）",
+     "url": "https://news.nsysu.edu.tw/p/406-1120-241100,r2910.php?Lang=zh-tw"
+    }
+   ],
+   "category": "news"
+  },
+  {
+   "id": "wormhole-letters",
+   "title": "蟲洞書簡",
+   "pos": [
+    -156,
+    153
+   ],
+   "text": "有一屆大學部畢業生入學時都親手寫下「蟲洞書簡」，這些對自己的期許封存了 4 年；當年不少人的願望是早日「脫魯」、不要被當。",
+   "sources": [
+    {
+     "label": "中山新聞（蟲洞書簡）",
+     "url": "https://news.nsysu.edu.tw/p/406-1120-283292,r2910.php?Lang=zh-tw"
+    }
+   ],
+   "category": "news"
+  },
+  {
+   "id": "il-shuxiangting",
+   "title": "書香町",
+   "pos": [
+    -90,
+    -80
+   ],
+   "text": "書香町是圖資處在民國 103 年為了滿足學生安靜自習的需求而設的；同一篇報導也記下 24 小時智慧還書系統正式啟用。",
+   "sources": [
+    {
+     "label": "1111 人力銀行新聞（書香町）",
+     "url": "https://www.1111.com.tw/news/jobns/159043"
+    }
+   ],
+   "category": "news"
+  },
+  {
+   "id": "art-building-tales",
+   "title": "山上的藝術大樓",
+   "pos": [
+    -168,
+    -228
+   ],
+   "text": "校園口傳：山上的藝術大樓位處偏僻，曾驚傳鬧鬼事件。中山校園盛傳，某日晚間兩名劇藝系學生在藝術大樓搭電梯到地下室，匆促間「撞倒一名小女孩」，事後查看監視器畫面，「根本沒有小女孩」；另一則在二樓大劇場附近，有「人」在晚間一直敲窗戶，那個位置「當時根本沒有人」。",
+   "sources": [
+    {
+     "label": "中山大學・校網轉載自由時報〈鬼藝懼場開張〉",
+     "url": "https://www.nsysu.edu.tw/p/404-1000-95633.php?Lang=zh-tw"
+    }
+   ],
+   "category": "lore"
   }
  ]
 }

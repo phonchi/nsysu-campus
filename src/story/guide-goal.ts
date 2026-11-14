@@ -11,7 +11,7 @@ export function beaconFade(distance: number) {
   return t * t * (3 - 2 * t);
 }
 
-/** The one character on a person's badge: 阿灣 reads as 灣, 小禾 as 禾, 林老師 as 林, Mia as M. */
+/** The one character on a person's badge: 阿灣 reads as 灣, 小禾 as 禾, 呂老師 as 呂, Mia as M. */
 export function badgeGlyph(name: string) {
   const stem = /^[阿小]./u.test(name) ? name.slice(1) : name;
   return [...stem][0]?.toLocaleUpperCase() ?? '';
