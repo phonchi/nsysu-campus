@@ -54,7 +54,7 @@ export class StoryUi {
   constructor(host: HTMLElement, private chapters: Chapter[], private guideName: string) {
     this.root.className = 'q-layer';
     const coarse = typeof matchMedia === 'function' && matchMedia('(pointer:coarse)').matches;
-    this.root.innerHTML = `<div class="q-objective" hidden role="group" aria-label="目前目標"><div class="q-lines" role="group" aria-label="切換主線與支線"><button type="button" data-line="main">主線</button><button type="button" data-line="side">支線</button>${coarse ? '' : '<kbd>Q</kbd>'}</div><small></small><strong></strong><span class="q-dist"></span><i class="q-other"></i><em>${coarse ? '點此帶路' : 'G 自動前往'}</em></div>
+    this.root.innerHTML = `<div class="q-objective" hidden role="group" aria-label="目前目標"><div class="q-lines" role="group" aria-label="切換主線與支線"><button type="button" data-line="main">主線</button><button type="button" data-line="side">支線</button>${coarse ? '' : '<kbd>Q</kbd>'}</div><small></small><strong></strong><span class="q-dist"></span><i class="q-other"></i><span class="q-wait-reason" hidden></span><em>${coarse ? '點此帶路' : 'G 自動前往'}</em></div>
 <ol class="q-dots" aria-label="新生導覽進度">${chapters.map(c => `<li title="${esc(c.title)}"></li>`).join('')}</ol>
 <div class="q-badge" hidden aria-hidden="true"><b></b><small></small></div>
 <div class="q-pointer" hidden aria-hidden="true"><svg viewBox="0 0 40 40"><path d="M6 20h22m-9-10 10 10-10 10" stroke="#2a2c4a" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 20h22m-9-10 10 10-10 10" stroke="#e9b949" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
@@ -72,7 +72,8 @@ export class StoryUi {
     this.badgeEl = this.root.querySelector('.q-badge')!;
     this.logEl = this.root.querySelector('.q-log')!;
     this.root.querySelector('.q-hint')!.addEventListener('click',e=>{
-      const id=(e.target as HTMLElement).closest<HTMLElement>('[data-interaction]')?.dataset.interaction;
+      const button=(e.target as HTMLElement).closest<HTMLButtonElement>('[data-interaction]');
+      const id=button && !button.disabled ? button.dataset.interaction : undefined;
       if(id) { e.stopPropagation(); this.hintSelect?.(id); }
     });
     this.dialogueEl.addEventListener('click', e => {
@@ -229,6 +230,11 @@ export class StoryUi {
     this.objectiveEl.querySelectorAll<HTMLElement>('[data-line]').forEach(b => b.setAttribute('aria-pressed', String((b.dataset.line === 'side') === !!s)));
   }
 
+  waitReason(reason: string) {
+    const el = this.objectiveEl.querySelector<HTMLElement>('.q-wait-reason')!;
+    el.hidden = !reason; if (el.textContent !== reason) el.textContent = reason;
+  }
+
   private distanceText = '';
   distance(m: number | string | undefined) {
     const text = m === undefined ? '' : typeof m === 'string' ? m : `${Math.round(m)} m`;
@@ -358,14 +364,14 @@ ${fact ? `<p class="fact"><b>校史小知識</b>${esc(fact)}${source ? ` <a href
   }
 
   private npcBadgeEls = new Map<string,HTMLElement>();
-  npcBadges(badges:readonly {id:string;x:number;y:number;status:'acceptable'|'deliverable';name:string}[]) {
+  npcBadges(badges:readonly {id:string;x:number;y:number;status:'acceptable'|'deliverable'|'waiting';name:string}[]) {
     const visible=new Set(badges.map(b=>b.id));
     for(const [id,el] of this.npcBadgeEls) if(!visible.has(id))el.hidden=true;
     for(const b of badges) {
       let el=this.npcBadgeEls.get(b.id);
       if(!el) { el=document.createElement('div');el.className='q-badge q-npc-badge';el.innerHTML='<b></b>';this.root.append(el);this.npcBadgeEls.set(b.id,el); }
       el.hidden=false;el.dataset.status=b.status;
-      el.setAttribute('aria-label',`${b.name}：${b.status==='deliverable'?'可交付':'可接任務'}`);
+      el.setAttribute('aria-label',`${b.name}：${b.status==='deliverable'?'可交付':b.status==='waiting'?'等待可接時段':'可接任務'}`);
       el.firstElementChild!.textContent=b.status==='deliverable'?'？':'！';
       el.style.transform=`translate(${Math.round(b.x)}px,${Math.round(b.y)}px) translate(-50%,-100%)`;
     }
@@ -379,7 +385,7 @@ ${fact ? `<p class="fact"><b>校史小知識</b>${esc(fact)}${source ? ` <a href
   private toasts: { kind: string; title: string; sub?: string }[] = [];
   private toastBusy = false;
   /** Corner toast (stamp / achievement / item), one at a time; waits while a dialogue is open. */
-  toast(kind: 'stamp' | 'achievement' | 'item', title: string, sub?: string) {
+  toast(kind: 'stamp' | 'achievement' | 'item' | 'recommendation', title: string, sub?: string) {
     this.toasts.push({ kind, title, sub });
     if (!this.toastBusy) this.nextToast();
   }
@@ -392,7 +398,7 @@ ${fact ? `<p class="fact"><b>校史小知識</b>${esc(fact)}${source ? ` <a href
     el.className = `q-toast q-toast-${t.kind}`; el.setAttribute('role', 'status');
     el.innerHTML = `<span class="q-toast-seal" aria-hidden="true">${t.kind === 'stamp' ? '章' : t.kind === 'achievement' ? '★' : '＋'}</span><div><strong>${esc(t.title)}</strong>${t.sub ? `<small>${esc(t.sub)}</small>` : ''}</div>`;
     this.root.append(el);
-    window.setTimeout(() => { el.classList.add('out'); window.setTimeout(() => { el.remove(); this.nextToast(); }, 300); }, 3200);
+    window.setTimeout(() => { el.classList.add('out'); window.setTimeout(() => { el.remove(); this.nextToast(); }, 300); }, t.kind === 'recommendation' ? 6500 : 3200);
   }
 
   /** Mini-game timer pill (top centre) with an optional give-up button (touch), or null to hide. */

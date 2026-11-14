@@ -48,3 +48,20 @@ describe('v10: the highlight follows priority unless picked by hand', () => {
     expect(selectInteraction([landmark, quest], 'landmark:GATE', true)?.id).toBe('landmark:GATE');
   });
 });
+
+it('waiting offers remain visible but cannot receive E, cycling, number keys, or execution after becoming unavailable', () => {
+ const waiting={...action('waiting',p.newlyUnlocked),disabled:true,label:'接取・海風（可接：夕陽，按 N）'};
+ const talk=action('talk',p.talk), rows=orderInteractions([waiting,talk]);
+ expect(selectInteraction(rows,'waiting')?.id).toBe('talk');
+ expect(cycleInteraction(rows,'talk')?.id).toBe('talk');
+ expect(numberedInteractions(rows,'waiting').map(r=>r.id)).toEqual(['talk']);
+ expect(revalidateInteraction(rows,{...waiting,disabled:false})).toBeUndefined();
+ expect(revalidateInteraction([{...waiting,disabled:false}],waiting)).toBeUndefined();
+ expect(selectInteraction([waiting])).toBeUndefined();
+ expect(cycleInteraction([waiting])).toBeUndefined();
+ expect(numberedInteractions([waiting])).toEqual([]);
+ const html=interactionListHtml(rows,'talk');
+ expect(html).toContain('disabled aria-disabled="true"');
+ expect(html).toContain('<kbd>—</kbd>');
+ expect(html).toContain('可接：夕陽，按 N');
+});

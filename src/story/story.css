@@ -167,3 +167,23 @@
 @media(max-width:759px){.q-rhythm{width:min(200px,calc(100vw - 32px))}.q-rhythm-cue{width:110px;height:110px}.q-rhythm-cue i{left:35px;top:35px}.q-rhythm button{min-height:48px;padding:10px 14px}}
 .has-touch .q-rhythm-key{display:none}
 @media(pointer:coarse){.q-rhythm-key{display:none}}
+
+/* v10.2: waiting offers stay legible and visible, without claiming an action key. */
+.walkthrough .q-interaction-rows button:disabled{opacity:1;color:var(--ui-ink-soft);background:var(--ui-paper-2);border-color:#a5a6a3;cursor:default}
+.q-interaction-rows button:disabled:active{transform:none}
+.q-npc-badge[data-status=waiting] b{background:var(--ui-paper-2);border-color:#858b91;color:var(--ui-ink-soft)}
+.q-wait-reason{grid-column:1/-1;font-size:12px;line-height:1.5;color:var(--ui-ink-soft);white-space:normal}
+.q-toast-recommendation .q-toast-seal{border-color:var(--ui-sea);color:var(--ui-sea)}
+@media(max-width:759px){
+ /* The middle lane leaves the HUD/status above and touch actions below usable. */
+ .q-hint.has-choices,.q-toast-recommendation{top:calc(244px + env(safe-area-inset-top,0px));left:12px;right:12px;width:auto;max-width:none;max-height:max(24px,calc(100dvh - 568px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)));overflow:auto;overscroll-behavior:contain;transform:none!important}
+ .q-hint.has-choices .q-interaction-rows{max-height:none;overflow:visible}
+ .q-toast-recommendation{align-items:flex-start;pointer-events:auto;z-index:5}
+ .q-layer:has(.q-toast-recommendation) .q-hint{visibility:hidden}
+ .q-toast-recommendation .q-toast-seal{width:30px;height:30px;font-size:15px}
+ .q-toast-recommendation strong{font-size:14px}
+ .q-toast-recommendation small{font-size:12px}
+}
+@media(max-width:759px) and (max-height:650px){
+ .q-hint.has-choices,.q-toast-recommendation{top:212px;max-height:max(24px,calc(100dvh - 520px - env(safe-area-inset-bottom,0px)))}
+}

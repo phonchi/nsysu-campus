@@ -1,3 +1,4 @@
+import { questGrants, type QuestConsequences } from '../walk/interaction-quests';
 import type * as T from 'three';
 import type { Campus } from './collection';
 import type { CollectionData, NpcData } from './talk';
@@ -18,7 +19,7 @@ export class Album {
   private placeStamps: { id: string; x: number; z: number; r: number }[] = [];
   private checked = 0;
 
-  constructor(private data: CollectionData, npcs: NpcData | undefined, private campus: Campus, private world: AlbumWorld) {
+  constructor(private data: CollectionData, npcs: NpcData | undefined, private campus: Campus, private world: AlbumWorld, private quests: () => QuestConsequences | undefined = () => undefined) {
     const given = new Set<string>();
     for (const t of Object.values(npcs?.trees ?? {})) for (const n of Object.values(t.nodes)) for (const e of [...(n.effects ?? []), ...(n.choices ?? []).flatMap(c => c.effects ?? [])]) if ('stamp' in e) given.add(e.stamp);
     for (const s of data.stamps) {
@@ -66,12 +67,21 @@ export class Album {
       const got = p.stamps.includes(s.id), secret = s.hidden && !got;
       return `<li class="${got ? 'got' : ''}${s.hidden ? ' hidden-stamp' : ''}" title="${esc(secret ? '隱藏章' : s.desc)}"><span class="seal">${got ? esc(s.name.slice(0, 2)) : '？'}</span><small>${esc(secret ? '？？？' : s.name)}</small></li>`;
     };
+    const grants = questGrants(this.quests()), ids = [...new Set([...p.items, ...grants.map(g => g.itemId)])];
+    const questItems = ids.filter(id => this.data.items.find(i => i.id === id)?.group === 'quest' || grants.some(g => g.itemId === id));
+    const campusItems = ids.filter(id => !questItems.includes(id));
+    const item = (id: string) => {
+      const base = this.data.items.find(i => i.id === id), grant = grants.find(g => g.itemId === id);
+      const variant = grant?.variant ? base?.variants?.[grant.variant] : undefined;
+      return `<li><strong>${esc(variant?.name ?? base?.name ?? id)}</strong><small>${esc(variant?.desc ?? base?.desc ?? '')}</small></li>`;
+    };
     const main = this.data.stamps.filter(s => !s.hidden), hidden = this.data.stamps.filter(s => s.hidden);
     return `<div class="album">
 <h3>集章 <b>${p.stamps.filter(s => main.some(m => m.id === s)).length}／${main.length}</b></h3><ol class="stamps">${main.map(stamp).join('')}</ol>
 <h3>隱藏章 <b>${p.stamps.filter(s => hidden.some(m => m.id === s)).length}／${hidden.length}</b></h3><ol class="stamps">${hidden.map(stamp).join('')}</ol>
 <h3>成就 <b>${p.achievements.length}／${this.data.achievements.length}</b></h3><ul class="achv">${this.data.achievements.map(a => `<li class="${p.achievements.includes(a.id) ? 'got' : ''}"><strong>${esc(a.name)}</strong><small>${esc(a.desc)}</small></li>`).join('')}</ul>
-<h3>背包 <b>${p.items.length}</b></h3><ul class="items">${p.items.length ? p.items.map(id => { const i = this.data.items.find(x => x.id === id); return `<li><strong>${esc(i?.name ?? id)}</strong><small>${esc(i?.desc ?? '')}</small></li>`; }).join('') : '<li class="empty">還沒有東西。跟校園裡的人聊聊吧。</li>'}</ul>
+<h3>背包 <b>${ids.length}</b></h3><h4>校園物品</h4><ul class="items">${campusItems.length ? campusItems.map(item).join('') : '<li class="empty">還沒有校園物品。跟校園裡的人聊聊吧。</li>'}</ul>
+<h4>支線收藏 <b>${questItems.length}</b></h4><ul class="items quest-items">${questItems.length ? questItems.map(item).join('') : '<li class="empty">完成支線後，收藏品會留在這裡。</li>'}</ul>
 <h3>校史故事 <b>${stories.found}／${stories.total}</b></h3><p class="album-note">在校園裡找發光的寶石，或聽 NPC 提起的地方。</p>
 <h3>認識的人 <b>${p.talked.length}</b></h3></div>`;
   }

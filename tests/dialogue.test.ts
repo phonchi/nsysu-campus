@@ -96,3 +96,15 @@ describe('shipped NPC data', () => {
     }
   });
 });
+
+import { questFlagCatalog } from '../src/story/dialogue';
+it('derived quest flags validate reads separately from main-story flags and cannot be set by dialogue',()=>{
+ const questFlags=questFlagCatalog({quests:[{id:'q',steps:[{id:'return',choices:[{id:'a'},{id:'b'}]}]}]});
+ expect(questFlags).toEqual(['quest.q.done','quest.q.return.a','quest.q.return.b']);
+ const t:Tree={entries:[{if:{all:[{flag:'quest.q.done'},{notFlag:'quest.q.return.b'}]},node:'answer'},{node:'answer'}],nodes:{answer:{lines:[{who:'kai',text:'謝謝。'}]}}};
+ expect(validateTrees({kai:t},{kai:'kai'},{...cat,questFlags})).toEqual([]);
+ expect(validateTrees({kai:t},{kai:'kai'},cat).join('\n')).toContain('never set');
+ t.nodes.answer.effects=[{setFlag:'quest.q.done'}];
+ expect(validateTrees({kai:t},{kai:'kai'},{...cat,questFlags}).join('\n')).toContain('must not set quest flag');
+ expect(cat.storyFlags).toEqual(['c1.talked']);
+});

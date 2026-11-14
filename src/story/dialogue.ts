@@ -86,7 +86,7 @@ const EFFECT_KEYS = ['setFlag', 'giveItem', 'stamp', 'achievement', 'unlockSideQ
 
 export interface Catalog {
   npcs: string[]; items: string[]; stamps: string[]; achievements: string[]; sideQuests: string[];
-  chapters: string[]; storyFlags: string[]; sounds: string[];
+  chapters: string[]; storyFlags: string[]; questFlags?: string[]; sounds: string[];
 }
 
 /** Problems in a set of trees (empty = OK). `owner` maps tree id → npc id (for the flag namespace rule). */
@@ -109,7 +109,7 @@ export function validateTrees(trees: Record<string, Tree>, owner: Record<string,
       if (keys.length !== 1 || !COND_KEYS.includes(keys[0])) { errors.push(at(`${where}: bad condition ${JSON.stringify(c)}`)); return; }
       if ('all' in c) c.all.forEach(x => checkCond(x, where));
       if ('any' in c) c.any.forEach(x => checkCond(x, where));
-      if ('flag' in c || 'notFlag' in c) { const fl = 'flag' in c ? c.flag : c.notFlag; if (!setFlags.has(fl) && !cat.storyFlags.includes(fl)) errors.push(at(`${where}: flag ${fl} is never set`)); }
+      if ('flag' in c || 'notFlag' in c) { const fl = 'flag' in c ? c.flag : c.notFlag; if (!setFlags.has(fl) && !cat.storyFlags.includes(fl) && !cat.questFlags?.includes(fl)) errors.push(at(`${where}: flag ${fl} is never set`)); }
       if ('hasItem' in c && !cat.items.includes(c.hasItem)) errors.push(at(`${where}: unknown item ${c.hasItem}`));
       if ('chapterDone' in c && !cat.chapters.includes(c.chapterDone)) errors.push(at(`${where}: unknown chapter ${c.chapterDone}`));
       if ('timeOfDay' in c && !['day', 'sunset', 'night'].includes(c.timeOfDay)) errors.push(at(`${where}: unknown time ${c.timeOfDay}`));
@@ -120,6 +120,7 @@ export function validateTrees(trees: Record<string, Tree>, owner: Record<string,
       if (keys.length !== 1 || !EFFECT_KEYS.includes(keys[0])) { errors.push(at(`${where}: bad effect ${JSON.stringify(e)}`)); return; }
       if ('setFlag' in e && !(e.setFlag.startsWith(npc + '.') || e.setFlag.startsWith('v4.'))) errors.push(at(`${where}: flag ${e.setFlag} must start with "${npc}." or "v4."`));
       if ('setFlag' in e && cat.storyFlags.includes(e.setFlag)) errors.push(at(`${where}: dialogue must not set story flag ${e.setFlag}`));
+      if ('setFlag' in e && (e.setFlag.startsWith('quest.') || cat.questFlags?.includes(e.setFlag))) errors.push(at(`${where}: dialogue must not set quest flag ${e.setFlag}`));
       if ('giveItem' in e && !cat.items.includes(e.giveItem)) errors.push(at(`${where}: unknown item ${e.giveItem}`));
       if ('stamp' in e && !cat.stamps.includes(e.stamp)) errors.push(at(`${where}: unknown stamp ${e.stamp}`));
       if ('achievement' in e && !cat.achievements.includes(e.achievement)) errors.push(at(`${where}: unknown achievement ${e.achievement}`));
@@ -171,4 +172,9 @@ export function validateTrees(trees: Record<string, Tree>, owner: Record<string,
     for (const nid of Object.keys(t.nodes ?? {})) if (!seen.has(nid)) errors.push(at(`node ${nid} unreachable`));
   }
   return errors;
+}
+
+/** Read-only derived facts, kept separate from the story's writable flag catalog. */
+export function questFlagCatalog(data: { quests: readonly { id: string; steps: readonly { id: string; choices?: readonly { id: string }[] }[] }[] }): string[] {
+  return data.quests.flatMap(q => [`quest.${q.id}.done`, ...q.steps.flatMap(s => (s.choices ?? []).map(c => `quest.${q.id}.${s.id}.${c.id}`))]);
 }

@@ -394,10 +394,10 @@
    },
    "schedule": {
     "day": {
-     "at": "IL",
+     "at": "tunnel-west",
      "offset": [
-      -3,
-      6
+      -9,
+      -3
      ],
      "activity": "Idle"
     },
@@ -679,8 +679,8 @@
     "day": {
      "at": "arcade",
      "offset": [
-      0,
-      6
+      9,
+      9.5
      ],
      "activity": "Wave"
     },
@@ -787,10 +787,10 @@
    },
    "schedule": {
     "day": {
-     "at": "IL",
+     "at": "library",
      "offset": [
-      -3,
-      -4
+      -10,
+      -1
      ],
      "activity": "Idle"
     },
@@ -1384,6 +1384,22 @@
         "chapterDone": "c3-admin"
        },
        {
+        "flag": "quest.tunnel-leaflet.done"
+       },
+       {
+        "notFlag": "s1.v102-tunnel-leaflet-done"
+       }
+      ]
+     },
+     "node": "v102-tunnel-leaflet-done"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "chapterDone": "c3-admin"
+       },
+       {
         "flag": "s1.together"
        }
       ]
@@ -1701,6 +1717,20 @@
        "setFlag": "s1.story-told"
       }
      ]
+    },
+    "v102-tunnel-leaflet-done": {
+     "lines": [
+      {
+       "who": "s1",
+       "text": "傳單有人幫我收進箱子了，是你對吧？謝謝！"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "s1.v102-tunnel-leaflet-done"
+      }
+     ],
+     "next": "admin-hub"
     }
    }
   },
@@ -1909,6 +1939,70 @@
         "chapterDone": "c4-library"
        },
        {
+        "flag": "quest.admin-list.return.a"
+       },
+       {
+        "notFlag": "s3.v102-admin-list-return-a"
+       }
+      ]
+     },
+     "node": "v102-admin-list-return-a"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "chapterDone": "c4-library"
+       },
+       {
+        "flag": "quest.admin-list.return.b"
+       },
+       {
+        "notFlag": "s3.v102-admin-list-return-b"
+       }
+      ]
+     },
+     "node": "v102-admin-list-return-b"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "chapterDone": "c4-library"
+       },
+       {
+        "flag": "quest.library-corner.return.a"
+       },
+       {
+        "notFlag": "s3.v102-library-corner-return-a"
+       }
+      ]
+     },
+     "node": "v102-library-corner-return-a"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "chapterDone": "c4-library"
+       },
+       {
+        "flag": "quest.library-corner.return.b"
+       },
+       {
+        "notFlag": "s3.v102-library-corner-return-b"
+       }
+      ]
+     },
+     "node": "v102-library-corner-return-b"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "chapterDone": "c4-library"
+       },
+       {
         "timeOfDay": "night"
        }
       ]
@@ -2067,6 +2161,62 @@
       }
      ],
      "next": "root"
+    },
+    "v102-admin-list-return-a": {
+     "lines": [
+      {
+       "who": "s3",
+       "text": "櫃台旁的小地圖，新生看了就不迷路。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "s3.v102-admin-list-return-a"
+      }
+     ],
+     "next": "root"
+    },
+    "v102-admin-list-return-b": {
+     "lines": [
+      {
+       "who": "s3",
+       "text": "條列方向一目了然，從服務台走過來順順的。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "s3.v102-admin-list-return-b"
+      }
+     ],
+     "next": "root"
+    },
+    "v102-library-corner-return-a": {
+     "lines": [
+      {
+       "who": "s3",
+       "text": "安靜角落的照片貼在推薦牆了，讀者都很喜歡。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "s3.v102-library-corner-return-a"
+      }
+     ],
+     "next": "root"
+    },
+    "v102-library-corner-return-b": {
+     "lines": [
+      {
+       "who": "s3",
+       "text": "望海位子的照片貼上牆，大家都想去那邊坐。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "s3.v102-library-corner-return-b"
+      }
+     ],
+     "next": "root"
     }
    }
   },
@@ -2191,6 +2341,32 @@
       "timeOfDay": "night"
      },
      "node": "night-root"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "flag": "quest.gate-lost.return.a"
+       },
+       {
+        "notFlag": "guard-chung.v102-gate-lost-return-a"
+       }
+      ]
+     },
+     "node": "v102-gate-lost-return-a"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "flag": "quest.gate-lost.return.b"
+       },
+       {
+        "notFlag": "guard-chung.v102-gate-lost-return-b"
+       }
+      ]
+     },
+     "node": "v102-gate-lost-return-b"
     },
     {
      "if": {
@@ -2372,6 +2548,34 @@
        "text": "乖。路燈下面走。"
       }
      ]
+    },
+    "v102-gate-lost-return-a": {
+     "lines": [
+      {
+       "who": "guard-chung",
+       "text": "看了告示來認領的同學說對了，卡片物歸原主囉。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "guard-chung.v102-gate-lost-return-a"
+      }
+     ],
+     "next": "menu"
+    },
+    "v102-gate-lost-return-b": {
+     "lines": [
+      {
+       "who": "guard-chung",
+       "text": "鎖在鐵櫃最穩當，剛才猴子在窗邊晃也沒輒。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "guard-chung.v102-gate-lost-return-b"
+      }
+     ],
+     "next": "menu"
     }
    }
   },
@@ -2801,6 +3005,70 @@
    "entries": [
     {
      "if": {
+      "all": [
+       {
+        "timeOfDay": "day"
+       },
+       {
+        "flag": "quest.tunnel-leaflet.return.a"
+       },
+       {
+        "notFlag": "photo-ju.v102-tunnel-leaflet-return-a"
+       }
+      ]
+     },
+     "node": "v102-tunnel-leaflet-return-a"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "timeOfDay": "day"
+       },
+       {
+        "flag": "quest.tunnel-leaflet.return.b"
+       },
+       {
+        "notFlag": "photo-ju.v102-tunnel-leaflet-return-b"
+       }
+      ]
+     },
+     "node": "v102-tunnel-leaflet-return-b"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "timeOfDay": "day"
+       },
+       {
+        "flag": "quest.tunnel-photo.return.a"
+       },
+       {
+        "notFlag": "photo-ju.v102-tunnel-photo-return-a"
+       }
+      ]
+     },
+     "node": "v102-tunnel-photo-return-a"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "timeOfDay": "day"
+       },
+       {
+        "flag": "quest.tunnel-photo.return.b"
+       },
+       {
+        "notFlag": "photo-ju.v102-tunnel-photo-return-b"
+       }
+      ]
+     },
+     "node": "v102-tunnel-photo-return-b"
+    },
+    {
+     "if": {
       "timeOfDay": "day"
      },
      "node": "day-root"
@@ -2810,6 +3078,38 @@
       "timeOfDay": "night"
      },
      "node": "night-root"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "timeOfDay": "sunset"
+       },
+       {
+        "flag": "quest.sea-postcard.return.a"
+       },
+       {
+        "notFlag": "photo-ju.v102-sea-postcard-return-a"
+       }
+      ]
+     },
+     "node": "v102-sea-postcard-return-a"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "timeOfDay": "sunset"
+       },
+       {
+        "flag": "quest.sea-postcard.return.b"
+       },
+       {
+        "notFlag": "photo-ju.v102-sea-postcard-return-b"
+       }
+      ]
+     },
+     "node": "v102-sea-postcard-return-b"
     },
     {
      "node": "sunset-root"
@@ -2999,6 +3299,90 @@
        "text": "海平線歪了，太陽也切掉。再來，不急。"
       }
      ]
+    },
+    "v102-tunnel-leaflet-return-a": {
+     "lines": [
+      {
+       "who": "photo-ju",
+       "text": "按時間分頁很清楚，大家進洞口一眼就能查。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "photo-ju.v102-tunnel-leaflet-return-a"
+      }
+     ],
+     "next": "day-root"
+    },
+    "v102-tunnel-leaflet-return-b": {
+     "lines": [
+      {
+       "who": "photo-ju",
+       "text": "按社團分類很整齊，小婷的海洋社直接在首頁。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "photo-ju.v102-tunnel-leaflet-return-b"
+      }
+     ],
+     "next": "day-root"
+    },
+    "v102-tunnel-photo-return-a": {
+     "lines": [
+      {
+       "who": "photo-ju",
+       "text": "洞口那張拱圈，我貼在展示板上了。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "photo-ju.v102-tunnel-photo-return-a"
+      }
+     ],
+     "next": "day-root"
+    },
+    "v102-tunnel-photo-return-b": {
+     "lines": [
+      {
+       "who": "photo-ju",
+       "text": "洞口亮暗光影很生動，路人走進光裡的感覺很棒。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "photo-ju.v102-tunnel-photo-return-b"
+      }
+     ],
+     "next": "day-root"
+    },
+    "v102-sea-postcard-return-a": {
+     "lines": [
+      {
+       "who": "photo-ju",
+       "text": "記下今天的海風，未來的你收到一定會微笑吧。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "photo-ju.v102-sea-postcard-return-a"
+      }
+     ],
+     "next": "sunset-root"
+    },
+    "v102-sea-postcard-return-b": {
+     "lines": [
+      {
+       "who": "photo-ju",
+       "text": "把西子灣的夕陽寄給朋友，是最浪漫的問候了。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "photo-ju.v102-sea-postcard-return-b"
+      }
+     ],
+     "next": "sunset-root"
     }
    }
   },
@@ -3655,6 +4039,38 @@
     },
     {
      "if": {
+      "all": [
+       {
+        "timeOfDay": "sunset"
+       },
+       {
+        "flag": "quest.sea-stage.return.a"
+       },
+       {
+        "notFlag": "guitar-yun.v102-sea-stage-return-a"
+       }
+      ]
+     },
+     "node": "v102-sea-stage-return-a"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "timeOfDay": "sunset"
+       },
+       {
+        "flag": "quest.sea-stage.return.b"
+       },
+       {
+        "notFlag": "guitar-yun.v102-sea-stage-return-b"
+       }
+      ]
+     },
+     "node": "v102-sea-stage-return-b"
+    },
+    {
+     "if": {
       "timeOfDay": "sunset"
      },
      "node": "sunset-root"
@@ -3815,6 +4231,34 @@
        "achievement": "audience"
       }
      ]
+    },
+    "v102-sea-stage-return-a": {
+     "lines": [
+      {
+       "who": "guitar-yun",
+       "text": "Mia 帶話了，開場用輕快小調。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "guitar-yun.v102-sea-stage-return-a"
+      }
+     ],
+     "next": "sunset-root"
+    },
+    "v102-sea-stage-return-b": {
+     "lines": [
+      {
+       "who": "guitar-yun",
+       "text": "Mia 帶話了，開場用海風旋律。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "guitar-yun.v102-sea-stage-return-b"
+      }
+     ],
+     "next": "sunset-root"
     }
    }
   },
@@ -3825,6 +4269,32 @@
       "hasItem": "item-flyer-ocean"
      },
      "node": "has-flyer"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "flag": "quest.arcade-club.return.a"
+       },
+       {
+        "notFlag": "club-ocean-ting.v102-arcade-club-return-a"
+       }
+      ]
+     },
+     "node": "v102-arcade-club-return-a"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "flag": "quest.arcade-club.return.b"
+       },
+       {
+        "notFlag": "club-ocean-ting.v102-arcade-club-return-b"
+       }
+      ]
+     },
+     "node": "v102-arcade-club-return-b"
     },
     {
      "node": "root"
@@ -3920,6 +4390,34 @@
        "text": "考慮就是加入的開始。"
       }
      ]
+    },
+    "v102-arcade-club-return-a": {
+     "lines": [
+      {
+       "who": "club-ocean-ting",
+       "text": "冷知識招牌吸引好多人停下來猜，攤位超熱鬧！"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "club-ocean-ting.v102-arcade-club-return-a"
+      }
+     ],
+     "next": "menu"
+    },
+    "v102-arcade-club-return-b": {
+     "lines": [
+      {
+       "who": "club-ocean-ting",
+       "text": "海浪塗鴉遠遠看好顯眼，連走廊對面都看得到。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "club-ocean-ting.v102-arcade-club-return-b"
+      }
+     ],
+     "next": "menu"
     }
    }
   },
@@ -3950,6 +4448,58 @@
       ]
      },
      "node": "v10-stories"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "flag": "quest.arcade-coffee.return.a"
+       },
+       {
+        "notFlag": "ta-lin.v102-arcade-coffee-return-a"
+       }
+      ]
+     },
+     "node": "v102-arcade-coffee-return-a"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "flag": "quest.arcade-coffee.return.b"
+       },
+       {
+        "notFlag": "ta-lin.v102-arcade-coffee-return-b"
+       }
+      ]
+     },
+     "node": "v102-arcade-coffee-return-b"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "flag": "quest.math-day.return.a"
+       },
+       {
+        "notFlag": "ta-lin.v102-math-day-return-a"
+       }
+      ]
+     },
+     "node": "v102-math-day-return-a"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "flag": "quest.math-day.return.b"
+       },
+       {
+        "notFlag": "ta-lin.v102-math-day-return-b"
+       }
+      ]
+     },
+     "node": "v102-math-day-return-b"
     },
     {
      "if": {
@@ -4098,6 +4648,62 @@
       }
      ],
      "next": "menu"
+    },
+    "v102-arcade-coffee-return-a": {
+     "lines": [
+      {
+       "who": "ta-lin",
+       "text": "那句加油真及時，喝完這杯咖啡又有精神備課了。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "ta-lin.v102-arcade-coffee-return-a"
+      }
+     ],
+     "next": "menu"
+    },
+    "v102-arcade-coffee-return-b": {
+     "lines": [
+      {
+       "who": "ta-lin",
+       "text": "杯蓋上的笑臉貼紙很可愛，忙碌中看了會心一笑。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "ta-lin.v102-arcade-coffee-return-b"
+      }
+     ],
+     "next": "menu"
+    },
+    "v102-math-day-return-a": {
+     "lines": [
+      {
+       "who": "ta-lin",
+       "text": "你在四樓留的便條我看見了，數學圖書館很棒吧。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "ta-lin.v102-math-day-return-a"
+      }
+     ],
+     "next": "menu"
+    },
+    "v102-math-day-return-b": {
+     "lines": [
+      {
+       "who": "ta-lin",
+       "text": "國際會議廳空間很開闊，在那裡聽演講收穫很多。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "ta-lin.v102-math-day-return-b"
+      }
+     ],
+     "next": "menu"
     }
    }
   },
@@ -4108,6 +4714,32 @@
       "timeOfDay": "sunset"
      },
      "node": "bodhi"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "flag": "quest.admin-garden.return.a"
+       },
+       {
+        "notFlag": "gardener-hai.v102-admin-garden-return-a"
+       }
+      ]
+     },
+     "node": "v102-admin-garden-return-a"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "flag": "quest.admin-garden.return.b"
+       },
+       {
+        "notFlag": "gardener-hai.v102-admin-garden-return-b"
+       }
+      ]
+     },
+     "node": "v102-admin-garden-return-b"
     },
     {
      "if": {
@@ -4304,6 +4936,34 @@
        "count": "gardener-hai.leaves"
       }
      ]
+    },
+    "v102-admin-garden-return-a": {
+     "lines": [
+      {
+       "who": "gardener-hai",
+       "text": "花盆排成一列整整齊齊，走道寬敞推車好過。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "gardener-hai.v102-admin-garden-return-a"
+      }
+     ],
+     "next": "menu"
+    },
+    "v102-admin-garden-return-b": {
+     "lines": [
+      {
+       "who": "gardener-hai",
+       "text": "沿著邊界排真好，抬頭就能看見西子灣的海。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "gardener-hai.v102-admin-garden-return-b"
+      }
+     ],
+     "next": "menu"
     }
    }
   },
@@ -4314,6 +4974,32 @@
       "timeOfDay": "sunset"
      },
      "node": "sea"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "flag": "quest.library-bookmark.return.a"
+       },
+       {
+        "notFlag": "poet-wen.v102-library-bookmark-return-a"
+       }
+      ]
+     },
+     "node": "v102-library-bookmark-return-a"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "flag": "quest.library-bookmark.return.b"
+       },
+       {
+        "notFlag": "poet-wen.v102-library-bookmark-return-b"
+       }
+      ]
+     },
+     "node": "v102-library-bookmark-return-b"
     },
     {
      "node": "root"
@@ -4452,6 +5138,34 @@
        "setFlag": "poet-wen.story-told"
       }
      ]
+    },
+    "v102-library-bookmark-return-a": {
+     "lines": [
+      {
+       "who": "poet-wen",
+       "text": "溫暖的紙條留在那裡，失主看到心裡一定很踏實。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "poet-wen.v102-library-bookmark-return-a"
+      }
+     ],
+     "next": "root"
+    },
+    "v102-library-bookmark-return-b": {
+     "lines": [
+      {
+       "who": "poet-wen",
+       "text": "收進冊子妥善登記，短句也是一段美麗的相遇。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "poet-wen.v102-library-bookmark-return-b"
+      }
+     ],
+     "next": "root"
     }
    }
   },
@@ -4488,6 +5202,32 @@
       "timeOfDay": "sunset"
      },
      "node": "sunset-root"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "flag": "quest.gate-mia.return.a"
+       },
+       {
+        "notFlag": "intl-mia.v102-gate-mia-return-a"
+       }
+      ]
+     },
+     "node": "v102-gate-mia-return-a"
+    },
+    {
+     "if": {
+      "all": [
+       {
+        "flag": "quest.gate-mia.return.b"
+       },
+       {
+        "notFlag": "intl-mia.v102-gate-mia-return-b"
+       }
+      ]
+     },
+     "node": "v102-gate-mia-return-b"
     },
     {
      "if": {
@@ -4653,6 +5393,34 @@
        "setFlag": "intl-mia.seawall"
       }
      ]
+    },
+    "v102-gate-mia-return-a": {
+     "lines": [
+      {
+       "who": "intl-mia",
+       "text": "你推薦的閱讀桌，我每天都來。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "intl-mia.v102-gate-mia-return-a"
+      }
+     ],
+     "next": "root"
+    },
+    "v102-gate-mia-return-b": {
+     "lines": [
+      {
+       "who": "intl-mia",
+       "text": "遮陽傘的位子很安靜，海風吹過來特別舒服。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "intl-mia.v102-gate-mia-return-b"
+      }
+     ],
+     "next": "root"
     }
    }
   }
@@ -4893,7 +5661,7 @@
      {
       "kind": "say",
       "who": "guitar-yun",
-      "text": "慢慢的海風旋律，阿柏說是你選的。",
+      "text": "慢慢的海風旋律，Mia 說是你選的。",
       "if": {
        "quest": "sea-stage",
        "step": "return",
@@ -4912,6 +5680,34 @@
     },
     "achievement": "audience"
    }
+  }
+ ],
+ "scheduleOverrides": [
+  {
+   "npc": "intl-mia",
+   "preset": "day",
+   "if": {
+    "flag": "quest.gate-mia.return.a"
+   },
+   "at": "library",
+   "offset": [
+    9.6,
+    -5.6
+   ],
+   "activity": "Sit"
+  },
+  {
+   "npc": "intl-mia",
+   "preset": "day",
+   "if": {
+    "flag": "quest.gate-mia.return.b"
+   },
+   "at": "library",
+   "offset": [
+    11.5,
+    -7
+   ],
+   "activity": "Sit"
   }
  ]
 }

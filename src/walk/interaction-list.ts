@@ -10,9 +10,9 @@ export function interactionListHtml(rows:readonly InteractionRow[],selectedId:st
   const html=rows.map(row=>{
     const heading=row.targetLabel && previous!==row.targetId?`<div class="q-interaction-group">${esc(row.targetLabel)} · ${counts.get(row.targetId)} 件事</div>`:'';
     previous=row.targetId;
-    const index=numbered.findIndex(r=>r.id===row.id), selected=row.id===selectedId;
-    const key=selected?'E':index>=0?String(index+1):'點選';
-    return `${heading}<button type="button" data-interaction="${esc(row.id)}" aria-pressed="${selected}"${index>=0?` aria-keyshortcuts="${selected?'E ':''}${index+1}"`:''}><kbd>${key}</kbd><span>${esc(row.label)}</span></button>`;
+    const index=numbered.findIndex(r=>r.id===row.id), selected=!row.disabled && row.id===selectedId;
+    const key=row.disabled?'—':selected?'E':index>=0?String(index+1):'點選';
+    return `${heading}<button type="button" data-interaction="${esc(row.id)}"${row.disabled?' disabled aria-disabled="true"':''} aria-pressed="${selected}"${index>=0?` aria-keyshortcuts="${selected?'E ':''}${index+1}"`:''}><kbd>${key}</kbd><span>${esc(row.label)}</span></button>`;
   }).join('');
   return `<div class="q-interaction-rows" role="group" aria-label="附近可做的事">${html}</div><small class="q-interaction-help">點選或 1–4 執行 · E 高亮項 · R 換高亮</small>`;
 }

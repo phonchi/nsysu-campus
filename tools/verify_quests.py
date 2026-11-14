@@ -4,12 +4,20 @@ Read-only: no caches, generated data or navmesh changes. Run from any directory.
 
 The contract (`saveContract` in quests.json) is the revision-1 snapshot of what a save can refer to: quest ids, step ids in
 their original order, rewards (saved as strings), chapter gates and choice ids. A rewrite may move steps and change targets or
-lines, but every revision-1 step id must still exist, a reordered quest must carry `revision >= 2` and `legacyStepOrder` equal
-to the snapshot, and the last step must stay `return` with choices (the runtime's delivery contract).
+lines, but every revision-1 step id must still exist or be mapped by `legacySteps` to one that does, a reordered quest must
+carry `revision >= 2` and `legacyStepOrder` equal to the snapshot, the reward must equal the snapshot or keep it in
+`legacyRewards`, the chapter gate may only move earlier, and the last step must stay `return` with choices (the runtime's
+delivery contract).
 
-Route audit (warnings only, never a failure): straight-line distance between consecutive steps over ROUTE_LEG_WARN metres, or
-a retrace share over ROUTE_RETRACE_WARN. Distances are 2D straight lines from the same placement rules as the speaker check
-(zone anchor + offset, spot `at`); `dest:` rooms have no outdoor coordinate here and end a leg chain.
+v10.2 additions: every quest states `accept.times` and its giver and chain are on campus at each of them; `works` point at
+existing spots with variant kinds from quest-spots.ts and conditions on existing quest flags, one quest per spot;
+`completionRewards` name a `group: 'quest'` item in collection.json with an a/b variant per choice; npcs.json
+`scheduleOverrides` keep the base schedule's zone and use existing quest flags.
+
+Route audit (warnings only, never a failure): for every acceptable time of day, straight-line distance between consecutive
+steps over ROUTE_LEG_WARN metres, or a retrace share over ROUTE_RETRACE_WARN. Distances are 2D straight lines from the same
+placement rules as the speaker check (zone anchor + offset, spot `at`); `dest:` rooms have no outdoor coordinate here and end
+a leg chain.
 """
 import json
 import math
@@ -59,7 +67,39 @@ def building_rooms(code):
 def load():
     def read(name):
         return json.loads((ROOT / 'public/data' / name).read_text())
-    return read('quests.json'), read('encounters.json'), read('npcs.json'), read('story-zones.json'), read('chapters.json'), read('walkthrough/outdoor-graph.json'), read('walkthrough/campus-structure.json')
+    return read('quests.json'), read('encounters.json'), read('npcs.json'), read('story-zones.json'), read('chapters.json'), read('walkthrough/outdoor-graph.json'), read('walkthrough/campus-structure.json'), read('collection.json')
+
+
+def quest_flags(quests):
+    """Every flag the quest data can produce: quest.<id>.<step>.<choice> and quest.<id>.done (QuestEngine.flag)."""
+    out = set()
+    for q in quests['quests']:
+        out.add(f"quest.{q['id']}.done")
+        for step in q['steps']:
+            for choice in step.get('choices', []):
+                out.add(f"quest.{q['id']}.{step['id']}.{choice['id']}")
+    return out
+
+
+def cond_flags(cond):
+    """Flags a dialogue-style condition refers to; other condition kinds carry none."""
+    if not isinstance(cond, dict):
+        return [None]
+    if 'flag' in cond:
+        return [cond['flag']]
+    if 'notFlag' in cond:
+        return [cond['notFlag']]
+    if 'all' in cond or 'any' in cond:
+        return [f for c in cond.get('all', cond.get('any', [])) for f in cond_flags(c)]
+    return []
+
+
+def accept_times(quest):
+    """Times of day a new acceptance is possible; older data without the field counts as the first step's time (or day)."""
+    times = quest.get('accept', {}).get('times')
+    if times:
+        return list(times)
+    return [quest['steps'][0].get('when') or next((s['when'] for s in quest['steps'] if s.get('when')), 'day')]
 
 
 def placements(npcs, zones, chapters, graph, errors=None):
@@ -107,8 +147,9 @@ def placements(npcs, zones, chapters, graph, errors=None):
     return people, anchor, placement
 
 
-def verify(quests, encounters, npcs, zones, chapters, graph, structure):
+def verify(quests, encounters, npcs, zones, chapters, graph, structure, collection=None):
     errors, results = [], set()
+    flags = quest_flags(quests)
     def check(ok, message):
         if not ok:
             errors.append(message)
@@ -126,7 +167,8 @@ def verify(quests, encounters, npcs, zones, chapters, graph, structure):
     live_edges = [(graph['nodes'][a]['p'], graph['nodes'][b]['p']) for (a, b, _), kind in zip(graph['edges'], graph['edgeKind']) if kind != 'tunnel']
     def path_distance(x, z):
         return min(segment_distance(x, z, (a[0], a[2]), (b[0], b[2])) for a, b in live_edges)
-    used_spots = set()
+    used_spots, spot_owner = set(), {}
+    items = {i['id']: i for i in (collection or {'items': []})['items']}
     for sid, s in spots.items():
         check(s.get('kind') in kinds, f'spot {sid}: unknown kind {s.get("kind")}')
         check(bool(s.get('label')), f'spot {sid}: missing label')
@@ -157,6 +199,7 @@ def verify(quests, encounters, npcs, zones, chapters, graph, structure):
     legacy = contract.get('quests', {})
     current_ids = [q['id'] for q in quests['quests']]
     check(len(set(current_ids)) == len(current_ids), 'duplicate quest id')
+    check(len(current_ids) == 13 and set(current_ids) == set(legacy), f'the thirteen quest ids must match the save contract (have {sorted(current_ids)})')
     for qid in legacy:
         check(qid in current_ids, f'{qid}: quest in the save contract no longer exists')
     for q in quests['quests']:
@@ -170,10 +213,14 @@ def verify(quests, encounters, npcs, zones, chapters, graph, structure):
         check(ids and ids[-1] == 'return' and len(q['steps'][-1].get('choices', [])) >= 2, f'{label}: delivery must be last, as `return` with choices')
         if snapshot is None:
             continue
-        check(q['reward'] == snapshot['reward'], f'{label}: reward changed')
+        check(q['reward'] == snapshot['reward'] or snapshot['reward'] in q.get('legacyRewards', []), f'{label}: reward changed')
         gate = q.get('accept', {}).get('chapterDone')
-        check(gate in chapter_ids and gate == snapshot['gate'], f'{label}: incorrect chapter gate {gate}')
-        missing = [sid for sid in snapshot['steps'] if sid not in ids]
+        check(gate in chapter_ids and snapshot['gate'] in chapter_ids and chapter_ids.index(gate) <= chapter_ids.index(snapshot['gate']), f'{label}: incorrect chapter gate {gate}')
+        legacy_steps = q.get('legacySteps', {})
+        for retired, current in legacy_steps.items():
+            check(retired not in ids, f'{label}: legacySteps retires {retired}, which still exists')
+            check(current in ids, f'{label}: legacySteps maps {retired} to missing {current}')
+        missing = [sid for sid in snapshot['steps'] if sid not in ids and legacy_steps.get(sid) not in ids]
         check(not missing, f'{label}: save step IDs/count changed against the revision-1 contract (missing {missing})')
         order = q.get('legacyStepOrder')
         if ids != snapshot['steps']:
@@ -193,6 +240,14 @@ def verify(quests, encounters, npcs, zones, chapters, graph, structure):
         check(q.get('accept', {}).get('near') == 'npc:' + q['npc'], f'{label}: acceptance must be at its NPC')
         check(q['steps'][0]['target'] == q['accept']['near'] or any(l.get('who') == q['npc'] for l in q['accept'].get('lines', [])), f'{label}: the NPC must ask on acceptance')
         count_min = chapter_ids.index(gate) + 1 if gate in chapter_ids else 0
+        times = q.get('accept', {}).get('times')
+        check(isinstance(times, list) and times and all(t in TIMES for t in times) and len(set(times)) == len(times), f'{label}: accept.times must list distinct times of day')
+        for time in accept_times(q):
+            for count in range(count_min, len(chapters_list) + 1):
+                check(placement(q['npc'], time, count) is not None, f'{label}/{time}/chapter-count={count}: acceptable while the giver is off campus')
+                for step in q['steps']:
+                    if step['target'].startswith('npc:') and step.get('when', time) == time:
+                        check(placement(step['target'][4:], time, count) is not None, f'{label}/{step["id"]}/{time}/chapter-count={count}: acceptable while {step["target"]} is off campus')
         inherited = None
         for step in q['steps']:
             sl = f"{label}/{step['id']}"
@@ -201,6 +256,9 @@ def verify(quests, encounters, npcs, zones, chapters, graph, structure):
             check(kind != 'zone', f'{sl}: a quest step needs something to see (spot:, dest: or npc:), not a bare zone')
             if kind == 'spot':
                 used_spots.add(name)
+                if name in spots:
+                    owner = spot_owner.setdefault(name, label)
+                    check(owner == label, f'{sl}: spot {name} already belongs to {owner} (one object per spot)')
                 limit = PHOTO_RADIUS if step.get('kind') == 'photo' else SPOT_RADIUS
                 check(step.get('radius', 4) <= limit, f'{sl}: radius over {limit} m')
                 check(name not in spots or spots[name]['kind'] == 'viewpoint' or step.get('kind') != 'photo', f'{sl}: a photo step marks a viewpoint')
@@ -239,9 +297,51 @@ def verify(quests, encounters, npcs, zones, chapters, graph, structure):
         for time in TIMES:
             if placement(q['npc'], time, len(chapters_list)) is None:
                 check(bool(q.get('absent', {}).get(time)), f'{label}/{time}: acceptance NPC absence needs directions')
+        # ---- works: what a finished quest leaves in the world ------------------------------------------------------------
+        work_ids = set()
+        for work in q.get('works', []):
+            wl = f"{label}/work:{work.get('id')}"
+            check(work.get('id') and work['id'] not in work_ids, f'{wl}: missing or duplicate work id')
+            work_ids.add(work.get('id'))
+            check(work.get('spot') in spots, f'{wl}: unknown spot {work.get("spot")}')
+            if work.get('spot') in spots:
+                used_spots.add(work['spot'])
+                owner = spot_owner.setdefault(work['spot'], label)
+                check(owner == label, f'{wl}: spot {work["spot"]} already belongs to {owner} (one object per spot)')
+            for cond in [work.get('if')] + [v.get('if') for v in work.get('variants', [])]:
+                for flag in cond_flags(cond):
+                    check(flag in flags, f'{wl}: condition uses unknown quest flag {flag}')
+            for v in work.get('variants', []):
+                check(v.get('kind') in kinds, f'{wl}: unknown variant kind {v.get("kind")}')
+        # ---- completion rewards: one collectible per quest ---------------------------------------------------------------
+        rewards = q.get('completionRewards', [])
+        check(len(rewards) == 1 and rewards[0].get('kind') == 'item' and rewards[0].get('itemId') == f'item-quest-{label}', f'{label}: completionRewards must be the one item item-quest-{label}')
+        for r in rewards:
+            item = items.get(r.get('itemId'))
+            check(item is not None and item.get('group') == 'quest', f'{label}: collectible {r.get("itemId")} missing from collection.json or not group quest')
+            by = r.get('variantBy')
+            if by is not None:
+                step = next((s for s in q['steps'] if s['id'] == by), None)
+                check(step is not None and bool(step.get('choices')), f'{label}: variantBy {by} is not a choice step')
+                if item is not None and step is not None:
+                    have = set((item.get('variants') or {}).keys())
+                    for c in step.get('choices', []):
+                        check(c['id'] in have and all(item['variants'][c['id']].get(k) for k in ('name', 'desc')), f'{label}: collectible {r.get("itemId")} needs variant {c["id"]} with name and desc')
     check(len(results) == RESULTS, f'expected {RESULTS} distinct choice results')
     for sid in spots:
-        check(sid in used_spots, f'spot {sid}: no step uses it')
+        check(sid in used_spots, f'spot {sid}: no step or work uses it')
+    for item_id, item in items.items():
+        if item.get('group') == 'quest':
+            check(any(r.get('itemId') == item_id for q in quests['quests'] for r in q.get('completionRewards', [])), f'collectible {item_id}: no quest grants it')
+    # ---- schedule overrides (npcs.json, applied by npc.ts): same zone as the base schedule, known quest flags --------------
+    for i, o in enumerate(npcs.get('scheduleOverrides', []) or []):
+        ol = f'scheduleOverrides[{i}]'
+        check(o.get('npc') in people, f'{ol}: unknown npc {o.get("npc")}')
+        check(o.get('preset') in TIMES, f'{ol}: invalid preset {o.get("preset")}')
+        base = people.get(o.get('npc'), {}).get('schedule', {}).get(o.get('preset')) if o.get('npc') in people and o.get('preset') in TIMES else None
+        check(base is not None and o.get('at') == base.get('at'), f'{ol}: override must keep the base schedule zone {base.get("at") if base else None}')
+        for flag in cond_flags(o.get('if')):
+            check(flag in flags, f'{ol}: condition uses unknown quest flag {flag}')
     for e in encounters['encounters']:
         reference(e['target'], e['id'])
         check(e['npc'] == 'player' or e['npc'] in people, f'{e["id"]}: unknown attribution')
@@ -255,8 +355,9 @@ def verify(quests, encounters, npcs, zones, chapters, graph, structure):
     return errors
 
 
-def quest_route(quest, spots, placement, chapter_count):
-    """Straight-line legs of a quest, from its giver through every step, at each step's own time of day.
+def quest_route(quest, spots, placement, chapter_count, time=None):
+    """Straight-line legs of a quest, from its giver through every step, accepted at `time` (default: the first timed step's
+    time, or day) and continued at each step's own `when` where it has one.
     Returns (legs, total, net): legs are (from, to, metres) or (from, to, None) when a `dest:` room has no coordinate."""
     def point(target, time):
         kind, _, name = target.partition(':')
@@ -265,7 +366,7 @@ def quest_route(quest, spots, placement, chapter_count):
         if kind == 'spot':
             return spots.get(name, {}).get('at')
         return None
-    inherited = quest['steps'][0].get('when') or next((s['when'] for s in quest['steps'] if s.get('when')), 'day')
+    inherited = time or quest['steps'][0].get('when') or next((s['when'] for s in quest['steps'] if s.get('when')), 'day')
     stops = [(quest['accept']['near'], point(quest['accept']['near'], inherited))]
     for step in quest['steps']:
         inherited = step.get('when', inherited)
@@ -282,19 +383,20 @@ def quest_route(quest, spots, placement, chapter_count):
 
 
 def route_warnings(quests, npcs, zones, chapters, graph):
-    """Long legs and retracing, as text with the numbers (spec-v10 §3). Never fails a build."""
+    """Long legs and retracing at every acceptable time of day, as text with the numbers (spec-v10 §3, v10.2 §1). Never fails a build."""
     _, _, placement = placements(npcs, zones, chapters, graph)
     spots = quests.get('spots', {})
     out = []
     for q in quests['quests']:
-        legs, total, net = quest_route(q, spots, placement, len(chapters['chapters']))
-        for a, b, d in legs:
-            if d is not None and d > ROUTE_LEG_WARN:
-                out.append(f'{q["id"]}: {a} → {b} is {d:.0f} m in a straight line (over {ROUTE_LEG_WARN} m)')
-        if net is not None and total >= ROUTE_MIN_TOTAL:
-            retrace = 1 - net / total if total else 0
-            if retrace > ROUTE_RETRACE_WARN:
-                out.append(f'{q["id"]}: retrace {retrace:.0%} of {total:.0f} m (net displacement {net:.0f} m, over {ROUTE_RETRACE_WARN:.0%})')
+        for time in accept_times(q):
+            legs, total, net = quest_route(q, spots, placement, len(chapters['chapters']), time)
+            for a, b, d in legs:
+                if d is not None and d > ROUTE_LEG_WARN:
+                    out.append(f'{q["id"]}/{time}: {a} → {b} is {d:.0f} m in a straight line (over {ROUTE_LEG_WARN} m)')
+            if net is not None and total >= ROUTE_MIN_TOTAL:
+                retrace = 1 - net / total if total else 0
+                if retrace > ROUTE_RETRACE_WARN:
+                    out.append(f'{q["id"]}/{time}: retrace {retrace:.0%} of {total:.0f} m (net displacement {net:.0f} m, over {ROUTE_RETRACE_WARN:.0%})')
     return out
 
 
@@ -303,8 +405,8 @@ if __name__ == '__main__':
     errors = verify(*data)
     for error in errors:
         print(error, file=sys.stderr)
-    quests, _, npcs, zones, chapters, graph, _ = data
+    quests, _, npcs, zones, chapters, graph, _, _ = data
     for warning in route_warnings(quests, npcs, zones, chapters, graph):
         print(f'warning: {warning}', file=sys.stderr)
-    print(f'quests: {"FAIL" if errors else "OK"}（{len(quests["quests"])} 個任務、{RESULTS} 個結果、實體目標、排程、錨點與舊存檔契約）')
+    print(f'quests: {"FAIL" if errors else "OK"}（{len(quests["quests"])} 個任務、{RESULTS} 個結果、實體目標、排程、錨點、成果、收藏品與舊存檔契約）')
     sys.exit(bool(errors))

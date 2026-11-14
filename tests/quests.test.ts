@@ -67,7 +67,7 @@ describe('review regressions',()=>{
   const storage=memory();storage.setItem(QUEST_KEY,JSON.stringify({version:1,quests:{},journal:[],rewards:[]}));const e=new QuestEngine(data,{storage});e.importLegacy(['new'],[]);expect(e.progress.journal).toHaveLength(0);
  });
  it('only accepts a photo at the shutter instant in the right location and time',()=>{
-  const q=data.quests.find(q=>q.steps[0].kind==='photo')!;const local:QuestData={version:1,quests:[{...q,steps:[{...q.steps[0],when:'sunset'},q.steps[1]]}]};const storage=memory();let e=new QuestEngine(local,{storage});accept(e, q.id);
+  const q=data.quests.find(q=>q.steps[0].kind==='photo')!;const local:QuestData={version:1,quests:[{...q,accept:{...q.accept,times:['sunset']},steps:[{...q.steps[0],when:'sunset'},q.steps[1]]}]};const storage=memory();let e=new QuestEngine(local,{storage});accept(e, q.id);
   const correct={...world(q.steps[0].target,7),timeOfDay:()=> 'sunset'};
   e.update(correct);expect(e.progress.quests[q.id].step).toBe(0);
   expect(e.notifyPhoto(world('wrong',8))).toBe(0);expect(e.notifyPhoto(world(q.steps[0].target,9))).toBe(0);
@@ -138,11 +138,12 @@ describe('stable step ids (v10)', () => {
  it('a quest cannot be accepted while someone in its step chain is off campus, and says when it can be', () => {
   const q = data.quests.find(q => q.id === 'sea-stage')!, e = new QuestEngine(data, { storage: memory() });
   const sunset = { ...world(q.accept.near), timeOfDay: () => 'sunset' };
-  expect(e.acceptable({ ...sunset, npcPresent: id => id !== 'jogger-po' }).map(v => v.definition.id)).toEqual([]);
-  expect(e.accept(q.id, { ...sunset, npcPresent: id => id !== 'jogger-po' })).toBe(false);
-  expect(e.missingNpcs(q, { ...sunset, npcPresent: id => id !== 'jogger-po' })).toEqual(['jogger-po']);
-  expect(e.acceptableTimes(q, sunset)).toBeUndefined();
-  expect(e.acceptableTimes(q, { ...sunset, npcPresentAt: (id, time) => !(id === 'jogger-po' && time === 'night') })).toEqual(['sunset']);
+  expect(e.acceptable({ ...sunset, npcPresent: id => id !== 'intl-mia' }).map(v => v.definition.id)).toEqual([]);
+  expect(e.accept(q.id, { ...sunset, npcPresent: id => id !== 'intl-mia' })).toBe(false);
+  expect(e.missingNpcs(q, { ...sunset, npcPresent: id => id !== 'intl-mia' })).toEqual(['intl-mia']);
+  expect(e.availability(q, { ...sunset, npcPresent: id => id !== 'intl-mia' })).toMatchObject({ state: 'npc-away', missing: ['intl-mia'], times: ['sunset'] });
+  // v10.2: the authored accept.times answer "when", with or without a schedule to ask.
+  expect(e.acceptableTimes(q, sunset)).toEqual(['sunset']);
   expect(e.acceptableTimes(data.quests.find(q => q.id === 'gate-lost')!, { ...sunset, npcPresentAt: (id, time) => !(id === 'guard-chung' && time === 'night') })).toEqual(['day', 'sunset']);
   expect(e.accept(q.id, { ...sunset, npcPresent: () => true })).toBe(true);
  });

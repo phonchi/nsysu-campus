@@ -5,7 +5,7 @@ import data from '../public/data/quests.json';
 import npcs from '../public/data/npcs.json';
 import type { NpcData } from '../src/story/talk';
 const world={distanceTo:()=>0,timeOfDay:()=> 'day',chapterDone:()=>true};
-for(const [id,from,to,target] of [['admin-list','errand-3','return','npc:s3'],['sea-stage','errand-2','return','npc:jogger-po']])it(`${id}: continues ${from} → ${to} without a second interaction`,()=>{
+for(const [id,from,to,target] of [['admin-list','errand-3','return','npc:s3'],['sea-stage','errand-2','return','npc:intl-mia']])it(`${id}: continues ${from} → ${to} without a second interaction`,()=>{
  const quest=(data as QuestData).quests.find(q=>q.id===id)!;
  const storage={getItem:()=>null,setItem:()=>{},removeItem:()=>{}};
  const engine=new QuestEngine({version:1,quests:[quest]},{storage});

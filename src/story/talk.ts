@@ -1,9 +1,10 @@
 import * as T from 'three';
-import { runTalk, entryNode, type Effect, type Facts, type MinigameId, type Tree } from './dialogue';
+import { runTalk, entryNode, type Effect, type Facts, type MinigameId, type Tree, type Cond } from './dialogue';
 import type { Campus } from './collection';
 import type { StoryEngine } from './engine';
 import type { StoryUi, CastEntry } from './ui';
 import type { CampusEventDefinition } from './campus-events';
+import { questGrants, type QuestConsequences } from '../walk/interaction-quests';
 import type { PortraitSpec } from './portraits';
 
 type Sched = { at: string | [number, number]; offset?: [number, number]; activity?: string } | null;
@@ -11,10 +12,11 @@ export interface NpcDef {
   id: string; name: string; role: string; model: string; look?: Record<string, string>; portrait: PortraitSpec;
   schedule: Record<'day' | 'sunset' | 'night', Sched>; talk?: string; minigame?: MinigameId; observe?: boolean;
 }
-export interface NpcData { version: number; npcs: NpcDef[]; trees: Record<string, Tree>; events?: CampusEventDefinition[] }
+export interface ScheduleOverride { npc: string; preset: 'day' | 'sunset' | 'night'; if: Cond; at: string | [number, number]; offset?: [number, number]; activity?: string }
+export interface NpcData { version: number; npcs: NpcDef[]; trees: Record<string, Tree>; events?: CampusEventDefinition[]; scheduleOverrides?: ScheduleOverride[] }
 export interface CollectionData {
   version: number;
-  items: { id: string; name: string; desc: string }[];
+  items: { id: string; name: string; desc: string; group?: string; variants?: Record<string, { name: string; desc: string }> }[];
   stamps: { id: string; name: string; at: string | [number, number]; r: number; hidden?: boolean; desc: string }[];
   achievements: { id: string; name: string; desc: string; rule: Record<string, unknown> }[];
 }
@@ -41,7 +43,7 @@ export class TalkDirector {
   private byId = new Map<string, NpcDef>();
 
   constructor(private data: NpcData, private collection: CollectionData, private ui: StoryUi, private campus: Campus,
-              private engine: StoryEngine, private world: TalkWorld) {
+              private engine: StoryEngine, private world: TalkWorld, private quests: () => QuestConsequences | undefined = () => undefined) {
     for (const n of data.npcs) this.byId.set(n.id, n);
     ui.cast = who => { const n = this.byId.get(who); return n ? { name: n.name, portrait: n.portrait } as CastEntry : undefined; };
   }
@@ -50,8 +52,8 @@ export class TalkDirector {
   npc(id: string) { return this.byId.get(id); }
 
   readonly facts: Facts = {
-    flag: f => this.engine.progress.flags.includes(f) || this.campus.progress.flags.includes(f),
-    hasItem: i => this.campus.progress.items.includes(i),
+    flag: f => this.engine.progress.flags.includes(f) || this.campus.progress.flags.includes(f) || this.quests()?.flag?.(f) === true,
+    hasItem: i => this.campus.progress.items.includes(i) || questGrants(this.quests()).some(g => g.itemId === i),
     stamps: () => this.campus.progress.stamps.filter(s => !this.collection.stamps.find(x => x.id === s)?.hidden).length,
     chapterDone: c => this.engine.progress.done.includes(c),
     timeOfDay: () => this.world.timeOfDay(),

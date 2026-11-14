@@ -61,6 +61,8 @@ import { trackedTarget } from '../story/guide-goal';
 import { nextFocus, storyPriority, destinationDistance, findDestination, floorLabel, walkResumes } from '../story/focus';
 import type { StoryData } from '../story/schema';
 import bundledQuests from '../../public/data/quests.json';
+import type { Facts } from '../story/dialogue';
+import { nearbyQuestOffers, questGrants, questAvailability, questOfferLabel, questWaitReason, nextQuestRecommendation, syncQuestWorks, type QuestPresentationEngine } from './interaction-quests';
 import { QuestEngine, QUEST_KEY, type QuestData, type QuestDefinition, type QuestStep, type QuestWorld } from '../story/quests';
 import { EncounterEngine, type EncounterData } from '../story/encounters';
 import { EncounterScene } from '../world/encounter-scene';
@@ -210,7 +212,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   let spotField: QuestSpotField | undefined;
   let rhythm:RhythmPerformance|undefined,rhythmOwner:string|undefined,movementRequested=false,playerMoved=false;
   let campusEvents: CampusEventEngine | undefined, eventStorage: EventCompletionStorage | undefined, eventCommitted: ReturnType<CampusEventEngine['snapshot']> | undefined, miniGameActive=false;
-  let quests: QuestEngine | undefined, notebook: JournalView | undefined, npcDefinitions: NpcData | undefined, storageNotice = '';
+  let quests: (QuestEngine & QuestPresentationEngine) | undefined, notebook: JournalView | undefined, npcDefinitions: NpcData | undefined, storageNotice = '';
   let refreshNotebook = () => {};
   const pocket = document.createElement('button'); pocket.className = 'quest-pocket'; pocket.hidden = true; host.append(pocket);
   pocket.addEventListener('click', () => openNotebook());
@@ -535,7 +537,10 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     if(chase.active && monkey && Math.hypot(p.x-monkey.position.x,p.z-monkey.position.z)<2.2) add('chase','拿回便當',95,monkey.position,()=>{chase.press(p);},'npc:m3-thief','retrieve');
     const encounter=encounters?.active;
     if(encounter && p.distanceTo(encounterTarget())<=encounterReach(encounter.phase)) add('encounter',encounter.phase==='offered'?'參與偶遇':'完成偶遇互動',90,encounterTarget(),()=>{pressEncounter();},`encounter:${encounter.instance}`,encounter.phase);
-    for (const v of quests?.acceptable(questWorld()) ?? []) add(`accept:${v.definition.id}`, `接取・${v.definition.title}`, v.definition.accept.chapterDone && v.definition.accept.chapterDone === director?.engine.progress.done.at(-1) ? interactionPriority.newlyUnlocked : interactionPriority.acceptable, questPoint(v.definition.accept.near), () => { void acceptSideQuest(v.definition.id); },v.definition.accept.near,'accept');
+    for (const { definition: q, availability, disabled } of quests ? nearbyQuestOffers(quests, questWorld()) : []) {
+      add(`accept:${q.id}`, questOfferLabel(q.title, availability), q.accept.chapterDone && q.accept.chapterDone === director?.engine.progress.done.at(-1) ? interactionPriority.newlyUnlocked : interactionPriority.acceptable, questPoint(q.accept.near), () => { void acceptSideQuest(q.id); }, q.accept.near, 'accept');
+      const row = out.find(c => c.id === `accept:${q.id}`); if (row) row.disabled = disabled;
+    }
     for(const v of quests?.list()??[]) {
       const step=v.step; if(!step || step.kind==='photo' || (step.when && step.when!==sky.preset))continue;
       const point=questPoint(step.target);if(!point || questDistance(step.target)>(step.radius??4))continue;
@@ -1143,14 +1148,16 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     if (!lines.length) { say('目前沒有進行中的支線，可以在手帳挑一件。', 3500); openNotebook(); return; }
     focusLine(nextFocus(lines, quests.progress.tracked) ?? lines[0]);
   }
-  /** Objects appear only with their step, and only once the collision world can say what floor they stand on. */
-  function syncSpots() { if (routesValidated && quests) spotField?.sync(activeSpotIds(quests.list())); }
+  /** Active-step objects and completed works share one field, once collision can resolve their floor. */
+  function syncSpots() { if (routesValidated && quests && spotField) syncQuestWorks(spotField, activeSpotIds(quests.list()), quests, questWorld()); }
   let activityGuideTarget:string|undefined;
   function syncFocus() {
     const activityGuide=campusActivityGuide(campusEvents?.activity,questPoint);
     if(activityGuide?.target!==activityGuideTarget && autoFollow && (activityGuide || autoTarget===activityGuideTarget)){clearAuto();autoFollow=false;}
     activityGuideTarget=activityGuide?.target;
     guideOverride = activityGuide ?? trackedGuide(); director?.setGuideOverride(guideOverride, sideSummary());
+    const tracked = trackedQuest();
+    director?.ui.waitReason(!activityGuide && tracked && quests ? questWaitReason(quests, tracked.definition, questWorld()) : '');
     director?.ui.eventGuidance(activityGuide?toggleFollow:undefined,autoFollow&&autoTarget===activityGuide?.target,!!activityGuide&&questDistance(activityGuide.target)<=activityGuide.max);
     const target = guideOverride?.target ?? director?.goalTarget;
     npcs?.setFocus(target?.startsWith('npc:') ? target.slice(4) : undefined);
@@ -1166,8 +1173,13 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     if (t.startsWith('dest:')) { const d = findDestination(world.destinations, t.slice(5)); return d ? destinationDistance(d.position, physics.position) : Infinity; }
     const p = questPoint(t); return p ? physics.position.distanceTo(p) : Infinity;
   };
-  function questWorld(): QuestWorld & { npcPresent(npcId: string): boolean } {
-    return { npcPresent: id => !!npcs && !npcs.isAbsent(id), npcPresentAt:(id,time)=>npcPresentAt(npcDefinitions?.npcs??[],id,time), distanceTo: questDistance, timeOfDay: () => sky.preset, photoCount: campus.progress.counters['photo.saved'] ?? 0, chapterDone: id => director?.engine.progress.done.includes(id) ?? false };
+  function questWorld(): QuestWorld & Facts & { npcPresent(npcId: string): boolean; questChoice(quest: string, step: string): string | undefined } {
+    return { questChoice,
+      flag: id => talk?.facts.flag(id) ?? (quests?.flag?.(id) === true || campus.progress.flags.includes(id) || director?.engine.progress.flags.includes(id) === true),
+      hasItem: id => talk?.facts.hasItem(id) ?? (campus.progress.items.includes(id) || questGrants(quests).some(g => g.itemId === id)),
+      stamps: () => talk?.facts.stamps() ?? campus.progress.stamps.length,
+      count: id => campus.progress.counters[id] ?? 0,
+      npcPresent: id => !!npcs && !npcs.isAbsent(id), npcPresentAt:(id,time)=>npcPresentAt(npcDefinitions?.npcs??[],id,time), distanceTo: questDistance, timeOfDay: () => sky.preset, photoCount: campus.progress.counters['photo.saved'] ?? 0, chapterDone: id => director?.engine.progress.done.includes(id) ?? false };
   }
   function notebookModel(): JournalModel {
     const names = new Map((npcDefinitions?.npcs ?? []).map(n => [n.id, n.name]));
@@ -1175,13 +1187,14 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       notice: storageNotice,
       clues: director ? campusClues(director.engine.progress.sideQuests, campusUi?.collectedStoryIds ?? [], director.engine.data) : [],
       tasks: (quests?.list() ?? []).map(v => {
-        const unlocked = quests?.unlocked(v.definition, questWorld());
+        const availability = questAvailability(quests!, v.definition, questWorld());
+        const unlocked = availability.state !== 'locked';
         const chapter = director?.engine.data.chapters.find(c => c.id === v.definition.accept.chapterDone)?.title;
         const target = v.step?.target ?? v.definition.accept.near;
         const missing = target.startsWith('npc:') && !questPoint(target);
-        const qw=questWorld(), times=quests?.acceptableTimes(v.definition,qw);
-        const unavailable=!v.state && unlocked && (!!quests?.missingNpcs(v.definition,qw).length || missing || (!!times && !times.includes(sky.preset)));
-        const timeHint = unavailable ? (times?.length ? `${times.map(t=>PRESET_LABEL[t as Preset]).join('、')}時段可接。` : '目前沒有全員在場的可接時段。') : v.definition.absent?.[sky.preset] ?? (missing ? '人物目前不在校園，請切換時段再來。' : '');
+        const qw = questWorld();
+        const unavailable = availability.state === 'wrong-time' || availability.state === 'npc-away';
+        const timeHint = questWaitReason(quests!, v.definition, qw);
         const name = names.get(target.slice(4)) ?? names.get(v.definition.npc) ?? v.definition.npc;
         return { id: v.definition.id, title: v.definition.title,
           subtitle: `${v.state?.status === 'completed' ? '已完成' : v.state ? '進行中' : unlocked ? unavailable ? '等待可接時段' : '可接任務' : '尚未解鎖'}・${zoneLabels[v.definition.zone] ?? '校園'}`,
@@ -1206,7 +1219,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     if (action === 'time') {
       const target = v.step?.target ?? v.definition.accept.near;
       const npc = npcDefinitions?.npcs.find(n => `npc:${n.id}` === target);
-      const preset = v.step?.when ?? (!v.state ? quests.acceptableTimes(v.definition,questWorld())?.[0] : undefined) ?? (['day','sunset','night'] as const).find(p => npc?.schedule[p]);
+      const preset = v.step?.when ?? (!v.state ? questAvailability(quests,v.definition,questWorld()).times[0] : undefined) ?? (['day','sunset','night'] as const).find(p => npc?.schedule[p]);
       if (preset && ['day','sunset','night'].includes(preset)) { sky.set(preset as Preset); get('[data-action=sky]').textContent = `${PRESET_LABEL[preset as Preset]} N`; scheduleNpcs(true); }
     }
     if (action === 'go' && v.state?.status !== 'completed') {
@@ -1220,7 +1233,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   const pocketDistance = (point: T.Vector3 | undefined) => point ? `${Math.round(physics.position.distanceTo(point))} m` : '不在校園';
   refreshNotebook = () => {
     notebook?.update(notebookModel());
-    syncFocus(); syncSpots();
+    syncFocus(); scheduleNpcs(true);
     const v = trackedQuest();
     pocket.hidden = !v?.step;
     if (v?.step) pocket.innerHTML = `<strong>${safe(v.definition.title)} <em data-pocket-distance>${pocketDistance(guideOverride?.point)}</em></strong><small>${safe(v.step.text)} · J 手帳</small>`;
@@ -1229,8 +1242,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   function questStepDone(q: QuestDefinition, next: QuestStep | undefined) {
     if (next) { director?.ui.toast('item', `${q.title}：完成一步`, `接下來：${next.text}`); sound.cue('chime'); return; }
     autoFollow = false;
-    director?.ui.toast('achievement', `完成支線「${q.title}」`, q.reward); sound.cue('fanfare');
-    say('支線完成，回到主線。', 3500);
+    director?.ui.toast('recommendation', `完成支線「${q.title}」`, `${q.reward}。${quests ? nextQuestRecommendation(q, quests, questWorld(), z => zoneLabels[z] ?? z) : ''}`); sound.cue('fanfare');
+    // The queued toast waits for the result dialogue; it never changes time or accepts a quest.
   }
   async function acceptSideQuest(id: string) {
     const ui = director?.ui;
@@ -1281,7 +1294,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     const p = director.engine.progress, key = `${sky.preset}|${p.done.length}|${JSON.stringify(p.npcAt)}`;
     if (!force && key === scheduledKey) return;
     scheduledKey = key;
-    npcs.schedule(sky.preset as Preset, director.engine.finished, p.npcAt, physics.position);
+    npcs.schedule(sky.preset as Preset, director.engine.finished, p.npcAt, physics.position, questWorld());
+    syncSpots();
     album?.evaluate(); // chapters count toward achievements
   }
   function startStoryWhenReady() {
@@ -1436,7 +1450,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
               campus.game(game, won ? 1 : 0, won); album?.evaluate();return won;
             } finally { miniGameActive=false; }
           },
-        });
+        }, () => quests);
       }
       if (collection) {
         const ui = director.ui, eng = director.engine, n = npcs;
@@ -1444,7 +1458,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
           place: at => n.anchorPoint(at), chaptersDone: () => eng.progress.done.length,
           toast: (k, t, sub) => ui.toast(k, t, sub), cue: id => sound.cue(id),
           storiesFound: () => campusUi?.storyProgress ?? { found: 0, total: 8 },
-        });
+        }, () => quests);
         album.evaluate();
         renderAlbum = () => { get('[data-pane=album]').innerHTML = album!.html(); };
       }
@@ -1666,10 +1680,11 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       if (time > tipsFrom && (guideOverride?.point ?? director.goal())) wanted.push('goal');
       if (time > tipsFrom && sideLines().length) wanted.push('line');
       tips.update(time, overview || !walking || !get('.walk-welcome').hidden || guide.open || !!director.blocking || menuOpen() || !!notebook?.open || photo.active || !!quiz?.open, wanted);
-      if(chosen && !director.blocking) {
-        const projected=chosen.point.clone();projected.y+=2;projected.project(camera);
-        director.ui.hint({x:projected.z<1?(projected.x+1)/2*innerWidth:innerWidth/2,y:projected.z<1?(1-projected.y)/2*innerHeight:innerHeight*.55,text:`E ${chosen.label}`,
-          choices:candidates.length>1?candidates:undefined,selectedId:chosen.id,onSelect:id=>{const row=candidates.find(c=>c.id===id);if(row)executeInteraction(row);}});
+      const anchor = chosen ?? candidates[0];
+      if(anchor && !director.blocking) {
+        const projected=anchor.point.clone();projected.y+=2;projected.project(camera);
+        director.ui.hint({x:projected.z<1?(projected.x+1)/2*innerWidth:innerWidth/2,y:projected.z<1?(1-projected.y)/2*innerHeight:innerHeight*.55,text:chosen ? `E ${chosen.label}` : anchor.label,
+          choices:candidates.length>1 || candidates.some(c=>c.disabled)?candidates:undefined,selectedId:chosen?.id ?? '',onSelect:id=>{const row=candidates.find(c=>c.id===id);if(row)executeInteraction(row);}});
       } else director.ui.hint(null);
       setText(get('[data-action=door]'),chosen?`${chosen.label} E`:'互動 E');
 

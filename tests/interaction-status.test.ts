@@ -10,6 +10,8 @@ it('gold is an unlocked offer; blue follows the current active step, respects ti
  done=true;expect(npcQuestStatuses(quests,world).get('a')).toBe('acceptable');
  expect(quests.accept('q',{...world,distanceTo:()=>0})).toBe(true);
  expect([...npcQuestStatuses(quests,world)]).toEqual([['b','deliverable']]);
+ // An accepted save stays usable even if its chapter history is incomplete.
+ done=false;expect(npcQuestStatuses(quests,world).get('b')).toBe('deliverable');done=true;
  absent.add('b');expect([...npcQuestStatuses(quests,world)]).toEqual([]);
  absent.clear();time='night';expect([...npcQuestStatuses(quests,world)]).toEqual([]);
  time='day';quests.interact('q',{...world,distanceTo:()=>0});

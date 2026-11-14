@@ -1,7 +1,7 @@
 /** Static check of the v4 NPC, collection and quiz data (spec-v4 §8.2, §15.2–§15.5).
  * Run: npx tsx tools/verify_dialogue.ts   (exit 1 on any problem) */
 import fs from 'node:fs';
-import { validateTrees, MINIGAMES, type Tree, type Cond } from '../src/story/dialogue';
+import { validateTrees, questFlagCatalog, MINIGAMES, type Tree, type Cond } from '../src/story/dialogue';
 
 const read = <T>(p: string) => JSON.parse(fs.readFileSync(p, 'utf8')) as T;
 type Sched = { at: string | [number, number]; offset?: [number, number]; activity?: string } | null;
@@ -18,6 +18,7 @@ const chapters = read<{ chapters: { id: string; steps: { then: Record<string, un
 const zones = read<{ zones: Record<string, unknown>; npcs: Record<string, unknown> }>('public/data/story-zones.json');
 const anchors = Object.keys(read<{ anchors?: Record<string, unknown> }>('public/data/walkthrough/outdoor-graph.json').anchors ?? {});
 
+const questFlags = questFlagCatalog(read<Parameters<typeof questFlagCatalog>[0]>('public/data/quests.json'));
 const storyFlags = chapters.chapters.flatMap(c => c.steps.flatMap(s => s.then.filter(a => 'setFlag' in a).map(a => a.setFlag as string)));
 const STORY_NPCS = ['guide', 's1', 's2', 's3', 'm1'];
 const MODELS = fs.readdirSync('public/models/characters').filter(f => f.endsWith('.glb')).map(f => f.slice(0, -4));
@@ -53,7 +54,7 @@ const owner: Record<string, string> = {};
 for (const n of npcs.npcs) if (n.talk) owner[n.talk] = n.id;
 errors.push(...validateTrees(npcs.trees, owner, {
   npcs: [...ids], items: col.items.map(i => i.id), stamps: col.stamps.map(s => s.id), achievements: col.achievements.map(a => a.id),
-  sideQuests: chapters.sideQuests.map(q => q.id), chapters: chapters.chapters.map(c => c.id), storyFlags,
+  sideQuests: chapters.sideQuests.map(q => q.id), chapters: chapters.chapters.map(c => c.id), storyFlags, questFlags,
   sounds: ['chime', 'page', 'fanfare', 'echo', 'stamp', 'shutter', 'monkey', 'pop'],
 }));
 const usedTrees = new Set(npcs.npcs.map(n => n.talk).filter(Boolean));

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import * as T from 'three';
-import { QuestSpotField, SPOT_RECIPES, activeSpotIds, spotGeometry, type QuestSpot, type SpotKind } from '../src/world/quest-spots';
+import { QuestSpotField, SPOT_RECIPES, activeSpotIds, baseKind, spotGeometry, type QuestSpot, type SpotKind } from '../src/world/quest-spots';
 import { npcsWithinCap } from '../src/world/npc';
 import authored from '../public/data/quests.json';
 
@@ -54,6 +54,38 @@ describe('quest spots', () => {
   });
   it('finds the spots the current steps need, once each, and ignores people and places', () => {
     expect(activeSpotIds([{ step: { target: 'spot:a' } }, { step: { target: 'spot:a' } }, { step: { target: 'npc:x' } }, {}, { step: { target: 'spot:b' } }])).toEqual(['a', 'b']);
+  });
+});
+
+describe('quest works (v10.2)', () => {
+  it('every variant kind extends its base and names a base that exists', () => {
+    for (const kind of Object.keys(SPOT_RECIPES) as SpotKind[]) {
+      const base = baseKind(kind);
+      expect(SPOT_RECIPES[base], kind).toBeDefined();
+      if (kind !== base) expect(SPOT_RECIPES[kind].parts.length + (SPOT_RECIPES[kind].props?.length ?? 0)).toBeGreaterThan(SPOT_RECIPES[base].parts.length + (SPOT_RECIPES[base].props?.length ?? 0) - 2);
+    }
+    expect(baseKind('planters-edge')).toBe('planters'); expect(baseKind('viewpoint')).toBe('viewpoint');
+  });
+  it('a finished work stays in its variant, is rebuilt when the variant changes, and its colliders follow the built kind', async () => {
+    const f = field();
+    f.sync([], [{ spot: 'admin-planters', kind: 'planters-row' }]); await settle(); await settle();
+    expect(f.shown).toEqual(['admin-planters']); expect(f.kindOf('admin-planters')).toBe('planters-row');
+    expect(f.bodies()).toHaveLength(3);
+    const first = f.mesh('admin-planters')!;
+    f.sync([], [{ spot: 'admin-planters', kind: 'planters-row' }]); await settle();
+    expect(f.mesh('admin-planters')).toBe(first);
+    f.sync([], [{ spot: 'admin-planters', kind: 'planters-edge' }]); await settle(); await settle();
+    expect(f.kindOf('admin-planters')).toBe('planters-edge'); expect(f.mesh('admin-planters')).not.toBe(first); expect(f.bodies()).toHaveLength(2);
+    f.sync([]); expect(f.shown).toEqual([]); expect(f.bodies()).toEqual([]);
+  });
+  it('a variant change while props load shows only the final kind; a step on the same spot beats a work', async () => {
+    const f = field();
+    f.sync([], [{ spot: 'gate-notice', kind: 'notice-claim' }]); f.sync([], [{ spot: 'gate-notice', kind: 'notice' }]);
+    await settle(); await settle(); await settle();
+    expect(f.shown).toEqual(['gate-notice']); expect(f.kindOf('gate-notice')).toBe('notice'); expect(f.group.children).toHaveLength(1);
+    f.sync(['gate-notice'], [{ spot: 'gate-notice', kind: 'notice-claim' }, { spot: 'gate-lost-ledger', kind: 'ledger-entry' }]); await settle(); await settle();
+    expect(f.kindOf('gate-notice')).toBe('notice'); expect(f.kindOf('gate-lost-ledger')).toBe('ledger-entry');
+    expect(f.shown.sort()).toEqual(['gate-lost-ledger', 'gate-notice']);
   });
 });
 

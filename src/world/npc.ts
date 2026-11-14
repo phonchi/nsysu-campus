@@ -6,7 +6,8 @@ import { toonify } from '../render/toon';
 import { addOutlines } from '../render/outline';
 import type { OutdoorRoutes } from '../walk/route';
 import type { Terrain } from './terrain';
-import type { NpcData, NpcDef } from '../story/talk';
+import { holds, type Facts } from '../story/dialogue';
+import type { NpcData, NpcDef, ScheduleOverride } from '../story/talk';
 import { recolor, modelFor, type Look } from '../walk/player-look';
 import type { ActorBody, SupportAt } from '../walk/obstacles';
 
@@ -137,11 +138,13 @@ export function npcsWithinCap<N extends { id: string; talking: boolean }>(sorted
 
 /** Where an NPC should be: the story decides for story NPCs until all chapters are done, otherwise the
  * schedule for the current light preset (null = not on campus now). Pure, so it is unit-tested. */
-export function resolveNpcPlacement(id: string, def: NpcDef | undefined, preset: Preset, tourDone: boolean, zones: StoryZones, storyAt: Record<string, string>): Placement {
+export function resolveNpcPlacement(id: string, def: NpcDef | undefined, preset: Preset, tourDone: boolean, zones: StoryZones, storyAt: Record<string, string>, overrides: readonly ScheduleOverride[] = [], facts?: Facts): Placement {
   if (STORY_NPCS.includes(id) && !tourDone) {
     const z = zones.npcs[id];
     return { at: storyAt[id] ?? z?.at ?? def?.schedule.day?.at ?? 'gate', offset: z?.offset, activity: z?.activity };
   }
+  const override = facts && overrides.find(o => o.npc === id && o.preset === preset && holds(o.if, facts));
+  if (override) return { at: override.at, offset: override.offset, activity: override.activity };
   const s = def?.schedule[preset];
   return s === undefined ? null : s;
 }
@@ -404,13 +407,16 @@ export class NpcManager {
 
   /** Re-resolve every NPC's place (on load, preset change and chapter completion; spec §15.1). Walks along
    * the path network when the player can see it, otherwise moves directly. */
-  schedule(preset: Preset, tourDone: boolean, storyAt: Record<string, string>, player?: T.Vector3) {
+  private lastSchedule?: { preset: Preset; tourDone: boolean; storyAt: Record<string, string>; player?: T.Vector3; facts?: Facts };
+  schedule(preset: Preset, tourDone: boolean, storyAt: Record<string, string>, player?: T.Vector3, facts?: Facts) {
+    this.lastSchedule = { preset, tourDone, storyAt, player, facts };
     this.preset = preset;
     for (const [id, npc] of this.npcs) {
-      if(this.borrowed.has(id) || this.gameReserved.has(id))continue;
+      const storyOwns = STORY_NPCS.includes(id) && !tourDone;
+      if (!storyOwns && (this.borrowed.has(id) || this.gameReserved.has(id) || npc.talking)) continue;
       const def = this.defs.get(id);
       if (!def && !STORY_NPCS.includes(id)) continue;
-      const place = resolveNpcPlacement(id, def, preset, tourDone, this.zones, storyAt);
+      const place = resolveNpcPlacement(id, def, preset, tourDone, this.zones, storyAt, this.data?.scheduleOverrides, facts);
       const key = place ? JSON.stringify(place) : 'absent';
       if (this.placed.get(id) === key) continue;
       this.placed.set(id, key);
@@ -462,7 +468,12 @@ export class NpcManager {
   private focusNpc?: string;
   setFocus(id: string | undefined) { this.focusNpc = id; }
 
-  setTalking(id: string | undefined) { for (const n of this.npcs.values()) n.talking = n.id === id; }
+  setTalking(id: string | undefined) {
+    for (const n of this.npcs.values()) n.talking = n.id === id;
+    // Re-evaluate deferred choices only after the conversation relinquishes its NPC.
+    const s = this.lastSchedule;
+    if (s) this.schedule(s.preset, s.tourDone, s.storyAt, s.player, s.facts);
+  }
 
   update(dt: number, player: T.Vector3, borrowedPaused=false) {
     // Visible cap: nearest people first (talking and story NPCs always count), macaques separately.
