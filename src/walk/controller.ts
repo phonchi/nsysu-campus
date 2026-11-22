@@ -143,6 +143,25 @@ export class RapierController implements CharacterController {
     this.world.step();
   }
 
+  private liftColliders=new Map<string, RAPIER.Collider>();
+  private liftPoses=new Map<string,string>();
+  /** Moving elevator floors and doors; kept outside static navigation geometry. Unchanged poses
+   * are skipped, so idle lifts cost no collider writes and force no query-world step. */
+  setLiftObstacles(specs:readonly Obstacle[]) {
+    const keep=new Set(specs.map(s=>s.id));
+    for(const [id,c] of this.liftColliders)if(!keep.has(id)){this.world.removeCollider(c,false);this.liftColliders.delete(id);this.liftPoses.delete(id);this.queryDirty=true;}
+    for(const o of specs){const key=`${o.shape},${o.center.join(',')},${o.half.join(',')},${o.yaw ?? 0}`;if(this.liftPoses.get(o.id)===key)continue;
+      let c=this.liftColliders.get(o.id);if(!c){c=this.world.createCollider(this.obstacleDesc(o));this.liftColliders.set(o.id,c);}
+      else{c.setTranslation({x:o.center[0],y:o.center[1],z:o.center[2]});const yaw=(o.yaw??0)/2;c.setRotation({x:0,y:Math.sin(yaw),z:0,w:Math.cos(yaw)});}
+      this.liftPoses.set(o.id,key);this.queryDirty=true;}
+  }
+  /** Carrier owns position during transport; no gravity or walk integration in this mode. */
+  carry(p:Vector3){
+    this.position.copy(p);this.body.setTranslation({x:p.x,y:p.y+HALF+RADIUS+OFFSET,z:p.z});
+    this.velocity.set(0,0,0);this.vy=0;this.onGround=true;this.intendedSpeed=0;this.airTime=0;this.jumpHeld=false;
+    this.groundNormal.set(0,1,0);this.queryDirty=true;
+  }
+
   private obstacleDesc(o: Obstacle) {
     const d = o.shape === 'cylinder' ? RAPIER.ColliderDesc.cylinder(o.half[1], o.half[0]) : RAPIER.ColliderDesc.cuboid(...o.half);
     const yaw = (o.yaw ?? 0) / 2;

@@ -1,0 +1,159 @@
+{
+ "generator": "tools/create_props_v12.py",
+ "license": "authored in this repo (see docs/licenses.md)",
+ "props": [
+  {
+   "name": "bus_campus",
+   "tris": 584
+  },
+  {
+   "name": "bus_orange1",
+   "tris": 584
+  },
+  {
+   "name": "sup_board",
+   "tris": 172
+  },
+  {
+   "name": "sup_paddle",
+   "tris": 84
+  },
+  {
+   "name": "kayak",
+   "tris": 308
+  },
+  {
+   "name": "kayak_paddle",
+   "tris": 116
+  },
+  {
+   "name": "surfboard",
+   "tris": 184
+  },
+  {
+   "name": "laser_dinghy",
+   "tris": 260
+  },
+  {
+   "name": "swim_buoy",
+   "tris": 160
+  },
+  {
+   "name": "lane_float",
+   "tris": 480
+  },
+  {
+   "name": "lifeguard_chair",
+   "tris": 272
+  },
+  {
+   "name": "fitness_station",
+   "tris": 140
+  },
+  {
+   "name": "treadmill",
+   "tris": 156
+  },
+  {
+   "name": "start_gate",
+   "tris": 52
+  }
+ ],
+ "anchors": {
+  "bus_campus": {
+   "length": 10.5,
+   "width": 2.5,
+   "height": 3.1,
+   "frontDoor": [
+    -1.25,
+    0.35,
+    3.9
+   ],
+   "rearDoor": [
+    -1.25,
+    0.35,
+    -1.6
+   ],
+   "seat": [
+    0.55,
+    0.85,
+    1.0
+   ],
+   "driver": [
+    0.6,
+    1.0,
+    4.3
+   ],
+   "note": "right side (-x) doors; player hidden or seated at seat while carried"
+  },
+  "sup_board": {
+   "length": 3.2,
+   "width": 0.8,
+   "deckY": 0.13,
+   "stand": [
+    0,
+    0.13,
+    0.0
+   ]
+  },
+  "kayak": {
+   "length": 3.8,
+   "width": 0.72,
+   "seatY": 0.22,
+   "seat": [
+    0,
+    0.22,
+    -0.2
+   ]
+  },
+  "surfboard": {
+   "length": 2.1,
+   "width": 0.54,
+   "deckY": 0.08
+  },
+  "laser_dinghy": {
+   "length": 4.2,
+   "width": 1.36,
+   "mastHeight": 6.5,
+   "helm": [
+    0.35,
+    0.4,
+    -1.2
+   ]
+  },
+  "sup_paddle": {
+   "length": 1.9,
+   "axis": "+y from blade tip"
+  },
+  "kayak_paddle": {
+   "length": 2.2,
+   "axis": "x, centred"
+  },
+  "bus_orange1": {
+   "length": 10.5,
+   "width": 2.5,
+   "height": 3.1,
+   "frontDoor": [
+    -1.25,
+    0.35,
+    3.9
+   ],
+   "rearDoor": [
+    -1.25,
+    0.35,
+    -1.6
+   ],
+   "seat": [
+    0.55,
+    0.85,
+    1.0
+   ],
+   "driver": [
+    0.6,
+    1.0,
+    4.3
+   ],
+   "note": "right side (-x) doors; player hidden or seated at seat while carried"
+  }
+ }
+}

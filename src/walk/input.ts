@@ -4,7 +4,7 @@ import { Vector2, Vector3 } from 'three';
 const MOVE_KEYS = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
 const STICK_RUN_THRESHOLD = .85;
 /** Keys the walkthrough owns while focus is not in a text field. */
-const OWNED = [...MOVE_KEYS, ' ', 'e', 'g', 'v', 'm', 'n', 'l', 'p', 'b', 'j', 'r', 'h', 'shift', '/', 'escape', '1', '2', '3', '4'];
+const OWNED = [...MOVE_KEYS, ' ', 'e', 'g', 'v', 'm', 'n', 'l', 'p', 'b', 'j', 'r', 'h', 't', 'q', 'shift', '/', 'escape', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
 /** Raw camera-relative intent, shared by movement and follow-camera policy. */
 export interface MoveAxes { forward: number; right: number }
@@ -18,9 +18,9 @@ export function isForwardMove({ forward: f, right: r }: MoveAxes, speed: number)
   return speed > .25 && f > .1 && f / Math.hypot(f, r) >= .5;
 }
 
-/** Who owns the keyboard (spec-v4 §15.4). Outside "walk" no movement is recorded and no walk shortcut fires;
- * every key goes to `modal` instead (photo mode still records movement keys for its camera). */
-export type InputMode = 'walk' | 'dialogue' | 'menu' | 'photo' | 'game';
+/** Who owns the keyboard (spec-v4 §15.4). Modals suppress walk shortcuts. Photo records camera
+ * movement; carried records held movement but suppresses its output until walking resumes. */
+export type InputMode = 'walk' | 'dialogue' | 'menu' | 'photo' | 'game' | 'carried';
 
 export interface InputHooks {
   /** A key press while a modal mode owns the keyboard. */
@@ -63,8 +63,16 @@ export class WalkInput {
   private abort = new AbortController();
   private _mode: InputMode = 'walk';
   get mode() { return this._mode; }
-  /** Switching modes drops held keys, so a key held into a dialogue never keeps walking afterwards. */
-  set mode(m: InputMode) { if (m !== this._mode) { this._mode = m; this.release(); } }
+  /** A lift pauses movement without releasing the player's keys or captured finger.
+   * Other modals still drop held input, so closing a dialogue never resumes an old walk. */
+  set mode(m: InputMode) {
+    if (m === this._mode) return;
+    const liftTransition = (this._mode === 'walk' && m === 'carried') || (this._mode === 'carried' && m === 'walk');
+    this._mode = m;
+    if (!liftTransition) { this.release(); return; }
+    this.jump = false; this.lookId = -1;
+    if (m === 'walk' && (this.axes.forward !== 0 || this.axes.right !== 0)) this.hooks.moveStarted();
+  }
 
   constructor(canvas: HTMLElement, private joystick: HTMLElement, private knob: HTMLElement, private hooks: InputHooks) {
     this.runButton = joystick.parentElement?.querySelector<HTMLButtonElement>('[data-action=run]') ?? null;
@@ -75,11 +83,11 @@ export class WalkInput {
       if (typing && k !== 'escape') return;
       const mode = this._mode;
       if(mode==='dialogue'&&nativeDialogueLinkKey(k,e.target,!!document.querySelector?.('.q-dialog:not([hidden]) a[data-content-link]')))return;
-      if (mode === 'dialogue' || mode === 'menu' || mode === 'photo') {
+      if (mode === 'dialogue' || mode === 'menu' || mode === 'photo' || mode === 'carried') {
         // Menus keep native focus navigation (Tab, arrows, Enter, Space activate the focused control).
-        const native = mode === 'menu' && (k === 'tab' || k === 'enter' || k === ' ' || k.startsWith('arrow'));
+        const native = (mode === 'menu' || mode === 'carried') && (k === 'tab' || k === 'enter' || k === ' ' || k.startsWith('arrow'));
         if (!native && (k === 'tab' || k === 'enter' || k === ' ' || OWNED.includes(k) || /^[1-4]$/.test(k))) { e.preventDefault(); e.stopImmediatePropagation(); }
-        if (mode === 'photo' && (MOVE_KEYS.includes(k) || k === 'shift')) { this.keys.add(k); return; }
+        if ((mode === 'photo' || mode === 'carried') && (MOVE_KEYS.includes(k) || k === 'shift')) { this.keys.add(k); return; }
         if (!e.repeat) hooks.modal?.(k, mode);
         return;
       }
@@ -89,7 +97,7 @@ export class WalkInput {
       if (k === ' ') { if (!e.repeat) this.jump = true; return; }
       if (!e.repeat) hooks.press(k);
     }, { capture: true, signal });
-    window.addEventListener('keyup', e => this.keys.delete(e.key.toLowerCase()), { signal });
+    window.addEventListener('keyup', e => this.keys.delete(e.key.toLowerCase()), { capture: true, signal });
     window.addEventListener('blur', () => this.release(), { signal });
     document.addEventListener('pointerlockchange', () => { if (!document.pointerLockElement) this.lookId = -1; }, { signal });
 
@@ -119,8 +127,9 @@ export class WalkInput {
       knob.style.transform = `translate(${v.x * 30}px,${v.y * 30}px)`;
     };
     joystick.addEventListener('pointerdown', e => {
-      if (this._mode !== 'walk' || this.stickId !== -1) return;
-      this.stickId = e.pointerId; joystick.setPointerCapture(e.pointerId); moveStick(e); hooks.moveStarted();
+      if ((this._mode !== 'walk' && this._mode !== 'carried') || this.stickId !== -1) return;
+      this.stickId = e.pointerId; joystick.setPointerCapture(e.pointerId); moveStick(e);
+      if (this._mode === 'walk') hooks.moveStarted();
     }, { signal });
     joystick.addEventListener('pointermove', e => { if (e.pointerId === this.stickId) moveStick(e); }, { signal });
     const endStick = (e: PointerEvent) => { if (e.pointerId === this.stickId) this.releaseStick(); };
@@ -141,7 +150,7 @@ export class WalkInput {
     if (id !== -1 && this.joystick.hasPointerCapture(id)) this.joystick.releasePointerCapture(id);
   }
 
-  get axes(): MoveAxes { return moveAxes(this.keys, this.stick); }
+  get axes(): MoveAxes { return this._mode === 'carried' ? { forward: 0, right: 0 } : moveAxes(this.keys, this.stick); }
 
   /** Requested movement relative to the camera's ground forward; length ≤ 1. */
   direction(forward: Vector3, out = new Vector3()) {

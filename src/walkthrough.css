@@ -28,7 +28,7 @@
 
 .walkthrough:not(.is-overview) .walk-floor-label{display:none}.walk-run-indicator{display:none!important}@media(max-width:759px){.walkthrough .walk-evidence{display:none}.walkthrough:not(.is-overview) .walk-location{top:124px;max-width:230px;padding:6px 10px}.walkthrough .walk-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;right:12px;bottom:144px}.walkthrough .walk-actions .walk-button{min-height:44px;min-width:58px;padding:7px 9px}.walkthrough .walk-help{max-width:52vw;font-size:12px}.walkthrough .walk-location{font-size:13px}}
 
-.walk-lift{position:absolute;left:50%;bottom:120px;transform:translateX(-50%);z-index:6;background:rgba(23,62,73,.94);color:#faf4de;border-radius:14px;padding:14px 16px;box-shadow:0 10px 30px rgba(0,0,0,.25);font-size:15px;max-width:min(92vw,520px)}
+.walk-lift{pointer-events:auto;position:absolute;left:50%;bottom:120px;transform:translateX(-50%);z-index:6;background:rgba(23,62,73,.94);color:#faf4de;border-radius:14px;padding:14px 16px;box-shadow:0 10px 30px rgba(0,0,0,.25);font-size:15px;max-width:min(92vw,520px)}
 .walk-lift strong{display:block;margin-bottom:10px;font-size:15px}
 .walk-lift div{display:flex;flex-wrap:wrap;gap:8px}
 .walk-lift button{min-width:56px;min-height:44px;border-radius:10px;border:1px solid rgba(250,244,222,.35);background:#24525c;color:#faf4de;font:inherit;font-size:15px;cursor:pointer}
@@ -207,3 +207,15 @@
 .walk-actions [data-action=camera]{display:none;white-space:normal}
 .has-touch .walk-actions [data-action=camera]{display:inline-flex}
 @media(pointer:coarse){.walk-actions [data-action=camera]{display:inline-flex}}
+
+/* v12: shares the existing lift panel palette and controls, including photo overlay. */
+.walk-gestures{pointer-events:auto;position:absolute;z-index:160;left:50%;top:28%;transform:translateX(-50%);max-width:calc(100% - 32px);padding:18px;background:#183a40;color:#faf4de;border:1px solid #bca98c;border-radius:12px;box-shadow:0 12px 36px #0005}
+.walk-gestures[hidden]{display:none}
+.walk-gestures>div{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.walk-gestures button{min-height:44px;padding:8px 14px;border:1px solid #bca98c;border-radius:8px;background:#264c50;color:#faf4de;cursor:pointer}
+.walk-gestures button:hover,.walk-gestures button:focus-visible{background:#355b52;outline:2px solid #eedcad;outline-offset:2px}
+.walk-lift button[aria-pressed=true]{background:#eedcad;color:#183a40}
+.walk-lift button:disabled{opacity:.5;cursor:default}
+.walk-lift button{min-height:44px}
+.walk-photo-gesture{pointer-events:auto;display:none;position:absolute;z-index:45;right:24px;top:24px;background:var(--walk-panel);border:1px solid var(--walk-line)}
+.walkthrough.is-photo .walk-photo-gesture{display:inline-flex}

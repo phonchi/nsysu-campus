@@ -403,6 +403,20 @@ def plan_floor_access(floor:dict,portal_width:float=1.2,max_gap:float=.4,service
             for _,n,_ in adjacency[todo.pop()]:
                 if n in pending:pending.remove(n);component.append(n);todo.append(n)
         islands.append({'nodeIds':sorted(component),'roomIds':sorted(n for n in component if n in rooms)})
+    # Lift landings: the shaft is an obstacle, so guidance never crosses it; the approach point in front of the
+    # landing door must stand in public space that reaches the root (the runtime carries the player from there).
+    landings=[]
+    for item in floor.get('liftLandings',[]):
+        spot=Point(item['approach']);node=min(free_ids,key=lambda n:nodes[n].distance(spot));gap=nodes[node].distance(spot)
+        door=item['landingDoor'];shaft=next((Polygon(s['polygon']) for s in floor.get('verticalServices',[]) if s.get('id')==item['serviceId']),None)
+        on_wall=shaft is not None and shaft.exterior.distance(Point(door['center']))<=.02
+        stand=nearest_points(core_by_free[node],spot)[0];ok=gap<=.5 and node in visited and stand.distance(spot)<=1.2
+        landings.append({'liftId':item['liftId'],'serviceId':item['serviceId'],'landingDoor':door,'approach':_point(item['approach']),'approachNodeId':node,
+            'approachClearancePosition':_point((stand.x,stand.y)),'connectedToPublicRoot':bool(ok),'doorOnShaftBoundary':bool(on_wall),'guidance':'not-routed',
+            'note':'Shaft stays closed to ordinary guidance; the landing door is an opening for the lift runtime only.'})
+        if not ok:issues.append({'type':'lift-approach-not-in-public-root','liftId':item['liftId'],'approach':_point(item['approach']),'freeNode':node,'gap':round(gap,5)})
+        if not on_wall:issues.append({'type':'lift-door-off-shaft-boundary','liftId':item['liftId'],'door':door['center']})
+    if landings:result['liftLandings']=landings
     result['report']={
         'status':'complete' if result['entry'] and not unreachable and not invalid and not overlaps and not any(i['type']=='room-outside-floor' for i in issues) else 'needs-review',
         'roomCount':len(floor.get('rooms',[])),'validRoomCount':len(rooms),'reachableRoomCount':len(rooms)-len(unreachable),
@@ -464,10 +478,19 @@ def _apply_structure(floor,building_id,structure):
         services.append({'id':core['id'],'kind':'stair-core','polygon':_rect(core['center'],core['length'],core['width'],core['angle'])})
         landing=_apron_center(core,core['length'],core['width']);landings.append((len(core['levels']),landing))
         notes.append({'kind':'stairs','position':landing,'source':core['id']})
+    lift_landings=[]
     for lift in structure.get('lifts',{}).get(building_id,[]):
-        if any(s['floorId']==fid for s in lift['stops']):
-            services.append({'id':lift['id'],'kind':'lift-car','polygon':_rect(lift['center'],lift['size'],lift['size'],lift['angle'])})
+        stop=next((s for s in lift['stops'] if s['floorId']==fid),None)
+        if stop is None:continue
+        # v12: the car obstacle has a per-storey id; the whole shaft stays closed to ordinary guidance.
+        # The landing door is only recorded as an opening in the shaft wall, with its approach point in the corridor.
+        service={'id':f"{lift['id']}-car@{fid}",'liftId':lift['id'],'kind':'lift-car','polygon':lift.get('shaftPolygon') or _rect(lift['center'],lift['size'],lift['size'],lift['angle'])}
+        if stop.get('landingDoor') and stop.get('approach'):
+            service['opening']={**stop['landingDoor'],'guidance':'closed'}
+            lift_landings.append({'liftId':lift['id'],'serviceId':service['id'],'landingDoor':stop['landingDoor'],'approach':stop['approach']})
+        services.append(service)
     floor['verticalServices']=services;floor['mapAnnotations']=notes
+    if lift_landings:floor['liftLandings']=lift_landings
     entry=None
     if floor['level']!=1 and landings:entry=max(landings,key=lambda x:x[0])[1]
     return floor,entry

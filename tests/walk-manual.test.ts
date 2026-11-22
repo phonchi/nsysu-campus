@@ -1,3 +1,5 @@
+import {LiftPassenger,insideLift,liftDoorOccupied,liftObstacles,syncLift} from '../src/walk/lift-world';
+import {liftWins} from '../src/walk/interaction';
 /** Manual-style acceptance: the walking capsule, real door blocking and explicit E presses.
  * Navigation only steers (as a person would); physics decides whether the route is walkable. */
 import {buildRuntimeWorld} from './world-fixture';
@@ -23,7 +25,7 @@ beforeAll(async()=>{
  data=WALK_BUILDING_IDS.map(id=>{const b=JSON.parse(fs.readFileSync(`public/data/walkthrough/${id}.json`,'utf8')) as WalkBuilding;for(const f of b.floors)f.access=access.floors[f.id];return b;});
  world=buildRuntimeWorld().world;await init();
  navigation=new WalkNavigation(importNavMesh(new Uint8Array(fs.readFileSync('public/data/walkthrough/navmesh.bin'))).navMesh);
- await initPhysics();physics=new RapierController(world.collision);physics.constrain=doorConstraint(world.doors);report.physicsStats=physics.stats;
+ await initPhysics();physics=new RapierController(world.collision);physics.setLiftObstacles(liftObstacles(world.lifts));physics.constrain=doorConstraint(world.doors);report.physicsStats=physics.stats;
 },60000);
 afterAll(()=>{
  navigation?.dispose();physics?.dispose();
@@ -150,19 +152,35 @@ it('enters every room on every floor through closed doors (E only at the door)',
  report.rooms=results;expect(failures).toEqual([]);expect(wrongDoor).toBe(0);
 },7200000);
 
-it('rides every lift: walk into the car, E selects a floor, walk out to that storey',()=>{
+it('rides every lift: call, enter, select, travel continuously and walk out',()=>{
  const failures:string[]=[];let rides=0;
  for(const lift of world.lifts)for(let i=0;i<lift.stops.length;i++){
   const from=lift.stops[i],to=lift.stops[(i+1)%lift.stops.length],key=`${lift.id} ${from.floorId}->${to.floorId}`;
-  const spec=structure.lifts[lift.buildingId].find(l=>l.id===lift.id)!,ux=Math.cos(spec.angle),uz=Math.sin(spec.angle),d=spec.size/2+.8;
-  const doorway=new T.Vector3(spec.center[0]-ux*d,from.position.y,spec.center[1]-uz*d).applyMatrix4(world.frames.get(lift.buildingId)!);doorway.y=from.position.y;
-  let error=start(v(dest(from.floorId+'-entrance').position))?walk(doorway,{tolerance:.3}):'entrance not grounded';
-  const liftChosen=()=>{const nd=nearestDoor(),lp=from.position,toLift=Math.hypot(lp.x-physics.position.x,lp.z-physics.position.z);return nearLift()?.stop===from&&(!nd||toLift<(world.scales.get(lift.buildingId)??1)+.2||toLift<nd.position.distanceTo(physics.position));};
-  // A neighbouring room door may win at the doorway; a player then steps into the car and presses E again.
-  if(!error&&!liftChosen()){error=walk(from.position.clone(),{tolerance:.3});if(!error&&!liftChosen())error='E inside the car does not select this stop';}
-  if(!error){physics.teleport(to.position.clone().add(new T.Vector3(0,.15,0)));error=settle()?undefined:'arrival not grounded';}
+  const passenger=new LiftPassenger();
+  let error=start(v(dest(from.floorId+'-entrance').position))?walk(from.approach,{tolerance:.25}):'entrance not grounded';
+  const step=(direction=zero)=>{
+   passenger.update(world,physics.position);
+   lift.runtime.update(DT,{doorway:liftDoorOccupied(lift,[physics.position])});syncLift(lift);physics.setLiftObstacles(liftObstacles(world.lifts));
+   const carried=passenger.update(world,physics.position);if(carried)physics.carry(carried);else physics.step(direction,DT,false,1.4);
+  };
+  const waitFor=(predicate:()=>boolean)=>{for(let t=0;t<1800&&!predicate();t++)step();return predicate();};
+  const walkDirect=(target:T.Vector3)=>{for(let t=0;t<300;t++){const d=target.clone().sub(physics.position);d.y=0;if(d.length()<.12)return true;step(d.normalize());}return false;};
+  if(!error){const selected=liftWins(world,physics.position);if(selected?.lift!==lift||selected.stop!==from)error='E does not select this external call button';}
+  if(!error){lift.runtime.call(from.floorId);ePresses++;if(!waitFor(()=>lift.runtime.snapshot.phase==='open'&&lift.runtime.snapshot.atFloorId===from.floorId))error='external call did not arrive and open';}
+  if(!error&&!walkDirect(from.position))error='cannot enter the open car';
+  if(!error&&!insideLift(lift,physics.position,.28/(world.scales.get(lift.buildingId)??1)))error='not safely inside the car';
+  if(!error){
+   lift.runtime.select(to.floorId);let moved=false,previousY=physics.position.y;
+   for(let t=0;t<1800;t++){
+    step();moved ||= passenger.carried;
+    if(Math.abs(physics.position.y-previousY)>.12){error='non-continuous passenger motion';break;}previousY=physics.position.y;
+    if(lift.runtime.snapshot.phase==='open'&&lift.runtime.snapshot.atFloorId===to.floorId)break;
+   }
+   if(!error&&(!moved||lift.runtime.snapshot.atFloorId!==to.floorId||passenger.carried))error='ride did not arrive and release passenger';
+  }
+  if(!error&&!walkDirect(to.approach))error='cannot exit the car';
   if(!error)error=walk(v(dest(to.floorId+'-entrance').position),{keepY:to.position.y});
-  rides++;if(error)failures.push(`${key}: ${error}`);
+  passenger.clear();rides++;if(error)failures.push(`${key}: ${error}`);
  }
  report.lifts={rides,failures};expect(failures).toEqual([]);
 },900000);

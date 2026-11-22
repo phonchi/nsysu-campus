@@ -125,7 +125,19 @@ try {
  for(const f of floorCoverage){if(!f.rendered)errors.push(`Floor not rendered: ${f.floorId}`);if(!f.reachable)errors.push(`No reachable door or entrance: ${f.floorId}`);}
  for(const c of checks)if(!c.reachable||!c.returnReachable)errors.push(`Unreachable destination: ${c.id} at ${c.target.join(',')} (out=${c.reachable}, return=${c.returnReachable})`);
  const polygonArea=(p:number[][])=>Math.abs(p.reduce((sum,a,i)=>{const b=p[(i+1)%p.length];return sum+a[0]*b[1]-b[0]*a[1];},0)/2);
- const renderableRooms=data.flatMap(b=>b.floors.flatMap(f=>effectiveRooms(f,structure).filter(r=>['room','room-candidate'].includes(r.kind)&&r.polygon.length>=3&&polygonArea(r.polygon)>=1.6).map(r=>({buildingId:b.id,floorId:f.id,roomId:r.id}))));
+ // v12: restrooms and split sub-rooms are expected rooms too (destination + own-room interior check).
+ // Keep this list in step with tools/verify_walk_data.py ENTERABLE.
+ const enterableKinds=['room','room-candidate','restroom'];
+ const renderableRooms=data.flatMap(b=>b.floors.flatMap(f=>effectiveRooms(f,structure).filter(r=>enterableKinds.includes(r.kind)&&r.polygon.length>=3&&polygonArea(r.polygon)>=1.6).map(r=>({buildingId:b.id,floorId:f.id,roomId:r.id}))));
+ // A restroom that is too small must fail loudly, never drop out of the expected rooms.
+ for(const b of data)for(const f of b.floors)for(const r of effectiveRooms(f,structure))if(r.kind==='restroom'){
+  const xs=r.polygon.map(p=>p[0]),zs=r.polygon.map(p=>p[1]),dims=[Math.max(...xs)-Math.min(...xs),Math.max(...zs)-Math.min(...zs)].sort((a,b)=>a-b);
+  // local >= 1.8 x 2.2 m (coordinator ruling) and world (local x placement scale) >= 2.0 x 2.4 m, the planRestroom gate
+  const scale=structure.placements[b.id]?.scale??1;
+  if(r.polygon.length<3||polygonArea(r.polygon)<1.6||dims[0]<1.8-1e-6||dims[1]<2.2-1e-6||dims[0]*scale<2-1e-6||dims[1]*scale<2.4-1e-6)errors.push(`Restroom too small (needs 1.8 x 2.2 m local and 2.0 x 2.4 m world): ${b.id}/${f.id}/${r.id}`);
+ }
+ for(const b of data)for(const f of b.floors)for(const parent of Object.keys((f as unknown as {roomSplits?:{children:Record<string,string[]>}}).roomSplits?.children??{}))
+  if(f.rooms.some(r=>r.id===parent))errors.push(`Split parent room still present: ${b.id}/${f.id}/${parent}`);
  const builderOmissions=renderableRooms.filter(r=>!checks.some(c=>c.buildingId===r.buildingId&&c.floorId===r.floorId&&c.roomId===r.roomId));
  for(const r of builderOmissions)errors.push(`Builder omission: ${r.buildingId}/${r.floorId}/${r.roomId}`);
  const insideChecks=renderableRooms.map(r=>{

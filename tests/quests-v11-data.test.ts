@@ -132,6 +132,6 @@ describe('seats and clues (spec-v11 §1 坐姿、線索解鎖)', () => {
     for (const s of stories) { expect(s.sources.length, s.id).toBeGreaterThan(0); for (const l of s.sources) expect(l.url, s.id).toMatch(/^https:\/\//); }
     expect(stories.filter(s => s.category === 'lore').map(s => s.id)).toEqual(['art-building-tales']);
     for (const s of stories) if (s.category === 'lore') expect(s.text.startsWith('校園口傳：'), s.id).toBe(true);
-    expect(stories.filter(s => s.y !== undefined).map(s => [s.id, s.y])).toEqual([['tunnel-starry', 1], ['tunnel-dispositif', 1]]);
+    expect(stories.filter(s => s.y !== undefined).map(s => [s.id, s.y])).toEqual([['tunnel-starry', 1], ['tunnel-dispositif', 1], ['math-gifted-class', 0]]); // 8f705f3 pinned the courtyard gem to ground height
   });
 });

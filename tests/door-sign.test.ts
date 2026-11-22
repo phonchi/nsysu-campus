@@ -8,10 +8,12 @@ import { doorSignPose, buildSignWall, buildDoorSignWalls, type SignWall, SIGN_MO
 
 let world: WalkWorld;
 let walls: Map<string,SignWall>;
+let buildings: WalkBuilding[];
+let access: { floors:Record<string,FloorAccess> };
 beforeAll(() => {
   const read = (p:string) => JSON.parse(fs.readFileSync(`public/data/walkthrough/${p}.json`,'utf8'));
-  const access = read('access-plan') as { floors:Record<string,FloorAccess> };
-  const buildings = WALK_BUILDING_IDS.map(id => {
+  access = read('access-plan') as { floors:Record<string,FloorAccess> };
+  buildings = WALK_BUILDING_IDS.map(id => {
     const b = read(id) as WalkBuilding;
     for (const f of b.floors) f.access = access.floors[f.id];
     return b;
@@ -41,7 +43,9 @@ function verify(d:WorldDoor) {
   }
 }
 it('SC2001 faces the public corridor even though the saved normal points inside',()=>{
-  const d=world.doors.find(d=>d.id==='SC-2F-portal-022')!;
+  // Portal ids are positional; v12 rooms renumbered SC-2F (022 -> 020), so look the door up by its room.
+  const pid=access.floors['SC-2F'].portals.find(p=>p.roomIds.length===1&&p.roomIds[0]==='SC-2F-SC2001')!.id;
+  const d=world.doors.find(d=>d.id===pid)!;
   expect(d.normal!.dot(d.outside.clone().sub(d.inside))).toBeLessThan(0);
   expect(angle(d.outside.clone().sub(d.position).normalize(),d.normal!)).toBeCloseTo(23.9961,3);
   verify(d);
@@ -52,8 +56,19 @@ it('SC-B1 portal-023 corrects the largest old angle, with an explicit fragment o
   expect(angle(d.outside.clone().sub(d.position).normalize(),d.normal!)).toBeCloseTo(62.526,2);
   expect(walls.get(d.id)!.override).toContain(d.id);verify(d);
 });
-it('audits all eight buildings: 891 upright signs, no angle or wall-clearance exceptions',()=>{
-  expect(world.doors).toHaveLength(891);
+it('audits all eight buildings: every access-plan door gets a sign, no angle or wall-clearance exceptions',()=>{
+  // v12 changed the door count in both directions: split rooms and restrooms add doors; traced regions absorbed into
+  // lift shafts and EV corridor regions made public remove room-to-region doors. The count is therefore derived from
+  // the access plan (portals that build a door leaf), and every coded room and restroom keeps at least one door
+  // (six uncoded sealed B1/3F/4F regions had no door before v12 either).
+  const roomDoors=new Map<string,number>();
+  for(const d of world.doors)roomDoors.set(d.id,(roomDoors.get(d.id)??0)+1);
+  const planned=Object.values(access.floors).flatMap(f=>f.portals).filter(p=>roomDoors.has(p.id));
+  expect(world.doors).toHaveLength(planned.length);
+  expect(world.doors.length).toBeGreaterThan(891);
+  const rooms=buildings.flatMap(b=>b.floors.flatMap(f=>f.rooms.filter(r=>r.kind==='restroom'||!!r.code).map(r=>({floor:f.id,id:r.id}))));
+  const withDoor=new Set(Object.values(access.floors).flatMap(f=>f.portals.flatMap(p=>p.roomIds)));
+  expect(rooms.filter(r=>!withDoor.has(r.id)).map(r=>r.id),'rooms without any portal').toEqual([]);
   const missing=world.doors.filter(d=>!walls.has(d.id)).map(d=>d.id);
   expect(missing,'Portals with missing mounting faces').toEqual([]);
   expect(walls.size).toBe(world.doors.length);

@@ -1,3 +1,5 @@
+import { gestureReactions } from '../walk/gestures';
+import type { GestureId, GestureReaction } from './v12-types';
 import {configureCharacterCoverage,characterBodyStencil,CHARACTER_BODY_ORDER} from '../render/character-surface';
 import {SeatRegistry,ChairPose,seatApproach,withinSeatApproach,type Seat,type SeatSpec} from './seats';
 import * as T from 'three';
@@ -192,7 +194,7 @@ export function disposeObject(root: T.Object3D) {
 }
 
 /** One animated character in the world. Skinned clones share geometry and textures with the loaded GLB. */
-class Npc {
+export class Npc {
   readonly root = new T.Group();
   private mixer: T.AnimationMixer;
   private chair:ChairPose;
@@ -205,6 +207,28 @@ class Npc {
   qaFade?: number;
   private actions = new Map<string, T.AnimationAction>();
   private current?: T.AnimationAction;
+  private reaction?:{kind:GestureReaction['kind'];left:number;duration:number;target:T.Vector3};
+  private head?:T.Object3D;
+  private headBase?:T.Quaternion;
+  react(kind:GestureReaction['kind'],target:T.Vector3){
+    const seated=!!this.seat&&!this.path.length||this.activity==='Sit';
+    if(this.talking||seated)kind='nod';
+    const clip={wave:'Wave',bow:'Bow',clap:'Clap',nod:''}[kind];
+    const duration=this.actions.get(clip)?.getClip().duration??1.2;
+    this.reaction={kind,left:duration,duration,target:target.clone()};
+  }
+  /** Playing a full (non-nod) gesture reply: standing still on purpose, not stalled. */
+  get gesturing(){return !!this.reaction&&this.reaction.kind!=='nod'&&!this.talking;}
+  private restoreNod(){if(this.head&&this.headBase)this.head.quaternion.copy(this.headBase);this.headBase=undefined;}
+  private applyReaction(dt:number){
+    const r=this.reaction;if(!r)return;
+    r.left=Math.max(0,r.left-dt);
+    if(r.kind==='nod'&&this.head){this.headBase=this.head.quaternion.clone();
+      const t=1-r.left/r.duration,envelope=Math.sin(Math.PI*t),want=Math.atan2(-(r.target.x-this.position.x),-(r.target.z-this.position.z));
+      this.head.rotateY(T.MathUtils.clamp(Math.atan2(Math.sin(want-this.heading),Math.cos(want-this.heading)),-.6,.6)*envelope);
+      this.head.rotateX(Math.sin(t*Math.PI*4)*.13*envelope);}
+    if(!r.left)this.reaction=undefined;
+  }
   path: T.Vector3[] = [];
   speed = 1.4;
   heading = 0;
@@ -230,6 +254,7 @@ class Npc {
       o.material = Array.isArray(o.material) ? o.material.map(clone) : clone(o.material);
     });
     model.rotation.y = Math.PI; // glTF characters face +Z; headings below assume -Z
+    this.head=model.getObjectByName('Head')??model.getObjectByName('head')??model.getObjectByName('Neck');
     this.root.add(model);this.chair=new ChairPose(model,this.root);
     this.mixer = new T.AnimationMixer(model);
     for (const c of clips) this.actions.set(c.name, this.mixer.clipAction(c));
@@ -244,10 +269,16 @@ class Npc {
     this.current = a;
   }
   update(dt: number, ground: SupportAt, player: T.Vector3, near: boolean, sweep?: NpcSweep) {
-    this.chair.release();
+    this.restoreNod();this.chair.release();
+    if(this.reaction&&(this.talking||this.seat&&!this.path.length))this.reaction.kind='nod';
     if(this.seat&&!this.path.length&&withinSeatApproach(this.seat,this.position)){
       this.heading=this.seat.spec.yaw;this.root.rotation.y=this.heading;
-      this.play('Sit');this.mixer.update(dt);this.chair.apply(this.seat,this.position,ground);return;
+      this.play('Sit');this.mixer.update(dt);this.chair.apply(this.seat,this.position,ground);this.applyReaction(dt);return;
+    }
+    if(this.reaction&&this.reaction.kind!=='nod'&&!this.talking){
+      const want=Math.atan2(-(this.reaction.target.x-this.position.x),-(this.reaction.target.z-this.position.z));
+      this.heading+=Math.atan2(Math.sin(want-this.heading),Math.cos(want-this.heading))*damp(6,dt);this.root.rotation.y=this.heading;
+      this.play({wave:'Wave',bow:'Bow',clap:'Clap'}[this.reaction.kind]);this.mixer.update(dt);this.applyReaction(dt);return;
     }
     const desired = this.root.position.clone();
     if (this.path.length && !this.talking) {
@@ -263,18 +294,18 @@ class Npc {
       this.play(this.speed > 2.5 ? 'Run' : 'Walk');
     } else {
       // At the post: face the player when they come close, otherwise keep the activity.
-      if (near) {
+      if (near && this.reaction?.kind!=='nod') {
         const want = Math.atan2(-(player.x - this.root.position.x), -(player.z - this.root.position.z));
         this.heading += Math.atan2(Math.sin(want - this.heading), Math.cos(want - this.heading)) * damp(5, dt);
       }
-      this.play(this.talking ? 'Talk' : near && this.activity !== 'Sit' ? 'Wave' : this.activity==='Sit'&&!this.monkey?'Idle':this.activity);
+      this.play(this.talking ? 'Talk' : near && !this.reaction && this.activity !== 'Sit' ? 'Wave' : this.activity==='Sit'&&!this.monkey?'Idle':this.activity);
     }
     const radius = this.monkey ? .24 : .32, height = this.monkey ? .65 : 1.7;
     if(!this.talking)this.root.position.copy(moveNpcSafely(this.id, this.root.position, desired, player, dt, radius, height, ground, sweep));
     this.root.rotation.y = this.heading;
-    this.mixer.update(dt);
+    this.mixer.update(dt);this.applyReaction(dt);
   }
-  animateOnly(dt:number,ground:SupportAt){this.chair.release();this.mixer.update(dt);if(this.seat&&!this.path.length)this.chair.apply(this.seat,this.position,ground);}
+  animateOnly(dt:number,ground:SupportAt){this.restoreNod();this.chair.release();this.mixer.update(dt);if(this.seat&&!this.path.length)this.chair.apply(this.seat,this.position,ground);this.applyReaction(dt);}
   updateCamera(camera: T.Vector3) {
     const alpha = this.qaFade ?? (this.talking ? 1 : npcCameraOpacity(camera, this.position, this.monkey ? .65 : 1.7));
     if (alpha === this.fade) return;
@@ -349,7 +380,7 @@ export class NpcManager {
     n.root.position.copy(free);n.path=[];this.recovery.delete(n.id);this.reservations.set(n.id,this.body(n));this.actorChanged?.(this.body(n));return true;
   }
   private recover(n:Npc,dt:number,player:T.Vector3){
-    if(n.talking||this.gameReserved.has(n.id))return;
+    if(n.talking||this.gameReserved.has(n.id)||n.gesturing)return;
     let r=this.recovery.get(n.id);
     if(!r){r={best:Infinity,stalled:0,cooldown:0,attempts:0};this.recovery.set(n.id,r);}
     r.cooldown=Math.max(0,r.cooldown-dt);
@@ -584,6 +615,7 @@ export class NpcManager {
   }
 
   update(dt: number, player: T.Vector3, borrowedPaused=false) {
+    this.gestureClock+=dt;
     // Visible cap: nearest people first (talking and story NPCs always count), macaques separately.
     const night = this.preset === 'night', people: [number, Npc][] = [], monkeys: [number, Npc][] = [];
     for (const n of [...this.npcs.values(), ...this.ambient]) if (!n.absent) (n.monkey ? monkeys : people).push([n.position.distanceTo(player), n]);
@@ -616,6 +648,14 @@ export class NpcManager {
       n.update(dt, this.movementGround, player, d < 4, liveSweep);
       this.reservations.delete(n.id);this.actorChanged?.(this.body(n));
     }
+  }
+
+  private gestureClock=0;
+  private gestureCooldown=new Map<string,number>();
+  reactToGesture(gesture:GestureId,player:T.Vector3,heading:number,clear:(target:T.Vector3)=>boolean=()=>true):GestureReaction[]{
+    const all=[...this.npcs.values(),...this.ambient].filter(n=>!n.absent&&!n.monkey&&n.root.visible&&(this.gestureCooldown.get(n.id)??0)<=this.gestureClock);
+    const reactions=gestureReactions(gesture,player.toArray(),heading,all.map(n=>({id:n.id,position:n.position.toArray(),seated:!!n.seat||n.activity==='Sit',talking:n.talking,reserved:this.borrowed.has(n.id)||this.gameReserved.has(n.id)})),n=>clear(new T.Vector3(...n.position)));
+    for(const r of reactions){all.find(n=>n.id===r.npcId)!.react(r.kind,player);this.gestureCooldown.set(r.npcId,this.gestureClock+8);}return reactions;
   }
 
   /** All present NPCs in reach, including people sharing the same interaction area. */

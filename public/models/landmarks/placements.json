@@ -21,13 +21,14 @@
  "liberal-arts": {
   "osmId": null,
   "centroid": [
-   -569.8,
-   -915.8
+   -564.5,
+   -889.5
   ],
-  "yaw": 0.0,
-  "note": "待 T3 對位：OSM 無文學院輪廓；T3 以藝術大樓偏移推估 ±60 m，山坡地形約 +52 m（elevation 取 Terrain.heightAt）。量體為可替換的通用院館。",
+  "yaw": -0.7278,
+  "note": "v12：依 NLSC 2024 正射影像描圖重新對位（本機參考，artifacts/v12/reference/sports-trace.json）。中庭式院館群中心 (-564.5,-889.5)、長軸西北—東南 41.7°、外包約 87×42 m，信心中；量體仍為通用院館，拱廊面朝西南（海側）。",
   "elevation": null,
-  "uncertainty_m": 60
+  "uncertainty_m": 8,
+  "basis": "orthophoto-trace"
  },
  "sci-eng-arcade": {
   "osmId": 269874273,

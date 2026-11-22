@@ -75,11 +75,11 @@ export interface GuideHooks {
 const DESKTOP_TIPS = [
   '<kbd>WASD</kbd>／方向鍵移動，<kbd>Shift</kbd> 奔跑；拖曳畫面轉頭，滾輪拉遠拉近。',
   '<kbd>V</kbd> 輪流切換跟隨、自由、第一人稱。跟隨只在前進或帶路時轉向；自由只由拖曳轉動。拖曳後 1.5 秒暫停跟隨，<kbd>L</kbd> 可鎖定視角。',
-  '靠近人物或物件時按 <kbd>E</kbd> 互動；多個項目會自動列出，可點選或按 <kbd>1–4</kbd>。',
+  '靠近人物或物件時按 <kbd>E</kbd> 互動；多個項目會自動列出，可點選或按 <kbd>1–4</kbd>。按 <kbd>T</kbd> 可揮手、鞠躬、比讚或拍手。',
 ];
 const TOUCH_TIPS = [
   '左下搖桿移動，在畫面上拖曳可以轉頭；「視角」鈕輪流切換跟隨、自由、第一人稱。跟隨在向前推動時轉向，拖曳後 1.5 秒暫停；自由模式不自動轉向。',
-  '靠近人物或物件時，按右下的「互動 E」；多個項目會列出可點清單。',
+  '靠近人物或物件時，按右下的「互動 E」；多個項目會列出可點清單。「手勢」可選揮手、鞠躬、比讚或拍手，拍照中也能使用。',
 ];
 
 export const TIPS_KEY = 'nsysu-walk-tips-v8';
@@ -90,7 +90,7 @@ const CONTEXT_TIPS: Record<TipId, { desktop: string; touch: string }> = {
   switch: { desktop: '附近可做的事已列出：點選或按 <kbd>1–4</kbd> 直接執行；<kbd>R</kbd>／上下鍵移動高亮，<kbd>E</kbd> 執行。', touch: '附近可做的事已列出，直接點一項；「互動 E」會執行高亮項。清單可上下捲動。' },
   bike: { desktop: '這裡可以租腳踏車，按 <kbd>E</kbd> 租車，之後按 <kbd>B</kbd> 上下車。', touch: '這裡可以租腳踏車，按「互動 E」租車，之後按「騎車 B」上下車。' },
   line: { desktop: '按 <kbd>Q</kbd> 切換主線與支線；專注支線時主線會暫停，切回後接續。', touch: '點目標卡上的「主線｜支線」切換；專注支線時主線會暫停，切回後接續。' },
-  photo: { desktop: '這一步要拍照：走到地點按 <kbd>P</kbd>，再按 <kbd>Space</kbd> 拍下。', touch: '這一步要拍照：走到地點點右上的相機，再按快門。' },
+  photo: { desktop: '這一步要拍照：走到地點按 <kbd>P</kbd>，可按 <kbd>T</kbd> 選手勢，再按 <kbd>Space</kbd> 拍下。', touch: '這一步要拍照：走到地點點右上的相機，可先點「手勢」選姿勢，再按快門。' },
 };
 /** A shown tip stays this long; there is no dialog to dismiss, so it never takes the keyboard. */
 export const TIP_MS = 7000;

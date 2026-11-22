@@ -1,3 +1,7 @@
+import { GestureMenu } from './gestures';
+import { searchDestinations } from './search';
+import { LiftPassenger, insideLift, liftDoorOccupied, liftObstacles, syncLift } from './lift-world';
+import type { WorldLift } from '../walk-world';
 import {seatApproach,withinSeatApproach,type Seat} from '../world/seats';
 import {dialogueLinks,journalLinks} from '../story/content-links';
 import * as T from 'three';
@@ -26,7 +30,7 @@ import type { RhythmPerformance } from '../audio/rhythm-performance';
 import { npcQuestStatuses } from './interaction-status';
 import { doorSignPose, buildDoorSignWalls } from './door-sign';
 import { selectInteraction, cycleInteraction, encounterReach, orderInteractions, numberedInteractions, revalidateInteraction, interactionPriority, type InteractionAction } from './interaction-choice';
-import { liftWins, toggleDoorById, nearestDoor, continueQuestAtTarget, npcPresentAt, type LiftStopRef } from './interaction';
+import { liftWins, toggleDoorById, nearestDoor, continueQuestAtTarget, npcPresentAt } from './interaction';
 import { hudTemplate, drawFloorMinimap, makeDoorSign, safe } from './hud';
 import { ContextTips, FirstRunGuide, helpShortcut, type TipId } from './help';
 import { startLoadingTips } from './loading-tips';
@@ -331,6 +335,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     physics = new RapierController(world.collision);
     const obstacles = (world.display.userData.obstacles ?? []) as Obstacle[];
     physics.addObstacles(obstacles); obstacleField.add(obstacles);
+    for(const lift of world.lifts)syncLift(lift);physics.setLiftObstacles(liftObstacles(world.lifts));
     const doors = doorConstraint(world.doors);
     const shore = shoreConstraint(terrain, (x,z,y)=>physics.supportAt(x,z,y));
     physics.constrain = (position,velocity,h)=>{ doors(position,velocity,h); shore(position,velocity,h); };
@@ -509,6 +514,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     chooseMode(false); drawRoute(p); say(`沿校園步道走到 ${autoDestination.label}`, 6000);
   }
   function goTo(destination: WalkDestination) {
+    if(passenger.carried)return;gestures.close();
     routes?.avoid.splice(0);
     get('.walk-results').hidden = true; get<HTMLInputElement>('.walk-search input').blur(); clearAuto();
     if (!routesValidated) { say('場景碰撞與步道仍在準備，請稍候再開始帶路。'); return; }
@@ -522,24 +528,42 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
 
   // ---- interaction -----------------------------------------------------------------------
   const liftPanel = get('.walk-lift');
-  function showLift(found: LiftStopRef) {
-    liftPanel.innerHTML = `<strong>${safe(found.lift.buildingId)} 電梯（示意）</strong><div>${found.lift.stops.map(s => `<button data-stop="${safe(s.floorId)}"${s === found.stop ? ' aria-current="true"' : ''}>${safe(s.label)}</button>`).join('')}</div>`;
-    liftPanel.hidden = false;
+  const passenger=new LiftPassenger();
+  let panelLift:WorldLift|undefined;
+  let carriedCamera:{yaw:number;pitch:number;distance:number;locked:boolean;doorYaw?:number}|undefined;
+  const liftPoses=new WeakMap<WorldLift,string>();
+  const cabinLift=()=>world.lifts.find(l=>insideLift(l,physics.position));
+  function clearPassenger(){passenger.clear();panelLift=undefined;liftPanel.hidden=true;if(carriedCamera){rig.yaw=carriedCamera.yaw;rig.pitch=carriedCamera.pitch;rig.distance=carriedCamera.distance;rig.locked=carriedCamera.locked;carriedCamera=undefined;}input.release();rig.protect();}
+  function showLift(lift:WorldLift) {
+    const state=lift.runtime.snapshot;
+    if(panelLift!==lift||liftPanel.hidden){
+      liftPanel.innerHTML = `<strong>${safe(lift.buildingId)} 電梯</strong><p data-lift-status role="status" aria-live="polite"></p><div>${lift.stops.map((s,i) => `<button type="button" data-stop="${safe(s.floorId)}">${i<9?`${i+1} · `:''}${safe(s.label)}</button>`).join('')}<button type="button" data-lift-hold>開門</button></div>`;
+    }
+    panelLift=lift;liftPanel.hidden=false;
+    const label=lift.stops.find(s=>s.floorId===(state.atFloorId??state.targetFloorId))?.label??'';
+    setText(liftPanel.querySelector('[data-lift-status]')!,`${state.phase==='moving'?'前往':state.phase==='open'?'已開門':'停靠'} ${label}・可繼續選層`);
+    liftPanel.querySelectorAll<HTMLButtonElement>('[data-stop]').forEach(b=>{b.setAttribute('aria-pressed',String(state.requestedFloorIds.includes(b.dataset.stop!)));if(state.atFloorId===b.dataset.stop)b.setAttribute('aria-current','true');else b.removeAttribute('aria-current');});
+    liftPanel.querySelector<HTMLButtonElement>('[data-lift-hold]')!.disabled=state.phase==='moving';
   }
+  function selectLiftFloor(id:string){const lift=cabinLift();if(!lift)return;clearAuto(true);lift.runtime.select(id);showLift(lift);}
+  function liftKey(k:string){const lift=cabinLift();if(!lift)return false;if(/^[1-9]$/.test(k)){const stop=lift.stops[Number(k)-1];if(stop)selectLiftFloor(stop.floorId);return true;}if(k==='e'){lift.runtime.holdOpen();showLift(lift);return true;}return false;}
   liftPanel.addEventListener('click', e => {
-    const id = (e.target as HTMLElement).closest<HTMLElement>('[data-stop]')?.dataset.stop, found = liftWins(world, physics.position);
-    liftPanel.hidden = true;
-    if (!id || !found) return;
-    const stop = found.lift.stops.find(s => s.floorId === id)!;
-    if (stop === found.stop) return;
-    clearAuto(true); if(!teleportTo(stop.position,undefined,true))return;
-    say(`電梯抵達 ${stop.label}｜電梯位置為示意`, 3500);
+    const target=e.target as HTMLElement,id=target.closest<HTMLElement>('[data-stop]')?.dataset.stop;
+    if(id)selectLiftFloor(id);else if(target.closest('[data-lift-hold]'))cabinLift()?.runtime.holdOpen();
   });
+  const gestures=new GestureMenu(host,id=>{
+    avatar.gesture(id);
+    npcs?.reactToGesture(id,physics.position,avatar.heading,target=>{
+      const from=physics.position.clone().add(new T.Vector3(0,1.3,0)),to=target.clone().add(new T.Vector3(0,1.3,0));
+      return physics.sweep(from,to,.04)>=from.distanceTo(to)-.45;
+    });
+  },()=>{input.release();input.mode=gestures.open?'menu':director?.ui.dialogueOpen?'dialogue':menuOpen()?'menu':photo.active?'photo':'walk';});
+  function toggleGestures(){if(passenger.carried||overview||!walking||bike.riding||avatar.seated||rhythm||quiz?.open||guide.open||notebook?.open||menuOpen()||(!!director?.blocking&&!director?.ui.dialogueOpen))return;clearAuto(true);gestures.toggle();if(gestures.open&&document.pointerLockElement)document.exitPointerLock();}
   type Candidate = InteractionAction & { label:string; targetLabel?:string; point:T.Vector3; run:()=>void };
   let selectedInteraction: string | undefined;
   let shownInteractions: Candidate[] = [];
   function interactionCandidates(): Candidate[] {
-    if (eventPose.sitting || rhythm || notebook?.open || menuOpen() || overview || !walking || photo.active || quiz?.open || director?.blocking || guide.open) return [];
+    if (passenger.carried || gestures.open || eventPose.sitting || rhythm || notebook?.open || menuOpen() || overview || !walking || photo.active || quiz?.open || director?.blocking || guide.open) return [];
     const p=physics.position, out:Candidate[]=[];
     const add=(id:string,label:string,priority:number,point:T.Vector3|undefined,run:()=>void,targetId=id,actionId=id)=>{if(point)out.push({id,targetId,actionId,targetLabel:targetId.startsWith('npc:')?npcs?.displayName(targetId.slice(4)):undefined,label,priority,point:point.clone(),distance:p.distanceTo(point),run});};
     const focused=quests?.progress.tracked;
@@ -562,7 +586,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     for (const person of talk?.candidate(p) ?? []) add(`talk:${person.id}`,`交談・${person.name}`,interactionPriority.talk,npcs?.get(person.id)?.position,()=>{talk?.pressId(person.id);},`npc:${person.id}`,'talk');
     if(bike.atStand(p)) add('bike','租腳踏車',70,bike.stand,()=>{ if (avatar.rideReady) bike.press(p); else say('腳踏車與人物姿勢仍在準備，請稍候。', 2500); });
     const lift=liftWins(world,p);
-    if(lift) add('lift','搭電梯',60,lift.stop.position,()=>{if(liftPanel.hidden)showLift(lift);else liftPanel.hidden=true;},`lift:${lift.lift.id}`,lift.stop.floorId);
+    if(lift) add('lift',insideLift(lift.lift,p)?'電梯面板':'呼叫電梯',60,lift.stop.approach,()=>{clearAuto(true);if(insideLift(lift.lift,p))showLift(lift.lift);else{lift.lift.runtime.call(lift.stop.floorId);say('已呼叫電梯，請等候開門後進入。');}},`lift:${lift.lift.id}`,lift.stop.floorId);
     for (const door of world.doors.filter(d=>d.position.distanceTo(p)<2.15)) {
       const expected=door.target;
       add(`door:${door.id}`,`${door.target?'關門':'開門'}・${door.label}`,50,door.position,()=>{
@@ -598,7 +622,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     if(candidate) executeInteraction(candidate);
     else say('靠近人物或互動物件後按 E；多個項目可點清單或按數字鍵。',2500);
   }
-  function resetToSpawn() { clearAuto(); if(!moveSafely(world.spawn)) { say('起點附近沒有安全落點，請稍後再試或返回校園地圖。',7000); return; } recoveryFailed=false; avatar.face(-Math.PI / 2); rig.yaw = -Math.PI / 2; rig.pitch = -.18; rig.snap(physics.position); chooseMode(false); say('已回到理工長廊前的安全位置。'); }
+  function resetToSpawn() { clearAuto(); if(!moveSafely(world.spawn)) { say('起點附近沒有安全落點，請稍後再試或返回校園地圖。',7000); return; } clearPassenger();gestures.close();recoveryFailed=false; avatar.face(-Math.PI / 2); rig.yaw = -Math.PI / 2; rig.pitch = -.18; rig.snap(physics.position); chooseMode(false); say('已回到理工長廊前的安全位置。'); }
 
   // ---- menu (Esc) ------------------------------------------------------------------------
   const menu = get('.walk-menu');
@@ -644,8 +668,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     exited: () => rig.snap(physics.position),
   });
   function enterPhoto() {
-    if (overview || !walking || director?.blocking) return;
-    setMenu(false); clearAuto(); autoFollow = false; photo.enter(physics.position, rig.yaw);
+    if (passenger.carried || overview || !walking || director?.blocking) return;
+    gestures.close();setMenu(false); clearAuto(); autoFollow = false; photo.enter(physics.position, rig.yaw);
   }
 
   // ---- rental bike (gate → campus on wheels) ---------------------------------------------
@@ -703,6 +727,9 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   window.addEventListener('keydown',captureRhythmKey,{capture:true});
   const input = new WalkInput(renderer.domElement, get('.walk-joystick'), get('.walk-stick'), {
     modal(k, mode) {
+      if(passenger.carried){liftKey(k);return;}
+      if(gestures.open){gestures.key(k);return;}
+      if(k==='t'){toggleGestures();return;}
       if (guide.open) { guide.key(k); return; }
       if (notebook?.open) { notebook.key(k); return; }
       if (mode === 'dialogue') director?.ui.key(k);
@@ -711,6 +738,10 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       else if (mode === 'menu') { if (k === 'j') { openNotebook(); return; } if (k === 'h') { toggleHelp(); return; } if (k === 'escape') setMenu(false); else if (k === '/') { setMenu(true, 'play'); get<HTMLInputElement>('.walk-search input').focus(); } }
     },
     press(k) {
+      if(passenger.carried){liftKey(k);return;}
+      if(gestures.open){gestures.key(k);return;}
+      if(k==='t'){toggleGestures();return;}
+      if(liftKey(k))return;
       if (k === 'j') { openNotebook(); return; }
       if (k === 'h') { toggleHelp(); return; }
       if (k === 'escape' && campusEvents?.activity && !eventPaused()) { cancelCampusActivity(); return; }
@@ -732,33 +763,42 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       if (/^[1-4]$/.test(k)) { const row=numberedInteractions(shownInteractions,selectedInteraction)[Number(k)-1]; if(row)executeInteraction(row); }
     },
     interactionListOpen: () => shownInteractions.length > 1,
-    moveStarted() { movementRequested=true;eventPose.update(true,false);if(rhythm)cancelCampusActivity();if (!walking || overview) chooseMode(false); clearAuto(true); },
-    look(dx, dy) { if (photo.active) photo.look(dx, dy); else rig.rotate(dx, dy); },
-    zoom(d) { if (photo.active) photo.zoom(d); else rig.zoom(d); },
-    canLook: () => !overview,
+    moveStarted() { avatar.cancelGesture();movementRequested=true;eventPose.update(true,false);if(rhythm)cancelCampusActivity();if (!walking || overview) chooseMode(false); clearAuto(true); },
+    look(dx, dy) { if(passenger.carried||gestures.open)return; if (photo.active) photo.look(dx, dy); else rig.rotate(dx, dy); },
+    zoom(d) { if(passenger.carried||gestures.open)return; if (photo.active) photo.zoom(d); else rig.zoom(d); },
+    canLook: () => !overview && !passenger.carried && !gestures.open,
   });
   input.mode='menu';
-  renderer.domElement.addEventListener('click', () => { if (rig.firstPerson && !overview && !coarse && !document.pointerLockElement) void renderer.domElement.requestPointerLock?.()?.catch(()=>{}); });
+  renderer.domElement.addEventListener('click', () => { if (rig.firstPerson && !overview && !coarse && !document.pointerLockElement && !cameraBlocked()) void renderer.domElement.requestPointerLock?.()?.catch(()=>{}); });
   host.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') host.classList.add('has-touch'); });
   if (coarse) {
-    get('.walk-help').textContent = '左搖桿移動 · 右側拖曳轉頭 · 按鈕奔跑／互動／跳躍';
+    get('.walk-help').textContent = '左搖桿移動 · 右側拖曳轉頭 · 按鈕奔跑／互動／手勢／跳躍';
     // Phone players read touch controls first; the key tables stay below for keyboards on tablets.
     const pane = get('[data-pane=help]'), heading = [...pane.querySelectorAll('h3')].find(h => h.textContent === '手機操作');
     if (heading) pane.prepend(heading, heading.nextElementSibling!);
   }
 
   const searchInput = get<HTMLInputElement>('.walk-search input');
+  // The last input's result is reused by Enter: a restroom search plans a route to every restroom.
+  let lastSearch:{term:string;matches:WalkDestination[]}|undefined;
+  const searchMatches=(term:string)=>lastSearch?.term===term?lastSearch.matches:(lastSearch={term,matches:searchDestinations(world.destinations,term,d=>{
+    if(!routesValidated||!navigation)return Infinity;
+    const path=planRoute(new T.Vector3(...d.position));
+    return path.length?path.reduce((sum,p,i)=>sum+(i?p.distanceTo(path[i-1]):physics.position.distanceTo(p)),0):Infinity;
+  })}).matches;
+  searchInput.addEventListener('keydown',e=>{if(e.key!=='Enter')return;e.preventDefault();const first=searchMatches(searchInput.value.normalize('NFKC').toUpperCase().replace(/\s/g, ''))[0];lastSearch=undefined;if(first){setMenu(false);goTo(first);}});
   searchInput.addEventListener('input', () => {
     const term = searchInput.value.normalize('NFKC').toUpperCase().replace(/\s/g, ''), results = get('.walk-results');
     if (!term) { results.hidden = true; return; }
-    const matches = world.destinations.filter(d => (d.label + ' ' + d.buildingId + ' ' + (d.displayName ?? '')).normalize('NFKC').toUpperCase().includes(term)).slice(0, 12);
+    lastSearch = undefined; const matches = searchMatches(term);
     const places = (routes?.anchorIds ?? []).filter(id => routes!.label(id).normalize('NFKC').toUpperCase().includes(term)).slice(0, 6);
-    results.innerHTML = matches.length || places.length ? places.map(id => `<button data-place="${safe(id)}"><strong>${safe(routes!.label(id))}</strong><small>校園步道 · 帶我走過去 →</small></button>`).join('') + matches.map(d => `<button data-destination="${safe(d.id)}"><strong>${safe(d.displayName ? `${d.label} ${d.displayName}` : d.label)}</strong><small>${safe(d.floorId)} · 帶我走到門口 →</small></button>`).join('')
+    results.innerHTML = matches.length || places.length ? places.map(id => `<button data-place="${safe(id)}"><strong>${safe(routes!.label(id))}</strong><small>校園步道 · 帶我走過去 →</small></button>`).join('') + matches.map(d => `<button data-destination="${safe(d.id)}"><strong>${safe(d.displayName && d.displayName !== d.label ? `${d.label} ${d.displayName}` : d.label)}</strong><small>${safe(d.floorId)} · 帶我走到門口 →</small></button>`).join('')
       : '<div class="walk-empty">找不到這個名稱。可試房號前綴，或選擇上方大樓與樓層探索。</div>';
     results.hidden = false;
   });
   host.addEventListener('click', e => {
     const target = e.target as HTMLElement;
+    if(passenger.carried&&!target.closest('[data-stop],[data-lift-hold],[data-action=exit],[data-action=reset]'))return;
     const bodyBtn = target.closest<HTMLElement>('[data-body]'), palBtn = target.closest<HTMLElement>('[data-palette]');
     if (bodyBtn) { if (bodyBtn.dataset.body !== look().body) { campus.setPlayer({ body: bodyBtn.dataset.body as Body, palette: 0 }); markChar(); loadCharacter(); } return; }
     if (palBtn) { campus.setPlayer({ palette: Number(palBtn.dataset.palette) }); markChar(); loadCharacter(); return; }
@@ -767,16 +807,18 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     const destination = target.closest<HTMLElement>('[data-destination]')?.dataset.destination;
     if (destination) { const d = world.destinations.find(d => d.id === destination); if (d) { setMenu(false); goTo(d); } return; }
     const action = target.closest<HTMLElement>('[data-action]')?.dataset.action;
+    if(passenger.carried&&action!=='exit'&&action!=='reset')return;
     switch (action) {
       case 'start': case 'walk': chooseMode(false); break;
       case 'overview': chooseMode(true); break;
+      case 'gesture': toggleGestures();break;
       case 'run': input.runToggle = !input.runToggle; break;
       case 'camera': cycleCameraMode(); break;
       case 'lock': toggleLock(); break;
       case 'door': interact(); break;
       case 'sky': cycleSky(); break;
       case 'sound': void sound.toggle().then(soundLabel); break;
-      case 'jump': clearAuto(true); input.jump = true; break;
+      case 'jump': avatar.cancelGesture();gestures.close();clearAuto(true); input.jump = true; break;
       case 'reset': resetToSpawn(); break;
       case 'menu': setMenu(!menuOpen(), 'play'); break;
       case 'help': toggleHelp(); break;
@@ -911,8 +953,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       const center = overview ? orbit.target : foot, heading = overview ? Math.atan2(camera.position.x - orbit.target.x, camera.position.z - orbit.target.z) : rig.yaw;
       if (!minimapSheet.draw(ctx, center, heading, guideOverride ? guideOverride.point : director?.goal())) campusUi?.drawMinimap(ctx, center, heading);
     }
-    const door = nearestDoor(world, foot), inLift = liftWins(world, foot);
-    if (!inLift) liftPanel.hidden = true;
+    const lift=cabinLift();if(lift&&!photo.active&&!gestures.open)showLift(lift);else {liftPanel.hidden=true;panelLift=undefined;}
   }
   function placeSign(door: WorldDoor) {
     const pose = doorSignPose(door, signWalls.get(door.id));
@@ -923,7 +964,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   }
 
   function close() {
-    alive = false; stopLoadingTips(); campusUi?.dispose(); clearTimeout(statusTimer); cancelAnimationFrame(frameId);
+    clearPassenger();gestures.dispose();alive = false; stopLoadingTips(); campusUi?.dispose(); clearTimeout(statusTimer); cancelAnimationFrame(frameId);
     characterQa.dispose(); input.dispose(); window.removeEventListener('keydown',captureRhythmKey,{capture:true});document.removeEventListener('visibilitychange', soundVisibility); window.removeEventListener('campus-storage-error',storageFailed); window.removeEventListener('resize', resize); orbit.dispose(); navigation?.dispose();
     eventQueue.clear(); npcs?.releaseAllBorrowed(); eventInvite.remove();
     encounterScene.dispose();
@@ -1363,6 +1404,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   }
   /** G and the objective card: set off, or call off the walk under way. */
   function toggleFollow() {
+    if(passenger.carried)return;gestures.close();
     if (autoPath.length && autoDestination?.id === 'quest' && autoFollow) { clearAuto(); autoFollow = false; say('已停止帶路；再按一次可繼續。', 2500); return; }
     followQuest();
   }
@@ -1400,7 +1442,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     clearAuto();
     const reference=keepY?p.y:(physics.supportAt(p.x,p.z,p.y)??terrainRef?.heightAt(p.x,p.z)??p.y);
     if(!moveSafely(p.clone().setY(reference+.15),face)) { say('目的地附近沒有安全落點，這次移動尚未完成；請改用步道前往。',7000);return false; }
-    recoveryFailed=false;if(bike.riding)rig.protect();bike.riding=false;
+    clearPassenger();gestures.close();recoveryFailed=false;if(bike.riding)rig.protect();bike.riding=false;
     const yaw=face?Math.atan2(-(face.x-p.x),-(face.z-p.z)):rig.yaw;
     avatar.face(yaw);rig.yaw=yaw;rig.snap(physics.position);return true;
   }
@@ -1576,7 +1618,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   /** Close enough to talk to the person being walked to: stop short rather than lean on them. */
   const atAutoPerson = () => { if (!autoTarget?.startsWith('npc:')) return false; const n = npcs?.get(autoTarget.slice(4)); return !!n && Math.hypot(n.position.x - physics.position.x, n.position.z - physics.position.z) < NPC_ARRIVE && Math.abs(n.position.y - physics.position.y) < 1.2; };
   /** At the end of a walk, turn to what the walk was for, so it is in the picture without the player hunting for it. */
-  function cameraBlocked(){return !walking || overview || !!notebook?.open || menuOpen() || !!director?.blocking || photo.active || !!quiz?.open || guide.open || chase.active || recoveryFailed;}
+  function cameraBlocked(){return passenger.carried || gestures.open || !walking || overview || !!notebook?.open || menuOpen() || !!director?.blocking || photo.active || !!quiz?.open || guide.open || chase.active || recoveryFailed;}
   function faceTarget(target: string | undefined) {
     if (!target) return;
     const [kind, id] = target.split(':'), door = kind === 'dest' ? world.doors.find(d => d.id === findDestination(world.destinations, id)?.doorId) : undefined;
@@ -1625,19 +1667,41 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   function animate(time: number) {
     if (!alive) return;
     frameId = requestAnimationFrame(animate);
-    const rawDt = time - lastTime, dt = Math.min(rawDt / 1000, maxFrame); lastTime = time;
+    const rawDt = time - lastTime, dt = Math.min(Math.max(0, rawDt / 1000), maxFrame); lastTime = time; // rAF time can precede a lastTime reset (resume, QA stepping); never pass a negative dt
     renderer.info.reset();
     previous.copy(physics.position); direction.set(0, 0, 0); jumped = false;
-    guide.update(); input.mode = director?.ui.dialogueOpen ? 'dialogue' : guide.open || notebook?.open || menuOpen() || quiz?.open ? 'menu' : photo.active ? 'photo' : 'walk';
+    guide.update();
     if(wasBlocking&&!director?.blocking)rig.protect();
     const wasRiding=bike.riding;
+    const feet=[physics.position,...(npcs?.bodies(physics.position)??[]).map(b=>b.position)];
+    // Observe the car before it moves, so the anchor is captured at its old pose.
+    passenger.update(world,physics.position,walking&&!overview&&!bike.riding);
+    let liftsChanged=false;
+    for(const lift of world.lifts){
+      const cabin=insideLift(lift,physics.position);
+      if(cabin&&(photo.active||!!director?.blocking||gestures.open||menuOpen()||!!notebook?.open||guide.open||!!quiz?.open))lift.runtime.holdOpen();
+      const s=lift.runtime.update(dt,{doorway:liftDoorOccupied(lift,feet),cabin}),key=`${s.phase}|${s.carPositionWorld[1]}|${s.doorOpen01}|${s.atFloorId}|${s.targetFloorId}`;
+      if(liftPoses.get(lift)!==key){liftPoses.set(lift,key);syncLift(lift);liftsChanged=true;}
+    }
+    if(liftsChanged)physics.setLiftObstacles(liftObstacles(world.lifts));
+    const carried=passenger.update(world,physics.position,walking&&!overview&&!bike.riding);
+    if(carried){
+      physics.carry(carried);clearAuto(true);avatar.cancelGesture();
+      if(!carriedCamera){carriedCamera={yaw:rig.yaw,pitch:rig.pitch,distance:rig.distance,locked:rig.locked};gestures.close();if(photo.active)photo.exit();if(document.pointerLockElement)document.exitPointerLock();}
+      rig.locked=true;carriedCamera.doorYaw=passenger.doorYaw()??carriedCamera.doorYaw;
+    }
+    // On arrival face the open door (not the back wall the rider walked in facing), so W walks out.
+    if(!passenger.carried&&carriedCamera){rig.yaw=carriedCamera.doorYaw??carriedCamera.yaw;rig.pitch=carriedCamera.pitch;rig.distance=carriedCamera.distance;rig.locked=carriedCamera.locked;carriedCamera=undefined;rig.snap(physics.position);rig.protect();}
+    // Publish this frame's passenger state before accepting input between frames. The opening
+    // frame must already accept walking; a one-frame lag discards the first exit key/pointerdown.
+    input.mode = passenger.carried?'carried':gestures.open?'menu':director?.ui.dialogueOpen ? 'dialogue' : guide.open || notebook?.open || menuOpen() || quiz?.open ? 'menu' : photo.active ? 'photo' : 'walk';
     scheduleNpcs();
-    const pausedEvents = !walking || overview || !!notebook?.open || menuOpen() || !!director?.blocking || photo.active || !!quiz?.open || chase.active || autoPath.length > 0;
+    const pausedEvents = passenger.carried || gestures.open || !walking || overview || !!notebook?.open || menuOpen() || !!director?.blocking || photo.active || !!quiz?.open || chase.active || autoPath.length > 0;
     encounters?.update(dt, encounterWorld(), pausedEvents || !!campusEvents?.activity || eventQueue.busy);
     animateEncounter(dt, time, pausedEvents);
     if (!notebook?.open && !menuOpen() && !director?.blocking) quests?.update(questWorld());
-    if (walking && !overview && !recoveryFailed) {
-      if (photo.active || notebook?.open || menuOpen()) direction.set(0, 0, 0); else steer(time);
+    if (walking && !overview && !recoveryFailed && !carried && !passenger.carried) {
+      if (gestures.open || photo.active || notebook?.open || menuOpen()) direction.set(0, 0, 0); else steer(time);
       // Dialogue and chapter cards hold the player; Space advances like E.
       if (director?.blocking) { direction.set(0, 0, 0); if (input.takeJump()) director.press(); }
       // A dialogue ends the walk under way (its goal may be out of date by the end); G's walk resumes to whatever is next.
@@ -1683,7 +1747,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       const model = notebookModel(), key = JSON.stringify(model);
       if (key !== journalKey) { journalKey = key; notebook.update(model); }
     }
-    if (!overview && storyStarted && !photo.active && !notebook?.open && !menuOpen()) director?.update(time, dt);
+    if (!passenger.carried && !gestures.open && !overview && storyStarted && !photo.active && !notebook?.open && !menuOpen()) director?.update(time, dt);
     else director?.ui.badge(null);
     if(eventPose.sitting || rhythm){director?.ui.badge(null);director?.ui.pointer(null);}
     updateEventSpeech(time);
@@ -1726,6 +1790,10 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       if (walking && !overview && physics.onGround) sound.footsteps(speed, dt, indoors ? 'hard' : 'soft');
     }
     if (photo.active) { photo.update(dt, input.keys); avatar.setOpacity(1); }
+    else if(passenger.carried){
+      passenger.updateCamera(camera);
+      avatar.setOpacity(0);
+    }
     else if (!overview) {
       rig.poseView=avatar.seatView;
       rig.update(dt, { foot: physics.position, running: input.running, moving: speed > .25, gait:bike.riding?'ride':input.running?'run':'walk', blocked:cameraBlocked(), follow:cameraFollowTarget({mode:rig.mode,axes:input.axes,speed,heading:avatar.heading,route:autoPath.length>0,blocked:cameraBlocked()}) });
@@ -1762,6 +1830,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   // Read-only acceptance hooks: observations and real input paths, never hidden teleport navigation.
   (window as unknown as { campusWalk: unknown }).campusWalk = {
     get position() { return physics.position.toArray(); },
+    get lifts(){return world.lifts.map(l=>l.runtime.snapshot);},
+    get motion(){return bike.riding?{kind:'bike'}:passenger.motion;},
     get mode() { return { overview, cameraMode:rig.mode, firstPerson: rig.firstPerson, walking, running: input.running, locked: rig.locked, tier }; },
     get heading() { return rig.yaw; },
     get onGround() { return physics.onGround; },

@@ -1,9 +1,10 @@
+import type { GestureId } from '../world/v12-types';
 import {configureCharacterCoverage} from '../render/character-surface';
 import * as T from 'three';
 import { ChairPose, type Seat } from '../world/seats';
 import { RideRig, soleSide, type RideDiagnostics } from './ride-rig';
 
-export type AvatarState = 'idle' | 'walk' | 'run' | 'jump' | 'fall' | 'land' | 'wave' | 'talk' | 'ride' | 'sit';
+export type AvatarState = 'idle' | 'walk' | 'run' | 'jump' | 'fall' | 'land' | 'wave' | 'bow' | 'thumbsUp' | 'clap' | 'talk' | 'ride' | 'sit';
 
 /** Clip names tried per state, first match wins (our Blender rigs and the CC0 packs differ). */
 const CLIPS: Record<AvatarState, string[]> = {
@@ -14,11 +15,12 @@ const CLIPS: Record<AvatarState, string[]> = {
   fall: ['Fall', 'Jump_Idle', 'Jump_Loop', 'Jump'],
   land: ['Land', 'Jump_Land'],
   wave: ['Wave', 'Wave_Loop'],
+  bow: ['Bow'], thumbsUp: ['ThumbsUp'], clap: ['Clap'],
   talk: ['Talk', 'Talking', 'Idle'],
   ride: ['Ride'],
   sit: ['Sit','Sit_Idle','Sitting'],
 };
-const ONE_SHOT: AvatarState[] = ['jump', 'land', 'wave'];
+const ONE_SHOT: AvatarState[] = ['jump', 'land', 'wave', 'bow', 'thumbsUp', 'clap'];
 const damp = (k: number, dt: number) => 1 - Math.exp(-k * dt);
 const wrap = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
 
@@ -77,6 +79,7 @@ export class Avatar {
     this.chair?.release();this.seat=value?seat:undefined;
     this.seated=value;
     this.seatedHeading=value?heading:undefined;
+    this.oneShotLeft=0;
     if(value){this.riding=false;this.wasRiding=false;this.rideRig?.reset();this.mixer?.stopAllAction();this.current=undefined;this.setState('sit');}
     else {this.mixer?.stopAllAction();this.current=undefined;this.setState('idle');this.mixer?.update(0);if(this.model)this.model.position.y=0;}
   }
@@ -130,7 +133,8 @@ export class Avatar {
   face(angle: number) { this.facing = angle; this.root.rotation.y = angle; }
 
   /** Play a gesture (wave/talk) until movement resumes. */
-  gesture(state: 'wave' | 'talk') { if(!this.seated)this.setState(state); }
+  gesture(state: GestureId | 'talk') { if(!this.seated&&!this.riding){if(this.state===state){this.current?.stop();this.current=undefined;}this.setState(state);} }
+  cancelGesture(){if(['wave','bow','thumbsUp','clap'].includes(this.state)){this.oneShotLeft=0;this.setState('idle');}}
 
   setOpacity(alpha: number) {
     this.root.visible = alpha > .02;
@@ -177,15 +181,16 @@ export class Avatar {
 
     // Sitting uses the authored pose; normal locomotion and ground-foot IK must not undo it.
     if(this.seated) {
-      this.state='sit';this.root.scale.set(1,1,1);this.root.rotation.x=0;
+      this.setState('sit');this.root.scale.set(1,1,1);this.root.rotation.x=0;
       if(this.vehicle)this.vehicle.visible=false;
       this.mixer?.update(dt);if(this.seat)this.chair?.apply(this.seat,f.foot,f.supportAt??(()=>f.surfaceHeight??f.foot.y));this.wasGround=f.onGround;return;
     }
     // State machine.
     const moving = Math.min(f.speed, f.intendedSpeed) > .25;
+    if(f.intendedSpeed>.05)this.cancelGesture();
     if(this.riding&&!this.rideReady)this.riding=false;
     if(this.riding){
-      if(!this.wasRiding){this.mixer?.stopAllAction();this.current=undefined;this.rideRig?.reset();}
+      if(!this.wasRiding){this.mixer?.stopAllAction();this.current=undefined;this.rideRig?.reset();this.oneShotLeft=0;}
       this.state='ride';this.root.scale.set(1,1,1);
       let contacts=f.rideContacts;
       if(f.supportAt){const dx=-Math.sin(this.facing)*.52,dz=-Math.cos(this.facing)*.52,front=f.supportAt(f.foot.x+dx,f.foot.z+dz,f.foot.y),rear=f.supportAt(f.foot.x-dx,f.foot.z-dz,f.foot.y);if(front===undefined||rear===undefined){this.riding=false;this.rideRig?.reset();if(this.vehicle)this.vehicle.visible=false;return;}contacts={front,rear};}
@@ -200,7 +205,7 @@ export class Avatar {
     else if (f.onGround && !this.wasGround && f.airborneFor === 0 && (this.state === 'fall' || this.state === 'jump')) {
       this.setState(moving ? (f.intendedSpeed > f.runSpeed * .8 ? 'run' : 'walk') : 'land');
       this.squash = 1;
-    } else if ((f.onGround || (f.airborneFor <= .15 && this.state !== 'jump')) && !(this.oneShotLeft > 0 && !moving) && !((this.state === 'talk' || this.state === 'wave') && !moving)) {
+    } else if ((f.onGround || (f.airborneFor <= .15 && this.state !== 'jump')) && !(this.oneShotLeft > 0 && !moving) && !((this.state === 'talk') && !moving)) {
       this.setState(moving ? (f.intendedSpeed > f.runSpeed * .8 ? 'run' : 'walk') : 'idle');
     }
     this.wasGround = f.onGround;
@@ -249,8 +254,8 @@ export class Avatar {
   }
 
   private play(state: AvatarState, fade: number) {
-    const action = this.actions.get(state) ?? (state === 'land' || state === 'wave' || state === 'talk' ? this.actions.get('idle') : undefined);
-    this.oneShotLeft = ONE_SHOT.includes(state) && action ? action.getClip().duration * .9 : 0;
+    const action = this.actions.get(state) ?? (ONE_SHOT.includes(state) || state === 'talk' ? this.actions.get('idle') : undefined);
+    this.oneShotLeft = ONE_SHOT.includes(state) ? action?.getClip().duration ?? 1.2 : 0;
     if (!action || action === this.current) return;
     action.reset().setEffectiveWeight(1).play();
     if (this.current && fade > 0) this.current.crossFadeTo(action, fade, false);

@@ -14,7 +14,8 @@ ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / 'data/sources/fonts/NotoSansTC-VF.ttf'
 OUT = ROOT / 'public/assets/fonts/noto-sans-tc.woff2'
 TEXT_FILES = [*ROOT.glob('src/**/*.ts'), *ROOT.glob('src/**/*.css'), ROOT / 'index.html',
-              *[ROOT / 'public/data' / n for n in ('chapters.json', 'campus-info.json', 'story-zones.json', 'campus-map.json', 'rooms.json', 'floors.json', 'npcs.json', 'collection.json', 'quiz.json', 'quests.json', 'encounters.json')],
+              *[ROOT / 'public/data' / n for n in ('chapters.json', 'campus-info.json', 'story-zones.json', 'campus-map.json', 'rooms.json', 'floors.json', 'npcs.json', 'collection.json', 'quiz.json', 'quests.json', 'encounters.json', 'sea.json', 'bus-routes.json', 'sports.json', 'v12-sources.json')],
+              *ROOT.glob('public/data/interiors/*.json'),
               *ROOT.glob('public/data/walkthrough/*.json')]
 
 chars = {chr(c) for c in range(0x20, 0x7f)} | set('　、。，．：；？！「」『』（）〔〕【】《》〈〉—…・～／％＋－＝①②③④⑤⑥⑦⑧⑨⑩↗→←↑↓⇧⟲×▼▲●○')

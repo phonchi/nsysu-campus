@@ -53,6 +53,133 @@ def records(name: str, errors: list[str]) -> list[dict]:
     return data
 
 
+WALK = ROOT / 'public/data/walkthrough'
+WALK_BUILDINGS = ['SC', 'EN', 'BI', 'PH', 'CH', 'EC', 'MS', 'EV']
+WC_KEYWORDS = ['廁所', '洗手間', 'WC', 'toilet']
+
+
+def walkthrough_floors() -> dict:
+    """{buildingId: {floorId: floor}} from the walkthrough building files (read-only)."""
+    out = {}
+    for bid in WALK_BUILDINGS:
+        path = WALK / f'{bid}.json'
+        out[bid] = {f['id']: f for f in json.loads(path.read_text())['floors']} if path.exists() else {}
+    return out
+
+
+def segment_distance(p, a, b) -> float:
+    dx, dz = b[0] - a[0], b[1] - a[1]; length = dx * dx + dz * dz
+    t = 0 if length == 0 else max(0, min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dz) / length))
+    return math.hypot(p[0] - a[0] - t * dx, p[1] - a[1] - t * dz)
+
+
+def inside(p, polygon) -> bool:
+    hit = False
+    for a, b in zip(polygon, polygon[1:] + polygon[:1]):
+        if (a[1] > p[1]) != (b[1] > p[1]) and p[0] < (b[0] - a[0]) * (p[1] - a[1]) / (b[1] - a[1]) + a[0]:
+            hit = not hit
+    return hit
+
+
+def is_point(value: object) -> bool:
+    return isinstance(value, list) and len(value) == 2 and all(finite(v) for v in value)
+
+
+def is_evidence(value: object) -> bool:
+    return isinstance(value, dict) and bool(value.get('sourceId')) and bool(value.get('locator')) and value.get('basis') in ('map-derived', 'schematic')
+
+
+def check_lifts(walk: dict, errors: list[str]) -> None:
+    """LiftGeometryV12 (docs/spec-v12.md §2): every landing door sits on its shaft boundary."""
+    structure = json.loads((WALK / 'campus-structure.json').read_text())
+    lifts = structure.get('lifts', {}); replaced: list[str] = []
+    services = {v.get('id') for floors in walk.values() for f in floors.values() for v in f.get('verticalServices') or []}
+    for bid in WALK_BUILDINGS:
+        if not lifts.get(bid):
+            errors.append(f'lift {bid}: building has no lift'); continue
+        for lift in lifts[bid]:
+            lid = lift.get('id', bid + '-lift-?'); shaft = lift.get('shaftPolygon')
+            if lift.get('buildingId') != bid: errors.append(f'lift {lid}: buildingId missing or wrong')
+            if not is_point(lift.get('center')) or not finite(lift.get('angle')) or not finite(lift.get('size')) or lift.get('size', 0) <= 0:
+                errors.append(f'lift {lid}: legacy center/angle/size missing'); continue
+            if not isinstance(shaft, list) or len(shaft) < 3 or not all(is_point(p) for p in shaft):
+                errors.append(f'lift {lid}: shaftPolygon missing or invalid'); continue
+            if not inside(lift['center'], shaft): errors.append(f'lift {lid}: center is outside shaftPolygon')
+            xs = [p[0] for p in shaft]; zs = [p[1] for p in shaft]; cabin = lift.get('cabinSize')
+            if not is_point(cabin) or min(cabin) <= 0 or max(cabin) > max(max(xs) - min(xs), max(zs) - min(zs)) + 1e-6:
+                errors.append(f'lift {lid}: cabinSize missing or larger than the shaft')
+            if lift.get('basis') not in ('map-derived', 'schematic'): errors.append(f'lift {lid}: basis invalid')
+            if not is_evidence(lift.get('evidence')): errors.append(f'lift {lid}: evidence must be {{sourceId, locator, basis}}')
+            elif lift['evidence']['basis'] != lift.get('basis'): errors.append(f'lift {lid}: basis differs from evidence.basis')
+            ids = lift.get('replacesServiceIds')
+            if not isinstance(ids, list) or not all(isinstance(i, str) and i for i in ids):
+                errors.append(f'lift {lid}: replacesServiceIds missing'); ids = []
+            replaced += ids
+            stops = lift.get('stops') or []
+            if len(stops) < 2: errors.append(f'lift {lid}: fewer than two stops')
+            ux, uz = math.cos(lift['angle']), math.sin(lift['angle'])
+            for i in ids:
+                if i.endswith('-shaft-x'): errors.append(f'lift {lid}: {i} is a different shaft and must not be replaced')
+                if '-car@' not in i and i not in services: errors.append(f'lift {lid}: replaced service {i} does not exist')
+                if '-car@' in i and i not in [f"{lid}-car@{s.get('floorId')}" for s in stops]: errors.append(f'lift {lid}: car id {i} has no stop')
+            for stop in stops:
+                fid = stop.get('floorId'); where = f'lift {lid} @ {fid}'
+                if fid not in walk.get(bid, {}): errors.append(f'{where}: unknown floor'); continue
+                if not finite(stop.get('level')) or not finite(stop.get('storey')): errors.append(f'{where}: level/storey missing')
+                if f'{lid}-car@{fid}' not in ids: errors.append(f'{where}: car id missing from replacesServiceIds')
+                if not is_evidence(stop.get('evidence')): errors.append(f'{where}: stop evidence missing')
+                door = stop.get('landingDoor') or {}; approach = stop.get('approach')
+                if not is_point(door.get('center')) or not is_point(door.get('tangent')) or not finite(door.get('clearWidth')) or not is_point(approach):
+                    errors.append(f'{where}: landingDoor/approach missing'); continue
+                edge = min(zip(shaft, shaft[1:] + shaft[:1]), key=lambda e: segment_distance(door['center'], *e))
+                if segment_distance(door['center'], *edge) > .02: errors.append(f'{where}: landing door is not on the shaft boundary')
+                tx, tz = door['tangent']; length = math.hypot(edge[1][0] - edge[0][0], edge[1][1] - edge[0][1]) or 1
+                if abs(math.hypot(tx, tz) - 1) > 1e-3: errors.append(f'{where}: door tangent is not a unit vector')
+                if abs(tx * ux + tz * uz) > 1e-3: errors.append(f'{where}: door tangent disagrees with the lift angle')
+                if abs(tx * (edge[1][1] - edge[0][1]) - tz * (edge[1][0] - edge[0][0])) / length > 1e-3: errors.append(f'{where}: door tangent is not along the shaft wall')
+                if not .8 <= door['clearWidth'] <= 1.2 or door['clearWidth'] > length + 1e-6: errors.append(f'{where}: clearWidth out of range')
+                if inside(approach, shaft): errors.append(f'{where}: approach point is inside the shaft')
+                if (approach[0] - lift['center'][0]) * ux + (approach[1] - lift['center'][1]) * uz >= 0: errors.append(f'{where}: approach is not on the opening side (opening = -angle)')
+                if not .3 <= math.hypot(approach[0] - door['center'][0], approach[1] - door['center'][1]) <= 1.5: errors.append(f'{where}: approach is not in front of the landing door')
+                # The runtime cuts the whole shaft out of upper slabs and centres the car (cabinSize[0] along the door
+                # axis): a car short of the sill leaves a gap a rider falls through on the way out.
+                if is_point(cabin):
+                    sill = (lift['center'][0] - door['center'][0]) * ux + (lift['center'][1] - door['center'][1]) * uz - cabin[0] / 2
+                    if sill > .16: errors.append(f'{where}: car stops {sill:.2f} m short of the landing door (shaft deeper than cabinSize[0])')
+    if len(replaced) != len(set(replaced)): errors.append('lifts: replacesServiceIds are not globally unique')
+    if len(services) != sum(len(f.get('verticalServices') or []) for floors in walk.values() for f in floors.values()) or None in services:
+        errors.append('verticalServices: missing or duplicate ids')
+
+
+def check_v12_rooms(rooms: list[dict], walk: dict, errors: list[str]) -> None:
+    """rooms.json rows for split sub-rooms (aliases, no parent row) and restrooms (kind, gender, accessible, keywords)."""
+    rows = {r.get('walkRoomId'): r for r in rooms if r.get('v12')}
+    codes = {(r.get('buildingId'), r.get('code')) for r in rooms if not r.get('v12')}
+    for bid, floors in walk.items():
+        for fid, floor in floors.items():
+            for room in floor.get('rooms', []):
+                restroom = room.get('kind') == 'restroom'; child = bool(room.get('splitFrom')) and not restroom
+                if not restroom and not child: continue
+                row = rows.get(room['id'])
+                if row is None:
+                    errors.append(f'rooms.json: no row for {room["id"]}'); continue
+                if row.get('buildingId') != bid or row.get('floorId') != fid or row.get('code') != room.get('code'):
+                    errors.append(f'rooms.json {row["id"]}: building/floor/code differs from the walkthrough room')
+                if restroom:
+                    if row.get('kind') != 'restroom' or row.get('gender') != room.get('gender') or row.get('accessible') is not room.get('accessible'):
+                        errors.append(f'rooms.json {row["id"]}: kind/gender/accessible differs from the walkthrough room')
+                    if not isinstance(row.get('keywords'), list) or any(k not in row['keywords'] for k in WC_KEYWORDS):
+                        errors.append(f'rooms.json {row["id"]}: keywords must include {WC_KEYWORDS}')
+                else:
+                    if row.get('aliases') != room.get('aliases') or not row.get('aliases'):
+                        errors.append(f'rooms.json {row["id"]}: aliases differ from the walkthrough room')
+                    for alias in room.get('aliases', []):
+                        if (bid, alias) in codes: errors.append(f'rooms.json: parent row {alias} must not be kept beside its sub-rooms')
+    known = {room['id'] for floors in walk.values() for floor in floors.values() for room in floor.get('rooms', [])}
+    for rid, row in rows.items():
+        if rid not in known: errors.append(f'rooms.json {row["id"]}: walkRoomId {rid} does not exist')
+
+
 def build_snapshot() -> tuple[dict, list[str]]:
     errors: list[str] = []
     sources = records('sources', errors)
@@ -105,10 +232,23 @@ def build_snapshot() -> tuple[dict, list[str]]:
             snapshot['floors'][fid] = {'sha256': sha, 'dimensions': dimensions, 'metadata': metadata}
         except (OSError, ValueError, KeyError) as exc:
             errors.append(f'floor {fid}: {exc}')
+    walk = walkthrough_floors()
+    check_v12_rooms(rooms, walk, errors)
+    check_lifts(walk, errors)
     for room in rooms:
         rid = room['id']
         floor = floor_by_id.get(room.get('floorId'))
         source = source_by_id.get(room.get('sourceId'))
+        # v12 restrooms also exist on storeys that have no entry in floors.json (basements, the other seven
+        # buildings): there the walkthrough floor is the reference, and its sourceId must match.
+        walk_floor = walk.get(room.get('buildingId'), {}).get(room.get('floorId')) if room.get('kind') == 'restroom' and room.get('v12') else None
+        if walk_floor is not None and floor is None:
+            if walk_floor.get('sourceId') != room.get('sourceId'):
+                errors.append(f'room {rid}: sourceId differs from its walkthrough floor')
+            for axis in ('x', 'y'):
+                if not finite(room.get(axis)) or not 0 <= room[axis] <= 1:
+                    errors.append(f'room {rid}: {axis} is not a normalized coordinate')
+            continue
         if floor is None:
             errors.append(f'room {rid}: unknown floorId {room.get("floorId")}')
         if source is None:
@@ -123,7 +263,7 @@ def build_snapshot() -> tuple[dict, list[str]]:
         # never leak into BI/PH or another building during ingestion/merging.
         if re.match(r'^SC\s*\d', code, re.I) and (room.get('buildingId') != 'SC' or not floor or floor.get('buildingId') != 'SC' or not source or source.get('buildingId') != 'SC'):
             errors.append(f'room {rid}: SC room code assigned to another building/source')
-        if room.get('buildingId') == 'SC' and not re.match(r'^SC\s*\d', code, re.I):
+        if room.get('buildingId') == 'SC' and room.get('kind') != 'restroom' and not re.match(r'^SC\s*\d', code, re.I):
             errors.append(f'room {rid}: non-SC room code assigned to SC')
     # Lock the campus reference and the derived image together. Coordinate
     # annotations must not silently survive a changed map or changed preview.

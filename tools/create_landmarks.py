@@ -708,9 +708,9 @@ def lm_library():
 @landmark
 def lm_liberal_arts():
     lm = LM('liberal-arts', '文學院', 3000)
-    la = next(m for m in json.loads((ROOT / 'artifacts/v3/T3/corrections.json').read_text(encoding='utf-8'))['missing'] if m['id'] == 'LA')
-    place('liberal-arts', None, la['world'], 0., '待 T3 對位：OSM 無文學院輪廓；T3 以藝術大樓偏移推估 ±60 m，山坡地形約 +52 m（elevation 取 Terrain.heightAt）。量體為可替換的通用院館。',
-          elevation=None, uncertainty_m=la.get('uncertainty_m'))
+    # v12: re-placed from the local NLSC 2024 orthophoto trace (artifacts/v12/reference/sports-trace.json, hill.liberal-arts).
+    place('liberal-arts', None, (-564.5, -889.5), -0.7278, 'v12：依 NLSC 2024 正射影像描圖重新對位（本機參考，artifacts/v12/reference/sports-trace.json）。中庭式院館群中心 (-564.5,-889.5)、長軸西北—東南 41.7°、外包約 87×42 m，信心中；量體仍為通用院館，拱廊面朝西南（海側）。',
+          elevation=None, uncertainty_m=8, basis='orthophoto-trace')
     brick = '#b85a45'; B = lm.tile('brick', 'brick', span=(2, 2), color=brick); R = lm.solid(P['roof']); T = lm.solid(P['trim'])
     win = wintiles(lm, 'win', wall=brick, win=(.18, .26, .82, .76), mull=1)
     arch = lm.tile('arch', 'arch', span=(2, 3), wall=brick, box=(.12, .06, .88, 1), shape='semi', lit='warm')

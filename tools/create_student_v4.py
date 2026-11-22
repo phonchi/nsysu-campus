@@ -1,6 +1,6 @@
 """v4 stylized university students (art-direction-v4.md §8, spec-v4.md §6/§7.1).
 
-Run: "$(cat tools/blender-path.txt)" --background --python tools/create_student_v4.py [-- id1 id2 ...] [--preview]
+Run: "$(cat tools/blender-path.txt)" --background --python tools/create_student_v4.py [-- id1 id2 ...] [--preview] [--preview-clips] [--no-export]
 
 The body is authored here (no pack mesh): each part (head, neck, torso, sleeves, arms, hands, legs,
 shoes, hair, backpack ...) is built from primitives around the joints of the Quaternius
@@ -320,7 +320,7 @@ def make_material(name, img):
     m = v3.make_material(name, img)
     return m
 
-def build(cid, spec, preview=False):
+def build(cid, spec, preview=False, clip_preview=False, export=True):
     v3.reset()
     src = v3.SRC / ('quaternius-animated-women/AQsd9ngvKU.glb' if spec['body'] == 'f' else 'quaternius-animated-men/HMnuH5geEG.glb')
     arm, pack = v3.import_src(src)
@@ -356,7 +356,8 @@ def build(cid, spec, preview=False):
     tris = sum(len(p.vertices) - 2 for p in body.data.polygons)
     print('BUILT', cid, 'tris', tris, flush=True)
     if preview: render_preview(arm, body, cid)
-    v3.export(arm, body, cid)
+    if clip_preview: render_clip_preview(arm, body, cid)
+    if export: v3.export(arm, body, cid)
     return dict(id=cid, label=spec['label'], tris=tris, body=spec['body'])
 
 def render_preview(arm, body, cid):
@@ -379,6 +380,35 @@ def render_preview(arm, body, cid):
         arm.animation_data.action = walk; sc.frame_set(5); cam.location = (4.2, -4.2, .8); cam.rotation_euler = (math.pi / 2, 0, math.pi / 4)
         sc.render.filepath = str(PREVIEW / f'{cid}-walk.png'); bpy.ops.render.render(write_still=True)
         arm.animation_data.action = None
+
+CLIP_PREVIEW = ROOT / 'artifacts/v12/impl/glb-regen/preview'
+
+def render_clip_preview(arm, body, cid):
+    """Workbench renders of the v12 clips (front and side, a few frames each) for gesture/hand QA."""
+    CLIP_PREVIEW.mkdir(parents=True, exist_ok=True)
+    sc = bpy.context.scene
+    sc.render.engine = 'BLENDER_WORKBENCH'; sc.display.shading.light = 'STUDIO'; sc.display.shading.color_type = 'TEXTURE'
+    sc.display.shading.show_object_outline = True
+    sc.render.resolution_x, sc.render.resolution_y = 360, 360; sc.render.film_transparent = False
+    sc.world = sc.world or bpy.data.worlds.new('w')
+    cam_d = bpy.data.cameras.new('cp'); cam_d.type = 'ORTHO'; cam_d.ortho_scale = 2.2
+    cam = bpy.data.objects.new('cp', cam_d); sc.collection.objects.link(cam); sc.camera = cam
+    arm.data.pose_position = 'POSE'
+    for nm in v3.V12_CLIPS:
+        act = bpy.data.actions.get(nm)
+        if not act: continue
+        arm.animation_data.action = act; n = int(act.frame_range[1])
+        for k, fr in enumerate((n * .25, n * .5, n * .75)):
+            sc.frame_set(int(fr))
+            for view, loc, rot in (('front', (0, -6, .7), (math.pi / 2, 0, 0)), ('side', (6, 0, .7), (math.pi / 2, 0, math.pi / 2))):
+                cam.location = loc; cam.rotation_euler = rot
+                sc.render.filepath = str(CLIP_PREVIEW / f'{cid}-{nm}-{k}-{view}.png'); bpy.ops.render.render(write_still=True)
+            if nm in ('ThumbsUp', 'Clap', 'PaddleStand'):
+                hp = arm.matrix_world @ arm.pose.bones['Palm.R'].head
+                cam_d.ortho_scale = .55; cam.location = (hp.x - .9, hp.y - 4, hp.z); cam.rotation_euler = (math.pi / 2, 0, -.22)
+                sc.render.filepath = str(CLIP_PREVIEW / f'{cid}-{nm}-{k}-hand.png'); bpy.ops.render.render(write_still=True)
+                cam_d.ortho_scale = 2.2
+    arm.animation_data.action = None
 
 NPC = lambda **k: dict(label=k.pop('label'), **k)
 SPECS = {
@@ -416,6 +446,8 @@ SPECS = {
 if __name__ == '__main__':
     argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
     preview = '--preview' in argv
+    clip_preview = '--preview-clips' in argv
+    export = '--no-export' not in argv
     ids = [a for a in argv if not a.startswith('--')] or list(SPECS)
-    meta = [build(c, SPECS[c], preview) for c in ids]
+    meta = [build(c, SPECS[c], preview, clip_preview, export) for c in ids]
     print(json.dumps(meta, ensure_ascii=False))

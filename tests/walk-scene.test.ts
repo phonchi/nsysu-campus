@@ -25,7 +25,7 @@ afterAll(()=>{navigation?.dispose();physics?.dispose();});
 it('has a complete bidirectional path to every declared room and floor entrance',()=>{
  expect(world.frames.size).toBe(8);expect(world.floors.length).toBe(60);
  const polygonArea=(p:[number,number][])=>Math.abs(p.reduce((n,a,i)=>{const b=p[(i+1)%p.length];return n+a[0]*b[1]-b[0]*a[1];},0)/2);
- const sourceRooms=data.flatMap(b=>b.floors.flatMap(f=>effectiveRooms(f,structure).filter(r=>['room','room-candidate'].includes(r.kind)&&r.polygon.length>=3&&polygonArea(r.polygon)>=1.6).map(r=>r.id)));
+ const sourceRooms=data.flatMap(b=>b.floors.flatMap(f=>effectiveRooms(f,structure).filter(r=>['room','room-candidate','restroom'].includes(r.kind)&&r.polygon.length>=3&&polygonArea(r.polygon)>=1.6).map(r=>r.id)));
  expect(new Set(world.destinations.filter(d=>d.roomId).map(d=>d.roomId))).toEqual(new Set(sourceRooms));
  expect(world.destinations.length).toBe(sourceRooms.length+60);
  const failures:string[]=[];

@@ -1650,6 +1650,62 @@
           "matchedCodes": [],
           "note": "輪廓來自官方圖面區域；門點朝向僅示意，尚未逐間核對，區域可能含廊道、設備間或分割誤差。",
           "name": "未編號圖面空間候選"
+        },
+        {
+          "id": "PH-1F-WC-P1-F",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "女廁",
+          "gender": "female",
+          "accessible": false,
+          "planSymbol": "f",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "map-derived",
+          "designNote": "位置依平面圖，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_3",
+            "locator": "PH-1F 平面圖符號，像素 (310, 357)，local (-15.47, -0.09)",
+            "basis": "schematic",
+            "note": "範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_3",
+            "locator": "PH-1F 平面圖符號，像素 (310, 357)，local (-15.47, -0.09)",
+            "basis": "map-derived",
+            "note": "1F 平面圖只看到女廁圖示。"
+          },
+          "polygon": [
+            [
+              -16.5683,
+              -1.3941
+            ],
+            [
+              -14.3683,
+              -1.3941
+            ],
+            [
+              -14.3683,
+              1.2059
+            ],
+            [
+              -16.5683,
+              1.2059
+            ]
+          ],
+          "door": {
+            "position": [
+              -15.4683,
+              1.2059
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
         }
       ],
       "regionCandidates": [
@@ -3588,6 +3644,52 @@
         "basis": "schematic",
         "reviewRequired": true,
         "note": "虛擬外接通道；是否需在房間外牆開新服務門由幾何整合檢查，不宣稱實際入口。"
+      },
+      "virtualPortalOverrides": [
+        {
+          "roomId": "PH-1F-WC-P1-F",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_restrooms.py",
+            "entryId": "PH-1F-WC-P1-F"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "PH-1F-WC-P1-F": [
+                -15.4683,
+                1.2059
+              ],
+              "@public": [
+                -15.4683,
+                1.2259
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        }
+      ],
+      "v12Restrooms": {
+        "version": 1,
+        "tool": "tools/apply_v12_restrooms.py",
+        "note": "v12 廁所：位置依平面圖符號或沿用 1F 位置；範圍、男女分隔與門位為示意，內裝由 runtime 配置。",
+        "generated": [
+          "PH-1F-WC-P1-F"
+        ],
+        "sourceRooms": {},
+        "sourceIndex": {},
+        "sourceOverrides": [],
+        "placements": [
+          {
+            "slot": "P1",
+            "mode": "free",
+            "offset": 0.0
+          }
+        ],
+        "skipped": [],
+        "overridesKeyAdded": true
       }
     },
     {
@@ -5472,6 +5574,62 @@
           "matchedCodes": [],
           "note": "輪廓來自官方圖面區域；門點朝向僅示意，尚未逐間核對，區域可能含廊道、設備間或分割誤差。",
           "name": "未編號圖面空間候選"
+        },
+        {
+          "id": "PH-2F-WC-P1-F",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "女廁",
+          "gender": "female",
+          "accessible": false,
+          "planSymbol": "f",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "沿用 1F 位置，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_3",
+            "locator": "PH-2F 平面圖符號，像素 (302, 359)，local (-15.47, -0.09)",
+            "basis": "schematic",
+            "note": "範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_3",
+            "locator": "PH-2F 平面圖符號，像素 (302, 359)，local (-15.47, -0.09)",
+            "basis": "schematic",
+            "note": "沿用 PH-1F 平面圖符號的位置；本層未對圖。"
+          },
+          "polygon": [
+            [
+              -16.5683,
+              -1.3941
+            ],
+            [
+              -14.3683,
+              -1.3941
+            ],
+            [
+              -14.3683,
+              1.2059
+            ],
+            [
+              -16.5683,
+              1.2059
+            ]
+          ],
+          "door": {
+            "position": [
+              -15.4683,
+              1.2059
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
         }
       ],
       "regionCandidates": [
@@ -5829,6 +5987,52 @@
         "basis": "schematic",
         "reviewRequired": true,
         "note": "虛擬外接通道；是否需在房間外牆開新服務門由幾何整合檢查，不宣稱實際入口。"
+      },
+      "virtualPortalOverrides": [
+        {
+          "roomId": "PH-2F-WC-P1-F",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_restrooms.py",
+            "entryId": "PH-2F-WC-P1-F"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "PH-2F-WC-P1-F": [
+                -15.4683,
+                1.2059
+              ],
+              "@public": [
+                -15.4683,
+                1.2259
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        }
+      ],
+      "v12Restrooms": {
+        "version": 1,
+        "tool": "tools/apply_v12_restrooms.py",
+        "note": "v12 廁所：位置依平面圖符號或沿用 1F 位置；範圍、男女分隔與門位為示意，內裝由 runtime 配置。",
+        "generated": [
+          "PH-2F-WC-P1-F"
+        ],
+        "sourceRooms": {},
+        "sourceIndex": {},
+        "sourceOverrides": [],
+        "placements": [
+          {
+            "slot": "P1",
+            "mode": "free",
+            "offset": 0.0
+          }
+        ],
+        "skipped": [],
+        "overridesKeyAdded": true
       }
     },
     {
@@ -7857,7 +8061,7 @@
         },
         {
           "id": "PH-3F-region-021",
-          "kind": "room-candidate",
+          "kind": "restroom",
           "polygon": [
             [
               -16.1654,
@@ -7889,7 +8093,7 @@
             ],
             "note": "候選邊界上朝向灰色公共廊道/無其他房間區域的示意開口；非已逐門核對位置。"
           },
-          "basis": "map-derived",
+          "basis": "schematic",
           "reviewStatus": "candidate-review-required",
           "sourceRegionPixels": [
             [
@@ -7911,7 +8115,31 @@
           ],
           "matchedCodes": [],
           "note": "輪廓來自官方圖面區域；門點朝向僅示意，尚未逐間核對，區域可能含廊道、設備間或分割誤差。",
-          "name": "未編號圖面空間候選"
+          "name": "未編號圖面空間候選",
+          "code": "WC",
+          "displayName": "女廁",
+          "gender": "female",
+          "accessible": false,
+          "planSymbol": "f",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "designNote": "範圍依描圖，內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_3",
+            "locator": "PH-3F 平面圖符號，像素 (394, 331)，local (-15.47, -0.09)",
+            "basis": "map-derived",
+            "note": "範圍沿用官方圖面描圖區域。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_3",
+            "locator": "PH-3F 平面圖符號，像素 (394, 331)，local (-15.47, -0.09)",
+            "basis": "schematic",
+            "note": "沿用 PH-1F 平面圖符號的位置；本層未對圖。"
+          }
         }
       ],
       "regionCandidates": [
@@ -8745,6 +8973,86 @@
         "basis": "schematic",
         "reviewRequired": true,
         "note": "虛擬外接通道；是否需在房間外牆開新服務門由幾何整合檢查，不宣稱實際入口。"
+      },
+      "v12Restrooms": {
+        "version": 1,
+        "tool": "tools/apply_v12_restrooms.py",
+        "note": "v12 廁所：位置依平面圖符號或沿用 1F 位置；範圍、男女分隔與門位為示意，內裝由 runtime 配置。",
+        "generated": [],
+        "sourceRooms": {
+          "PH-3F-region-021": {
+            "id": "PH-3F-region-021",
+            "kind": "room-candidate",
+            "polygon": [
+              [
+                -16.1654,
+                -1.4979
+              ],
+              [
+                -16.1654,
+                1.2612
+              ],
+              [
+                -13.4652,
+                1.2612
+              ],
+              [
+                -13.4652,
+                -1.4979
+              ]
+            ],
+            "door": {
+              "position": [
+                -13.4652,
+                -0.1183
+              ],
+              "width": 1.1,
+              "basis": "schematic",
+              "outsideHint": [
+                -12.6652,
+                -0.1183
+              ],
+              "note": "候選邊界上朝向灰色公共廊道/無其他房間區域的示意開口；非已逐門核對位置。"
+            },
+            "basis": "map-derived",
+            "reviewStatus": "candidate-review-required",
+            "sourceRegionPixels": [
+              [
+                382.0,
+                307.0
+              ],
+              [
+                382.0,
+                354.0
+              ],
+              [
+                428.0,
+                354.0
+              ],
+              [
+                428.0,
+                307.0
+              ]
+            ],
+            "matchedCodes": [],
+            "note": "輪廓來自官方圖面區域；門點朝向僅示意，尚未逐間核對，區域可能含廊道、設備間或分割誤差。",
+            "name": "未編號圖面空間候選"
+          }
+        },
+        "sourceIndex": {
+          "PH-3F-region-021": 10
+        },
+        "sourceOverrides": [],
+        "placements": [
+          {
+            "slot": "P1",
+            "mode": "region",
+            "regionId": "PH-3F-region-021",
+            "offset": 0
+          }
+        ],
+        "skipped": [],
+        "overridesKeyAdded": true
       }
     },
     {
@@ -10050,7 +10358,7 @@
         },
         {
           "id": "PH-4F-region-026",
-          "kind": "room-candidate",
+          "kind": "restroom",
           "polygon": [
             [
               -16.2164,
@@ -10082,7 +10390,7 @@
             ],
             "note": "候選邊界上朝向灰色公共廊道/無其他房間區域的示意開口；非已逐門核對位置。"
           },
-          "basis": "map-derived",
+          "basis": "schematic",
           "reviewStatus": "candidate-review-required",
           "sourceRegionPixels": [
             [
@@ -10104,7 +10412,31 @@
           ],
           "matchedCodes": [],
           "note": "輪廓來自官方圖面區域；門點朝向僅示意，尚未逐間核對，區域可能含廊道、設備間或分割誤差。",
-          "name": "未編號圖面空間候選"
+          "name": "未編號圖面空間候選",
+          "code": "WC",
+          "displayName": "女廁",
+          "gender": "female",
+          "accessible": false,
+          "planSymbol": "f",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "designNote": "範圍依描圖，內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_3",
+            "locator": "PH-4F 平面圖符號，像素 (307, 357)，local (-15.47, -0.09)",
+            "basis": "map-derived",
+            "note": "範圍沿用官方圖面描圖區域。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_3",
+            "locator": "PH-4F 平面圖符號，像素 (307, 357)，local (-15.47, -0.09)",
+            "basis": "schematic",
+            "note": "沿用 PH-1F 平面圖符號的位置；本層未對圖。"
+          }
         },
         {
           "id": "PH-4F-region-027",
@@ -11484,6 +11816,86 @@
         "basis": "schematic",
         "reviewRequired": true,
         "note": "虛擬外接通道；是否需在房間外牆開新服務門由幾何整合檢查，不宣稱實際入口。"
+      },
+      "v12Restrooms": {
+        "version": 1,
+        "tool": "tools/apply_v12_restrooms.py",
+        "note": "v12 廁所：位置依平面圖符號或沿用 1F 位置；範圍、男女分隔與門位為示意，內裝由 runtime 配置。",
+        "generated": [],
+        "sourceRooms": {
+          "PH-4F-region-026": {
+            "id": "PH-4F-region-026",
+            "kind": "room-candidate",
+            "polygon": [
+              [
+                -16.2164,
+                -1.2992
+              ],
+              [
+                -16.2757,
+                1.3581
+              ],
+              [
+                -13.6171,
+                1.3581
+              ],
+              [
+                -13.5578,
+                -1.2412
+              ]
+            ],
+            "door": {
+              "position": [
+                -16.2372,
+                -0.3691
+              ],
+              "width": 1.1,
+              "basis": "schematic",
+              "outsideHint": [
+                -17.037,
+                -0.387
+              ],
+              "note": "候選邊界上朝向灰色公共廊道/無其他房間區域的示意開口；非已逐門核對位置。"
+            },
+            "basis": "map-derived",
+            "reviewStatus": "candidate-review-required",
+            "sourceRegionPixels": [
+              [
+                294.0,
+                337.0
+              ],
+              [
+                293.0,
+                382.0
+              ],
+              [
+                338.0,
+                382.0
+              ],
+              [
+                339.0,
+                338.0
+              ]
+            ],
+            "matchedCodes": [],
+            "note": "輪廓來自官方圖面區域；門點朝向僅示意，尚未逐間核對，區域可能含廊道、設備間或分割誤差。",
+            "name": "未編號圖面空間候選"
+          }
+        },
+        "sourceIndex": {
+          "PH-4F-region-026": 8
+        },
+        "sourceOverrides": [],
+        "placements": [
+          {
+            "slot": "P1",
+            "mode": "region",
+            "regionId": "PH-4F-region-026",
+            "offset": 0
+          }
+        ],
+        "skipped": [],
+        "overridesKeyAdded": true
       }
     },
     {
@@ -12677,7 +13089,7 @@
         },
         {
           "id": "PH-5F-region-017",
-          "kind": "room-candidate",
+          "kind": "restroom",
           "polygon": [
             [
               -16.0517,
@@ -12709,7 +13121,7 @@
             ],
             "note": "候選邊界上朝向灰色公共廊道/無其他房間區域的示意開口；非已逐門核對位置。"
           },
-          "basis": "map-derived",
+          "basis": "schematic",
           "reviewStatus": "candidate-review-required",
           "sourceRegionPixels": [
             [
@@ -12731,7 +13143,31 @@
           ],
           "matchedCodes": [],
           "note": "輪廓來自官方圖面區域；門點朝向僅示意，尚未逐間核對，區域可能含廊道、設備間或分割誤差。",
-          "name": "未編號圖面空間候選"
+          "name": "未編號圖面空間候選",
+          "code": "WC",
+          "displayName": "女廁",
+          "gender": "female",
+          "accessible": false,
+          "planSymbol": "f",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "designNote": "範圍依描圖，內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_3",
+            "locator": "PH-5F 平面圖符號，像素 (403, 330)，local (-15.47, -0.09)",
+            "basis": "map-derived",
+            "note": "範圍沿用官方圖面描圖區域。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_3",
+            "locator": "PH-5F 平面圖符號，像素 (403, 330)，local (-15.47, -0.09)",
+            "basis": "schematic",
+            "note": "沿用 PH-1F 平面圖符號的位置；本層未對圖。"
+          }
         },
         {
           "id": "PH-5F-region-019",
@@ -13889,6 +14325,86 @@
         "basis": "schematic",
         "reviewRequired": true,
         "note": "虛擬外接通道；是否需在房間外牆開新服務門由幾何整合檢查，不宣稱實際入口。"
+      },
+      "v12Restrooms": {
+        "version": 1,
+        "tool": "tools/apply_v12_restrooms.py",
+        "note": "v12 廁所：位置依平面圖符號或沿用 1F 位置；範圍、男女分隔與門位為示意，內裝由 runtime 配置。",
+        "generated": [],
+        "sourceRooms": {
+          "PH-5F-region-017": {
+            "id": "PH-5F-region-017",
+            "kind": "room-candidate",
+            "polygon": [
+              [
+                -16.0517,
+                -1.2101
+              ],
+              [
+                -16.111,
+                1.3877
+              ],
+              [
+                -13.512,
+                1.4469
+              ],
+              [
+                -13.4527,
+                -1.1521
+              ]
+            ],
+            "door": {
+              "position": [
+                -16.0725,
+                -0.3009
+              ],
+              "width": 1.1,
+              "basis": "schematic",
+              "outsideHint": [
+                -16.8722,
+                -0.3191
+              ],
+              "note": "候選邊界上朝向灰色公共廊道/無其他房間區域的示意開口；非已逐門核對位置。"
+            },
+            "basis": "map-derived",
+            "reviewStatus": "candidate-review-required",
+            "sourceRegionPixels": [
+              [
+                393.0,
+                311.0
+              ],
+              [
+                392.0,
+                355.0
+              ],
+              [
+                436.0,
+                356.0
+              ],
+              [
+                437.0,
+                312.0
+              ]
+            ],
+            "matchedCodes": [],
+            "note": "輪廓來自官方圖面區域；門點朝向僅示意，尚未逐間核對，區域可能含廊道、設備間或分割誤差。",
+            "name": "未編號圖面空間候選"
+          }
+        },
+        "sourceIndex": {
+          "PH-5F-region-017": 7
+        },
+        "sourceOverrides": [],
+        "placements": [
+          {
+            "slot": "P1",
+            "mode": "region",
+            "regionId": "PH-5F-region-017",
+            "offset": 0
+          }
+        ],
+        "skipped": [],
+        "overridesKeyAdded": true
       }
     },
     {
@@ -15472,7 +15988,7 @@
         },
         {
           "id": "PH-6F-region-019",
-          "kind": "room-candidate",
+          "kind": "restroom",
           "polygon": [
             [
               -16.1719,
@@ -15508,7 +16024,7 @@
             ],
             "note": "候選邊界上朝向灰色公共廊道/無其他房間區域的示意開口；非已逐門核對位置。"
           },
-          "basis": "map-derived",
+          "basis": "schematic",
           "reviewStatus": "candidate-review-required",
           "sourceRegionPixels": [
             [
@@ -15534,7 +16050,31 @@
           ],
           "matchedCodes": [],
           "note": "輪廓來自官方圖面區域；門點朝向僅示意，尚未逐間核對，區域可能含廊道、設備間或分割誤差。",
-          "name": "未編號圖面空間候選"
+          "name": "未編號圖面空間候選",
+          "code": "WC",
+          "displayName": "女廁",
+          "gender": "female",
+          "accessible": false,
+          "planSymbol": "f",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "designNote": "範圍依描圖，內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_3",
+            "locator": "PH-6F 平面圖符號，像素 (307, 361)，local (-15.47, -0.09)",
+            "basis": "map-derived",
+            "note": "範圍沿用官方圖面描圖區域。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_3",
+            "locator": "PH-6F 平面圖符號，像素 (307, 361)，local (-15.47, -0.09)",
+            "basis": "schematic",
+            "note": "沿用 PH-1F 平面圖符號的位置；本層未對圖。"
+          }
         },
         {
           "id": "PH-6F-region-020",
@@ -16774,6 +17314,94 @@
         "basis": "schematic",
         "reviewRequired": true,
         "note": "虛擬外接通道；是否需在房間外牆開新服務門由幾何整合檢查，不宣稱實際入口。"
+      },
+      "v12Restrooms": {
+        "version": 1,
+        "tool": "tools/apply_v12_restrooms.py",
+        "note": "v12 廁所：位置依平面圖符號或沿用 1F 位置；範圍、男女分隔與門位為示意，內裝由 runtime 配置。",
+        "generated": [],
+        "sourceRooms": {
+          "PH-6F-region-019": {
+            "id": "PH-6F-region-019",
+            "kind": "room-candidate",
+            "polygon": [
+              [
+                -16.1719,
+                -1.2838
+              ],
+              [
+                -16.2313,
+                1.3223
+              ],
+              [
+                -16.053,
+                1.4411
+              ],
+              [
+                -13.5659,
+                1.3817
+              ],
+              [
+                -13.5659,
+                -1.2838
+              ]
+            ],
+            "door": {
+              "position": [
+                -16.1927,
+                -0.3717
+              ],
+              "width": 1.1,
+              "basis": "schematic",
+              "outsideHint": [
+                -16.9925,
+                -0.3899
+              ],
+              "note": "候選邊界上朝向灰色公共廊道/無其他房間區域的示意開口；非已逐門核對位置。"
+            },
+            "basis": "map-derived",
+            "reviewStatus": "candidate-review-required",
+            "sourceRegionPixels": [
+              [
+                295.0,
+                341.0
+              ],
+              [
+                294.0,
+                385.0
+              ],
+              [
+                297.0,
+                387.0
+              ],
+              [
+                339.0,
+                386.0
+              ],
+              [
+                339.0,
+                341.0
+              ]
+            ],
+            "matchedCodes": [],
+            "note": "輪廓來自官方圖面區域；門點朝向僅示意，尚未逐間核對，區域可能含廊道、設備間或分割誤差。",
+            "name": "未編號圖面空間候選"
+          }
+        },
+        "sourceIndex": {
+          "PH-6F-region-019": 8
+        },
+        "sourceOverrides": [],
+        "placements": [
+          {
+            "slot": "P1",
+            "mode": "region",
+            "regionId": "PH-6F-region-019",
+            "offset": 0
+          }
+        ],
+        "skipped": [],
+        "overridesKeyAdded": true
       }
     },
     {
@@ -18478,7 +19106,7 @@
         },
         {
           "id": "PH-7F-region-031",
-          "kind": "room-candidate",
+          "kind": "restroom",
           "polygon": [
             [
               -16.1086,
@@ -18510,7 +19138,7 @@
             ],
             "note": "候選邊界上朝向灰色公共廊道/無其他房間區域的示意開口；非已逐門核對位置。"
           },
-          "basis": "map-derived",
+          "basis": "schematic",
           "reviewStatus": "candidate-review-required",
           "sourceRegionPixels": [
             [
@@ -18532,7 +19160,31 @@
           ],
           "matchedCodes": [],
           "note": "輪廓來自官方圖面區域；門點朝向僅示意，尚未逐間核對，區域可能含廊道、設備間或分割誤差。",
-          "name": "未編號圖面空間候選"
+          "name": "未編號圖面空間候選",
+          "code": "WC",
+          "displayName": "女廁",
+          "gender": "female",
+          "accessible": false,
+          "planSymbol": "f",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "designNote": "範圍依描圖，內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_3",
+            "locator": "PH-7F 平面圖符號，像素 (410, 268)，local (-15.47, -0.09)",
+            "basis": "map-derived",
+            "note": "範圍沿用官方圖面描圖區域。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_3",
+            "locator": "PH-7F 平面圖符號，像素 (410, 268)，local (-15.47, -0.09)",
+            "basis": "schematic",
+            "note": "沿用 PH-1F 平面圖符號的位置；本層未對圖。"
+          }
         },
         {
           "id": "PH-7F-region-033",
@@ -20508,6 +21160,86 @@
         "basis": "schematic",
         "reviewRequired": true,
         "note": "虛擬外接通道；是否需在房間外牆開新服務門由幾何整合檢查，不宣稱實際入口。"
+      },
+      "v12Restrooms": {
+        "version": 1,
+        "tool": "tools/apply_v12_restrooms.py",
+        "note": "v12 廁所：位置依平面圖符號或沿用 1F 位置；範圍、男女分隔與門位為示意，內裝由 runtime 配置。",
+        "generated": [],
+        "sourceRooms": {
+          "PH-7F-region-031": {
+            "id": "PH-7F-region-031",
+            "kind": "room-candidate",
+            "polygon": [
+              [
+                -16.1086,
+                -1.2725
+              ],
+              [
+                -16.1086,
+                1.3926
+              ],
+              [
+                -13.5029,
+                1.3926
+              ],
+              [
+                -13.5029,
+                -1.2725
+              ]
+            ],
+            "door": {
+              "position": [
+                -13.5029,
+                -0.3397
+              ],
+              "width": 1.1,
+              "basis": "schematic",
+              "outsideHint": [
+                -12.7029,
+                -0.3397
+              ],
+              "note": "候選邊界上朝向灰色公共廊道/無其他房間區域的示意開口；非已逐門核對位置。"
+            },
+            "basis": "map-derived",
+            "reviewStatus": "candidate-review-required",
+            "sourceRegionPixels": [
+              [
+                399.0,
+                248.0
+              ],
+              [
+                399.0,
+                293.0
+              ],
+              [
+                443.0,
+                293.0
+              ],
+              [
+                443.0,
+                248.0
+              ]
+            ],
+            "matchedCodes": [],
+            "note": "輪廓來自官方圖面區域；門點朝向僅示意，尚未逐間核對，區域可能含廊道、設備間或分割誤差。",
+            "name": "未編號圖面空間候選"
+          }
+        },
+        "sourceIndex": {
+          "PH-7F-region-031": 9
+        },
+        "sourceOverrides": [],
+        "placements": [
+          {
+            "slot": "P1",
+            "mode": "region",
+            "regionId": "PH-7F-region-031",
+            "offset": 0
+          }
+        ],
+        "skipped": [],
+        "overridesKeyAdded": true
       }
     },
     {

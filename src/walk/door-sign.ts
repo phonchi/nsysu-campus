@@ -135,7 +135,7 @@ export function buildDoorSignWalls(world: WalkWorld, buildings: WalkBuilding[], 
   const doors=new Map(world.doors.map(d=>[d.id,d]));
   for(const b of buildings) for(const f of b.floors) for(const room of effectiveRooms(f,structure)) {
     const p=room.polygon;
-    if(!['room','room-candidate'].includes(room.kind) || p.length<3)continue;
+    if(!['room','room-candidate','restroom'].includes(room.kind) || p.length<3)continue;
     const area=Math.abs(p.reduce((sum,a,i)=>{const q=p[(i+1)%p.length];return sum+a[0]*q[1]-q[0]*a[1];},0)/2);
     if(area<1.6)continue;
     const portals=f.access?.portals.filter(portal=>portal.roomIds.includes(room.id))??[];

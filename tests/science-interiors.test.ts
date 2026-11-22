@@ -14,7 +14,8 @@ const make=()=>b.floors.flatMap(f=>{f.access=a.floors[f.id];return effectiveRoom
 const layouts=make();
 it('furnishes named SC rooms deterministically and protects actual door cores',()=>{
  expect(make()).toEqual(layouts);
- const named=layouts.filter(l=>l.code);expect(named.length).toBe(75);
+ // v12: SC2005/SC2003/SC1011 became 2+3+3 sub-rooms (75-3+8); restrooms (code WC) are furnished by restroom-interiors, not here.
+ const named=layouts.filter(l=>l.code&&l.code!=='WC');expect(named.length).toBe(80);
  for(const l of named){
   expect(l.skipped,l.code).toBeUndefined();
   expect(l.items.some(i=>i.solid),l.code).toBe(true);
@@ -116,6 +117,29 @@ it('uses 教室 for unnamed SC rooms while preserving unique destination and doo
  for(const d of destinations){expect(d.label).toBe('教室');expect(d.displayName).toBeUndefined();}
  for(const d of world.doors.filter(d=>d.buildingId==='SC'))expect(d.label).not.toMatch(/未編號|候選|圖面未標|undefined/);
  for(const code of ['SC2001','SC2002-4','SC2004','SC4010','SC4009'])expect(world.destinations.filter(d=>d.label===code).length).toBe(1);
+});
+it('v12 split rooms: eight sub-rooms replace SC2005, SC2003 and SC1011, each with one destination and a centred 1.0 m door',()=>{
+ const children:Record<string,string[]>={SC2005:['SC2005-1','SC2005-2'],SC2003:['SC2003-1','SC2003-2','SC2003-3'],SC1011:['SC1011-1','SC1011-2','SC1011-3']};
+ const rooms=b.floors.flatMap(f=>f.rooms.map(r=>({f,r:r as typeof r&{aliases?:string[];splitFrom?:string;designNote?:string}})));
+ for(const [parent,codes] of Object.entries(children)){
+  expect(rooms.filter(x=>x.r.code===parent),parent).toHaveLength(0);
+  expect(world.destinations.filter(d=>d.label===parent),parent).toHaveLength(0);
+  let west=-Infinity;
+  for(const code of codes){
+   const found=rooms.filter(x=>x.r.code===code);expect(found,code).toHaveLength(1);
+   const {f,r}=found[0],xs=r.polygon.map(p=>p[0]);
+   expect(r.kind).toBe('room');expect(r.aliases).toEqual([parent]);expect(r.splitFrom).toBe(`${f.id}-${parent}`);expect(r.designNote).toBe('隔間依使用者回報，位置示意');
+   expect(Math.min(...xs),`${code} is east of the previous sub-room`).toBeGreaterThanOrEqual(west-1e-6);west=Math.max(...xs);
+   expect(r.door.width).toBe(1);
+   // SC1011-1 keeps the v9.1 plan door; every other sub-room door is centred on its corridor wall.
+   if(code==='SC1011-1')expect(r.door.position).toEqual([-22.21,14.051]);
+   else expect(r.door.position[0]).toBeCloseTo((Math.min(...xs)+Math.max(...xs))/2,3);
+   expect(world.destinations.filter(d=>d.roomId===r.id),code).toHaveLength(1);
+   const portal=f.access!.portals.find(p=>p.id===f.access!.primaryPortalByRoom[r.id])!;
+   expect(portal.width,code).toBe(1);expect(Math.hypot(portal.position[0]-r.door.position[0],portal.position[1]-r.door.position[1]),code).toBeLessThan(.05);
+  }
+ }
+ expect(layouts.filter(l=>l.use==='tiered-lecture').map(l=>l.code)).toContain('SC1001');
 });
 
 it('leaves the U-sofa hollow walkable and seats the plush on a real cushion',()=>{

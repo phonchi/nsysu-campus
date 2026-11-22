@@ -77,17 +77,74 @@ else:
   if item.get('roomId') and item.get('doorId') not in door_ids:errors.append('destination missing rendered door: '+str(item.get('id')))
 # Independently derive the room inventory; never trust a builder that omitted rooms.
 access=load('public/data/walkthrough/access-plan.json')
+structure=load('public/data/walkthrough/campus-structure.json')
 expected_rooms=set()
+# v12: restrooms are enterable rooms like any other (same list as isEnterableRoom on the TS side).
+ENTERABLE=['room','room-candidate','restroom']
+RESTROOM_MIN=(1.8,2.2)  # local metres (coordinator ruling, wpd-run round 2)
+RESTROOM_WORLD_MIN=(2.0,2.4)  # world metres = local x placement scale (runtime planRestroom gate)
 for bid in selected:
  if access.get('sourceSHA256',{}).get(bid+'.json')!=sha(f'public/data/walkthrough/{bid}.json'):errors.append('stale access plan: '+bid)
  building=load(f'public/data/walkthrough/{bid}.json')
  for floor in building.get('floors',[]):
+  fid=floor['id'];rooms=floor.get('rooms',[]);ids={room['id'] for room in rooms};plan=access.get('floors',{}).get(fid,{})
+  # v12 data rules hold on every floor, baked or not.
+  if len(ids)!=len(rooms):errors.append('duplicate room ids: '+fid)
+  for entry in floor.get('virtualPortalOverrides',[]):
+   spots=entry.get('suggestedPortal',{}).get('perRoomPosition',{})
+   for key in ['roomId','neighborRoomId']:
+    rid=entry.get(key)
+    if rid!='@public' and rid not in ids:errors.append(f'door override points at a missing room: {fid} {rid}')
+    if rid not in spots:errors.append(f'door override has no position for {rid}: {fid}')
+   if not entry.get('sourceReview'):errors.append(f'door override without sourceReview: {fid} {entry.get("roomId")}')
+   if not .9<=entry.get('suggestedPortal',{}).get('width',0)<=1.2:errors.append(f'door override width out of range: {fid} {entry.get("roomId")}')
+  splits=floor.get('roomSplits')
+  if splits:
+   for parent,children in splits.get('children',{}).items():
+    if parent in ids:errors.append('split parent room still present: '+parent)
+    if parent not in splits.get('sourceRooms',{}):errors.append('split parent has no sourceRooms record: '+parent)
+    code=splits.get('sourceRooms',{}).get(parent,{}).get('code')
+    for child in children:
+     room=next((r for r in rooms if r['id']==child),None)
+     if room is None:errors.append('split child room missing: '+child);continue
+     if room.get('splitFrom')!=parent or room.get('aliases')!=[code] or not room.get('designNote'):errors.append('split child lacks splitFrom/aliases/designNote: '+child)
+     if not any(e.get('roomId')==child for e in floor.get('virtualPortalOverrides',[])):errors.append('split child has no fixed door override: '+child)
+     if room['door'].get('width')!=1.0:errors.append('split child door is not 1.0 m wide: '+child)
+  for room in rooms:
+   if room.get('kind')!='restroom':continue
+   rid=room['id'];p=room.get('polygon',[])
+   if len(p)<3:errors.append('restroom without polygon: '+rid);continue
+   dims=sorted([max(q[0] for q in p)-min(q[0] for q in p),max(q[1] for q in p)-min(q[1] for q in p)])
+   scale=structure['placements'][bid]['scale']
+   if dims[0]<RESTROOM_MIN[0]-1e-6 or dims[1]<RESTROOM_MIN[1]-1e-6:errors.append(f'restroom smaller than 1.8 x 2.2 m: {rid} is {dims[0]:.2f} x {dims[1]:.2f}')
+   if dims[0]*scale<RESTROOM_WORLD_MIN[0]-1e-6 or dims[1]*scale<RESTROOM_WORLD_MIN[1]-1e-6:errors.append(f'restroom smaller than 2.0 x 2.4 world m at scale {scale:.3f}: {rid}')
+   if room.get('gender') not in ['male','female','unisex']:errors.append('restroom gender invalid: '+rid)
+   if not isinstance(room.get('accessible'),bool):errors.append('restroom accessible must be a boolean: '+rid)
+   if not room.get('displayName'):errors.append('restroom without displayName: '+rid)
+   if room.get('planSymbol') not in [None,'mf','m','f','accessible','text']:errors.append('restroom planSymbol invalid: '+rid)
+   if room.get('basis') not in ['map-derived','schematic']:errors.append('restroom basis invalid: '+rid)
+   if room.get('aliases')!=['廁所','洗手間','WC','toilet']:errors.append('restroom aliases incomplete: '+rid)
+   for field in ['evidence','locationEvidence']:
+    proof=room.get(field)
+    if field=='evidence' and not proof:errors.append('restroom without evidence: '+rid)
+    if proof and (not proof.get('sourceId') or not proof.get('locator') or proof.get('basis') not in ['map-derived','schematic']):errors.append(f'restroom {field} incomplete: {rid}')
+   if 'fixtures' in room:errors.append('restroom data must not list fixtures: '+rid)
+   if not room.get('door',{}).get('position'):errors.append('restroom without door: '+rid)
+   if plan and rid not in plan.get('primaryPortalByRoom',{}):errors.append('restroom has no door in the access plan: '+rid)
+   if rid in plan.get('report',{}).get('unreachableRoomIds',[]):errors.append('restroom unreachable in the access plan: '+rid)
+  for landing in plan.get('liftLandings',[]):
+   if not landing.get('connectedToPublicRoot'):errors.append(f'lift approach not on the public root: {fid} {landing.get("liftId")}')
+   if not landing.get('doorOnShaftBoundary'):errors.append(f'lift landing door off the shaft boundary: {fid} {landing.get("liftId")}')
   if prototype and floor.get('level') not in [1,2]:continue
   if floor['id'] not in access.get('floors',{}):errors.append('missing floor access: '+floor['id'])
-  for room in floor.get('rooms',[]):
-   p=room.get('polygon',[])
+  overrides=structure.get('roomOverrides',{}).get(fid,{})
+  for room in rooms:
+   # Same polygons as effectiveRooms() in src/walk-world.ts: structure clips replace or suppress a room.
+   p=overrides[room['id']] if room['id'] in overrides else room.get('polygon',[])
+   if p is None:continue
    area=abs(sum(a[0]*p[(i+1)%len(p)][1]-p[(i+1)%len(p)][0]*a[1] for i,a in enumerate(p))/2) if len(p)>=3 else 0
-   if room.get('kind') in ['room','room-candidate'] and area>=1.6:expected_rooms.add((bid,floor['id'],room['id']))
+   if room.get('kind')=='restroom' and area<1.6:errors.append('restroom too small to be entered: '+room['id'])
+   if room.get('kind') in ENTERABLE and area>=1.6:expected_rooms.add((bid,floor['id'],room['id']))
 checked_rooms={(x.get('buildingId'),x.get('floorId'),x.get('roomId')) for x in checks if x.get('roomId')}
 for key in sorted(expected_rooms-checked_rooms):errors.append('builder omission: '+'/'.join(key))
 if c.get('builderOmissions'):errors.append('bake reported builder omissions')

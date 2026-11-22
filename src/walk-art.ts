@@ -379,7 +379,18 @@ export async function addCampusProps(world:WalkWorld,load:(url:string)=>Promise<
  const toInstances=async(file:string,matrices:T.Matrix4[],name:string,tint?:(i:number)=>T.Color|undefined)=>{
   if(!matrices.length||!alive())return;const gltf=await load(asset('models/campus/'+file)).catch(e=>{console.warn(`campus prop ${file}`,e);return undefined;});if(!gltf)return;
   const parts:T.BufferGeometry[]=[];let metalStart=-1;gltf.scene.updateMatrixWorld(true);
-  gltf.scene.traverse(o=>{if(!(o instanceof T.Mesh))return;const mat=(Array.isArray(o.material)?o.material[0]:o.material) as T.MeshStandardMaterial;const g0=o.geometry.clone().applyMatrix4(o.matrixWorld);const g=g0.index?g0.toNonIndexed():g0;
+  gltf.scene.traverse(o=>{if(!(o instanceof T.Mesh))return;const mat=(Array.isArray(o.material)?o.material[0]:o.material) as T.MeshStandardMaterial;const g0=o.geometry.clone();
+   // GLBs mix quantized Int8 normals / Int16 positions with Float32 authored parts.
+   // Decode before baking transforms: integer positions otherwise wrap at +/-1, and
+   // mergeGeometries rejects the bicycle's mixed attribute array types.
+   for(const name of ['position','normal']){
+    const source=g0.getAttribute(name);if(!source)continue;
+    const values=new Float32Array(source.count*3);
+    for(let i=0;i<source.count;i++){values[i*3]=source.getX(i);values[i*3+1]=source.getY(i);values[i*3+2]=source.getZ(i);}
+    g0.setAttribute(name,new T.BufferAttribute(values,3));
+   }
+   g0.applyMatrix4(o.matrixWorld);if(!g0.getAttribute('normal'))g0.computeVertexNormals();
+   const g=g0.index?g0.toNonIndexed():g0;if(g!==g0)g0.dispose();
    for(const k of Object.keys(g.attributes))if(k!=='position'&&k!=='normal')g.deleteAttribute(k);
    const c=mat.color??new T.Color('#ffffff'),n=g.attributes.position.count,col=new Float32Array(n*3);
    // Tintable parts (bicycle frames) are flagged with alpha-less white so the instance colour shows through.

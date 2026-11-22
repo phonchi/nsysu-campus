@@ -43,9 +43,18 @@ DOORS = {
               '002': (2602, 1250), '005': (2306, 1400), '006': (2306, 1305), '016': (2306, 1485), '021': (2306, 1795), '032': (2064, 1950, 'v'), '041': (1960, 1994),
               '048': (2365, 2002), '049': (2316, 2225, 'v'), '055': (1366, 2215, 'v'),
               '015': (1994, 1465, 'v'), '039': (1213, 2202, 'v'), '035': (530, 2172), '036': (724, 1950, 'v'), '037': (738, 2240, 'v'), '040': (1361, 1950, 'v'), '052': (2215, 2074), '053': (565, 2240, 'v')},
-    'SC-1F': {'SC1011': (2873, 1151)},
+    # v12 splits SC1011 into SC1011-1..3; the plan door belongs to the west one. Both keys, so either run order works.
+    'SC-1F': {'SC1011': (2873, 1151), 'SC1011-1': (2873, 1151, 'h')},
     'SC-2F': {'SC2001': (4114, 1125, 'v'), 'SC2011': (2772, 367, 'v')},
 }
+REPORT = 'tools/apply_v91_sc_doors.py'
+
+
+def room_key(f, room):
+    """Table key of a room: its full room number, or the region number of an unnamed trace.
+    Never the text after the last '-': sub-rooms such as SC1011-1 or SC2002-4 would all collapse to '1', '4'."""
+    key = room['id'][len(f['id']) + 1:] if room['id'].startswith(f['id'] + '-') else room['id']
+    return key[len('region-'):] if key.startswith('region-') else key
 
 
 def wall_at(poly, p):
@@ -68,7 +77,10 @@ def wall_at(poly, p):
 def door_entry(f, room, target, forced=None):
     clipped = CLIPPED.get(f['id'], {})
     poly = clipped.get(room['id']) or room['polygon']
-    found = (1, target[0]) if forced == 'v' else wall_at(poly, target)
+    if forced == 'v': found = (1, target[0])
+    # 'h': the room's own east-west wall nearest the arc (a narrow sub-room's side wall is longer and would win in wall_at).
+    elif forced == 'h': found = (0, min((v[1] for v in poly), key=lambda z: abs(z - target[1])))
+    else: found = wall_at(poly, target)
     if not found:
         print('no wall', room['id'], target)
         return None
@@ -104,7 +116,7 @@ def door_entry(f, room, target, forced=None):
     room['door'].update(basis='map-derived', width=WIDTH, note='依官方平面圖門弧；未經現地。')
     room['door'].pop('outsideHint', None)
     return {'roomId': room['id'], 'neighborRoomId': neighbor, 'planDoor': True, 'basis': 'map-derived',
-            'sourceReview': {'report': 'tools/apply_v91_sc_doors.py', 'entryId': room['id']},
+            'sourceReview': {'report': REPORT, 'entryId': room['id']},
             'suggestedPortal': {'width': WIDTH, 'perRoomPosition': {room['id']: door, neighbor: far}},
             'geometryWarning': '官方平面圖門弧把描圖的牆切碎；只在這道門的範圍內修正。'}
 
@@ -139,7 +151,7 @@ def main():
         for room in f['rooms']:
             if room['id'] in KINDS:
                 room['kind'] = KINDS[room['id']]
-            key = room['id'].rsplit('-', 1)[-1]
+            key = room_key(f, room)
             if key in FILL.get(f['id'], {}):
                 t = f['transform']; m = t['metresPerPixel']; ox, oy = t['imageOriginPixels']
                 shape = Polygon(room['polygon']).buffer(0)
@@ -168,19 +180,22 @@ def main():
             continue
         entries = []
         for room in f['rooms']:
-            key = room['id'].rsplit('-', 1)[-1]
+            key = room_key(f, room)
             if key in TRIM.get(f['id'], {}):
                 x0, x1, z0, z1 = [(v / 2 - (ox if i < 2 else oy)) * m for i, v in enumerate(TRIM[f['id']][key])]
                 shape = Polygon(room['polygon']).buffer(0).difference(box(x0, z0, x1, z1))
                 shape = max(getattr(shape, 'geoms', [shape]), key=lambda q: q.area)
                 room['polygon'] = [[round(x, 4), round(y, 4)] for x, y in list(shape.exterior.coords)[:-1]]
         for room in f['rooms']:
-            key = room['id'].rsplit('-', 1)[-1]
+            key = room_key(f, room)
             if key in table:
                 X, Z, *forced = table[key]
                 entry = door_entry(f, room, [(X / 2 - ox) * m, (Z / 2 - oy) * m], *forced)
                 if entry:
                     entries.append(entry)
+        # Entries written by later tools (v12 sub-room and restroom doors) are not this tool's to drop.
+        made = {e['roomId'] for e in entries}
+        entries += [e for e in f.get('virtualPortalOverrides', []) if e.get('sourceReview', {}).get('report') != REPORT and e.get('roomId') not in made]
         f['virtualPortalOverrides'] = entries
     SC.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n')
     review = json.loads(REVIEW.read_text())

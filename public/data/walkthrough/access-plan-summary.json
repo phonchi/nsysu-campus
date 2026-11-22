@@ -1,23 +1,23 @@
 {
   "summary": {
     "floors": 60,
-    "rooms": 872,
-    "reachableRooms": 872,
+    "rooms": 976,
+    "reachableRooms": 976,
     "unreachableOrInvalidRooms": 0,
     "completeFloors": 60
   },
-  "sourceReviewHash": "d6a03a9400a98ce0a439f1fea21a9759e1d8b103c708b5b6059507e5edd0e6ef",
+  "sourceReviewHash": "94ff50dc6054bb1754e19c7d1ffd9a310c55662d57b61428c8cd2cb6eb7e1c02",
   "sourceSHA256": {
-    "SC.json": "ae5690ff7fa159a91661ec246416575019ef531a97da52b7ddb6bd762ec4a4e9",
-    "EN.json": "1f771128d636e82efa2c0e7426a8661b7b7f012400ed9535d0c820e890d774cf",
-    "BI.json": "8f517cb84899267c049e1325d2457d581accb05ea8bddfd39b1801832bf36795",
-    "PH.json": "ef6e626046761d64ba8a49d7f76798b5eb05d73f38d23bd7937488feff4fd2d5",
-    "CH.json": "48856224cd8e84715d071db93a5f7256204f7c2b862be5668740a3198ef79ba4",
-    "EC.json": "deec26513b0185a7777e694c8caf0557a30d57abd6d3015df4aa1c1d162f2313",
-    "MS.json": "20922c445187ee3fa56d6bb9ffac803df665f8c97e77716264031563e6e523df",
-    "EV.json": "fc334b9b8a997dfb17adcbf0c70b6437883032686805caaf6c13570d8c698d11"
+    "SC.json": "c8163d2b98629abd1d7901b18a7b0ee23e88d94eac6f2a83b1385f58587374ea",
+    "EN.json": "5d3523582ea1f244c2cb81254bc488d09db5c6077cc0ea37115689f0c2db0bb1",
+    "BI.json": "a7cf0844742903ec9f037ed3e3fef1904a25a5ab62c90f8afe06042fd4fabe1f",
+    "PH.json": "616131c2793b45c8ccc54e0feae546e62c842286bbbf2bd0aa47e1cda30ad2e3",
+    "CH.json": "71410e895574926b6578644af7143e59074b6601dd6a9c82f725768a36042383",
+    "EC.json": "72b16629ef0380b693908153cbb2ccf8063a4caad46167bbedc5a64e1a240989",
+    "MS.json": "33e484bb1731814897c72a10f3a77df2020431a7b47928cfa087b2d9664364f1",
+    "EV.json": "62cda45259e9fbffc445059db3d2a53c2081e0e70bb7810efdf8ed6074eac5d8"
   },
-  "accessPlanSHA256": "58af71dcb44e18ae55296a1ebcc657dfabf5c54835d59d69a8dbbe1b5e24dff5",
+  "accessPlanSHA256": "c9bc0eb1c7ac200c100632b9276e3b5f7e41166c89cf82e09100a19c6080cece",
   "floors": {
     "SC-B1": {
       "reachableRooms": 38,
@@ -28,32 +28,32 @@
       "unreachableRoomIds": []
     },
     "SC-1F": {
-      "reachableRooms": 13,
-      "rooms": 13,
+      "reachableRooms": 23,
+      "rooms": 23,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
       "unreachableRoomIds": []
     },
     "SC-2F": {
-      "reachableRooms": 21,
-      "rooms": 21,
+      "reachableRooms": 29,
+      "rooms": 29,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
       "unreachableRoomIds": []
     },
     "SC-3F": {
-      "reachableRooms": 27,
-      "rooms": 27,
+      "reachableRooms": 34,
+      "rooms": 34,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
       "unreachableRoomIds": []
     },
     "SC-4F": {
-      "reachableRooms": 36,
-      "rooms": 36,
+      "reachableRooms": 46,
+      "rooms": 46,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
@@ -89,32 +89,32 @@
       "unreachableRoomIds": []
     },
     "EN-1F": {
-      "reachableRooms": 20,
-      "rooms": 20,
+      "reachableRooms": 22,
+      "rooms": 22,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
       "unreachableRoomIds": []
     },
     "EN-2F": {
-      "reachableRooms": 24,
-      "rooms": 24,
+      "reachableRooms": 25,
+      "rooms": 25,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
       "unreachableRoomIds": []
     },
     "EN-3F": {
-      "reachableRooms": 14,
-      "rooms": 14,
+      "reachableRooms": 17,
+      "rooms": 17,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
       "unreachableRoomIds": []
     },
     "EN-4F": {
-      "reachableRooms": 50,
-      "rooms": 50,
+      "reachableRooms": 51,
+      "rooms": 51,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
@@ -129,14 +129,6 @@
       "unreachableRoomIds": []
     },
     "BI-1F": {
-      "reachableRooms": 7,
-      "rooms": 7,
-      "rate": 1.0,
-      "status": "complete",
-      "issues": [],
-      "unreachableRoomIds": []
-    },
-    "BI-2F": {
       "reachableRooms": 11,
       "rooms": 11,
       "rate": 1.0,
@@ -144,41 +136,49 @@
       "issues": [],
       "unreachableRoomIds": []
     },
-    "BI-3F": {
+    "BI-2F": {
       "reachableRooms": 15,
       "rooms": 15,
+      "rate": 1.0,
+      "status": "complete",
+      "issues": [],
+      "unreachableRoomIds": []
+    },
+    "BI-3F": {
+      "reachableRooms": 19,
+      "rooms": 19,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
       "unreachableRoomIds": []
     },
     "BI-4F": {
-      "reachableRooms": 15,
-      "rooms": 15,
+      "reachableRooms": 17,
+      "rooms": 17,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
       "unreachableRoomIds": []
     },
     "BI-5F": {
-      "reachableRooms": 3,
-      "rooms": 3,
+      "reachableRooms": 5,
+      "rooms": 5,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
       "unreachableRoomIds": []
     },
     "BI-6F": {
-      "reachableRooms": 20,
-      "rooms": 20,
+      "reachableRooms": 23,
+      "rooms": 23,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
       "unreachableRoomIds": []
     },
     "BI-7F": {
-      "reachableRooms": 3,
-      "rooms": 3,
+      "reachableRooms": 6,
+      "rooms": 6,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
@@ -193,16 +193,16 @@
       "unreachableRoomIds": []
     },
     "PH-1F": {
-      "reachableRooms": 8,
-      "rooms": 8,
+      "reachableRooms": 9,
+      "rooms": 9,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
       "unreachableRoomIds": []
     },
     "PH-2F": {
-      "reachableRooms": 14,
-      "rooms": 14,
+      "reachableRooms": 15,
+      "rooms": 15,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
@@ -257,22 +257,38 @@
       "unreachableRoomIds": []
     },
     "CH-1F": {
-      "reachableRooms": 3,
-      "rooms": 3,
+      "reachableRooms": 7,
+      "rooms": 7,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
       "unreachableRoomIds": []
     },
     "CH-2F": {
-      "reachableRooms": 9,
-      "rooms": 9,
+      "reachableRooms": 13,
+      "rooms": 13,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
       "unreachableRoomIds": []
     },
     "CH-3F": {
+      "reachableRooms": 22,
+      "rooms": 22,
+      "rate": 1.0,
+      "status": "complete",
+      "issues": [],
+      "unreachableRoomIds": []
+    },
+    "CH-4F": {
+      "reachableRooms": 19,
+      "rooms": 19,
+      "rate": 1.0,
+      "status": "complete",
+      "issues": [],
+      "unreachableRoomIds": []
+    },
+    "CH-5F": {
       "reachableRooms": 17,
       "rooms": 17,
       "rate": 1.0,
@@ -280,25 +296,9 @@
       "issues": [],
       "unreachableRoomIds": []
     },
-    "CH-4F": {
-      "reachableRooms": 16,
-      "rooms": 16,
-      "rate": 1.0,
-      "status": "complete",
-      "issues": [],
-      "unreachableRoomIds": []
-    },
-    "CH-5F": {
-      "reachableRooms": 14,
-      "rooms": 14,
-      "rate": 1.0,
-      "status": "complete",
-      "issues": [],
-      "unreachableRoomIds": []
-    },
     "CH-6F": {
-      "reachableRooms": 14,
-      "rooms": 14,
+      "reachableRooms": 17,
+      "rooms": 17,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
@@ -321,62 +321,14 @@
       "unreachableRoomIds": []
     },
     "EC-1F": {
-      "reachableRooms": 18,
-      "rooms": 18,
+      "reachableRooms": 19,
+      "rooms": 19,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
       "unreachableRoomIds": []
     },
     "EC-2F": {
-      "reachableRooms": 14,
-      "rooms": 14,
-      "rate": 1.0,
-      "status": "complete",
-      "issues": [],
-      "unreachableRoomIds": []
-    },
-    "EC-3F": {
-      "reachableRooms": 12,
-      "rooms": 12,
-      "rate": 1.0,
-      "status": "complete",
-      "issues": [],
-      "unreachableRoomIds": []
-    },
-    "EC-4F": {
-      "reachableRooms": 22,
-      "rooms": 22,
-      "rate": 1.0,
-      "status": "complete",
-      "issues": [],
-      "unreachableRoomIds": []
-    },
-    "EC-5F": {
-      "reachableRooms": 17,
-      "rooms": 17,
-      "rate": 1.0,
-      "status": "complete",
-      "issues": [],
-      "unreachableRoomIds": []
-    },
-    "EC-6F": {
-      "reachableRooms": 12,
-      "rooms": 12,
-      "rate": 1.0,
-      "status": "complete",
-      "issues": [],
-      "unreachableRoomIds": []
-    },
-    "EC-7F": {
-      "reachableRooms": 12,
-      "rooms": 12,
-      "rate": 1.0,
-      "status": "complete",
-      "issues": [],
-      "unreachableRoomIds": []
-    },
-    "EC-8F": {
       "reachableRooms": 15,
       "rooms": 15,
       "rate": 1.0,
@@ -384,9 +336,57 @@
       "issues": [],
       "unreachableRoomIds": []
     },
-    "EC-9F": {
+    "EC-3F": {
+      "reachableRooms": 13,
+      "rooms": 13,
+      "rate": 1.0,
+      "status": "complete",
+      "issues": [],
+      "unreachableRoomIds": []
+    },
+    "EC-4F": {
+      "reachableRooms": 23,
+      "rooms": 23,
+      "rate": 1.0,
+      "status": "complete",
+      "issues": [],
+      "unreachableRoomIds": []
+    },
+    "EC-5F": {
       "reachableRooms": 18,
       "rooms": 18,
+      "rate": 1.0,
+      "status": "complete",
+      "issues": [],
+      "unreachableRoomIds": []
+    },
+    "EC-6F": {
+      "reachableRooms": 13,
+      "rooms": 13,
+      "rate": 1.0,
+      "status": "complete",
+      "issues": [],
+      "unreachableRoomIds": []
+    },
+    "EC-7F": {
+      "reachableRooms": 13,
+      "rooms": 13,
+      "rate": 1.0,
+      "status": "complete",
+      "issues": [],
+      "unreachableRoomIds": []
+    },
+    "EC-8F": {
+      "reachableRooms": 16,
+      "rooms": 16,
+      "rate": 1.0,
+      "status": "complete",
+      "issues": [],
+      "unreachableRoomIds": []
+    },
+    "EC-9F": {
+      "reachableRooms": 19,
+      "rooms": 19,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
@@ -401,32 +401,32 @@
       "unreachableRoomIds": []
     },
     "MS-1F": {
-      "reachableRooms": 12,
-      "rooms": 12,
+      "reachableRooms": 14,
+      "rooms": 14,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
       "unreachableRoomIds": []
     },
     "MS-2F": {
-      "reachableRooms": 11,
-      "rooms": 11,
+      "reachableRooms": 14,
+      "rooms": 14,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
       "unreachableRoomIds": []
     },
     "MS-3F": {
-      "reachableRooms": 23,
-      "rooms": 23,
+      "reachableRooms": 25,
+      "rooms": 25,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
       "unreachableRoomIds": []
     },
     "MS-4F": {
-      "reachableRooms": 21,
-      "rooms": 21,
+      "reachableRooms": 22,
+      "rooms": 22,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
@@ -457,16 +457,16 @@
       "unreachableRoomIds": []
     },
     "EV-1F": {
-      "reachableRooms": 10,
-      "rooms": 10,
+      "reachableRooms": 9,
+      "rooms": 9,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
       "unreachableRoomIds": []
     },
     "EV-2F": {
-      "reachableRooms": 16,
-      "rooms": 16,
+      "reachableRooms": 15,
+      "rooms": 15,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
@@ -481,24 +481,24 @@
       "unreachableRoomIds": []
     },
     "EV-4F": {
-      "reachableRooms": 19,
-      "rooms": 19,
+      "reachableRooms": 18,
+      "rooms": 18,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
       "unreachableRoomIds": []
     },
     "EV-5F": {
-      "reachableRooms": 13,
-      "rooms": 13,
+      "reachableRooms": 14,
+      "rooms": 14,
       "rate": 1.0,
       "status": "complete",
       "issues": [],
       "unreachableRoomIds": []
     },
     "EV-6F": {
-      "reachableRooms": 12,
-      "rooms": 12,
+      "reachableRooms": 13,
+      "rooms": 13,
       "rate": 1.0,
       "status": "complete",
       "issues": [],

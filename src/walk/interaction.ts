@@ -1,3 +1,4 @@
+import { insideLift } from './lift-world';
 import type { Vector3 } from 'three';
 import { occupiesDoor } from '../walk-door';
 import type { WalkWorld, WorldDoor, WorldLift } from '../walk-world';
@@ -11,22 +12,30 @@ export function nearestDoor(world: WalkWorld, foot: Vector3): WorldDoor | undefi
   return door;
 }
 
-/** Lift stop on this storey within a car's reach, if any. */
+/** Lift stop on this storey: the car the player stands in wins (anywhere in the cabin), else the
+ * nearest landing approach within a car's reach. */
 export function nearestLift(world: WalkWorld, foot: Vector3): LiftStopRef | undefined {
+  for (const lift of world.lifts) if (insideLift(lift, foot)) {
+    const stop = lift.stops.reduce((a, b) => Math.abs(b.position.y - foot.y) < Math.abs(a.position.y - foot.y) ? b : a);
+    return { lift, stop };
+  }
+  let best: LiftStopRef | undefined, bestDistance = Infinity;
   for (const lift of world.lifts) {
     const reach = (world.scales.get(lift.buildingId) ?? 1) * 1.9 + .35;
-    for (const stop of lift.stops)
-      if (Math.abs(stop.position.y - foot.y) < .6 && Math.hypot(stop.position.x - foot.x, stop.position.z - foot.z) < reach) return { lift, stop };
+    for (const stop of lift.stops) {
+      const d = Math.hypot(stop.approach.x - foot.x, stop.approach.z - foot.z);
+      if (Math.abs(stop.position.y - foot.y) < .6 && d < reach && d < bestDistance) { best = { lift, stop }; bestDistance = d; }
+    }
   }
-  return undefined;
+  return best;
 }
 
 /** E priority after stories and NPCs: the lift wins only when standing in the car or nearer to it than to any door. */
 export function liftWins(world: WalkWorld, foot: Vector3): LiftStopRef | undefined {
   const near = nearestLift(world, foot);
   if (!near) return undefined;
-  const d = nearestDoor(world, foot), toLift = Math.hypot(near.stop.position.x - foot.x, near.stop.position.z - foot.z);
-  const inside = toLift < (world.scales.get(near.lift.buildingId) ?? 1) + .2;
+  const d = nearestDoor(world, foot), toLift = Math.hypot(near.stop.approach.x - foot.x, near.stop.approach.z - foot.z);
+  const inside = insideLift(near.lift,foot);
   return inside || !d || toLift < d.position.distanceTo(foot) ? near : undefined;
 }
 

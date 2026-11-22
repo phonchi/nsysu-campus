@@ -60,7 +60,8 @@ function overlaps(a: InteriorItem, b: InteriorItem) {
 export function planScienceInterior(room: WalkRoom, floor: WalkFloor, scale: number): InteriorLayout {
   const poly = room.polygon.map(([x, z]): Point2 => [x * scale, z * scale]);
   const code = room.code ?? '', layout: InteriorLayout = { roomId: room.id, code, floorId: floor.id, use: 'neutral', polygon: poly, items: [], exclusions: [...(floor.holes ?? []), ...(floor.verticalServices ?? []).map(s => s.polygon)].map(p => p.map(([x,z]): Point2 => [x*scale,z*scale])), protected: [], seats: 0, rows: 0, highestPlatform: 0 };
-  if (!code || floor.level === 99 || !['room', 'room-candidate'].includes(room.kind)) { layout.skipped = '未編號、屋頂或非一般房間；保留原空間'; return layout; }
+  if(room.kind==='restroom'){layout.use='restroom';return layout;}
+  if (!code || floor.level === 99 || !['room', 'room-candidate', 'restroom'].includes(room.kind)) { layout.skipped = '未編號、屋頂或非一般房間；保留原空間'; return layout; }
   const xs = poly.map(p => p[0]), zs = poly.map(p => p[1]), x0 = Math.min(...xs), x1 = Math.max(...xs), z0 = Math.min(...zs), z1 = Math.max(...zs), W = x1 - x0, D = z1 - z0;
   const portals = floor.access?.portals.filter(p => p.roomIds.includes(room.id)) ?? [];
   for (const p of portals) {

@@ -8997,6 +8997,118 @@
           "basis": "map-derived",
           "reviewStatus": "candidate-review-required",
           "note": "放大官方原圖讀到EC1004/EC1005及兩房中間明確分隔牆，人工近似描繪；不是依grid造房或造號。"
+        },
+        {
+          "id": "EC-1F-WC-P1-F",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "女廁",
+          "gender": "female",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "位置依平面圖，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-1F 平面圖符號，像素 (220, 175)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-1F 平面圖符號，像素 (220, 175)，local (-27.62, 0.03)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。 實際擺位偏移 0.05 m。"
+          },
+          "polygon": [
+            [
+              -28.8651,
+              0.0336
+            ],
+            [
+              -26.2651,
+              0.0336
+            ],
+            [
+              -26.2651,
+              2.2336
+            ],
+            [
+              -28.8651,
+              2.2336
+            ]
+          ],
+          "door": {
+            "position": [
+              -28.8651,
+              1.1336
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "EC-1F-WC-P1-M",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "男廁",
+          "gender": "male",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "位置依平面圖，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-1F 平面圖符號，像素 (220, 175)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-1F 平面圖符號，像素 (220, 175)，local (-27.62, 0.03)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。 實際擺位偏移 0.05 m。"
+          },
+          "polygon": [
+            [
+              -28.8651,
+              -2.1664
+            ],
+            [
+              -26.2651,
+              -2.1664
+            ],
+            [
+              -26.2651,
+              0.0336
+            ],
+            [
+              -28.8651,
+              0.0336
+            ]
+          ],
+          "door": {
+            "position": [
+              -28.8651,
+              -1.0664
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
         }
       ],
       "regionCandidates": [
@@ -11095,6 +11207,83 @@
         "basis": "schematic",
         "reviewRequired": true,
         "note": "虛擬外接通道；是否需在房間外牆開新服務門由幾何整合檢查，不宣稱實際入口。"
+      },
+      "virtualPortalOverrides": [
+        {
+          "roomId": "EC-1F-WC-P1-F",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_restrooms.py",
+            "entryId": "EC-1F-WC-P1-F"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "EC-1F-WC-P1-F": [
+                -28.8651,
+                1.1336
+              ],
+              "@public": [
+                -28.8851,
+                1.1336
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "EC-1F-WC-P1-M",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_restrooms.py",
+            "entryId": "EC-1F-WC-P1-M"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "EC-1F-WC-P1-M": [
+                -28.8651,
+                -1.0664
+              ],
+              "@public": [
+                -28.8851,
+                -1.0664
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        }
+      ],
+      "v12Restrooms": {
+        "version": 1,
+        "tool": "tools/apply_v12_restrooms.py",
+        "note": "v12 廁所：位置依平面圖符號或沿用 1F 位置；範圍、男女分隔與門位為示意，內裝由 runtime 配置。",
+        "generated": [
+          "EC-1F-WC-P1-F",
+          "EC-1F-WC-P1-M"
+        ],
+        "sourceRooms": {},
+        "sourceIndex": {},
+        "sourceOverrides": [],
+        "placements": [
+          {
+            "slot": "P1",
+            "mode": "free",
+            "offset": 0.05
+          }
+        ],
+        "skipped": [
+          {
+            "slot": "P2",
+            "symbol": "accessible",
+            "reason": "無障礙廁所小格夾在中央樓梯與 EC1011-2 之間；放寬到 runtime 允許的最小尺寸（EC 比例下約 1.86×2.23 m）仍找不到合法位置。"
+          }
+        ],
+        "overridesKeyAdded": true
       }
     },
     {
@@ -18049,6 +18238,118 @@
           ],
           "note": "輪廓來自官方圖面區域；門點朝向僅示意，尚未逐間核對，區域可能含廊道、設備間或分割誤差。",
           "code": "EC2007"
+        },
+        {
+          "id": "EC-2F-WC-P1-F",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "女廁",
+          "gender": "female",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "沿用 1F 位置，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-2F 平面圖符號，像素 (234, 243)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-2F 平面圖符號，像素 (234, 243)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "沿用 EC-1F 平面圖符號的位置；本層未對圖。 實際擺位偏移 0.20 m。"
+          },
+          "polygon": [
+            [
+              -28.7151,
+              0.0336
+            ],
+            [
+              -26.1151,
+              0.0336
+            ],
+            [
+              -26.1151,
+              2.2336
+            ],
+            [
+              -28.7151,
+              2.2336
+            ]
+          ],
+          "door": {
+            "position": [
+              -28.7151,
+              1.1336
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "EC-2F-WC-P1-M",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "男廁",
+          "gender": "male",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "沿用 1F 位置，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-2F 平面圖符號，像素 (234, 243)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-2F 平面圖符號，像素 (234, 243)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "沿用 EC-1F 平面圖符號的位置；本層未對圖。 實際擺位偏移 0.20 m。"
+          },
+          "polygon": [
+            [
+              -28.7151,
+              -2.1664
+            ],
+            [
+              -26.1151,
+              -2.1664
+            ],
+            [
+              -26.1151,
+              0.0336
+            ],
+            [
+              -28.7151,
+              0.0336
+            ]
+          ],
+          "door": {
+            "position": [
+              -28.7151,
+              -1.0664
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
         }
       ],
       "regionCandidates": [
@@ -18733,6 +19034,83 @@
         "basis": "schematic",
         "reviewRequired": true,
         "note": "虛擬外接通道；是否需在房間外牆開新服務門由幾何整合檢查，不宣稱實際入口。"
+      },
+      "virtualPortalOverrides": [
+        {
+          "roomId": "EC-2F-WC-P1-F",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_restrooms.py",
+            "entryId": "EC-2F-WC-P1-F"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "EC-2F-WC-P1-F": [
+                -28.7151,
+                1.1336
+              ],
+              "@public": [
+                -28.7351,
+                1.1336
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "EC-2F-WC-P1-M",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_restrooms.py",
+            "entryId": "EC-2F-WC-P1-M"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "EC-2F-WC-P1-M": [
+                -28.7151,
+                -1.0664
+              ],
+              "@public": [
+                -28.7351,
+                -1.0664
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        }
+      ],
+      "v12Restrooms": {
+        "version": 1,
+        "tool": "tools/apply_v12_restrooms.py",
+        "note": "v12 廁所：位置依平面圖符號或沿用 1F 位置；範圍、男女分隔與門位為示意，內裝由 runtime 配置。",
+        "generated": [
+          "EC-2F-WC-P1-F",
+          "EC-2F-WC-P1-M"
+        ],
+        "sourceRooms": {},
+        "sourceIndex": {},
+        "sourceOverrides": [],
+        "placements": [
+          {
+            "slot": "P1",
+            "mode": "free",
+            "offset": 0.2
+          }
+        ],
+        "skipped": [
+          {
+            "slot": "P2",
+            "symbol": "accessible",
+            "reason": "無障礙廁所小格夾在中央樓梯與 EC1011-2 之間；放寬到 runtime 允許的最小尺寸（EC 比例下約 1.86×2.23 m）仍找不到合法位置。"
+          }
+        ],
+        "overridesKeyAdded": true
       }
     },
     {
@@ -25691,6 +26069,118 @@
           "matchedCodes": [],
           "note": "輪廓來自官方圖面區域；門點朝向僅示意，尚未逐間核對，區域可能含廊道、設備間或分割誤差。",
           "name": "未編號圖面空間候選"
+        },
+        {
+          "id": "EC-3F-WC-P1-F",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "女廁",
+          "gender": "female",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "沿用 1F 位置，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-3F 平面圖符號，像素 (234, 248)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-3F 平面圖符號，像素 (234, 248)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "沿用 EC-1F 平面圖符號的位置；本層未對圖。 實際擺位偏移 0.20 m。"
+          },
+          "polygon": [
+            [
+              -28.7151,
+              0.0336
+            ],
+            [
+              -26.1151,
+              0.0336
+            ],
+            [
+              -26.1151,
+              2.2336
+            ],
+            [
+              -28.7151,
+              2.2336
+            ]
+          ],
+          "door": {
+            "position": [
+              -28.7151,
+              1.1336
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "EC-3F-WC-P1-M",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "男廁",
+          "gender": "male",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "沿用 1F 位置，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-3F 平面圖符號，像素 (234, 248)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-3F 平面圖符號，像素 (234, 248)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "沿用 EC-1F 平面圖符號的位置；本層未對圖。 實際擺位偏移 0.20 m。"
+          },
+          "polygon": [
+            [
+              -28.7151,
+              -2.1664
+            ],
+            [
+              -26.1151,
+              -2.1664
+            ],
+            [
+              -26.1151,
+              0.0336
+            ],
+            [
+              -28.7151,
+              0.0336
+            ]
+          ],
+          "door": {
+            "position": [
+              -28.7151,
+              -1.0664
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
         }
       ],
       "regionCandidates": [
@@ -26155,6 +26645,83 @@
         "basis": "schematic",
         "reviewRequired": true,
         "note": "虛擬外接通道；是否需在房間外牆開新服務門由幾何整合檢查，不宣稱實際入口。"
+      },
+      "virtualPortalOverrides": [
+        {
+          "roomId": "EC-3F-WC-P1-F",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_restrooms.py",
+            "entryId": "EC-3F-WC-P1-F"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "EC-3F-WC-P1-F": [
+                -28.7151,
+                1.1336
+              ],
+              "@public": [
+                -28.7351,
+                1.1336
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "EC-3F-WC-P1-M",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_restrooms.py",
+            "entryId": "EC-3F-WC-P1-M"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "EC-3F-WC-P1-M": [
+                -28.7151,
+                -1.0664
+              ],
+              "@public": [
+                -28.7351,
+                -1.0664
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        }
+      ],
+      "v12Restrooms": {
+        "version": 1,
+        "tool": "tools/apply_v12_restrooms.py",
+        "note": "v12 廁所：位置依平面圖符號或沿用 1F 位置；範圍、男女分隔與門位為示意，內裝由 runtime 配置。",
+        "generated": [
+          "EC-3F-WC-P1-F",
+          "EC-3F-WC-P1-M"
+        ],
+        "sourceRooms": {},
+        "sourceIndex": {},
+        "sourceOverrides": [],
+        "placements": [
+          {
+            "slot": "P1",
+            "mode": "free",
+            "offset": 0.2
+          }
+        ],
+        "skipped": [
+          {
+            "slot": "P2",
+            "symbol": "accessible",
+            "reason": "無障礙廁所小格夾在中央樓梯與 EC1011-2 之間；放寬到 runtime 允許的最小尺寸（EC 比例下約 1.86×2.23 m）仍找不到合法位置。"
+          }
+        ],
+        "overridesKeyAdded": true
       }
     },
     {
@@ -33825,6 +34392,118 @@
           "matchedCodes": [],
           "note": "輪廓來自官方圖面區域；門點朝向僅示意，尚未逐間核對，區域可能含廊道、設備間或分割誤差。",
           "name": "未編號圖面空間候選"
+        },
+        {
+          "id": "EC-4F-WC-P1-F",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "女廁",
+          "gender": "female",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "沿用 1F 位置，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-4F 平面圖符號，像素 (247, 246)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-4F 平面圖符號，像素 (247, 246)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "沿用 EC-1F 平面圖符號的位置；本層未對圖。 實際擺位偏移 0.10 m。"
+          },
+          "polygon": [
+            [
+              -28.8151,
+              -2.1664
+            ],
+            [
+              -26.2151,
+              -2.1664
+            ],
+            [
+              -26.2151,
+              0.0336
+            ],
+            [
+              -28.8151,
+              0.0336
+            ]
+          ],
+          "door": {
+            "position": [
+              -28.8151,
+              -1.0664
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "EC-4F-WC-P1-M",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "男廁",
+          "gender": "male",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "沿用 1F 位置，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-4F 平面圖符號，像素 (247, 246)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-4F 平面圖符號，像素 (247, 246)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "沿用 EC-1F 平面圖符號的位置；本層未對圖。 實際擺位偏移 0.10 m。"
+          },
+          "polygon": [
+            [
+              -28.8151,
+              0.0336
+            ],
+            [
+              -26.2151,
+              0.0336
+            ],
+            [
+              -26.2151,
+              2.2336
+            ],
+            [
+              -28.8151,
+              2.2336
+            ]
+          ],
+          "door": {
+            "position": [
+              -28.8151,
+              1.1336
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
         }
       ],
       "regionCandidates": [],
@@ -33989,6 +34668,83 @@
         "basis": "schematic",
         "reviewRequired": true,
         "note": "虛擬外接通道；是否需在房間外牆開新服務門由幾何整合檢查，不宣稱實際入口。"
+      },
+      "virtualPortalOverrides": [
+        {
+          "roomId": "EC-4F-WC-P1-F",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_restrooms.py",
+            "entryId": "EC-4F-WC-P1-F"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "EC-4F-WC-P1-F": [
+                -28.8151,
+                -1.0664
+              ],
+              "@public": [
+                -28.8351,
+                -1.0664
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "EC-4F-WC-P1-M",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_restrooms.py",
+            "entryId": "EC-4F-WC-P1-M"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "EC-4F-WC-P1-M": [
+                -28.8151,
+                1.1336
+              ],
+              "@public": [
+                -28.8351,
+                1.1336
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        }
+      ],
+      "v12Restrooms": {
+        "version": 1,
+        "tool": "tools/apply_v12_restrooms.py",
+        "note": "v12 廁所：位置依平面圖符號或沿用 1F 位置；範圍、男女分隔與門位為示意，內裝由 runtime 配置。",
+        "generated": [
+          "EC-4F-WC-P1-F",
+          "EC-4F-WC-P1-M"
+        ],
+        "sourceRooms": {},
+        "sourceIndex": {},
+        "sourceOverrides": [],
+        "placements": [
+          {
+            "slot": "P1",
+            "mode": "free",
+            "offset": 0.1
+          }
+        ],
+        "skipped": [
+          {
+            "slot": "P2",
+            "symbol": "accessible",
+            "reason": "無障礙廁所小格夾在中央樓梯與 EC1011-2 之間；放寬到 runtime 允許的最小尺寸（EC 比例下約 1.86×2.23 m）仍找不到合法位置。"
+          }
+        ],
+        "overridesKeyAdded": true
       }
     },
     {
@@ -40827,6 +41583,118 @@
           "matchedCodes": [],
           "note": "輪廓來自官方圖面區域；門點朝向僅示意，尚未逐間核對，區域可能含廊道、設備間或分割誤差。",
           "name": "未編號圖面空間候選"
+        },
+        {
+          "id": "EC-5F-WC-P1-F",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "女廁",
+          "gender": "female",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "沿用 1F 位置，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-5F 平面圖符號，像素 (246, 259)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "圖示處已被房間或動線佔用，移到最近的可用空位；預設尺寸放不下，依協調者裁決縮小（不低於 1.8×2.2 m，且換算世界尺寸不低於 runtime 的 2.0×2.4 m）；合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-5F 平面圖符號，像素 (246, 259)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "沿用 EC-1F 平面圖符號的位置；本層未對圖。 實際擺位偏移 1.80 m。"
+          },
+          "polygon": [
+            [
+              -30.4151,
+              -2.3664
+            ],
+            [
+              -28.4151,
+              -2.3664
+            ],
+            [
+              -28.4151,
+              0.0336
+            ],
+            [
+              -30.4151,
+              0.0336
+            ]
+          ],
+          "door": {
+            "position": [
+              -28.4151,
+              -1.1664
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "EC-5F-WC-P1-M",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "男廁",
+          "gender": "male",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "沿用 1F 位置，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-5F 平面圖符號，像素 (246, 259)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "圖示處已被房間或動線佔用，移到最近的可用空位；預設尺寸放不下，依協調者裁決縮小（不低於 1.8×2.2 m，且換算世界尺寸不低於 runtime 的 2.0×2.4 m）；合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-5F 平面圖符號，像素 (246, 259)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "沿用 EC-1F 平面圖符號的位置；本層未對圖。 實際擺位偏移 1.80 m。"
+          },
+          "polygon": [
+            [
+              -30.4151,
+              0.0336
+            ],
+            [
+              -28.4151,
+              0.0336
+            ],
+            [
+              -28.4151,
+              2.4336
+            ],
+            [
+              -30.4151,
+              2.4336
+            ]
+          ],
+          "door": {
+            "position": [
+              -28.4151,
+              1.2336
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
         }
       ],
       "regionCandidates": [
@@ -41144,6 +42012,84 @@
         "basis": "schematic",
         "reviewRequired": true,
         "note": "虛擬外接通道；是否需在房間外牆開新服務門由幾何整合檢查，不宣稱實際入口。"
+      },
+      "virtualPortalOverrides": [
+        {
+          "roomId": "EC-5F-WC-P1-F",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_restrooms.py",
+            "entryId": "EC-5F-WC-P1-F"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "EC-5F-WC-P1-F": [
+                -28.4151,
+                -1.1664
+              ],
+              "@public": [
+                -28.3951,
+                -1.1664
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "EC-5F-WC-P1-M",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_restrooms.py",
+            "entryId": "EC-5F-WC-P1-M"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "EC-5F-WC-P1-M": [
+                -28.4151,
+                1.2336
+              ],
+              "@public": [
+                -28.3951,
+                1.2336
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        }
+      ],
+      "v12Restrooms": {
+        "version": 1,
+        "tool": "tools/apply_v12_restrooms.py",
+        "note": "v12 廁所：位置依平面圖符號或沿用 1F 位置；範圍、男女分隔與門位為示意，內裝由 runtime 配置。",
+        "generated": [
+          "EC-5F-WC-P1-F",
+          "EC-5F-WC-P1-M"
+        ],
+        "sourceRooms": {},
+        "sourceIndex": {},
+        "sourceOverrides": [],
+        "placements": [
+          {
+            "slot": "P1",
+            "mode": "free",
+            "offset": 1.8,
+            "relaxed": true
+          }
+        ],
+        "skipped": [
+          {
+            "slot": "P2",
+            "symbol": "accessible",
+            "reason": "無障礙廁所小格夾在中央樓梯與 EC1011-2 之間；放寬到 runtime 允許的最小尺寸（EC 比例下約 1.86×2.23 m）仍找不到合法位置。"
+          }
+        ],
+        "overridesKeyAdded": true
       }
     },
     {
@@ -46944,6 +47890,118 @@
           ],
           "note": "輪廓來自官方圖面區域；門點朝向僅示意，尚未逐間核對，區域可能含廊道、設備間或分割誤差。",
           "code": "EC6013"
+        },
+        {
+          "id": "EC-6F-WC-P1-F",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "女廁",
+          "gender": "female",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "沿用 1F 位置，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-6F 平面圖符號，像素 (247, 250)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "圖示處已被房間或動線佔用，移到最近的可用空位；合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-6F 平面圖符號，像素 (247, 250)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "沿用 EC-1F 平面圖符號的位置；本層未對圖。 實際擺位偏移 3.61 m。"
+          },
+          "polygon": [
+            [
+              -27.9151,
+              2.4086
+            ],
+            [
+              -25.8651,
+              2.4086
+            ],
+            [
+              -25.8651,
+              4.8586
+            ],
+            [
+              -27.9151,
+              4.8586
+            ]
+          ],
+          "door": {
+            "position": [
+              -26.8901,
+              4.8586
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "EC-6F-WC-P1-M",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "男廁",
+          "gender": "male",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "沿用 1F 位置，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-6F 平面圖符號，像素 (247, 250)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "圖示處已被房間或動線佔用，移到最近的可用空位；合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-6F 平面圖符號，像素 (247, 250)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "沿用 EC-1F 平面圖符號的位置；本層未對圖。 實際擺位偏移 3.61 m。"
+          },
+          "polygon": [
+            [
+              -29.9651,
+              2.4086
+            ],
+            [
+              -27.9151,
+              2.4086
+            ],
+            [
+              -27.9151,
+              4.8586
+            ],
+            [
+              -29.9651,
+              4.8586
+            ]
+          ],
+          "door": {
+            "position": [
+              -28.9401,
+              4.8586
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
         }
       ],
       "regionCandidates": [
@@ -47312,6 +48370,83 @@
         "basis": "schematic",
         "reviewRequired": true,
         "note": "虛擬外接通道；是否需在房間外牆開新服務門由幾何整合檢查，不宣稱實際入口。"
+      },
+      "virtualPortalOverrides": [
+        {
+          "roomId": "EC-6F-WC-P1-F",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_restrooms.py",
+            "entryId": "EC-6F-WC-P1-F"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "EC-6F-WC-P1-F": [
+                -26.8901,
+                4.8586
+              ],
+              "@public": [
+                -26.8901,
+                4.8786
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "EC-6F-WC-P1-M",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_restrooms.py",
+            "entryId": "EC-6F-WC-P1-M"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "EC-6F-WC-P1-M": [
+                -28.9401,
+                4.8586
+              ],
+              "@public": [
+                -28.9401,
+                4.8786
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        }
+      ],
+      "v12Restrooms": {
+        "version": 1,
+        "tool": "tools/apply_v12_restrooms.py",
+        "note": "v12 廁所：位置依平面圖符號或沿用 1F 位置；範圍、男女分隔與門位為示意，內裝由 runtime 配置。",
+        "generated": [
+          "EC-6F-WC-P1-F",
+          "EC-6F-WC-P1-M"
+        ],
+        "sourceRooms": {},
+        "sourceIndex": {},
+        "sourceOverrides": [],
+        "placements": [
+          {
+            "slot": "P1",
+            "mode": "free",
+            "offset": 3.612
+          }
+        ],
+        "skipped": [
+          {
+            "slot": "P2",
+            "symbol": "accessible",
+            "reason": "無障礙廁所小格夾在中央樓梯與 EC1011-2 之間；放寬到 runtime 允許的最小尺寸（EC 比例下約 1.86×2.23 m）仍找不到合法位置。"
+          }
+        ],
+        "overridesKeyAdded": true
       }
     },
     {
@@ -54346,6 +55481,118 @@
           "matchedCodes": [],
           "note": "輪廓來自官方圖面區域；門點朝向僅示意，尚未逐間核對，區域可能含廊道、設備間或分割誤差。",
           "name": "未編號圖面空間候選"
+        },
+        {
+          "id": "EC-7F-WC-P1-F",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "女廁",
+          "gender": "female",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "沿用 1F 位置，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-7F 平面圖符號，像素 (220, 284)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "圖示處已被房間或動線佔用，移到最近的可用空位；預設尺寸放不下，依協調者裁決縮小（不低於 1.8×2.2 m，且換算世界尺寸不低於 runtime 的 2.0×2.4 m）；合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-7F 平面圖符號，像素 (220, 284)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "沿用 EC-1F 平面圖符號的位置；本層未對圖。 實際擺位偏移 1.80 m。"
+          },
+          "polygon": [
+            [
+              -30.4151,
+              -2.3664
+            ],
+            [
+              -28.4151,
+              -2.3664
+            ],
+            [
+              -28.4151,
+              0.0336
+            ],
+            [
+              -30.4151,
+              0.0336
+            ]
+          ],
+          "door": {
+            "position": [
+              -28.4151,
+              -1.1664
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "EC-7F-WC-P1-M",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "男廁",
+          "gender": "male",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "沿用 1F 位置，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-7F 平面圖符號，像素 (220, 284)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "圖示處已被房間或動線佔用，移到最近的可用空位；預設尺寸放不下，依協調者裁決縮小（不低於 1.8×2.2 m，且換算世界尺寸不低於 runtime 的 2.0×2.4 m）；合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-7F 平面圖符號，像素 (220, 284)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "沿用 EC-1F 平面圖符號的位置；本層未對圖。 實際擺位偏移 1.80 m。"
+          },
+          "polygon": [
+            [
+              -30.4151,
+              0.0336
+            ],
+            [
+              -28.4151,
+              0.0336
+            ],
+            [
+              -28.4151,
+              2.4336
+            ],
+            [
+              -30.4151,
+              2.4336
+            ]
+          ],
+          "door": {
+            "position": [
+              -28.4151,
+              1.2336
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
         }
       ],
       "regionCandidates": [
@@ -54722,6 +55969,84 @@
         "basis": "schematic",
         "reviewRequired": true,
         "note": "虛擬外接通道；是否需在房間外牆開新服務門由幾何整合檢查，不宣稱實際入口。"
+      },
+      "virtualPortalOverrides": [
+        {
+          "roomId": "EC-7F-WC-P1-F",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_restrooms.py",
+            "entryId": "EC-7F-WC-P1-F"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "EC-7F-WC-P1-F": [
+                -28.4151,
+                -1.1664
+              ],
+              "@public": [
+                -28.3951,
+                -1.1664
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "EC-7F-WC-P1-M",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_restrooms.py",
+            "entryId": "EC-7F-WC-P1-M"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "EC-7F-WC-P1-M": [
+                -28.4151,
+                1.2336
+              ],
+              "@public": [
+                -28.3951,
+                1.2336
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        }
+      ],
+      "v12Restrooms": {
+        "version": 1,
+        "tool": "tools/apply_v12_restrooms.py",
+        "note": "v12 廁所：位置依平面圖符號或沿用 1F 位置；範圍、男女分隔與門位為示意，內裝由 runtime 配置。",
+        "generated": [
+          "EC-7F-WC-P1-F",
+          "EC-7F-WC-P1-M"
+        ],
+        "sourceRooms": {},
+        "sourceIndex": {},
+        "sourceOverrides": [],
+        "placements": [
+          {
+            "slot": "P1",
+            "mode": "free",
+            "offset": 1.8,
+            "relaxed": true
+          }
+        ],
+        "skipped": [
+          {
+            "slot": "P2",
+            "symbol": "accessible",
+            "reason": "無障礙廁所小格夾在中央樓梯與 EC1011-2 之間；放寬到 runtime 允許的最小尺寸（EC 比例下約 1.86×2.23 m）仍找不到合法位置。"
+          }
+        ],
+        "overridesKeyAdded": true
       }
     },
     {
@@ -62522,6 +63847,118 @@
           "matchedCodes": [],
           "note": "輪廓來自官方圖面區域；門點朝向僅示意，尚未逐間核對，區域可能含廊道、設備間或分割誤差。",
           "name": "未編號圖面空間候選"
+        },
+        {
+          "id": "EC-8F-WC-P1-F",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "女廁",
+          "gender": "female",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "沿用 1F 位置，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-8F 平面圖符號，像素 (230, 280)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-8F 平面圖符號，像素 (230, 280)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "沿用 EC-1F 平面圖符號的位置；本層未對圖。"
+          },
+          "polygon": [
+            [
+              -27.6151,
+              -1.2664
+            ],
+            [
+              -25.4151,
+              -1.2664
+            ],
+            [
+              -25.4151,
+              1.3336
+            ],
+            [
+              -27.6151,
+              1.3336
+            ]
+          ],
+          "door": {
+            "position": [
+              -26.5151,
+              1.3336
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "EC-8F-WC-P1-M",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "男廁",
+          "gender": "male",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "沿用 1F 位置，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-8F 平面圖符號，像素 (230, 280)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-8F 平面圖符號，像素 (230, 280)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "沿用 EC-1F 平面圖符號的位置；本層未對圖。"
+          },
+          "polygon": [
+            [
+              -29.8151,
+              -1.2664
+            ],
+            [
+              -27.6151,
+              -1.2664
+            ],
+            [
+              -27.6151,
+              1.3336
+            ],
+            [
+              -29.8151,
+              1.3336
+            ]
+          ],
+          "door": {
+            "position": [
+              -28.7151,
+              1.3336
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
         }
       ],
       "regionCandidates": [
@@ -63230,6 +64667,83 @@
         "basis": "schematic",
         "reviewRequired": true,
         "note": "虛擬外接通道；是否需在房間外牆開新服務門由幾何整合檢查，不宣稱實際入口。"
+      },
+      "virtualPortalOverrides": [
+        {
+          "roomId": "EC-8F-WC-P1-F",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_restrooms.py",
+            "entryId": "EC-8F-WC-P1-F"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "EC-8F-WC-P1-F": [
+                -26.5151,
+                1.3336
+              ],
+              "@public": [
+                -26.5151,
+                1.3536
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "EC-8F-WC-P1-M",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_restrooms.py",
+            "entryId": "EC-8F-WC-P1-M"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "EC-8F-WC-P1-M": [
+                -28.7151,
+                1.3336
+              ],
+              "@public": [
+                -28.7151,
+                1.3536
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        }
+      ],
+      "v12Restrooms": {
+        "version": 1,
+        "tool": "tools/apply_v12_restrooms.py",
+        "note": "v12 廁所：位置依平面圖符號或沿用 1F 位置；範圍、男女分隔與門位為示意，內裝由 runtime 配置。",
+        "generated": [
+          "EC-8F-WC-P1-F",
+          "EC-8F-WC-P1-M"
+        ],
+        "sourceRooms": {},
+        "sourceIndex": {},
+        "sourceOverrides": [],
+        "placements": [
+          {
+            "slot": "P1",
+            "mode": "free",
+            "offset": 0.0
+          }
+        ],
+        "skipped": [
+          {
+            "slot": "P2",
+            "symbol": "accessible",
+            "reason": "無障礙廁所小格夾在中央樓梯與 EC1011-2 之間；放寬到 runtime 允許的最小尺寸（EC 比例下約 1.86×2.23 m）仍找不到合法位置。"
+          }
+        ],
+        "overridesKeyAdded": true
       }
     },
     {
@@ -73196,6 +74710,118 @@
           "matchedCodes": [],
           "note": "輪廓來自官方圖面區域；門點朝向僅示意，尚未逐間核對，區域可能含廊道、設備間或分割誤差。",
           "name": "未編號圖面空間候選"
+        },
+        {
+          "id": "EC-9F-WC-P1-F",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "女廁",
+          "gender": "female",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "沿用 1F 位置，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-9F 平面圖符號，像素 (223, 250)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "圖示處已被房間或動線佔用，移到最近的可用空位；預設尺寸放不下，依協調者裁決縮小（不低於 1.8×2.2 m，且換算世界尺寸不低於 runtime 的 2.0×2.4 m）；合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-9F 平面圖符號，像素 (223, 250)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "沿用 EC-1F 平面圖符號的位置；本層未對圖。 實際擺位偏移 1.82 m。"
+          },
+          "polygon": [
+            [
+              -30.4151,
+              -2.6664
+            ],
+            [
+              -28.4151,
+              -2.6664
+            ],
+            [
+              -28.4151,
+              -0.2664
+            ],
+            [
+              -30.4151,
+              -0.2664
+            ]
+          ],
+          "door": {
+            "position": [
+              -28.4151,
+              -1.4664
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "EC-9F-WC-P1-M",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "男廁",
+          "gender": "male",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "沿用 1F 位置，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-9F 平面圖符號，像素 (223, 250)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "圖示處已被房間或動線佔用，移到最近的可用空位；預設尺寸放不下，依協調者裁決縮小（不低於 1.8×2.2 m，且換算世界尺寸不低於 runtime 的 2.0×2.4 m）；合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-03Room_COE_2",
+            "locator": "EC-9F 平面圖符號，像素 (223, 250)，local (-27.62, 0.03)",
+            "basis": "schematic",
+            "note": "沿用 EC-1F 平面圖符號的位置；本層未對圖。 實際擺位偏移 1.82 m。"
+          },
+          "polygon": [
+            [
+              -30.4151,
+              -0.2664
+            ],
+            [
+              -28.4151,
+              -0.2664
+            ],
+            [
+              -28.4151,
+              2.1336
+            ],
+            [
+              -30.4151,
+              2.1336
+            ]
+          ],
+          "door": {
+            "position": [
+              -28.4151,
+              0.9336
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
         }
       ],
       "regionCandidates": [
@@ -73408,6 +75034,84 @@
         "basis": "schematic",
         "reviewRequired": true,
         "note": "虛擬外接通道；是否需在房間外牆開新服務門由幾何整合檢查，不宣稱實際入口。"
+      },
+      "virtualPortalOverrides": [
+        {
+          "roomId": "EC-9F-WC-P1-F",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_restrooms.py",
+            "entryId": "EC-9F-WC-P1-F"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "EC-9F-WC-P1-F": [
+                -28.4151,
+                -1.4664
+              ],
+              "@public": [
+                -28.3951,
+                -1.4664
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "EC-9F-WC-P1-M",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_restrooms.py",
+            "entryId": "EC-9F-WC-P1-M"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "EC-9F-WC-P1-M": [
+                -28.4151,
+                0.9336
+              ],
+              "@public": [
+                -28.3951,
+                0.9336
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        }
+      ],
+      "v12Restrooms": {
+        "version": 1,
+        "tool": "tools/apply_v12_restrooms.py",
+        "note": "v12 廁所：位置依平面圖符號或沿用 1F 位置；範圍、男女分隔與門位為示意，內裝由 runtime 配置。",
+        "generated": [
+          "EC-9F-WC-P1-F",
+          "EC-9F-WC-P1-M"
+        ],
+        "sourceRooms": {},
+        "sourceIndex": {},
+        "sourceOverrides": [],
+        "placements": [
+          {
+            "slot": "P1",
+            "mode": "free",
+            "offset": 1.825,
+            "relaxed": true
+          }
+        ],
+        "skipped": [
+          {
+            "slot": "P2",
+            "symbol": "accessible",
+            "reason": "無障礙廁所小格夾在中央樓梯與 EC1011-2 之間；放寬到 runtime 允許的最小尺寸（EC 比例下約 1.86×2.23 m）仍找不到合法位置。"
+          }
+        ],
+        "overridesKeyAdded": true
       }
     },
     {

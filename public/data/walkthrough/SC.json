@@ -600,47 +600,23 @@
         },
         {
           "id": "SC-B1-region-002",
-          "kind": "room-candidate",
+          "kind": "restroom",
           "polygon": [
             [
               -17.7809,
               -9.1738
             ],
             [
+              -14.2977,
+              -9.1738
+            ],
+            [
+              -14.2977,
+              -6.9102
+            ],
+            [
               -17.7809,
               -6.9102
-            ],
-            [
-              -15.2273,
-              -6.9102
-            ],
-            [
-              -15.1107,
-              -7.4322
-            ],
-            [
-              -15.0529,
-              -7.1423
-            ],
-            [
-              -14.2977,
-              -7.1423
-            ],
-            [
-              -14.2977,
-              -7.8965
-            ],
-            [
-              -14.7042,
-              -7.8965
-            ],
-            [
-              -14.5886,
-              -8.1875
-            ],
-            [
-              -14.5886,
-              -9.1738
             ]
           ],
           "door": {
@@ -699,7 +675,31 @@
           ],
           "matchedCodes": [],
           "note": "輪廓來自官方圖面區域；門點朝向僅示意，尚未逐間核對，區域可能含廊道、設備間或分割誤差。",
-          "name": "未編號圖面空間候選"
+          "name": "未編號圖面空間候選",
+          "code": "WC",
+          "displayName": "廁所",
+          "gender": "unisex",
+          "accessible": false,
+          "planSymbol": "text",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "designNote": "範圍依描圖，內裝示意",
+          "evidence": {
+            "sourceId": "safety-pta_174543_8048869_04268",
+            "locator": "SC-B1 平面圖符號，像素 (1261, 621)，local (-16.60, -8.00)",
+            "basis": "schematic",
+            "note": "描圖外框含門弧缺口，runtime planRestroom 放不下隔間（v12/fix1）；改為描圖外接矩形 3.48×2.26 m，門位（門弧）不變。"
+          },
+          "locationEvidence": {
+            "sourceId": "safety-pta_174543_8048869_04268",
+            "locator": "SC-B1 平面圖符號，像素 (1261, 621)，local (-16.60, -8.00)",
+            "basis": "map-derived",
+            "note": "圖上只標「廁所」，未分性別。"
+          }
         },
         {
           "id": "SC-B1-region-005",
@@ -12481,7 +12481,137 @@
           },
           "geometryWarning": "官方平面圖門弧把描圖的牆切碎；只在這道門的範圍內修正。"
         }
-      ]
+      ],
+      "v12Restrooms": {
+        "version": 1,
+        "tool": "tools/apply_v12_sc_rooms.py",
+        "note": "v12 廁所：位置依平面圖符號或沿用 1F 位置；範圍、男女分隔與門位為示意，內裝由 runtime 配置。",
+        "generated": [],
+        "sourceRooms": {
+          "SC-B1-region-002": {
+            "id": "SC-B1-region-002",
+            "kind": "room-candidate",
+            "polygon": [
+              [
+                -17.7809,
+                -9.1738
+              ],
+              [
+                -17.7809,
+                -6.9102
+              ],
+              [
+                -15.2273,
+                -6.9102
+              ],
+              [
+                -15.1107,
+                -7.4322
+              ],
+              [
+                -15.0529,
+                -7.1423
+              ],
+              [
+                -14.2977,
+                -7.1423
+              ],
+              [
+                -14.2977,
+                -7.8965
+              ],
+              [
+                -14.7042,
+                -7.8965
+              ],
+              [
+                -14.5886,
+                -8.1875
+              ],
+              [
+                -14.5886,
+                -9.1738
+              ]
+            ],
+            "door": {
+              "position": [
+                -14.2977,
+                -7.7809
+              ],
+              "width": 1.0,
+              "basis": "map-derived",
+              "note": "依官方平面圖門弧；未經現地。",
+              "reviewRequired": true
+            },
+            "basis": "map-derived",
+            "reviewStatus": "candidate-review-required",
+            "sourceRegionPixels": [
+              [
+                1241.0,
+                601.0
+              ],
+              [
+                1241.0,
+                640.0
+              ],
+              [
+                1285.0,
+                640.0
+              ],
+              [
+                1287.0,
+                631.0
+              ],
+              [
+                1288.0,
+                636.0
+              ],
+              [
+                1301.0,
+                636.0
+              ],
+              [
+                1301.0,
+                623.0
+              ],
+              [
+                1294.0,
+                623.0
+              ],
+              [
+                1296.0,
+                618.0
+              ],
+              [
+                1296.0,
+                601.0
+              ]
+            ],
+            "matchedCodes": [],
+            "note": "輪廓來自官方圖面區域；門點朝向僅示意，尚未逐間核對，區域可能含廊道、設備間或分割誤差。",
+            "name": "未編號圖面空間候選"
+          }
+        },
+        "sourceIndex": {
+          "SC-B1-region-002": 1
+        },
+        "sourceOverrides": [],
+        "placements": [
+          {
+            "slot": "MN",
+            "mode": "region",
+            "regionId": "SC-B1-region-002",
+            "offset": 0
+          }
+        ],
+        "skipped": [
+          {
+            "slot": "NE",
+            "symbol": "text",
+            "reason": "圖上「廁所」就是受審查保護的 SC-B1-region-010（3.65×1.86 m）；不改動受審房間，也不在走廊另放（會擋住該房間的門）。"
+          }
+        ]
+      }
     },
     {
       "id": "SC-1F",
@@ -13075,19 +13205,31 @@
           "polygon": [
             [
               -34.21,
-              -8.75
-            ],
-            [
-              -22.88,
-              -8.75
+              -1.81
             ],
             [
               -22.88,
               -1.81
+            ],
+            [
+              -22.88,
+              -4.53
+            ],
+            [
+              -25.48,
+              -4.53
+            ],
+            [
+              -25.48,
+              -6.64
+            ],
+            [
+              -25.48,
+              -8.75
             ],
             [
               -34.21,
-              -1.81
+              -8.75
             ]
           ],
           "door": {
@@ -13119,7 +13261,8 @@
               240.50400000000002
             ]
           ],
-          "note": "人工對照官方圖面描繪房間外界；受圖線寬影響為近似輪廓，非CAD尺寸。房門需另核對。"
+          "note": "人工對照官方圖面描繪房間外界；受圖線寬影響為近似輪廓，非CAD尺寸。房門需另核對。",
+          "v12Carved": "為 v12 廁所裁出缺口（位置依平面圖 WC 符號，範圍示意）。"
         },
         {
           "id": "SC-1F-SC1013",
@@ -13548,8 +13691,8 @@
           "note": "人工對照官方圖面描繪房間外界；受圖線寬影響為近似輪廓，非CAD尺寸。房門需另核對。"
         },
         {
-          "id": "SC-1F-SC1011",
-          "code": "SC1011",
+          "id": "SC-1F-SC1011-1",
+          "code": "SC1011-1",
           "kind": "room",
           "polygon": [
             [
@@ -13557,11 +13700,11 @@
               14.051
             ],
             [
-              -16.17,
+              -20.51,
               14.051
             ],
             [
-              -16.17,
+              -20.51,
               19.051
             ],
             [
@@ -13583,22 +13726,158 @@
           "sourceRegionPixels": [
             [
               1436.85,
-              575.752
+              575.753
             ],
             [
-              1576.3500000000001,
-              575.752
+              1484.618,
+              575.753
             ],
             [
-              1576.3500000000001,
-              681.428
+              1484.618,
+              681.435
             ],
             [
               1436.85,
-              681.428
+              681.435
             ]
           ],
-          "note": "人工對照官方圖面描繪房間外界；受圖線寬影響為近似輪廓，非CAD尺寸。房門需另核對。"
+          "note": "人工對照官方圖面描繪房間外界；受圖線寬影響為近似輪廓，非CAD尺寸。房門需另核對。",
+          "aliases": [
+            "SC1011"
+          ],
+          "splitFrom": "SC-1F-SC1011",
+          "designNote": "隔間依使用者回報，位置示意",
+          "wallBasis": {
+            "west": "map-derived",
+            "east": "map-derived",
+            "evidence": "SC-1F.webp「SC」與「1011」之間的直牆，像素 x≈1484；第三道牆無圖可依"
+          }
+        },
+        {
+          "id": "SC-1F-SC1011-2",
+          "code": "SC1011-2",
+          "kind": "room",
+          "polygon": [
+            [
+              -20.51,
+              14.051
+            ],
+            [
+              -18.34,
+              14.051
+            ],
+            [
+              -18.34,
+              19.051
+            ],
+            [
+              -20.51,
+              19.051
+            ]
+          ],
+          "door": {
+            "position": [
+              -19.425,
+              14.051
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 隔間後每間正中的示意門，朝向走廊。"
+          },
+          "basis": "schematic",
+          "reviewStatus": "outline-checked-door-review-required",
+          "sourceRegionPixels": [
+            [
+              1484.618,
+              575.753
+            ],
+            [
+              1530.484,
+              575.753
+            ],
+            [
+              1530.484,
+              681.435
+            ],
+            [
+              1484.618,
+              681.435
+            ]
+          ],
+          "note": "人工對照官方圖面描繪房間外界；受圖線寬影響為近似輪廓，非CAD尺寸。房門需另核對。",
+          "aliases": [
+            "SC1011"
+          ],
+          "splitFrom": "SC-1F-SC1011",
+          "designNote": "隔間依使用者回報，位置示意",
+          "wallBasis": {
+            "west": "map-derived",
+            "east": "schematic",
+            "evidence": "SC-1F.webp「SC」與「1011」之間的直牆，像素 x≈1484；第三道牆無圖可依"
+          }
+        },
+        {
+          "id": "SC-1F-SC1011-3",
+          "code": "SC1011-3",
+          "kind": "room",
+          "polygon": [
+            [
+              -18.34,
+              14.051
+            ],
+            [
+              -16.17,
+              14.051
+            ],
+            [
+              -16.17,
+              19.051
+            ],
+            [
+              -18.34,
+              19.051
+            ]
+          ],
+          "door": {
+            "position": [
+              -17.255,
+              14.051
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 隔間後每間正中的示意門，朝向走廊。"
+          },
+          "basis": "schematic",
+          "reviewStatus": "outline-checked-door-review-required",
+          "sourceRegionPixels": [
+            [
+              1530.484,
+              575.753
+            ],
+            [
+              1576.35,
+              575.753
+            ],
+            [
+              1576.35,
+              681.435
+            ],
+            [
+              1530.484,
+              681.435
+            ]
+          ],
+          "note": "人工對照官方圖面描繪房間外界；受圖線寬影響為近似輪廓，非CAD尺寸。房門需另核對。",
+          "aliases": [
+            "SC1011"
+          ],
+          "splitFrom": "SC-1F-SC1011",
+          "designNote": "隔間依使用者回報，位置示意",
+          "wallBasis": {
+            "west": "schematic",
+            "east": "map-derived",
+            "evidence": "SC-1F.webp「SC」與「1011」之間的直牆，像素 x≈1484；第三道牆無圖可依"
+          }
         },
         {
           "id": "SC-1F-SC1015",
@@ -13790,6 +14069,454 @@
             ]
           ],
           "note": "圖上可見封閉粉色區域，沒有清楚房號；不推測代碼。"
+        },
+        {
+          "id": "SC-1F-WC-NW-F",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "女廁",
+          "gender": "female",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "位置依平面圖，男女分隔及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-1F 平面圖符號，像素 (1411, 124)，local (-24.00, -7.30)",
+            "basis": "schematic",
+            "note": "範圍與男女分隔為示意；合併圖示依「靠走廊入口為女廁」切分。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-1F 平面圖符號，像素 (1411, 124)，local (-24.00, -7.30)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。"
+          },
+          "polygon": [
+            [
+              -25.48,
+              -6.64
+            ],
+            [
+              -22.88,
+              -6.64
+            ],
+            [
+              -22.88,
+              -4.53
+            ],
+            [
+              -25.48,
+              -4.53
+            ]
+          ],
+          "door": {
+            "position": [
+              -22.88,
+              -5.585
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "SC-1F-WC-NW-M",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "男廁",
+          "gender": "male",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "位置依平面圖，男女分隔及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-1F 平面圖符號，像素 (1411, 124)，local (-24.00, -7.30)",
+            "basis": "schematic",
+            "note": "範圍與男女分隔為示意；合併圖示依「靠走廊入口為女廁」切分。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-1F 平面圖符號，像素 (1411, 124)，local (-24.00, -7.30)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。"
+          },
+          "polygon": [
+            [
+              -25.48,
+              -8.75
+            ],
+            [
+              -22.88,
+              -8.75
+            ],
+            [
+              -22.88,
+              -6.64
+            ],
+            [
+              -25.48,
+              -6.64
+            ]
+          ],
+          "door": {
+            "position": [
+              -22.88,
+              -7.695
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "SC-1F-WC-MN-A",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "無障礙廁所",
+          "gender": "unisex",
+          "accessible": true,
+          "planSymbol": "accessible",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "位置依平面圖，男女分隔及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-1F 平面圖符號，像素 (1578, 116)，local (-16.10, -7.70)",
+            "basis": "schematic",
+            "note": "範圍與門位為示意：圖上隔間小於 2.0×2.4 m 下限或不臨主要走廊，v12 wpd-run 以放寬搜尋擺放。放在圖上無障礙廁所隔間內，門朝東側走廊。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-1F 平面圖符號，像素 (1578, 116)，local (-16.10, -7.70)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。"
+          },
+          "polygon": [
+            [
+              -17.1,
+              -8.9
+            ],
+            [
+              -14.7,
+              -8.9
+            ],
+            [
+              -14.7,
+              -6.6
+            ],
+            [
+              -17.1,
+              -6.6
+            ]
+          ],
+          "door": {
+            "position": [
+              -14.7,
+              -7.75
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "SC-1F-WC-NE-A",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "無障礙廁所",
+          "gender": "unisex",
+          "accessible": true,
+          "planSymbol": "accessible",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "map-derived",
+          "designNote": "位置依平面圖，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-1F 平面圖符號，像素 (2163, 116)，local (11.60, -7.70)",
+            "basis": "schematic",
+            "note": "範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-1F 平面圖符號，像素 (2163, 116)，local (11.60, -7.70)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。 實際擺位偏移 0.30 m。"
+          },
+          "polygon": [
+            [
+              10.6,
+              -8.8
+            ],
+            [
+              13.2,
+              -8.8
+            ],
+            [
+              13.2,
+              -6.6
+            ],
+            [
+              10.6,
+              -6.6
+            ]
+          ],
+          "door": {
+            "position": [
+              10.6,
+              -7.7
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "SC-1F-WC-S-F",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "女廁",
+          "gender": "female",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "位置依平面圖，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-1F 平面圖符號，像素 (1616, 644)，local (-14.30, 17.30)",
+            "basis": "schematic",
+            "note": "合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-1F 平面圖符號，像素 (1616, 644)，local (-14.30, 17.30)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。 實際擺位偏移 0.32 m。"
+          },
+          "polygon": [
+            [
+              -16.05,
+              15.975
+            ],
+            [
+              -14.0,
+              15.975
+            ],
+            [
+              -14.0,
+              18.425
+            ],
+            [
+              -16.05,
+              18.425
+            ]
+          ],
+          "door": {
+            "position": [
+              -15.025,
+              18.425
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "SC-1F-WC-S-M",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "男廁",
+          "gender": "male",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "位置依平面圖，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-1F 平面圖符號，像素 (1616, 644)，local (-14.30, 17.30)",
+            "basis": "schematic",
+            "note": "合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-1F 平面圖符號，像素 (1616, 644)，local (-14.30, 17.30)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。 實際擺位偏移 0.32 m。"
+          },
+          "polygon": [
+            [
+              -14.0,
+              15.975
+            ],
+            [
+              -11.95,
+              15.975
+            ],
+            [
+              -11.95,
+              18.425
+            ],
+            [
+              -14.0,
+              18.425
+            ]
+          ],
+          "door": {
+            "position": [
+              -12.975,
+              18.425
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "SC-1F-WC-EW-F",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "女廁",
+          "gender": "female",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "位置依平面圖，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-1F 平面圖符號，像素 (134, 651)，local (-84.40, 17.60)",
+            "basis": "schematic",
+            "note": "合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-1F 平面圖符號，像素 (134, 651)，local (-84.40, 17.60)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。"
+          },
+          "polygon": [
+            [
+              -84.4,
+              16.3
+            ],
+            [
+              -82.2,
+              16.3
+            ],
+            [
+              -82.2,
+              18.9
+            ],
+            [
+              -84.4,
+              18.9
+            ]
+          ],
+          "door": {
+            "position": [
+              -83.3,
+              18.9
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "SC-1F-WC-EW-M",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "男廁",
+          "gender": "male",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "位置依平面圖，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-1F 平面圖符號，像素 (134, 651)，local (-84.40, 17.60)",
+            "basis": "schematic",
+            "note": "合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-1F 平面圖符號，像素 (134, 651)，local (-84.40, 17.60)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。"
+          },
+          "polygon": [
+            [
+              -86.6,
+              16.3
+            ],
+            [
+              -84.4,
+              16.3
+            ],
+            [
+              -84.4,
+              18.9
+            ],
+            [
+              -86.6,
+              18.9
+            ]
+          ],
+          "door": {
+            "position": [
+              -85.5,
+              18.9
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
         }
       ],
       "regionCandidates": [],
@@ -13865,18 +14592,18 @@
       ],
       "virtualPortalOverrides": [
         {
-          "roomId": "SC-1F-SC1011",
+          "roomId": "SC-1F-SC1011-1",
           "neighborRoomId": "@public",
           "planDoor": true,
           "basis": "map-derived",
           "sourceReview": {
             "report": "tools/apply_v91_sc_doors.py",
-            "entryId": "SC-1F-SC1011"
+            "entryId": "SC-1F-SC1011-1"
           },
           "suggestedPortal": {
             "width": 1.0,
             "perRoomPosition": {
-              "SC-1F-SC1011": [
+              "SC-1F-SC1011-1": [
                 -22.21,
                 14.051
               ],
@@ -13887,8 +14614,449 @@
             }
           },
           "geometryWarning": "官方平面圖門弧把描圖的牆切碎；只在這道門的範圍內修正。"
+        },
+        {
+          "roomId": "SC-1F-SC1011-2",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-1F-SC1011-2"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-1F-SC1011-2": [
+                -19.425,
+                14.051
+              ],
+              "@public": [
+                -19.425,
+                14.031
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-1F-SC1011-3",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-1F-SC1011-3"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-1F-SC1011-3": [
+                -17.255,
+                14.051
+              ],
+              "@public": [
+                -17.255,
+                14.031
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-1F-WC-NW-F",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-1F-WC-NW-F"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-1F-WC-NW-F": [
+                -22.88,
+                -5.585
+              ],
+              "@public": [
+                -22.86,
+                -5.585
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-1F-WC-NW-M",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-1F-WC-NW-M"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-1F-WC-NW-M": [
+                -22.88,
+                -7.695
+              ],
+              "@public": [
+                -22.86,
+                -7.695
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-1F-WC-MN-A",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-1F-WC-MN-A"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-1F-WC-MN-A": [
+                -14.7,
+                -7.75
+              ],
+              "@public": [
+                -14.68,
+                -7.75
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-1F-WC-NE-A",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-1F-WC-NE-A"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-1F-WC-NE-A": [
+                10.6,
+                -7.7
+              ],
+              "@public": [
+                10.58,
+                -7.7
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-1F-WC-S-F",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-1F-WC-S-F"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-1F-WC-S-F": [
+                -15.025,
+                18.425
+              ],
+              "@public": [
+                -15.025,
+                18.445
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-1F-WC-S-M",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-1F-WC-S-M"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-1F-WC-S-M": [
+                -12.975,
+                18.425
+              ],
+              "@public": [
+                -12.975,
+                18.445
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-1F-WC-EW-F",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-1F-WC-EW-F"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-1F-WC-EW-F": [
+                -83.3,
+                18.9
+              ],
+              "@public": [
+                -83.3,
+                18.92
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-1F-WC-EW-M",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-1F-WC-EW-M"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-1F-WC-EW-M": [
+                -85.5,
+                18.9
+              ],
+              "@public": [
+                -85.5,
+                18.92
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
         }
-      ]
+      ],
+      "roomSplits": {
+        "version": 1,
+        "basis": "schematic",
+        "note": "隔間依使用者回報，位置示意；編號由西向東，-1 在西。內牆依據見各子房間 wallBasis。",
+        "sourceRooms": {
+          "SC-1F-SC1011": {
+            "id": "SC-1F-SC1011",
+            "code": "SC1011",
+            "kind": "room",
+            "polygon": [
+              [
+                -22.77,
+                14.051
+              ],
+              [
+                -16.17,
+                14.051
+              ],
+              [
+                -16.17,
+                19.051
+              ],
+              [
+                -22.77,
+                19.051
+              ]
+            ],
+            "door": {
+              "position": [
+                -22.21,
+                14.051
+              ],
+              "width": 1.0,
+              "basis": "map-derived",
+              "note": "依官方平面圖門弧；未經現地。"
+            },
+            "basis": "map-derived",
+            "reviewStatus": "outline-checked-door-review-required",
+            "sourceRegionPixels": [
+              [
+                1436.85,
+                575.752
+              ],
+              [
+                1576.3500000000001,
+                575.752
+              ],
+              [
+                1576.3500000000001,
+                681.428
+              ],
+              [
+                1436.85,
+                681.428
+              ]
+            ],
+            "note": "人工對照官方圖面描繪房間外界；受圖線寬影響為近似輪廓，非CAD尺寸。房門需另核對。"
+          }
+        },
+        "sourceIndex": {
+          "SC-1F-SC1011": 9
+        },
+        "children": {
+          "SC-1F-SC1011": [
+            "SC-1F-SC1011-1",
+            "SC-1F-SC1011-2",
+            "SC-1F-SC1011-3"
+          ]
+        },
+        "sourceOverrides": [
+          {
+            "index": 0,
+            "entry": {
+              "roomId": "SC-1F-SC1011",
+              "neighborRoomId": "@public",
+              "planDoor": true,
+              "basis": "map-derived",
+              "sourceReview": {
+                "report": "tools/apply_v91_sc_doors.py",
+                "entryId": "SC-1F-SC1011"
+              },
+              "suggestedPortal": {
+                "width": 1.0,
+                "perRoomPosition": {
+                  "SC-1F-SC1011": [
+                    -22.21,
+                    14.051
+                  ],
+                  "@public": [
+                    -22.21,
+                    14.031
+                  ]
+                }
+              },
+              "geometryWarning": "官方平面圖門弧把描圖的牆切碎；只在這道門的範圍內修正。"
+            }
+          }
+        ]
+      },
+      "v12Restrooms": {
+        "version": 1,
+        "tool": "tools/apply_v12_sc_rooms.py",
+        "note": "v12 廁所：位置依平面圖符號或沿用 1F 位置；範圍、男女分隔與門位為示意，內裝由 runtime 配置。",
+        "generated": [
+          "SC-1F-WC-NW-F",
+          "SC-1F-WC-NW-M",
+          "SC-1F-WC-MN-A",
+          "SC-1F-WC-NE-A",
+          "SC-1F-WC-S-F",
+          "SC-1F-WC-S-M",
+          "SC-1F-WC-EW-F",
+          "SC-1F-WC-EW-M"
+        ],
+        "sourceRooms": {
+          "SC-1F-SC1014": {
+            "id": "SC-1F-SC1014",
+            "code": "SC1014",
+            "kind": "room",
+            "polygon": [
+              [
+                -34.21,
+                -8.75
+              ],
+              [
+                -22.88,
+                -8.75
+              ],
+              [
+                -22.88,
+                -1.81
+              ],
+              [
+                -34.21,
+                -1.81
+              ]
+            ],
+            "door": {
+              "position": [
+                -22.88,
+                -3.06
+              ],
+              "width": 1,
+              "basis": "schematic",
+              "note": "人工依原圖廊道側選擇開洞位置；除四個既有門外，仍為未逐門驗證的示意門點。"
+            },
+            "basis": "map-derived",
+            "reviewStatus": "outline-checked-door-review-required",
+            "sourceRegionPixels": [
+              [
+                1195.05,
+                93.833
+              ],
+              [
+                1434.525,
+                93.833
+              ],
+              [
+                1434.525,
+                240.50400000000002
+              ],
+              [
+                1195.05,
+                240.50400000000002
+              ]
+            ],
+            "note": "人工對照官方圖面描繪房間外界；受圖線寬影響為近似輪廓，非CAD尺寸。房門需另核對。"
+          }
+        },
+        "sourceIndex": {
+          "SC-1F-SC1014": 0
+        },
+        "sourceOverrides": [],
+        "placements": [
+          {
+            "slot": "NW",
+            "mode": "manual",
+            "offset": 0
+          },
+          {
+            "slot": "MN",
+            "mode": "manual",
+            "offset": 0
+          },
+          {
+            "slot": "NE",
+            "mode": "free",
+            "offset": 0.3
+          },
+          {
+            "slot": "S",
+            "mode": "free",
+            "offset": 0.316
+          },
+          {
+            "slot": "EW",
+            "mode": "free",
+            "offset": 0.0
+          }
+        ],
+        "skipped": []
+      }
     },
     {
       "id": "SC-2F",
@@ -14703,8 +15871,8 @@
           "note": "人工對照官方圖面描繪房間外界；受圖線寬影響為近似輪廓，非CAD尺寸。房門需另核對。"
         },
         {
-          "id": "SC-2F-SC2005",
-          "code": "SC2005",
+          "id": "SC-2F-SC2005-1",
+          "code": "SC2005-1",
           "kind": "room",
           "polygon": [
             [
@@ -14712,11 +15880,11 @@
               -8.415
             ],
             [
-              -6.71,
+              -8.96,
               -8.415
             ],
             [
-              -6.71,
+              -8.96,
               -1.975
             ],
             [
@@ -14726,34 +15894,107 @@
           ],
           "door": {
             "position": [
-              -8.91,
+              -10.035,
               -1.975
             ],
-            "width": 1,
+            "width": 1.0,
             "basis": "schematic",
-            "note": "人工依原圖廊道側選擇開洞位置；除四個既有門外，仍為未逐門驗證的示意門點。"
+            "note": "v12 隔間後每間正中的示意門，朝向走廊。"
           },
           "basis": "map-derived",
           "reviewStatus": "outline-checked-door-review-required",
           "sourceRegionPixels": [
             [
-              1632.1499999999999,
-              67.635
+              1632.15,
+              67.627
             ],
             [
-              1725.15,
-              67.635
+              1677.593,
+              67.627
             ],
             [
-              1725.15,
-              203.74
+              1677.593,
+              203.746
             ],
             [
-              1632.1499999999999,
-              203.74
+              1632.15,
+              203.746
             ]
           ],
-          "note": "人工對照官方圖面描繪房間外界；受圖線寬影響為近似輪廓，非CAD尺寸。房門需另核對。"
+          "note": "人工對照官方圖面描繪房間外界；受圖線寬影響為近似輪廓，非CAD尺寸。房門需另核對。",
+          "aliases": [
+            "SC2005"
+          ],
+          "splitFrom": "SC-2F-SC2005",
+          "designNote": "隔間依使用者回報，位置示意",
+          "wallBasis": {
+            "west": "map-derived",
+            "east": "map-derived",
+            "evidence": "SC-2F.webp 標籤「SC2005」中間的直牆，像素 x≈1677"
+          }
+        },
+        {
+          "id": "SC-2F-SC2005-2",
+          "code": "SC2005-2",
+          "kind": "room",
+          "polygon": [
+            [
+              -8.96,
+              -8.415
+            ],
+            [
+              -6.71,
+              -8.415
+            ],
+            [
+              -6.71,
+              -1.975
+            ],
+            [
+              -8.96,
+              -1.975
+            ]
+          ],
+          "door": {
+            "position": [
+              -7.835,
+              -1.975
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 隔間後每間正中的示意門，朝向走廊。"
+          },
+          "basis": "map-derived",
+          "reviewStatus": "outline-checked-door-review-required",
+          "sourceRegionPixels": [
+            [
+              1677.593,
+              67.627
+            ],
+            [
+              1725.15,
+              67.627
+            ],
+            [
+              1725.15,
+              203.746
+            ],
+            [
+              1677.593,
+              203.746
+            ]
+          ],
+          "note": "人工對照官方圖面描繪房間外界；受圖線寬影響為近似輪廓，非CAD尺寸。房門需另核對。",
+          "aliases": [
+            "SC2005"
+          ],
+          "splitFrom": "SC-2F-SC2005",
+          "designNote": "隔間依使用者回報，位置示意",
+          "wallBasis": {
+            "west": "map-derived",
+            "east": "map-derived",
+            "evidence": "SC-2F.webp 標籤「SC2005」中間的直牆，像素 x≈1677"
+          }
         },
         {
           "id": "SC-2F-SC2004",
@@ -14809,8 +16050,8 @@
           "note": "人工對照官方圖面描繪房間外界；受圖線寬影響為近似輪廓，非CAD尺寸。房門需另核對。"
         },
         {
-          "id": "SC-2F-SC2003",
-          "code": "SC2003",
+          "id": "SC-2F-SC2003-1",
+          "code": "SC2003-1",
           "kind": "room",
           "polygon": [
             [
@@ -14818,11 +16059,11 @@
               -8.415
             ],
             [
-              6.71,
+              2.163,
               -8.415
             ],
             [
-              6.71,
+              2.163,
               -1.975
             ],
             [
@@ -14832,34 +16073,170 @@
           ],
           "door": {
             "position": [
-              2.97,
+              1.0265,
               -1.975
             ],
-            "width": 1,
+            "width": 1.0,
             "basis": "schematic",
-            "note": "人工依原圖廊道側選擇開洞位置；除四個既有門外，仍為未逐門驗證的示意門點。"
+            "note": "v12 隔間後每間正中的示意門，朝向走廊。"
           },
           "basis": "map-derived",
           "reviewStatus": "outline-checked-door-review-required",
           "sourceRegionPixels": [
             [
               1864.65,
-              67.635
+              67.627
             ],
             [
-              2008.8,
-              67.635
+              1912.693,
+              67.627
             ],
             [
-              2008.8,
-              203.74
+              1912.693,
+              203.746
             ],
             [
               1864.65,
-              203.74
+              203.746
             ]
           ],
-          "note": "人工對照官方圖面描繪房間外界；受圖線寬影響為近似輪廓，非CAD尺寸。房門需另核對。"
+          "note": "人工對照官方圖面描繪房間外界；受圖線寬影響為近似輪廓，非CAD尺寸。房門需另核對。",
+          "aliases": [
+            "SC2003"
+          ],
+          "splitFrom": "SC-2F-SC2003",
+          "designNote": "隔間依使用者回報，位置示意",
+          "wallBasis": {
+            "west": "map-derived",
+            "east": "map-derived",
+            "evidence": "SC-2F.webp「SC」與「2003」之間的直牆，像素 x≈1912（與等分差 0.02 m）；第三道牆無圖可依"
+          }
+        },
+        {
+          "id": "SC-2F-SC2003-2",
+          "code": "SC2003-2",
+          "kind": "room",
+          "polygon": [
+            [
+              2.163,
+              -8.415
+            ],
+            [
+              4.437,
+              -8.415
+            ],
+            [
+              4.437,
+              -1.975
+            ],
+            [
+              2.163,
+              -1.975
+            ]
+          ],
+          "door": {
+            "position": [
+              3.3,
+              -1.975
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 隔間後每間正中的示意門，朝向走廊。"
+          },
+          "basis": "schematic",
+          "reviewStatus": "outline-checked-door-review-required",
+          "sourceRegionPixels": [
+            [
+              1912.693,
+              67.627
+            ],
+            [
+              1960.757,
+              67.627
+            ],
+            [
+              1960.757,
+              203.746
+            ],
+            [
+              1912.693,
+              203.746
+            ]
+          ],
+          "note": "人工對照官方圖面描繪房間外界；受圖線寬影響為近似輪廓，非CAD尺寸。房門需另核對。",
+          "aliases": [
+            "SC2003"
+          ],
+          "splitFrom": "SC-2F-SC2003",
+          "designNote": "隔間依使用者回報，位置示意",
+          "wallBasis": {
+            "west": "map-derived",
+            "east": "schematic",
+            "evidence": "SC-2F.webp「SC」與「2003」之間的直牆，像素 x≈1912（與等分差 0.02 m）；第三道牆無圖可依"
+          }
+        },
+        {
+          "id": "SC-2F-SC2003-3",
+          "code": "SC2003-3",
+          "kind": "room",
+          "polygon": [
+            [
+              4.437,
+              -8.415
+            ],
+            [
+              6.71,
+              -8.415
+            ],
+            [
+              6.71,
+              -1.975
+            ],
+            [
+              4.437,
+              -1.975
+            ]
+          ],
+          "door": {
+            "position": [
+              5.5735,
+              -1.975
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 隔間後每間正中的示意門，朝向走廊。"
+          },
+          "basis": "schematic",
+          "reviewStatus": "outline-checked-door-review-required",
+          "sourceRegionPixels": [
+            [
+              1960.757,
+              67.627
+            ],
+            [
+              2008.8,
+              67.627
+            ],
+            [
+              2008.8,
+              203.746
+            ],
+            [
+              1960.757,
+              203.746
+            ]
+          ],
+          "note": "人工對照官方圖面描繪房間外界；受圖線寬影響為近似輪廓，非CAD尺寸。房門需另核對。",
+          "aliases": [
+            "SC2003"
+          ],
+          "splitFrom": "SC-2F-SC2003",
+          "designNote": "隔間依使用者回報，位置示意",
+          "wallBasis": {
+            "west": "schematic",
+            "east": "map-derived",
+            "evidence": "SC-2F.webp「SC」與「2003」之間的直牆，像素 x≈1912（與等分差 0.02 m）；第三道牆無圖可依"
+          }
         },
         {
           "id": "SC-2F-SC2001",
@@ -15555,6 +16932,286 @@
             ]
           ],
           "note": "圖上可見封閉粉色區域，沒有清楚房號；不推測代碼。"
+        },
+        {
+          "id": "SC-2F-WC-NW-A",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "無障礙廁所",
+          "gender": "unisex",
+          "accessible": true,
+          "planSymbol": "accessible",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "map-derived",
+          "designNote": "位置依平面圖，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-2F 平面圖符號，像素 (1370, 91)，local (-23.50, -7.30)",
+            "basis": "schematic",
+            "note": "範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-2F 平面圖符號，像素 (1370, 91)，local (-23.50, -7.30)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。 實際擺位偏移 0.15 m。"
+          },
+          "polygon": [
+            [
+              -24.6,
+              -8.75
+            ],
+            [
+              -22.4,
+              -8.75
+            ],
+            [
+              -22.4,
+              -6.15
+            ],
+            [
+              -24.6,
+              -6.15
+            ]
+          ],
+          "door": {
+            "position": [
+              -23.5,
+              -6.15
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "SC-2F-WC-NW-F",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "女廁",
+          "gender": "female",
+          "accessible": false,
+          "planSymbol": "f",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "位置依平面圖，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-2F 平面圖符號，像素 (1370, 136)，local (-23.50, -5.20)",
+            "basis": "schematic",
+            "note": "圖示處已被房間或動線佔用，移到最近的可用空位；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-2F 平面圖符號，像素 (1370, 136)，local (-23.50, -5.20)",
+            "basis": "schematic",
+            "note": "紫色女廁圖示，性別以圖為準。 實際擺位偏移 2.37 m。"
+          },
+          "polygon": [
+            [
+              -22.375,
+              -6.525
+            ],
+            [
+              -19.925,
+              -6.525
+            ],
+            [
+              -19.925,
+              -4.475
+            ],
+            [
+              -22.375,
+              -4.475
+            ]
+          ],
+          "door": {
+            "position": [
+              -19.925,
+              -5.5
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "SC-2F-WC-NE-A",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "無障礙廁所",
+          "gender": "unisex",
+          "accessible": true,
+          "planSymbol": "accessible",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "位置依平面圖，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-2F 平面圖符號，像素 (2078, 89)，local (10.00, -7.40)",
+            "basis": "schematic",
+            "note": "圖示處已被房間或動線佔用，移到最近的可用空位；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-2F 平面圖符號，像素 (2078, 89)，local (10.00, -7.40)",
+            "basis": "schematic",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。 實際擺位偏移 1.50 m。"
+          },
+          "polygon": [
+            [
+              10.2,
+              -8.5
+            ],
+            [
+              12.8,
+              -8.5
+            ],
+            [
+              12.8,
+              -6.3
+            ],
+            [
+              10.2,
+              -6.3
+            ]
+          ],
+          "door": {
+            "position": [
+              10.2,
+              -7.4
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "SC-2F-WC-S-F",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "女廁",
+          "gender": "female",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "位置依平面圖，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-2F 平面圖符號，像素 (1565, 611)，local (-14.30, 17.30)",
+            "basis": "schematic",
+            "note": "合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-2F 平面圖符號，像素 (1565, 611)，local (-14.30, 17.30)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。 實際擺位偏移 0.90 m。"
+          },
+          "polygon": [
+            [
+              -15.6,
+              15.95
+            ],
+            [
+              -13.4,
+              15.95
+            ],
+            [
+              -13.4,
+              18.55
+            ],
+            [
+              -15.6,
+              18.55
+            ]
+          ],
+          "door": {
+            "position": [
+              -14.5,
+              18.55
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "SC-2F-WC-S-M",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "男廁",
+          "gender": "male",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "位置依平面圖，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-2F 平面圖符號，像素 (1565, 611)，local (-14.30, 17.30)",
+            "basis": "schematic",
+            "note": "合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-2F 平面圖符號，像素 (1565, 611)，local (-14.30, 17.30)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。 實際擺位偏移 0.90 m。"
+          },
+          "polygon": [
+            [
+              -13.4,
+              15.95
+            ],
+            [
+              -11.2,
+              15.95
+            ],
+            [
+              -11.2,
+              18.55
+            ],
+            [
+              -13.4,
+              18.55
+            ]
+          ],
+          "door": {
+            "position": [
+              -12.3,
+              18.55
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
         }
       ],
       "regionCandidates": [],
@@ -15677,6 +17334,246 @@
             }
           },
           "geometryWarning": "官方平面圖門弧把描圖的牆切碎；只在這道門的範圍內修正。"
+        },
+        {
+          "roomId": "SC-2F-SC2005-1",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-2F-SC2005-1"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-2F-SC2005-1": [
+                -10.035,
+                -1.975
+              ],
+              "@public": [
+                -10.035,
+                -1.955
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-2F-SC2005-2",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-2F-SC2005-2"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-2F-SC2005-2": [
+                -7.835,
+                -1.975
+              ],
+              "@public": [
+                -7.835,
+                -1.955
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-2F-SC2003-1",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-2F-SC2003-1"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-2F-SC2003-1": [
+                1.0265,
+                -1.975
+              ],
+              "@public": [
+                1.0265,
+                -1.955
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-2F-SC2003-2",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-2F-SC2003-2"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-2F-SC2003-2": [
+                3.3,
+                -1.975
+              ],
+              "@public": [
+                3.3,
+                -1.955
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-2F-SC2003-3",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-2F-SC2003-3"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-2F-SC2003-3": [
+                5.5735,
+                -1.975
+              ],
+              "@public": [
+                5.5735,
+                -1.955
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-2F-WC-NW-A",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-2F-WC-NW-A"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-2F-WC-NW-A": [
+                -23.5,
+                -6.15
+              ],
+              "@public": [
+                -23.5,
+                -6.13
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-2F-WC-NW-F",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-2F-WC-NW-F"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-2F-WC-NW-F": [
+                -19.925,
+                -5.5
+              ],
+              "@public": [
+                -19.905,
+                -5.5
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-2F-WC-NE-A",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-2F-WC-NE-A"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-2F-WC-NE-A": [
+                10.2,
+                -7.4
+              ],
+              "@public": [
+                10.18,
+                -7.4
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-2F-WC-S-F",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-2F-WC-S-F"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-2F-WC-S-F": [
+                -14.5,
+                18.55
+              ],
+              "@public": [
+                -14.5,
+                18.57
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-2F-WC-S-M",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-2F-WC-S-M"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-2F-WC-S-M": [
+                -12.3,
+                18.55
+              ],
+              "@public": [
+                -12.3,
+                18.57
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
         }
       ],
       "roofPatches": [
@@ -16311,6 +18208,184 @@
             13.485,
             -2.957
           ]
+        ]
+      },
+      "roomSplits": {
+        "version": 1,
+        "basis": "schematic",
+        "note": "隔間依使用者回報，位置示意；編號由西向東，-1 在西。內牆依據見各子房間 wallBasis。",
+        "sourceRooms": {
+          "SC-2F-SC2005": {
+            "id": "SC-2F-SC2005",
+            "code": "SC2005",
+            "kind": "room",
+            "polygon": [
+              [
+                -11.11,
+                -8.415
+              ],
+              [
+                -6.71,
+                -8.415
+              ],
+              [
+                -6.71,
+                -1.975
+              ],
+              [
+                -11.11,
+                -1.975
+              ]
+            ],
+            "door": {
+              "position": [
+                -8.91,
+                -1.975
+              ],
+              "width": 1,
+              "basis": "schematic",
+              "note": "人工依原圖廊道側選擇開洞位置；除四個既有門外，仍為未逐門驗證的示意門點。"
+            },
+            "basis": "map-derived",
+            "reviewStatus": "outline-checked-door-review-required",
+            "sourceRegionPixels": [
+              [
+                1632.1499999999999,
+                67.635
+              ],
+              [
+                1725.15,
+                67.635
+              ],
+              [
+                1725.15,
+                203.74
+              ],
+              [
+                1632.1499999999999,
+                203.74
+              ]
+            ],
+            "note": "人工對照官方圖面描繪房間外界；受圖線寬影響為近似輪廓，非CAD尺寸。房門需另核對。"
+          },
+          "SC-2F-SC2003": {
+            "id": "SC-2F-SC2003",
+            "code": "SC2003",
+            "kind": "room",
+            "polygon": [
+              [
+                -0.11,
+                -8.415
+              ],
+              [
+                6.71,
+                -8.415
+              ],
+              [
+                6.71,
+                -1.975
+              ],
+              [
+                -0.11,
+                -1.975
+              ]
+            ],
+            "door": {
+              "position": [
+                2.97,
+                -1.975
+              ],
+              "width": 1,
+              "basis": "schematic",
+              "note": "人工依原圖廊道側選擇開洞位置；除四個既有門外，仍為未逐門驗證的示意門點。"
+            },
+            "basis": "map-derived",
+            "reviewStatus": "outline-checked-door-review-required",
+            "sourceRegionPixels": [
+              [
+                1864.65,
+                67.635
+              ],
+              [
+                2008.8,
+                67.635
+              ],
+              [
+                2008.8,
+                203.74
+              ],
+              [
+                1864.65,
+                203.74
+              ]
+            ],
+            "note": "人工對照官方圖面描繪房間外界；受圖線寬影響為近似輪廓，非CAD尺寸。房門需另核對。"
+          }
+        },
+        "sourceIndex": {
+          "SC-2F-SC2005": 5,
+          "SC-2F-SC2003": 7
+        },
+        "children": {
+          "SC-2F-SC2005": [
+            "SC-2F-SC2005-1",
+            "SC-2F-SC2005-2"
+          ],
+          "SC-2F-SC2003": [
+            "SC-2F-SC2003-1",
+            "SC-2F-SC2003-2",
+            "SC-2F-SC2003-3"
+          ]
+        },
+        "sourceOverrides": []
+      },
+      "v12Restrooms": {
+        "version": 1,
+        "tool": "tools/apply_v12_sc_rooms.py",
+        "note": "v12 廁所：位置依平面圖符號或沿用 1F 位置；範圍、男女分隔與門位為示意，內裝由 runtime 配置。",
+        "generated": [
+          "SC-2F-WC-NW-A",
+          "SC-2F-WC-NW-F",
+          "SC-2F-WC-NE-A",
+          "SC-2F-WC-S-F",
+          "SC-2F-WC-S-M"
+        ],
+        "sourceRooms": {},
+        "sourceIndex": {},
+        "sourceOverrides": [],
+        "placements": [
+          {
+            "slot": "NW",
+            "mode": "free",
+            "offset": 0.15
+          },
+          {
+            "slot": "NW",
+            "mode": "free",
+            "offset": 2.369
+          },
+          {
+            "slot": "NE",
+            "mode": "free",
+            "offset": 1.5
+          },
+          {
+            "slot": "S",
+            "mode": "free",
+            "offset": 0.901
+          }
+        ],
+        "skipped": [
+          {
+            "slot": "MN",
+            "symbol": "mf",
+            "reason": "圖上男女合併廁所位於 SC2007 北側窄格；放寬到 1.8×2.2 m、任何空間核心、各自門向，仍找不到男、女兩間或一間共用廁所的合法位置。"
+          },
+          {
+            "slot": "NE",
+            "symbol": "mf",
+            "reason": "同一格內的無障礙廁所已佔用可用空間；放寬到 1.8×2.2 m、任何空間核心、各自門向，仍找不到男、女兩間或一間共用廁所的合法位置。"
+          }
         ]
       }
     },
@@ -21537,6 +23612,398 @@
           ],
           "note": "輪廓來自官方圖面區域；門點朝向僅示意，尚未逐間核對，區域可能含廊道、設備間或分割誤差。",
           "code": "SC3020"
+        },
+        {
+          "id": "SC-3F-WC-NW-A",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "無障礙廁所",
+          "gender": "unisex",
+          "accessible": true,
+          "planSymbol": "accessible",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "位置依平面圖，男女分隔及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-3F 平面圖符號，像素 (1379, 78)，local (-23.50, -7.30)",
+            "basis": "schematic",
+            "note": "範圍與門位為示意：圖上隔間小於 2.0×2.4 m 下限或不臨主要走廊，v12 wpd-run 以放寬搜尋擺放。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-3F 平面圖符號，像素 (1379, 78)，local (-23.50, -7.30)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。"
+          },
+          "polygon": [
+            [
+              -24.8,
+              -8.5
+            ],
+            [
+              -22.8,
+              -8.5
+            ],
+            [
+              -22.8,
+              -6.1
+            ],
+            [
+              -24.8,
+              -6.1
+            ]
+          ],
+          "door": {
+            "position": [
+              -23.8,
+              -6.1
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "SC-3F-WC-MN-U",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "廁所（男女共用）",
+          "gender": "unisex",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "map-derived",
+          "designNote": "位置依平面圖，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-3F 平面圖符號，像素 (1529, 72)，local (-16.40, -7.60)",
+            "basis": "schematic",
+            "note": "預設尺寸放不下，依協調者裁決縮小（不低於 1.8×2.2 m，且換算世界尺寸不低於 runtime 的 2.0×2.4 m）；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-3F 平面圖符號，像素 (1529, 72)，local (-16.40, -7.60)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。 實際擺位偏移 0.30 m。"
+          },
+          "polygon": [
+            [
+              -17.9,
+              -8.6
+            ],
+            [
+              -15.5,
+              -8.6
+            ],
+            [
+              -15.5,
+              -6.6
+            ],
+            [
+              -17.9,
+              -6.6
+            ]
+          ],
+          "door": {
+            "position": [
+              -15.5,
+              -7.6
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "SC-3F-WC-NE-U",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "廁所（男女共用）",
+          "gender": "unisex",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "map-derived",
+          "designNote": "位置依平面圖，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-3F 平面圖符號，像素 (2125, 72)，local (11.80, -7.60)",
+            "basis": "schematic",
+            "note": "預設尺寸放不下，依協調者裁決縮小（不低於 1.8×2.2 m，且換算世界尺寸不低於 runtime 的 2.0×2.4 m）；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-3F 平面圖符號，像素 (2125, 72)，local (11.80, -7.60)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。"
+          },
+          "polygon": [
+            [
+              10.6,
+              -8.6
+            ],
+            [
+              13.0,
+              -8.6
+            ],
+            [
+              13.0,
+              -6.6
+            ],
+            [
+              10.6,
+              -6.6
+            ]
+          ],
+          "door": {
+            "position": [
+              10.6,
+              -7.6
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "SC-3F-WC-S-U",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "廁所（男女共用）",
+          "gender": "unisex",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "map-derived",
+          "designNote": "位置依平面圖，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-3F 平面圖符號，像素 (1573, 598)，local (-14.30, 17.30)",
+            "basis": "schematic",
+            "note": "預設尺寸放不下，依協調者裁決縮小（不低於 1.8×2.2 m，且換算世界尺寸不低於 runtime 的 2.0×2.4 m）；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-3F 平面圖符號，像素 (1573, 598)，local (-14.30, 17.30)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。 實際擺位偏移 0.30 m。"
+          },
+          "polygon": [
+            [
+              -15.45,
+              16.05
+            ],
+            [
+              -13.15,
+              16.05
+            ],
+            [
+              -13.15,
+              17.95
+            ],
+            [
+              -15.45,
+              17.95
+            ]
+          ],
+          "door": {
+            "position": [
+              -13.15,
+              17.0
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "SC-3F-WC-EE-F",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "女廁",
+          "gender": "female",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "位置依平面圖，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-3F 平面圖符號，像素 (1077, 514)，local (-37.80, 13.30)",
+            "basis": "schematic",
+            "note": "合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-3F 平面圖符號，像素 (1077, 514)，local (-37.80, 13.30)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。 實際擺位偏移 0.85 m。"
+          },
+          "polygon": [
+            [
+              -38.225,
+              11.45
+            ],
+            [
+              -36.175,
+              11.45
+            ],
+            [
+              -36.175,
+              13.9
+            ],
+            [
+              -38.225,
+              13.9
+            ]
+          ],
+          "door": {
+            "position": [
+              -36.175,
+              12.675
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "SC-3F-WC-EE-M",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "男廁",
+          "gender": "male",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "位置依平面圖，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-3F 平面圖符號，像素 (1077, 514)，local (-37.80, 13.30)",
+            "basis": "schematic",
+            "note": "合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-3F 平面圖符號，像素 (1077, 514)，local (-37.80, 13.30)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。 實際擺位偏移 0.85 m。"
+          },
+          "polygon": [
+            [
+              -38.225,
+              13.9
+            ],
+            [
+              -36.175,
+              13.9
+            ],
+            [
+              -36.175,
+              16.35
+            ],
+            [
+              -38.225,
+              16.35
+            ]
+          ],
+          "door": {
+            "position": [
+              -36.175,
+              15.125
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "SC-3F-WC-EW-U",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "廁所（男女共用）",
+          "gender": "unisex",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "map-derived",
+          "designNote": "位置依平面圖，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-3F 平面圖符號，像素 (90, 514)，local (-84.50, 13.30)",
+            "basis": "schematic",
+            "note": "預設尺寸放不下，依協調者裁決縮小（不低於 1.8×2.2 m，且換算世界尺寸不低於 runtime 的 2.0×2.4 m）；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-3F 平面圖符號，像素 (90, 514)，local (-84.50, 13.30)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。 實際擺位偏移 0.67 m。"
+          },
+          "polygon": [
+            [
+              -85.1,
+              12.0
+            ],
+            [
+              -82.7,
+              12.0
+            ],
+            [
+              -82.7,
+              14.0
+            ],
+            [
+              -85.1,
+              14.0
+            ]
+          ],
+          "door": {
+            "position": [
+              -85.1,
+              13.0
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
         }
       ],
       "regionCandidates": [
@@ -22655,8 +25122,248 @@
             }
           },
           "geometryWarning": "官方平面圖門弧把描圖的牆切碎；只在這道門的範圍內修正。"
+        },
+        {
+          "roomId": "SC-3F-WC-NW-A",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-3F-WC-NW-A"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-3F-WC-NW-A": [
+                -23.8,
+                -6.1
+              ],
+              "@public": [
+                -23.8,
+                -6.08
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-3F-WC-MN-U",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-3F-WC-MN-U"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-3F-WC-MN-U": [
+                -15.5,
+                -7.6
+              ],
+              "@public": [
+                -15.48,
+                -7.6
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-3F-WC-NE-U",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-3F-WC-NE-U"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-3F-WC-NE-U": [
+                10.6,
+                -7.6
+              ],
+              "@public": [
+                10.58,
+                -7.6
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-3F-WC-S-U",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-3F-WC-S-U"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-3F-WC-S-U": [
+                -13.15,
+                17.0
+              ],
+              "@public": [
+                -13.13,
+                17.0
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-3F-WC-EE-F",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-3F-WC-EE-F"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-3F-WC-EE-F": [
+                -36.175,
+                12.675
+              ],
+              "@public": [
+                -36.155,
+                12.675
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-3F-WC-EE-M",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-3F-WC-EE-M"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-3F-WC-EE-M": [
+                -36.175,
+                15.125
+              ],
+              "@public": [
+                -36.155,
+                15.125
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-3F-WC-EW-U",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-3F-WC-EW-U"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-3F-WC-EW-U": [
+                -85.1,
+                13.0
+              ],
+              "@public": [
+                -85.12,
+                13.0
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
         }
-      ]
+      ],
+      "v12Restrooms": {
+        "version": 1,
+        "tool": "tools/apply_v12_sc_rooms.py",
+        "note": "v12 廁所：位置依平面圖符號或沿用 1F 位置；範圍、男女分隔與門位為示意，內裝由 runtime 配置。",
+        "generated": [
+          "SC-3F-WC-NW-A",
+          "SC-3F-WC-MN-U",
+          "SC-3F-WC-NE-U",
+          "SC-3F-WC-S-U",
+          "SC-3F-WC-EE-F",
+          "SC-3F-WC-EE-M",
+          "SC-3F-WC-EW-U"
+        ],
+        "sourceRooms": {},
+        "sourceIndex": {},
+        "sourceOverrides": [],
+        "placements": [
+          {
+            "slot": "NW",
+            "mode": "manual",
+            "offset": 0
+          },
+          {
+            "slot": "MN",
+            "mode": "free",
+            "offset": 0.3,
+            "relaxed": true,
+            "parts": [
+              "S"
+            ]
+          },
+          {
+            "slot": "NE",
+            "mode": "free",
+            "offset": 0.0,
+            "relaxed": true,
+            "parts": [
+              "S"
+            ]
+          },
+          {
+            "slot": "S",
+            "mode": "free",
+            "offset": 0.3,
+            "relaxed": true,
+            "parts": [
+              "S"
+            ]
+          },
+          {
+            "slot": "EE",
+            "mode": "free",
+            "offset": 0.849
+          },
+          {
+            "slot": "EW",
+            "mode": "free",
+            "offset": 0.671,
+            "relaxed": true,
+            "parts": [
+              "S"
+            ]
+          }
+        ],
+        "skipped": [
+          {
+            "slot": "NW",
+            "symbol": "f",
+            "reason": "圖上女廁隔間約 2.3×2.1 m，在無障礙廁所南側；兩間都放到 2.0×2.4 m 以上且各自有門通往走廊的空間不存在（無障礙廁所的門只能朝南開進這一格）。放寬到 1.8×2.2 m 仍找不到合法位置。"
+          }
+        ]
+      }
     },
     {
       "id": "SC-4F",
@@ -28425,6 +31132,566 @@
           "note": "對照官方 4F 平面圖描繪；近似輪廓，非 CAD 尺寸。",
           "displayName": "應數系系辦",
           "nameSource": "https://highschool-math.nsysu.edu.tw/static/file/186/1186/img/4321/654177968.pdf"
+        },
+        {
+          "id": "SC-4F-WC-NW-A",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "無障礙廁所",
+          "gender": "unisex",
+          "accessible": true,
+          "planSymbol": "accessible",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "位置依平面圖，男女分隔及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-4F 平面圖符號，像素 (1358, 83)，local (-23.50, -7.30)",
+            "basis": "schematic",
+            "note": "範圍與門位為示意：圖上隔間小於 2.0×2.4 m 下限或不臨主要走廊，v12 wpd-run 以放寬搜尋擺放。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-4F 平面圖符號，像素 (1358, 83)，local (-23.50, -7.30)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。"
+          },
+          "polygon": [
+            [
+              -24.5,
+              -8.5
+            ],
+            [
+              -22.5,
+              -8.5
+            ],
+            [
+              -22.5,
+              -6.1
+            ],
+            [
+              -24.5,
+              -6.1
+            ]
+          ],
+          "door": {
+            "position": [
+              -23.5,
+              -6.1
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "SC-4F-WC-NW-F",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "女廁",
+          "gender": "female",
+          "accessible": false,
+          "planSymbol": "f",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "位置依平面圖，男女分隔及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-4F 平面圖符號，像素 (1358, 128)，local (-23.50, -5.20)",
+            "basis": "schematic",
+            "note": "範圍與門位為示意：圖上隔間小於 2.0×2.4 m 下限或不臨主要走廊，v12 wpd-run 以放寬搜尋擺放。圖上女廁隔間放不下（無障礙廁所的門朝南開進這一格）；放在西側最近的合法空位，偏移約 2.7 m。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-4F 平面圖符號，像素 (1358, 128)，local (-23.50, -5.20)",
+            "basis": "map-derived",
+            "note": "紫色女廁圖示，性別以圖為準。"
+          },
+          "polygon": [
+            [
+              -26.5,
+              -8.2
+            ],
+            [
+              -24.5,
+              -8.2
+            ],
+            [
+              -24.5,
+              -5.8
+            ],
+            [
+              -26.5,
+              -5.8
+            ]
+          ],
+          "door": {
+            "position": [
+              -25.5,
+              -5.8
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "SC-4F-WC-MN-U",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "廁所（男女共用）",
+          "gender": "unisex",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "map-derived",
+          "designNote": "位置依平面圖，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-4F 平面圖符號，像素 (1508, 77)，local (-16.40, -7.60)",
+            "basis": "schematic",
+            "note": "預設尺寸放不下，依協調者裁決縮小（不低於 1.8×2.2 m，且換算世界尺寸不低於 runtime 的 2.0×2.4 m）；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-4F 平面圖符號，像素 (1508, 77)，local (-16.40, -7.60)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。"
+          },
+          "polygon": [
+            [
+              -17.6,
+              -8.6
+            ],
+            [
+              -15.2,
+              -8.6
+            ],
+            [
+              -15.2,
+              -6.6
+            ],
+            [
+              -17.6,
+              -6.6
+            ]
+          ],
+          "door": {
+            "position": [
+              -15.2,
+              -7.6
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "SC-4F-WC-NE-U",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "廁所（男女共用）",
+          "gender": "unisex",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "map-derived",
+          "designNote": "位置依平面圖，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-4F 平面圖符號，像素 (2104, 77)，local (11.80, -7.60)",
+            "basis": "schematic",
+            "note": "預設尺寸放不下，依協調者裁決縮小（不低於 1.8×2.2 m，且換算世界尺寸不低於 runtime 的 2.0×2.4 m）；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-4F 平面圖符號，像素 (2104, 77)，local (11.80, -7.60)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。"
+          },
+          "polygon": [
+            [
+              10.6,
+              -8.6
+            ],
+            [
+              13.0,
+              -8.6
+            ],
+            [
+              13.0,
+              -6.6
+            ],
+            [
+              10.6,
+              -6.6
+            ]
+          ],
+          "door": {
+            "position": [
+              10.6,
+              -7.6
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "SC-4F-WC-S-F",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "女廁",
+          "gender": "female",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "位置依平面圖，男女分隔及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-4F 平面圖符號，像素 (1552, 603)，local (-14.30, 17.30)",
+            "basis": "schematic",
+            "note": "範圍與門位為示意：圖上隔間小於 2.0×2.4 m 下限或不臨主要走廊，v12 wpd-run 以放寬搜尋擺放。合併圖示切成男、女兩間，依「靠走廊入口為女廁」。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-4F 平面圖符號，像素 (1552, 603)，local (-14.30, 17.30)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。"
+          },
+          "polygon": [
+            [
+              -16.0,
+              16.0
+            ],
+            [
+              -13.6,
+              16.0
+            ],
+            [
+              -13.6,
+              18.0
+            ],
+            [
+              -16.0,
+              18.0
+            ]
+          ],
+          "door": {
+            "position": [
+              -14.8,
+              18.0
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "SC-4F-WC-S-M",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "男廁",
+          "gender": "male",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "位置依平面圖，男女分隔及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-4F 平面圖符號，像素 (1552, 603)，local (-14.30, 17.30)",
+            "basis": "schematic",
+            "note": "範圍與門位為示意：圖上隔間小於 2.0×2.4 m 下限或不臨主要走廊，v12 wpd-run 以放寬搜尋擺放。合併圖示切成男、女兩間，依「靠走廊入口為女廁」。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-4F 平面圖符號，像素 (1552, 603)，local (-14.30, 17.30)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。"
+          },
+          "polygon": [
+            [
+              -13.6,
+              16.0
+            ],
+            [
+              -11.2,
+              16.0
+            ],
+            [
+              -11.2,
+              18.0
+            ],
+            [
+              -13.6,
+              18.0
+            ]
+          ],
+          "door": {
+            "position": [
+              -12.4,
+              18.0
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "SC-4F-WC-EE-F",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "女廁",
+          "gender": "female",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "位置依平面圖，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-4F 平面圖符號，像素 (1055, 519)，local (-37.80, 13.30)",
+            "basis": "schematic",
+            "note": "合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-4F 平面圖符號，像素 (1055, 519)，local (-37.80, 13.30)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。 實際擺位偏移 0.54 m。"
+          },
+          "polygon": [
+            [
+              -38.65,
+              11.4
+            ],
+            [
+              -36.05,
+              11.4
+            ],
+            [
+              -36.05,
+              13.6
+            ],
+            [
+              -38.65,
+              13.6
+            ]
+          ],
+          "door": {
+            "position": [
+              -36.05,
+              12.5
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "SC-4F-WC-EE-M",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "男廁",
+          "gender": "male",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "位置依平面圖，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-4F 平面圖符號，像素 (1055, 519)，local (-37.80, 13.30)",
+            "basis": "schematic",
+            "note": "合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-4F 平面圖符號，像素 (1055, 519)，local (-37.80, 13.30)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。 實際擺位偏移 0.54 m。"
+          },
+          "polygon": [
+            [
+              -38.65,
+              13.6
+            ],
+            [
+              -36.05,
+              13.6
+            ],
+            [
+              -36.05,
+              15.8
+            ],
+            [
+              -38.65,
+              15.8
+            ]
+          ],
+          "door": {
+            "position": [
+              -36.05,
+              14.7
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "SC-4F-WC-EW-F",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "女廁",
+          "gender": "female",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "位置依平面圖，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-4F 平面圖符號，像素 (68, 519)，local (-84.50, 13.30)",
+            "basis": "schematic",
+            "note": "合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-4F 平面圖符號，像素 (68, 519)，local (-84.50, 13.30)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。 實際擺位偏移 0.34 m。"
+          },
+          "polygon": [
+            [
+              -85.65,
+              11.4
+            ],
+            [
+              -83.05,
+              11.4
+            ],
+            [
+              -83.05,
+              13.6
+            ],
+            [
+              -85.65,
+              13.6
+            ]
+          ],
+          "door": {
+            "position": [
+              -83.05,
+              12.5
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
+        },
+        {
+          "id": "SC-4F-WC-EW-M",
+          "code": "WC",
+          "kind": "restroom",
+          "displayName": "男廁",
+          "gender": "male",
+          "accessible": false,
+          "planSymbol": "mf",
+          "aliases": [
+            "廁所",
+            "洗手間",
+            "WC",
+            "toilet"
+          ],
+          "basis": "schematic",
+          "designNote": "位置依平面圖，範圍及內裝示意",
+          "evidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-4F 平面圖符號，像素 (68, 519)，local (-84.50, 13.30)",
+            "basis": "schematic",
+            "note": "合併圖示切成男、女兩間，依「靠走廊入口為女廁」；範圍為示意矩形。"
+          },
+          "locationEvidence": {
+            "sourceId": "oaa-02Room_COS_1",
+            "locator": "SC-4F 平面圖符號，像素 (68, 519)，local (-84.50, 13.30)",
+            "basis": "map-derived",
+            "note": "圖示中心讀圖誤差約 ±0.6 m。 實際擺位偏移 0.34 m。"
+          },
+          "polygon": [
+            [
+              -85.65,
+              13.6
+            ],
+            [
+              -83.05,
+              13.6
+            ],
+            [
+              -83.05,
+              15.8
+            ],
+            [
+              -85.65,
+              15.8
+            ]
+          ],
+          "door": {
+            "position": [
+              -83.05,
+              14.7
+            ],
+            "width": 1.0,
+            "basis": "schematic",
+            "note": "v12 示意門位，朝向走廊。"
+          }
         }
       ],
       "regionCandidates": [
@@ -29906,8 +33173,314 @@
             }
           },
           "geometryWarning": "官方平面圖門弧把描圖的牆切碎；只在這道門的範圍內修正。"
+        },
+        {
+          "roomId": "SC-4F-WC-NW-A",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-4F-WC-NW-A"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-4F-WC-NW-A": [
+                -23.5,
+                -6.1
+              ],
+              "@public": [
+                -23.5,
+                -6.08
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-4F-WC-NW-F",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-4F-WC-NW-F"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-4F-WC-NW-F": [
+                -25.5,
+                -5.8
+              ],
+              "@public": [
+                -25.5,
+                -5.78
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-4F-WC-MN-U",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-4F-WC-MN-U"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-4F-WC-MN-U": [
+                -15.2,
+                -7.6
+              ],
+              "@public": [
+                -15.18,
+                -7.6
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-4F-WC-NE-U",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-4F-WC-NE-U"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-4F-WC-NE-U": [
+                10.6,
+                -7.6
+              ],
+              "@public": [
+                10.58,
+                -7.6
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-4F-WC-S-F",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-4F-WC-S-F"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-4F-WC-S-F": [
+                -14.8,
+                18.0
+              ],
+              "@public": [
+                -14.8,
+                18.02
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-4F-WC-S-M",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-4F-WC-S-M"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-4F-WC-S-M": [
+                -12.4,
+                18.0
+              ],
+              "@public": [
+                -12.4,
+                18.02
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-4F-WC-EE-F",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-4F-WC-EE-F"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-4F-WC-EE-F": [
+                -36.05,
+                12.5
+              ],
+              "@public": [
+                -36.03,
+                12.5
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-4F-WC-EE-M",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-4F-WC-EE-M"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-4F-WC-EE-M": [
+                -36.05,
+                14.7
+              ],
+              "@public": [
+                -36.03,
+                14.7
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-4F-WC-EW-F",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-4F-WC-EW-F"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-4F-WC-EW-F": [
+                -83.05,
+                12.5
+              ],
+              "@public": [
+                -83.03,
+                12.5
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-4F-WC-EW-M",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-4F-WC-EW-M"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-4F-WC-EW-M": [
+                -83.05,
+                14.7
+              ],
+              "@public": [
+                -83.03,
+                14.7
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
         }
-      ]
+      ],
+      "v12Restrooms": {
+        "version": 1,
+        "tool": "tools/apply_v12_sc_rooms.py",
+        "note": "v12 廁所：位置依平面圖符號或沿用 1F 位置；範圍、男女分隔與門位為示意，內裝由 runtime 配置。",
+        "generated": [
+          "SC-4F-WC-NW-A",
+          "SC-4F-WC-NW-F",
+          "SC-4F-WC-MN-U",
+          "SC-4F-WC-NE-U",
+          "SC-4F-WC-S-F",
+          "SC-4F-WC-S-M",
+          "SC-4F-WC-EE-F",
+          "SC-4F-WC-EE-M",
+          "SC-4F-WC-EW-F",
+          "SC-4F-WC-EW-M"
+        ],
+        "sourceRooms": {},
+        "sourceIndex": {},
+        "sourceOverrides": [],
+        "placements": [
+          {
+            "slot": "NW",
+            "mode": "manual",
+            "offset": 0
+          },
+          {
+            "slot": "NW",
+            "mode": "manual",
+            "offset": 0
+          },
+          {
+            "slot": "MN",
+            "mode": "free",
+            "offset": 0.0,
+            "relaxed": true,
+            "parts": [
+              "S"
+            ]
+          },
+          {
+            "slot": "NE",
+            "mode": "free",
+            "offset": 0.0,
+            "relaxed": true,
+            "parts": [
+              "S"
+            ]
+          },
+          {
+            "slot": "S",
+            "mode": "manual",
+            "offset": 0
+          },
+          {
+            "slot": "EE",
+            "mode": "free",
+            "offset": 0.541
+          },
+          {
+            "slot": "EW",
+            "mode": "free",
+            "offset": 0.335
+          }
+        ],
+        "skipped": []
+      }
     },
     {
       "id": "SC-RF",

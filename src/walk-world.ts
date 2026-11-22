@@ -1,3 +1,8 @@
+import { normalizeLift } from './walk/lift';
+import { makeWorldLift } from './walk/lift-world';
+import type { LiftRuntime } from './walk/lift';
+import type { LiftGeometryV12 } from './world/v12-types';
+import { planRestroom, addRestroomInterior } from './world/restroom-interiors';
 import * as T from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import type { WalkBuilding,WalkFloor,WalkRoom,Point2,WalkDestination,CampusStructure,StairCore,LiftSpec } from './walk-types';
@@ -8,13 +13,17 @@ export const FLOOR_HEIGHT=3.7;
 export const floorY=(level:number)=>(level<0?level:level-1)*FLOOR_HEIGHT+.08;
 export interface WorldDoor {id:string;position:T.Vector3;outside:T.Vector3;inside:T.Vector3;group:T.Group;panel:T.Object3D;closedBox:T.Box3;normal?:T.Vector3;open:number;target:number;label:string;buildingId:string;floorId:string;}
 export interface WorldFloor {data:WalkFloor;buildingId:string;group:T.Group;y:number;}
-export interface WorldLift {id:string;buildingId:string;center:T.Vector3;stops:{floorId:string;label:string;level:number;position:T.Vector3}[];}
+export interface WorldLift {id:string;buildingId:string;center:T.Vector3;geometry:LiftGeometryV12;runtime:LiftRuntime;car:T.Group;carPanels:T.Mesh[];carDisplay:(label:string)=>void;group:T.Group;stops:{floorId:string;label:string;level:number;position:T.Vector3;approach:T.Vector3;landing:T.Group;panels:T.Mesh[];display:(label:string)=>void}[];}
 export interface WalkWorld {display:T.Group;collision:T.Group;doors:WorldDoor[];floors:WorldFloor[];destinations:WalkDestination[];spawn:T.Vector3;frames:Map<string,T.Matrix4>;scales:Map<string,number>;lifts:WorldLift[];bounds:T.Box3;}
 const palette={wall:'#ddd4c0',trim:'#bca98c',wood:'#9d7352',floor:'#d7d1c2',glass:'#6c8e91',roof:'#a3937c'};
 const mats=new Map<string,T.MeshStandardMaterial>();
 const mat=(c:string)=>{if(!mats.has(c))mats.set(c,new T.MeshStandardMaterial({color:c,roughness:.84}));return mats.get(c)!;};
 function box(parent:T.Object3D,w:number,h:number,d:number,x:number,y:number,z:number,c:string){const m=new T.Mesh(unitBox,mat(c));m.scale.set(w,h,d);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;}
 function shapeOf(points:Point2[],holes:Point2[][]=[]){const s=new T.Shape(points.map(([x,z])=>new T.Vector2(x,-z)));for(const p of holes)s.holes.push(new T.Path(p.map(([x,z])=>new T.Vector2(x,-z))));return s;}
+const pointIn=(p:Point2,poly:Point2[])=>{let c=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const a=poly[i],b=poly[j];if((a[1]>p[1])!==(b[1]>p[1])&&p[0]<(b[0]-a[0])*(p[1]-a[1])/(b[1]-a[1])+a[0])c=!c;}return c;};
+const crosses=(a:Point2[],b:Point2[])=>a.some((p,i)=>{const q=a[(i+1)%a.length];return b.some((r,j)=>{const t=b[(j+1)%b.length],o=(u:Point2,v:Point2,w:Point2)=>Math.sign((v[0]-u[0])*(w[1]-u[1])-(v[1]-u[1])*(w[0]-u[0]));return o(p,q,r)*o(p,q,t)<0&&o(r,t,p)*o(r,t,q)<0;});});
+/** A slab hole must lie inside the outline and be disjoint from the holes already cut. */
+const holeFits=(hole:Point2[],outline:Point2[],holes:Point2[][])=>hole.every(p=>pointIn(p,outline))&&!crosses(hole,outline)&&holes.every(h=>!crosses(hole,h)&&!hole.some(p=>pointIn(p,h))&&!h.some(p=>pointIn(p,hole)));
 function plane(parent:T.Object3D,poly:Point2[],holes:Point2[][],y:number,c:string){const m=new T.Mesh(new T.ShapeGeometry(shapeOf(poly,holes)),mat(c));m.rotation.x=-Math.PI/2;m.material.side=T.DoubleSide;m.position.y=y;m.receiveShadow=true;parent.add(m);return m;}
 function rect(x1:number,z1:number,x2:number,z2:number):Point2[]{return [[x1,z1],[x2,z1],[x2,z2],[x1,z2]];}
 function wall(parent:T.Object3D,a:Point2,b:Point2,y:number,height:number,color:string,thick=.16){const dx=b[0]-a[0],dz=b[1]-a[1],len=Math.hypot(dx,dz);if(len<.07)return;const m=box(parent,len,height,thick,(a[0]+b[0])/2,y+height/2,(a[1]+b[1])/2,color);m.rotation.y=-Math.atan2(dz,dx);return m;}
@@ -70,7 +79,7 @@ export function effectiveRooms(f:WalkFloor,structure:CampusStructure):WalkRoom[]
 /** SC display names are independent of stable room/portal identifiers. */
 function scienceDoorLabel(room:WalkRoom,roomIds:string[]|undefined,rooms:WalkRoom[]):string{
  const labels=(roomIds??[room.id]).map(id=>rooms.find(r=>r.id===id)).filter((r):r is WalkRoom=>!!r)
-  .map(r=>r.code?(r.displayName?`${r.code} ${r.displayName}`:r.code):'教室');
+  .map(r=>r.kind==='restroom'?r.displayName??'廁所':r.code?(r.displayName?`${r.code} ${r.displayName}`:r.code):'教室');
  return [...new Set(labels)].join('／')||'教室';
 }
 export function buildingFrame(structure:CampusStructure,id:string){const p=structure.placements[id];return new T.Matrix4().compose(new T.Vector3(p.x,0,p.z),new T.Quaternion().setFromEuler(new T.Euler(0,p.rotation,0)),new T.Vector3(p.scale,1,p.scale));}
@@ -95,12 +104,6 @@ function stairCore(display:T.Group,collision:T.Group,core:StairCore,ys:number[])
  pairWall(g,c,[x0,-W/2],[x0,0],hi,1.05,rail,.09);
  g.userData.stairCore=core.id;batchVisual(g);
 }
-function liftCab(display:T.Group,collision:T.Group,lift:LiftSpec,y:number){
- const g=new T.Group(),c=new T.Group();g.position.set(lift.center[0],0,lift.center[1]);g.rotation.y=-lift.angle;c.position.copy(g.position);c.rotation.copy(g.rotation);display.add(g);collision.add(c);
- const h=lift.size/2;for(const [a,b] of [[[-h,-h],[h,-h]],[[-h,h],[h,h]],[[h,-h],[h,h]],[[-h,-h],[-h,-h+.35]],[[-h,h-.35],[-h,h]]] as [Point2,Point2][])pairWall(g,c,a,b,y,3.3,'#8f9c98',.12);
- plane(g,rect(-h,-h,h,h),[],y+.012,'#5d6d69');box(g,.05,.32,.2,-h+.12,y+1.2,h-.18,'#e9c46a');
- g.userData.liftCab=lift.id;batchVisual(g);
-}
 /** Lift every vertex by the terrain at its x,z (flat decals follow the DEM). */
 export function drape(g:T.BufferGeometry,lift:(x:number,z:number)=>number){const p=g.attributes.position;for(let i=0;i<p.count;i++)p.setY(i,p.getY(i)+lift(p.getX(i),p.getZ(i)));p.needsUpdate=true;g.computeBoundingSphere();g.computeBoundingBox();return g;}
 function ribbon(points:Point2[],width:number,y:number){
@@ -121,6 +124,8 @@ export function buildWalkWorld(data:WalkBuilding[],structure:CampusStructure,ter
  // Ground opens over stairs that descend to basements.
  const groundHoles:Point2[][]=[];
  for(const b of data)for(const core of structure.stairCores[b.id]??[])if(core.levels.some(l=>l.level<0))groundHoles.push(coreRect(core,core.length,core.width).map(p=>toWorld(b.id,p)));
+ // Lifts open the ground only when they descend to a basement; otherwise the ground seals the pit.
+ for(const b of data)for(const lift of structure.lifts[b.id]??[])if(lift.stops.some(s=>s.level<0))groundHoles.push(normalizeLift(lift,b.id).shaftPolygon.map(p=>toWorld(b.id,p)));
  const [gx0,gz0,gx1,gz1]=terrain?PLAY_BOUNDS:CAMPUS_GROUND;
  // lift(x,z): metres the DEM raises the ground above the flat pad at this point (0 without terrain).
  const lift=(x:number,z:number)=>terrain?terrain.heightAt(x,z)-GROUND_Y:0;
@@ -167,22 +172,29 @@ export function buildWalkWorld(data:WalkBuilding[],structure:CampusStructure,ter
  for(const b of data){
   const frame=out.frames.get(b.id)!,scale=out.scales.get(b.id)!,building=new T.Group(),collision=new T.Group();building.name=b.id;building.applyMatrix4(frame);collision.applyMatrix4(frame);out.display.add(building);out.collision.add(collision);
   const maxLevel=maxLevelOf(b);const floors=b.floors.filter(f=>f.outline?.length>=3).sort((a,b)=>storey(a,maxLevel)-storey(b,maxLevel));
-  const cores=structure.stairCores[b.id]??[],lifts=structure.lifts[b.id]??[];
+  const cores=structure.stairCores[b.id]??[],lifts=(structure.lifts[b.id]??[]).map(l=>normalizeLift(l,b.id));
   const stairs=new T.Group();stairs.name='Stair cores '+b.id;stairs.userData.stairGroup=true;building.add(stairs);
   for(const core of cores){const ys=core.levels.map(l=>floorY(l.storey)).sort((a,b)=>a-b);stairCore(stairs,collision,core,ys);}
   for(const lift of lifts){
-   const cabs=new T.Group();cabs.name='Lift '+lift.id;building.add(cabs);const stops:WorldLift['stops']=[];
-   for(const s of lift.stops){const y=floorY(s.storey);liftCab(cabs,collision,lift,y);const f=floors.find(f=>f.id===s.floorId);stops.push({floorId:s.floorId,label:f?.label??String(s.level),level:s.level,position:new T.Vector3(lift.center[0],y,lift.center[1]).applyMatrix4(frame)});}
-   out.lifts.push({id:lift.id,buildingId:b.id,center:new T.Vector3(lift.center[0],0,lift.center[1]).applyMatrix4(frame),stops});
+   out.lifts.push(makeWorldLift(lift,frame,new Map(floors.map(f=>[f.id,f.label])),building));
+   // Static shaft enclosure, with the authored landing opening on each storey.
+   const lo=Math.min(...lift.stops.map(s=>floorY(s.storey))),hi=Math.max(...lift.stops.map(s=>floorY(s.storey)));
+   for(let y=lo;y<=hi+.01;y+=FLOOR_HEIGHT){const stop=lift.stops.find(s=>Math.abs(floorY(s.storey)-y)<.01);for(let i=0;i<lift.shaftPolygon.length;i++)
+    cutWall(stairs,collision,lift.shaftPolygon[i],lift.shaftPolygon[(i+1)%lift.shaftPolygon.length],y,FLOOR_HEIGHT,'#7c8e85',stop?[{p:stop.landingDoor.center,width:stop.landingDoor.clearWidth,depth:.22}]:[]);}
+   // Solid pit just under the car's lowest floor: nothing that enters the shaft falls below the building.
+   const pit=plane(stairs,lift.shaftPolygon,[],lo-.15,'#59645f');collision.add(pit.clone());
   }
   for(const f of floors){
    const ordinal=storey(f,maxLevel),y=floorY(ordinal),fg=new T.Group(),fc=new T.Group();fg.name=f.id;building.add(fg);collision.add(fc);out.floors.push({data:f,buildingId:b.id,group:fg,y});
    const entry=f.access?.entry??f.stairs?.[0]?.position??[f.bounds[2],0] as Point2;
    const holes=(f.holes??[]).map(h=>h.slice());
+   for(const lift of lifts)if(y>=Math.min(...lift.stops.map(s=>floorY(s.storey)))-.01&&y<=Math.max(...lift.stops.map(s=>floorY(s.storey)))+.01){
+    // An invalid hole (outside the slab, or overlapping another hole) would break triangulation of the whole slab.
+    if(holeFits(lift.shaftPolygon,f.access?.walkOutline??f.outline,holes))holes.push(lift.shaftPolygon);else console.warn(`${lift.id}: ${f.id} 樓板無法開井道洞（超出樓板或與既有開口重疊）`);}
    for(const core of cores){const own=core.levels.find(l=>l.floorId===f.id);if(own&&own.storey>Math.min(...core.levels.map(l=>l.storey)))holes.push(coreRect(core,core.length,core.width));}
    const walkOutline=f.access?.walkOutline??f.outline;const slab=plane(fg,walkOutline,holes,y+data.indexOf(b)*.002,palette.floor);fc.add(slab.clone());
    const entryPortal=f.access?.portals.find(p=>p.id===f.access?.entryPortalId),entryNode=entryPortal?.nodeIds?.find(id=>id!=='@outside'),entryStand=(entryNode?entryPortal?.clearancePositions?.[entryNode]:undefined)??f.access?.entryClearancePosition;
-   const floorEntry=new T.Vector3(entryStand?.[0]??entry[0],y,entryStand?.[1]??entry[1]).applyMatrix4(frame);out.destinations.push({id:f.id+'-entrance',label:`${b.name} ${f.label} · ${f.level===1?'樓層入口':'樓梯口'}`,buildingId:b.id,floorId:f.id,position:floorEntry.toArray(),level:f.level});
+   const floorEntry=new T.Vector3(entryStand?.[0]??entry[0],y,entryStand?.[1]??entry[1]).applyMatrix4(frame);out.destinations.push({id:f.id+'-entrance',category:'entrance',label:`${b.name} ${f.label} · ${f.level===1?'樓層入口':'樓梯口'}`,buildingId:b.id,floorId:f.id,position:floorEntry.toArray(),level:f.level});
    let perimeterEntry=entry,entryDistance=Infinity;for(let i=0;i<walkOutline.length;i++){const projection=projectToEdge(entry,walkOutline[i],walkOutline[(i+1)%walkOutline.length]);if(projection.d<entryDistance){entryDistance=projection.d;perimeterEntry=projection.p;}}
    const joins=[...structure.connectors.filter(c=>c.floors.includes(f.id)).flatMap(c=>c.openings[f.id]??[]),...(structure.railGaps?.[f.id]??[])];
    const keepClear=[...joins.map(o=>({p:o.p,r:o.width/2+.6})),...(f.level===1?[{p:perimeterEntry,r:1.7}]:[])];
@@ -194,11 +206,11 @@ export function buildWalkWorld(data:WalkBuilding[],structure:CampusStructure,ter
     for(let t=0;t<L;t+=4.2){const u=t/L,x=a[0]+(bb[0]-a[0])*u,z=a[1]+(bb[1]-a[1])*u;if(keepClear.some(k=>Math.hypot(x-k.p[0],z-k.p[1])<k.r))continue;const col=box(fg,.22,3.4,.22,x,y+1.7,z,palette.trim);fc.add(col.clone());}}
    // Source atria/voids get a 1.0 m guard on every storey above ground.
    if(ordinal>1)for(const h of f.holes??[])for(let i=0;i<h.length;i++)pairWall(fg,fc,h[i],h[(i+1)%h.length],y,1.0,'#7c8b7b',.1);
-   for(const service of f.verticalServices??[]){if(service.polygon.length<3)continue;const shaft=new T.Mesh(new T.ExtrudeGeometry(shapeOf(service.polygon),{depth:3.2,bevelEnabled:false}),mat('#7c8e85'));shaft.rotation.x=-Math.PI/2;shaft.position.y=y;shaft.castShadow=true;shaft.receiveShadow=true;fg.add(shaft);fc.add(shaft.clone());}
+   for(const service of f.verticalServices??[]){if(service.polygon.length<3||lifts.some(l=>service.id&&l.replacesServiceIds.includes(service.id)))continue;const shaft=new T.Mesh(new T.ExtrudeGeometry(shapeOf(service.polygon),{depth:3.2,bevelEnabled:false}),mat('#7c8e85'));shaft.rotation.x=-Math.PI/2;shaft.position.y=y;shaft.castShadow=true;shaft.receiveShadow=true;fg.add(shaft);fc.add(shaft.clone());}
    const portalVisuals=new Map<string,WorldDoor>();
    const rooms=effectiveRooms(f,structure);
    for(const room of rooms){
-    const p=room.polygon;if(!['room','room-candidate'].includes(room.kind)||p.length<3||area(p)<1.6)continue;
+    const p=room.polygon;if(room.kind==='restroom'&&(p.length<3||area(p)<1.6))throw new Error(`${room.id}: 廁所面積不足`);if(!['room','room-candidate','restroom'].includes(room.kind)||p.length<3||area(p)<1.6)continue;
     const bounds=new T.Box2().setFromPoints(p.map(v=>new T.Vector2(...v))),size=bounds.getSize(new T.Vector2());
     const portals=f.access?.portals.filter(p=>p.roomIds.includes(room.id))??[];
     const openings=portals.length?portals.map(p=>({id:p.id,p:p.perRoomPosition?.[room.id]??p.position,width:p.width,depth:p.cutDepth})): [{id:room.id,p:room.door.position,width:Math.max(1.15,room.door.width)}];
@@ -214,11 +226,14 @@ export function buildWalkWorld(data:WalkBuilding[],structure:CampusStructure,ter
      const spec=portals.find(p=>p.id===o.id),otherNode=spec?.nodeIds?.find(id=>id!==room.id);const coreIn=spec?.clearancePositions?.[room.id],coreOut=otherNode?spec?.clearancePositions?.[otherNode]:undefined;
      const outsidePoint=new T.Vector3(coreOut?.[0]??dp[0]-n.x*.55,y,coreOut?.[1]??dp[1]-n.y*.55).applyMatrix4(frame),insidePoint=new T.Vector3(coreIn?.[0]??dp[0]+n.x*.55,y,coreIn?.[1]??dp[1]+n.y*.55).applyMatrix4(frame);
      let door=portalVisuals.get(o.id);
-     if(!door){const dg=new T.Group();dg.userData.dynamicDoor=true;dg.position.set(dp[0],y,dp[1]);dg.rotation.y=-Math.atan2(uz,ux);fg.add(dg);const hinge=new T.Group();hinge.position.x=-w/2;dg.add(hinge);box(hinge,w-.06,2.22,.065,w/2,1.11,0,palette.wood);box(hinge,.28,.55,.07,w*.52,1.5,0,palette.glass);box(hinge,.09,.05,.14,w-.13,1.0,-.07,'#d8cb9b');const position=new T.Vector3(dp[0],y,dp[1]).applyMatrix4(frame);const worldTangent=new T.Vector3(ux,0,uz).transformDirection(frame);const worldWidth=w*scale;const closedBox=new T.Box3().setFromCenterAndSize(position.clone().add(new T.Vector3(0,1.1,0)),new T.Vector3(Math.abs(worldTangent.x)*worldWidth+.15,2.2,Math.abs(worldTangent.z)*worldWidth+.15));door={id:o.id,position,outside:outsidePoint,inside:insidePoint,group:dg,panel:hinge,closedBox,normal:new T.Vector3(-n.x,0,-n.y).transformDirection(frame),open:0,target:0,label:b.id==='SC'?scienceDoorLabel(room,portals.find(p=>p.id===o.id)?.roomIds,rooms):portals.find(p=>p.id===o.id)?.roomIds.map(id=>{const r=rooms.find(r=>r.id===id);return r?.displayName?`${r.code} ${r.displayName}`:r?.code;}).filter(Boolean).join('／')||room.code||(room.name&&!room.name.includes('候選')?room.name:'未編號空間'),buildingId:b.id,floorId:f.id};portalVisuals.set(o.id,door);out.doors.push(door);}
+     if(!door){const dg=new T.Group();dg.userData.dynamicDoor=true;dg.position.set(dp[0],y,dp[1]);dg.rotation.y=-Math.atan2(uz,ux);fg.add(dg);const hinge=new T.Group();hinge.position.x=-w/2;dg.add(hinge);box(hinge,w-.06,2.22,.065,w/2,1.11,0,palette.wood);box(hinge,.28,.55,.07,w*.52,1.5,0,palette.glass);box(hinge,.09,.05,.14,w-.13,1.0,-.07,'#d8cb9b');const position=new T.Vector3(dp[0],y,dp[1]).applyMatrix4(frame);const worldTangent=new T.Vector3(ux,0,uz).transformDirection(frame);const worldWidth=w*scale;const closedBox=new T.Box3().setFromCenterAndSize(position.clone().add(new T.Vector3(0,1.1,0)),new T.Vector3(Math.abs(worldTangent.x)*worldWidth+.15,2.2,Math.abs(worldTangent.z)*worldWidth+.15));door={id:o.id,position,outside:outsidePoint,inside:insidePoint,group:dg,panel:hinge,closedBox,normal:new T.Vector3(-n.x,0,-n.y).transformDirection(frame),open:0,target:0,label:b.id==='SC'?scienceDoorLabel(room,portals.find(p=>p.id===o.id)?.roomIds,rooms):portals.find(p=>p.id===o.id)?.roomIds.map(id=>{const r=rooms.find(r=>r.id===id);return r?.kind==='restroom'?r.displayName??'廁所':r?.displayName?`${r.code??''} ${r.displayName}`.trim():r?.code;}).filter(Boolean).join('／')||room.code||(room.name&&!room.name.includes('候選')?room.name:'未編號空間'),buildingId:b.id,floorId:f.id};portalVisuals.set(o.id,door);out.doors.push(door);}
      if(o.id===primary){primaryDoor={...door,outside:outsidePoint,inside:insidePoint};}
     }
-    if(primaryDoor)out.destinations.push({id:room.id,label:room.code??(b.id==='SC'?'教室':`${b.id} ${f.label} · 未編號空間 ${f.rooms.indexOf(room)+1}`),displayName:b.id==='SC'&&!room.code?undefined:room.displayName,buildingId:b.id,floorId:f.id,roomId:room.id,doorId:primaryDoor.id,position:primaryDoor.outside.toArray(),level:f.level});
-    if(b.id==='SC'){
+    if(primaryDoor)out.destinations.push({id:room.id,category:room.kind==='restroom'?'restroom':'room',aliases:room.aliases,gender:room.gender,accessible:room.accessible,label:room.code??(room.kind==='restroom'?room.displayName??'廁所':b.id==='SC'?'教室':`${b.id} ${f.label} · 未編號空間 ${f.rooms.indexOf(room)+1}`),displayName:room.displayName,buildingId:b.id,floorId:f.id,roomId:room.id,doorId:primaryDoor.id,position:primaryDoor.outside.toArray(),level:f.level});
+    if(room.kind==='restroom'){
+     const layout=planRestroom(room,f.access,scale);
+     (fg.userData.restrooms??=[]).push(layout);addRestroomInterior(layout,rg,fc,y,scale);
+    }else if(b.id==='SC'){
      const layout=planScienceInterior(room,f,scale);
      (fg.userData.interiors??=[]).push(layout);
      addScienceInterior(layout,rg,fc,y,scale);

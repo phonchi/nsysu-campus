@@ -356,6 +356,134 @@ def rotate_bone_axis(arm, bone, axis, angle):
 
 def ease(t): t = max(0., min(1., t)); return t * t * (3 - 2 * t)
 
+# ---------------------------------------------------------------- v12 clips (gestures, swimming, paddling)
+# Appended after the v3 clips so the earlier clip data stays identical. World axes here: Z up,
+# the character faces -Y, its right side is -X. Rotation about +X by a positive angle tips forward.
+V12_CLIPS = ('Bow', 'ThumbsUp', 'Clap', 'Swim', 'Tread', 'PaddleStand', 'PaddleSit')
+SWIM_DROP = 0.0  # set by Swim/Tread: how far Body is lowered (m, Blender units of the armature world)
+
+def rotate_local(arm, bone, axis, angle):
+    """Rotate a pose bone about one of its own local axes (finger curls)."""
+    pb = arm.pose.bones[bone]
+    pb.matrix_basis = pb.matrix_basis @ Quaternion(Vector(axis), angle).to_matrix().to_4x4()
+    bpy.context.view_layer.update()
+
+def move_bone_world(arm, bone, delta):
+    """Translate a pose bone by a world-space delta (IK targets, Body)."""
+    pb = arm.pose.bones[bone]; m = pb.matrix.copy()
+    m.translation += arm.matrix_world.inverted().to_3x3() @ Vector(delta); pb.matrix = m
+    bpy.context.view_layer.update()
+
+def set_bone_world(arm, bone, point):
+    """Place a pose bone's head at a world-space point, keeping its rotation."""
+    pb = arm.pose.bones[bone]; m = pb.matrix.copy()
+    m.translation = arm.matrix_world.inverted() @ Vector(point); pb.matrix = m
+    bpy.context.view_layer.update()
+
+def head_w(arm, bone): return arm.matrix_world @ arm.pose.bones[bone].head
+def curl_fist(arm, side, amount=1.0):
+    for b, k in ((f'Fingers.{side}', 1.45), (f'MiddleHand.{side}', .35)):
+        rotate_local(arm, b, (1, 0, 0), k * amount)
+
+def build_v12_clips(arm, clips, idle, sit):
+    # Bow (one-shot 1.6 s): bend at Abdomen/Torso, head down, hold, back up.
+    nB = 39
+    def bow_edit(a, i):
+        t = i / (nB - 1); b = ease(t / .30) * (1 - ease((t - .72) / .28))
+        if b <= 0: return
+        rotate_bone_axis(a, 'Abdomen', (1, 0, 0), .42 * b)
+        rotate_bone_axis(a, 'Torso', (1, 0, 0), .36 * b)
+        rotate_bone_axis(a, 'Head', (1, 0, 0), .25 * b)
+    clips['Bow'] = bake(arm, 'Bow', nB, lambda i: (idle, 0), bow_edit)
+    # ThumbsUp (one-shot 1.6 s): right forearm up in front of the chest, fist, thumb up, small pump.
+    nU = 39
+    def thumb_edit(a, i):
+        t = i / (nU - 1); u = ease(t / .22) * (1 - ease((t - .80) / .20))
+        if u <= 0: return
+        pump = .06 * math.sin((t - .25) / .5 * 2 * math.pi) if .25 < t < .75 else 0
+        rotate_bone_to(a, 'UpperArm.R', bone_dir(a, 'UpperArm.R').lerp(Vector((-.55, -.62, -.30)).normalized(), u))
+        rotate_bone_to(a, 'LowerArm.R', bone_dir(a, 'LowerArm.R').lerp(Vector((-.10, -.75, .65 + pump)).normalized(), u), twist=THUMB_TWIST * u)
+        curl_fist(a, 'R', u)
+        rotate_bone_axis(a, 'Head', (1, 0, 0), -.06 * u)
+    clips['ThumbsUp'] = bake(arm, 'ThumbsUp', nU, lambda i: (idle, 0), thumb_edit)
+    # Clap (one-shot 1.8 s): both hands in front of the chest, three claps.
+    nC = 44
+    def clap_edit(a, i):
+        t = i / (nC - 1); u = ease(t / .18) * (1 - ease((t - .84) / .16))
+        if u <= 0: return
+        op = .5 + .5 * math.cos(min(1., max(0., (t - .18) / .66)) * 3 * 2 * math.pi)  # 1 open .. 0 closed
+        for sd, sx in (('R', -1), ('L', 1)):
+            rotate_bone_to(a, f'UpperArm.{sd}', bone_dir(a, f'UpperArm.{sd}').lerp(Vector((sx * .30, -.62, -.72)).normalized(), u))
+            closed, opened = Vector((-sx * .36, -.85, .30)), Vector((.0, -.90, .42))
+            rotate_bone_to(a, f'LowerArm.{sd}', bone_dir(a, f'LowerArm.{sd}').lerp(closed.lerp(opened, op).normalized(), u))
+    clips['Clap'] = bake(arm, 'Clap', nC, lambda i: (idle, 0), clap_edit)
+    # Swim (loop 1.0 s): front crawl. Body pitched horizontal and lowered so the chest sits at the
+    # water line; feet (IK targets) trail behind the hips with a flutter kick.
+    global SWIM_DROP
+    sample(arm, idle, 0); hip0 = head_w(arm, 'Hips').copy(); SWIM_DROP = hip0.z - .05
+    nS = 24
+    def swim_edit(a, i):
+        ph = i / nS * 2 * math.pi
+        move_bone_world(a, 'Body', (0, 0, -SWIM_DROP))
+        rotate_bone_axis(a, 'Body', (1, 0, 0), 1.42)
+        rotate_bone_axis(a, 'Torso', (0, 1, 0), .18 * math.sin(ph))      # body roll
+        rotate_bone_axis(a, 'Head', (1, 0, 0), -.55)                     # face forward/down, not into the chest
+        hip = head_w(a, 'Hips')
+        for sd, sx, off in (('R', -1, 0.), ('L', 1, math.pi)):
+            p = ph + off
+            rotate_bone_to(a, f'UpperArm.{sd}', Vector((sx * .22, -math.cos(p), -math.sin(p))).normalized())
+            bend = .5 + .5 * math.sin(p)                                   # bent elbow on recovery (above water)
+            rotate_bone_to(a, f'LowerArm.{sd}', Vector((sx * .15, -math.cos(p + .5 * bend), -math.sin(p + .5 * bend))).normalized())
+            kick = .10 * math.sin(2 * ph + off)
+            set_bone_world(a, f'Foot.{sd}', (hip.x + sx * .10, hip.y + .78, hip.z + kick))
+            set_bone_world(a, f'PoleTarget.{sd}', (hip.x + sx * .12, hip.y + .4, hip.z - .5))
+    clips['Swim'] = bake(arm, 'Swim', nS, lambda i: (idle, 0), swim_edit)
+    # Tread (loop 2.0 s): upright in the water, lowered by the same amount, sculling arms, slow kick.
+    nT = 48
+    def tread_edit(a, i):
+        ph = i / nT * 2 * math.pi
+        move_bone_world(a, 'Body', (0, 0, -SWIM_DROP + .02 * math.sin(2 * ph)))
+        hip = head_w(a, 'Hips')
+        for sd, sx, off in (('R', -1, 0.), ('L', 1, math.pi)):
+            sc = .25 * math.sin(ph + off)
+            rotate_bone_to(a, f'UpperArm.{sd}', Vector((sx * .85, -.30 + sc, -.35)).normalized())
+            rotate_bone_to(a, f'LowerArm.{sd}', Vector((sx * .55, -.75 + sc, -.10)).normalized())
+            k = .12 * math.sin(ph + off)
+            set_bone_world(a, f'Foot.{sd}', (hip.x + sx * .14, hip.y + .10 + k, hip.z - .62 + .5 * abs(k)))
+            set_bone_world(a, f'PoleTarget.{sd}', (hip.x + sx * .14, hip.y - .6, hip.z - .3))
+    clips['Tread'] = bake(arm, 'Tread', nT, lambda i: (idle, 0), tread_edit)
+    # PaddleStand (SUP, loop 1.6 s): knees soft, strokes on the right side; right hand low on the
+    # shaft, left hand on the grip. The runtime spans the paddle between Palm.R and Palm.L.
+    nP = 39
+    def sup_edit(a, i):
+        ph = i / (nP - 1) * 2 * math.pi; s = .5 - .5 * math.cos(ph)       # 0 catch .. 1 exit
+        move_bone_world(a, 'Body', (0, 0, -.06))
+        rotate_bone_axis(a, 'Abdomen', (1, 0, 0), .22 - .12 * s)
+        rotate_bone_axis(a, 'Torso', (0, 0, 1), -.20 + .25 * s)
+        rotate_bone_to(a, 'UpperArm.R', Vector((-.35, -.80 + 1.1 * s, -.55)).normalized())
+        rotate_bone_to(a, 'LowerArm.R', Vector((-.25, -.85 + 1.0 * s, -.45)).normalized())
+        rotate_bone_to(a, 'UpperArm.L', Vector((-.05, -.80 + .30 * s, -.05)).normalized())
+        rotate_bone_to(a, 'LowerArm.L', Vector((-.55, -.55 + .35 * s, .40)).normalized())
+        curl_fist(a, 'R', .8); curl_fist(a, 'L', .8)
+    clips['PaddleStand'] = bake(arm, 'PaddleStand', nP, lambda i: (idle, 0), sup_edit)
+    # PaddleSit (kayak, loop 1.6 s): seated with legs forward, double-blade strokes left/right.
+    nK = 39
+    def kayak_edit(a, i):
+        ph = i / (nK - 1) * 2 * math.pi
+        hip = head_w(a, 'Hips')
+        for sd, sx in (('R', -1), ('L', 1)):
+            set_bone_world(a, f'Foot.{sd}', (hip.x + sx * .14, hip.y - .72, hip.z - .30))
+            set_bone_world(a, f'PoleTarget.{sd}', (hip.x + sx * .2, hip.y - .5, hip.z + .4))
+        rotate_bone_axis(a, 'Torso', (0, 0, 1), .30 * math.sin(ph))
+        for sd, sx, off in (('R', -1, 0.), ('L', 1, math.pi)):
+            d = math.sin(ph + off)                                         # +1 this side's blade in the water
+            rotate_bone_to(a, f'UpperArm.{sd}', Vector((sx * .35, -.80, -.20 - .25 * d)).normalized())
+            rotate_bone_to(a, f'LowerArm.{sd}', Vector((-sx * .25, -.90, .10 - .30 * d)).normalized())
+            curl_fist(a, sd, .8)
+    clips['PaddleSit'] = bake(arm, 'PaddleSit', nK, lambda i: (sit, 60), kayak_edit)
+
+THUMB_TWIST = 1.2
+
 def build_clips(arm, prefix):
     idle, walk, run = find_action(f'{prefix}_Idle'), find_action(f'{prefix}_Walk'), find_action(f'{prefix}_Run')
     jump, sit = find_action(f'{prefix}_Jump'), find_action(f'{prefix}_Sitting')
@@ -405,13 +533,14 @@ def build_clips(arm, prefix):
         rotate_bone_axis(a, 'Torso', (0, 0, 1), .05 * math.sin(ph))
     # Talk samples a fixed idle frame so the loop closes exactly.
     clips['Talk'] = bake(arm, 'Talk', nT, lambda i: (idle, 0), talk_edit)
+    build_v12_clips(arm, clips, idle, sit)
     # Clean up: drop every other pack action.
     keep = set(clips.values())
     for a in list(bpy.data.actions):
         if a not in keep: bpy.data.actions.remove(a)
     ad = arm.animation_data
     for tr in list(ad.nla_tracks): ad.nla_tracks.remove(tr)
-    for nm in ('Idle', 'Walk', 'Run', 'Jump', 'Wave', 'Talk', 'Sit'):
+    for nm in ('Idle', 'Walk', 'Run', 'Jump', 'Wave', 'Talk', 'Sit') + V12_CLIPS:
         tr = ad.nla_tracks.new(); tr.name = nm
         a = clips[nm]; st = tr.strips.new(nm, int(a.frame_range[0]), a)
         st.extrapolation = 'NOTHING'; tr.mute = False
