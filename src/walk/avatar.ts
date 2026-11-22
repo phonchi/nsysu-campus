@@ -4,7 +4,7 @@ import * as T from 'three';
 import { ChairPose, type Seat } from '../world/seats';
 import { RideRig, soleSide, type RideDiagnostics } from './ride-rig';
 
-export type AvatarState = 'idle' | 'walk' | 'run' | 'jump' | 'fall' | 'land' | 'wave' | 'bow' | 'thumbsUp' | 'clap' | 'talk' | 'ride' | 'sit';
+export type AvatarState = 'idle' | 'walk' | 'run' | 'jump' | 'fall' | 'land' | 'wave' | 'bow' | 'thumbsUp' | 'clap' | 'talk' | 'ride' | 'sit' | 'swim' | 'tread' | 'paddleStand' | 'paddleSit';
 
 /** Clip names tried per state, first match wins (our Blender rigs and the CC0 packs differ). */
 const CLIPS: Record<AvatarState, string[]> = {
@@ -19,6 +19,7 @@ const CLIPS: Record<AvatarState, string[]> = {
   talk: ['Talk', 'Talking', 'Idle'],
   ride: ['Ride'],
   sit: ['Sit','Sit_Idle','Sitting'],
+  swim:['Swim'],tread:['Tread'],paddleStand:['PaddleStand'],paddleSit:['PaddleSit'],
 };
 const ONE_SHOT: AvatarState[] = ['jump', 'land', 'wave', 'bow', 'thumbsUp', 'clap'];
 const damp = (k: number, dt: number) => 1 - Math.exp(-k * dt);
@@ -48,6 +49,9 @@ export class Avatar {
   readonly root = new T.Group();
   state: AvatarState = 'idle';
   constructor(){this.root.rotation.order='YXZ';}
+  externalPose?:{position:[number,number,number];heading:number;clip:'Swim'|'Tread'|'PaddleStand'|'PaddleSit'|'Walk'|'Run'|'Ride'|'Idle'};
+  private palms:Partial<Record<'L'|'R',T.Object3D>>={};
+  palm(side:'L'|'R'){return this.palms[side];}
   private mixer?: T.AnimationMixer;
   private actions = new Map<AvatarState, T.AnimationAction>();
   private current?: T.AnimationAction;
@@ -105,6 +109,7 @@ export class Avatar {
         this.actions.set(state, action);
       }
     }
+    for(const side of ['L','R'] as const)this.palms[side]=model.getObjectByName('Palm.'+side)??model.getObjectByName('Palm'+side)??model.getObjectByName('Palm_'+side);
     this.current = undefined;
     this.play(this.state, 0);
     this.mixer?.update(0);this.rebuildRide();if(this.seated){this.mixer?.stopAllAction();this.current=undefined;this.play('sit',0);}
@@ -160,6 +165,14 @@ export class Avatar {
     this.chair?.release();
     this.rideRig?.releaseGround();
     this.lastFrame=f;
+    if(this.externalPose){
+      const pose=this.externalPose;this.root.position.fromArray(pose.position);this.visualY=pose.position[1];this.facing=pose.heading;this.root.rotation.set(0,pose.heading,0);this.root.scale.set(1,1,1);
+      if(this.vehicle)this.vehicle.visible=pose.clip==='Ride';
+      if(pose.clip==='Ride'&&this.rideRig){this.state='ride';this.mixer?.stopAllAction();this.current=undefined;this.rideRig.apply(new T.Vector3(...pose.position),{front:pose.position[1],rear:pose.position[1]});}
+      else {const state=({Swim:'swim',Tread:'tread',PaddleStand:'paddleStand',PaddleSit:'paddleSit',Walk:'walk',Run:'run',Idle:'idle',Ride:'sit'} as const)[pose.clip];this.setState(state);this.mixer?.update(dt);}
+      this.wasGround=true;return;
+    }
+
     // Visual height: follows the feet closely, but filters millimetre contact noise and stair-step pops.
     // The grounded capsule can retain a small collision offset above its support.
     // Place the visible feet on that support instead of pulling the animated torso

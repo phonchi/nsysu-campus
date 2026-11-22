@@ -133,7 +133,7 @@ export class CampusSound {
   cue(id: string) {
     if (!this.ctx || !this.enabled) return;
     const ctx = this.ctx, t = ctx.currentTime;
-    const notes: Record<string, number[]> = { chime: [880, 1320], page: [660], fanfare: [523, 659, 784, 1047], echo: [392, 392, 392], stamp: [196, 1568], shutter: [2093, 1046], monkey: [988, 1319, 988], pop: [880] };
+    const notes: Record<string, number[]> = { whistle: [2350, 2350, 2100], chime: [880, 1320], page: [660], fanfare: [523, 659, 784, 1047], echo: [392, 392, 392], stamp: [196, 1568], shutter: [2093, 1046], monkey: [988, 1319, 988], pop: [880] };
     (notes[id] ?? [740]).forEach((freq, i) => {
       const o = ctx.createOscillator(), g = ctx.createGain(), at = t + i * (id === 'echo' ? .28 : .11), peak = id === 'echo' ? .12 / (i + 1) : .14;
       o.type = id === 'page' ? 'triangle' : 'sine'; o.frequency.value = freq;

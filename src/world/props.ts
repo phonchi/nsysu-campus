@@ -1,4 +1,5 @@
 import * as T from 'three';
+import {inside} from '../walk/v12-geometry';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
@@ -17,6 +18,8 @@ export interface PropWorld {
   pathDistance(x: number, z: number): number;
   ground(x: number, z: number): number;
   seaLevel: number;
+  allowed?:(x:number,z:number,radius?:number)=>boolean;
+  tetrapodZones?:[number,number][][];
   /** Points to keep clear (NPC posts, story spots). */
   keepClear: { x: number; z: number; r: number }[];
 }
@@ -80,6 +83,7 @@ export function planProps(w: PropWorld, seed = 2026): PropSpot[] {
   const r = rng(seed), out: PropSpot[] = [];
   const ok = (kind: string, x: number, z: number) => {
     const s = SIZE[kind] ?? .8;
+    if(w.ground(x,z)<w.seaLevel+.05||w.allowed&&!w.allowed(x,z,s))return false;
     if (!w.open(x, z) || !w.open(x + s, z) || !w.open(x - s, z) || !w.open(x, z + s) || !w.open(x, z - s)) return false;
     if (w.pathDistance(x, z) < s + 1.3) return false;
     if (w.keepClear.some(k => Math.hypot(k.x - x, k.z - z) < k.r + s)) return false;
@@ -129,9 +133,10 @@ export function planProps(w: PropWorld, seed = 2026): PropSpot[] {
     let n = 0;
     for (let k = 0; k < 6000 && n < 160; k++) {
       const x = sea.x - 120 + r() * 240, z = sea.z - 160 + r() * 320, h = w.ground(x, z);
+      if (!w.tetrapodZones?.some(poly=>inside([x,z],poly))) continue;
       if (h > w.seaLevel - .15 || h < w.seaLevel - 1.8) continue;
       if (out.some(o => o.kind === 'tetrapod' && Math.hypot(o.x - x, o.z - z) < 1.7)) continue;
-      out.push({ kind: 'tetrapod', x, z, ry: r() * Math.PI * 2, s: .9 + r() * .3, y: h - .35 }); n++;
+      out.push({ kind: 'tetrapod', x, z, ry: r() * Math.PI * 2, s: Math.max(1.4,(w.seaLevel+.6-h)/1.4499) + r() * .2, y: h - .15 }); n++;
     }
   }
   void scatter;

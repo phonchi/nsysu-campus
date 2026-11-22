@@ -112,6 +112,69 @@
    ],
    "r": 3,
    "seat": "arcade-player"
+  },
+  "sea-center": {
+   "label": "海域中心（位置示意）",
+   "sub": "MARINE SPORTS CENTER",
+   "p": [
+    -237.5,
+    -37.0
+   ],
+   "r": 14
+  },
+  "beach-lifeguard": {
+   "label": "西子灣沙灘・救生員椅",
+   "sub": "LIFEGUARD",
+   "p": [
+    -320.0,
+    160.0
+   ],
+   "r": 12
+  },
+  "surf-zone": {
+   "label": "衝浪教學區",
+   "sub": "SURF CLASS",
+   "p": [
+    -307.0,
+    252.0
+   ],
+   "r": 12
+  },
+  "sail-view": {
+   "label": "海堤觀賞點",
+   "sub": "SAILING VIEW",
+   "p": [
+    -316.0,
+    296.0
+   ],
+   "r": 10
+  },
+  "track": {
+   "label": "田徑場",
+   "sub": "TRACK",
+   "p": [
+    -207.42,
+    443.5
+   ],
+   "r": 12
+  },
+  "pool": {
+   "label": "游泳池",
+   "sub": "SWIMMING POOL",
+   "p": [
+    -262.5,
+    453.9
+   ],
+   "r": 14
+  },
+  "gym-portal": {
+   "label": "體育館・體適能中心入口",
+   "sub": "FITNESS CENTER",
+   "p": [
+    -29.8,
+    159.74
+   ],
+   "r": 8
   }
  },
  "npcs": {

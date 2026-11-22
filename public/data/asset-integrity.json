@@ -9798,7 +9798,7 @@
       "status": "user-reported",
       "v12": true,
       "walkRoomId": "SC-1F-SC1011-1",
-      "x": 0.628273,
+      "x": 0.668136,
       "y": 0.690004
     },
     "v12-SC-1F-SC1011-2": {
@@ -9832,7 +9832,7 @@
       "status": "user-reported",
       "v12": true,
       "walkRoomId": "SC-1F-SC1011-3",
-      "x": 0.668136,
+      "x": 0.628273,
       "y": 0.690004
     },
     "v12-SC-1F-WC-EW-F": {
@@ -10041,7 +10041,7 @@
       "status": "user-reported",
       "v12": true,
       "walkRoomId": "SC-2F-SC2003-1",
-      "x": 0.812332,
+      "x": 0.853668,
       "y": 0.162499
     },
     "v12-SC-2F-SC2003-2": {
@@ -10075,7 +10075,7 @@
       "status": "user-reported",
       "v12": true,
       "walkRoomId": "SC-2F-SC2003-3",
-      "x": 0.853668,
+      "x": 0.812332,
       "y": 0.162499
     },
     "v12-SC-2F-SC2005-1": {
@@ -10092,7 +10092,7 @@
       "status": "user-reported",
       "v12": true,
       "walkRoomId": "SC-2F-SC2005-1",
-      "x": 0.711773,
+      "x": 0.731773,
       "y": 0.162499
     },
     "v12-SC-2F-SC2005-2": {
@@ -10109,7 +10109,7 @@
       "status": "user-reported",
       "v12": true,
       "walkRoomId": "SC-2F-SC2005-2",
-      "x": 0.731773,
+      "x": 0.711773,
       "y": 0.162499
     },
     "v12-SC-2F-WC-NE-A": {

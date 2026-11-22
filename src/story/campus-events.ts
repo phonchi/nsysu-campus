@@ -46,7 +46,7 @@ export interface EventLine { who: string; text: string }
 export interface SayCondition { quest: string; step: string; choice: string }
 /** Cue timing of a 'rhythm' step: `cues` beats, the first `lead` s in, then every `interval` s; a clap within ±`window` s of a
  * beat hits; `need` hits succeed. `style` is a free hint for the synthesised melody. */
-export interface RhythmSpec { id: string; cues: number; interval: number; lead: number; window: number; need: number; style?: string }
+export interface RhythmSpec { id: string; cues: number; interval: number; lead: number; window: number; need: number; style?: string; presentation?: 'music'|'surf' }
 export type ActivityRequest =
   | { kind: 'move'; npc: string; to: string }
   | { kind: 'say'; who: string; text: string; if?: SayCondition }
@@ -139,7 +139,7 @@ const TARGET = /^(zone|npc|spot):./;
 const positive = (n: unknown): n is number => typeof n === 'number' && Number.isFinite(n) && n > 0;
 /** Ids act() answers to: action and rhythm steps share one namespace. */
 const actIds = (steps: readonly ActivityStep[]) => steps.flatMap(s => s.kind === 'action' || s.kind === 'rhythm' ? [s.id] : []);
-const rhythmSpec = (s: RhythmSpec): RhythmSpec => ({ id: s.id, cues: s.cues, interval: s.interval, lead: s.lead, window: s.window, need: s.need, ...(s.style !== undefined ? { style: s.style } : {}) });
+const rhythmSpec = (s: RhythmSpec): RhythmSpec => ({ id: s.id, cues: s.cues, interval: s.interval, lead: s.lead, window: s.window, need: s.need, ...(s.presentation !== undefined ? {presentation:s.presentation} : {}), ...(s.style !== undefined ? { style: s.style } : {}) });
 
 export function validateEvents(events: readonly CampusEventDefinition[]): string[] {
   const errors: string[] = [], ids = new Set<string>();
@@ -164,6 +164,7 @@ export function validateEvents(events: readonly CampusEventDefinition[]): string
         if (!TARGET.test(s.target ?? '') || !positive(s.max) || !positive(s.hold)) errors.push(`${at}: stay step needs target zone:/npc:/spot:, max > 0 and hold > 0`);
         if (s.keepSeated && !s.sit) errors.push(`${at}: keepSeated needs sit`);
       } else if (s.kind === 'rhythm') {
+        if(s.presentation!==undefined&&!['music','surf'].includes(s.presentation))errors.push(`${at}: invalid rhythm presentation`);
         if (!s.id || !Number.isInteger(s.cues) || s.cues < 1 || s.cues > MAX_RHYTHM_CUES || !positive(s.interval) || !positive(s.lead)
           || typeof s.window !== 'number' || !(s.window >= 0) || !(s.window < s.interval / 2) || !Number.isInteger(s.need) || s.need < 1 || s.need > s.cues)
           errors.push(`${at}: rhythm step ${s.id ?? '?'} needs id, 1..${MAX_RHYTHM_CUES} cues, interval > 0, lead > 0, 0 <= window < interval/2 and 1 <= need <= cues`);

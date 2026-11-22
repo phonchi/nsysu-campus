@@ -1,3 +1,8 @@
+import {loadV12Data,type V12Data} from './v12-data';
+import {prepareBusRoutes} from './bus';
+import {inside as insideWater} from './v12-geometry';
+import {V12Runtime} from './v12-runtime';
+import {prepareV12Terrain,buildV12Surfaces} from '../world/v12-surfaces';
 import { GestureMenu } from './gestures';
 import { searchDestinations } from './search';
 import { LiftPassenger, insideLift, liftDoorOccupied, liftObstacles, syncLift } from './lift-world';
@@ -54,6 +59,7 @@ import { clearProgress } from '../story/engine';
 import { GrassTufts, type GroundMask } from '../render/ground';
 import { buildClouds } from '../render/clouds';
 import { Album } from '../story/album';
+import {placementPolicy} from '../world/placement-policy';
 import { planProps, addProps, addSeatProps, propsForTier, loadPropGeometry } from '../world/props';
 import { QuestSpotField, activeSpotIds } from '../world/quest-spots';
 import { PhotoMode } from '../games/photo';
@@ -199,6 +205,8 @@ function warmupSamples() {
   return group;
 }
 
+import type { MotionMode } from '../world/v12-types';
+const BIKE_MOTION:MotionMode={kind:'bike'},WALK_MOTION:MotionMode={kind:'walk'};
 export async function openWalkthrough(opts: WalkOptions = {}) {
   if (document.querySelector('.walkthrough')) return;
   const host = document.createElement('section');
@@ -225,7 +233,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   pocket.addEventListener('click', () => openNotebook());
   /** Tour placement on start (gate / current goal); not for map arrivals, nor with ?spawn=arcade (QA tools). */
   const placeTour = !opts.target && new URLSearchParams(location.search).get('spawn') !== 'arcade';
-  const say = (text: string, ms = 5000) => { status.textContent = text; clearTimeout(statusTimer); if (ms) statusTimer = window.setTimeout(() => status.textContent = '', ms); };
+  const say = (text: string, ms = 5000) => { status.textContent = text.trim(); clearTimeout(statusTimer); if (ms) statusTimer = window.setTimeout(() => status.textContent = '', ms); };
   const storageFailed = () => { storageNotice = '目前無法保存進度；此頁關閉後，部分進度可能遺失。'; say(storageNotice,9000); };
   window.addEventListener('campus-storage-error',storageFailed);
   const exitToMap = () => { host.remove(); document.body.style.overflow = ''; window.dispatchEvent(new Event('walkthrough-exit')); };
@@ -278,6 +286,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   }
   const quality = new AdaptiveQuality(tier, t => { applyTier(t); say(`畫質自動調整為 ${t} 級以維持流暢`, 2500); });
 
+  let v12:V12Runtime|undefined,v12Data:V12Data={issues:[]};
   let world: WalkWorld, physics: RapierController, lod: CampusLod, alive = true,sceneLoading=true;
   const startupJobs:Promise<unknown>[]=[];
   let shaderWarmupMs=0;
@@ -301,6 +310,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       Terrain.load(asset),
       initPhysics(),
     ]);
+    v12Data=await loadV12Data(asset);if(v12Data.issues.length)console.warn('v12 optional data',v12Data.issues);
     const placements = await loadPlacements(asset).catch(() => undefined);
     uiPlacements = placements; uiStructure = s;
     if (placements) {
@@ -309,10 +319,15 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       const gone = new Set(Object.keys(placements).map(id => REPLACES[id]).filter(Boolean));
       replacedOsm = gone;
     }
+    prepareV12Terrain(terrain,v12Data);
+    if(v12Data.bus){const prepared=prepareBusRoutes(v12Data.bus.routes,(x,z)=>terrain.heightAt(x,z));v12Data.bus.routes=prepared.routes;for(const stop of v12Data.bus.stops)stop.berth.position[1]=terrain.heightAt(stop.berth.position[0],stop.berth.position[2]);console.info('v12 bus surface diagnostics',prepared.diagnostics);}
     campusData = buildings; structure = { ...s, context: { ...s.context, landmarks: s.context.landmarks.filter(l => !replacedOsm.has(l.id)) } };
     campusInfo = await loadJson<CampusInfo>('data/campus-info.json', '校園資訊').catch(() => undefined);
     for (const b of campusData) for (const f of b.floors) f.access = access.floors[f.id];
     world = buildWalkWorld(campusData, structure, terrain);
+    const sports=buildV12Surfaces(terrain,v12Data);world.display.add(sports.display);world.collision.add(sports.collision);
+    world.display.userData.sportsPolygons=[...(v12Data.sports?.facilities??[]).filter(f=>!f.id.includes('candidate')).map(f=>f.polygon),...(v12Data.bus?.forecourt?[v12Data.bus.forecourt.polygon]:[])];
+    world.display.userData.placementAllowed=placementPolicy(terrain,v12Data);
     world.display.userData.roadExclusions = s.context.landmarks.filter(l => replacedOsm.has(l.id)).map(l => l.polygon);
     if (placements?.tunnel) world.display.userData.treeBores = tunnelBores(fullTunnelProfile(placements.tunnel, (x,z)=>terrain.heightAt(x,z)));
     decorateCampus(world, structure, terrain, TIERS[tier].detail.leaf);
@@ -337,7 +352,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     physics.addObstacles(obstacles); obstacleField.add(obstacles);
     for(const lift of world.lifts)syncLift(lift);physics.setLiftObstacles(liftObstacles(world.lifts));
     const doors = doorConstraint(world.doors);
-    const shore = shoreConstraint(terrain, (x,z,y)=>physics.supportAt(x,z,y));
+    const shore = shoreConstraint(terrain, (x,z,y)=>physics.supportAt(x,z,y),(x,z)=>v12?.allowsWater(x,z)??false,(x,z)=>v12Data.sea?.waterBodies.some(w=>insideWater([x,z],w.polygon))??false);
     physics.constrain = (position,velocity,h)=>{ doors(position,velocity,h); shore(position,velocity,h); };
     physics.teleport(world.spawn);
     terrainRef = terrain;
@@ -452,7 +467,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     say(locked ? '視角已鎖定：角度與距離固定，再按 L 解除。' : '視角已解除鎖定，可拖曳轉動。', 2500);
   }
   const sound = new CampusSound();
-  const soundVisibility = () => sound.setHidden(document.hidden);
+  const soundVisibility = () => {sound.setHidden(document.hidden);if(!sceneLoading)lastTime=performance.now();};
   document.addEventListener('visibilitychange', soundVisibility);
   const soundLabel = () => host.querySelectorAll<HTMLElement>('[data-action=sound]').forEach(b => { if (!b.classList.contains('walk-icon')) b.textContent = sound.enabled ? '音樂 開' : '音樂 關'; b.setAttribute('aria-pressed', String(sound.enabled)); });
   soundLabel();
@@ -514,7 +529,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     chooseMode(false); drawRoute(p); say(`沿校園步道走到 ${autoDestination.label}`, 6000);
   }
   function goTo(destination: WalkDestination) {
-    if(passenger.carried)return;gestures.close();
+    if(passenger.carried||v12?.ownsMotion)return;gestures.close();
     routes?.avoid.splice(0);
     get('.walk-results').hidden = true; get<HTMLInputElement>('.walk-search input').blur(); clearAuto();
     if (!routesValidated) { say('場景碰撞與步道仍在準備，請稍候再開始帶路。'); return; }
@@ -532,6 +547,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   let panelLift:WorldLift|undefined;
   let carriedCamera:{yaw:number;pitch:number;distance:number;locked:boolean;doorYaw?:number}|undefined;
   const liftPoses=new WeakMap<WorldLift,string>();
+  let cachedLiftObstacles=liftObstacles(world.lifts),lastBusObstacleKey='';
   const cabinLift=()=>world.lifts.find(l=>insideLift(l,physics.position));
   function clearPassenger(){passenger.clear();panelLift=undefined;liftPanel.hidden=true;if(carriedCamera){rig.yaw=carriedCamera.yaw;rig.pitch=carriedCamera.pitch;rig.distance=carriedCamera.distance;rig.locked=carriedCamera.locked;carriedCamera=undefined;}input.release();rig.protect();}
   function showLift(lift:WorldLift) {
@@ -558,7 +574,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       return physics.sweep(from,to,.04)>=from.distanceTo(to)-.45;
     });
   },()=>{input.release();input.mode=gestures.open?'menu':director?.ui.dialogueOpen?'dialogue':menuOpen()?'menu':photo.active?'photo':'walk';});
-  function toggleGestures(){if(passenger.carried||overview||!walking||bike.riding||avatar.seated||rhythm||quiz?.open||guide.open||notebook?.open||menuOpen()||(!!director?.blocking&&!director?.ui.dialogueOpen))return;clearAuto(true);gestures.toggle();if(gestures.open&&document.pointerLockElement)document.exitPointerLock();}
+  function toggleGestures(){if(v12?.ownsMotion||passenger.carried||overview||!walking||bike.riding||avatar.seated||rhythm||quiz?.open||guide.open||notebook?.open||menuOpen()||(!!director?.blocking&&!director?.ui.dialogueOpen))return;clearAuto(true);gestures.toggle();if(gestures.open&&document.pointerLockElement)document.exitPointerLock();}
   type Candidate = InteractionAction & { label:string; targetLabel?:string; point:T.Vector3; run:()=>void };
   let selectedInteraction: string | undefined;
   let shownInteractions: Candidate[] = [];
@@ -566,6 +582,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     if (passenger.carried || gestures.open || eventPose.sitting || rhythm || notebook?.open || menuOpen() || overview || !walking || photo.active || quiz?.open || director?.blocking || guide.open) return [];
     const p=physics.position, out:Candidate[]=[];
     const add=(id:string,label:string,priority:number,point:T.Vector3|undefined,run:()=>void,targetId=id,actionId=id)=>{if(point)out.push({id,targetId,actionId,targetLabel:targetId.startsWith('npc:')?npcs?.displayName(targetId.slice(4)):undefined,label,priority,point:point.clone(),distance:p.distanceTo(point),run});};
+    for(const a of v12?.actions(p)??[])add(a.id,a.label,85,a.point,a.run);
+    if(v12?.ownsMotion||v12?.fitness.portal)return out;
     const focused=quests?.progress.tracked;
     const action=campusEvents && campusEventAction(campusEvents,eventWorld(),eventPaused() || eventQueue.busy);
     if(action)add(action.id,action.label,115,p,()=>{if(campusEvents && campusEventAction(campusEvents,eventWorld(),eventPaused())?.actionId===action.actionId){eventQueue.push(campusEvents.act(action.actionId));eventQueue.flush();}},action.targetId,action.actionId);
@@ -613,6 +631,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     else say('這個項目已不在互動範圍或狀態已改變，請重新選擇。',2500);
   }
   function interact(eventTimestamp?:number) {
+    if(v12?.key('e'))return;
     routeEventE(!!rhythm,()=>clapRhythm(eventTimestamp),interactNormally);
   }
   function interactNormally() {
@@ -622,7 +641,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     if(candidate) executeInteraction(candidate);
     else say('靠近人物或互動物件後按 E；多個項目可點清單或按數字鍵。',2500);
   }
-  function resetToSpawn() { clearAuto(); if(!moveSafely(world.spawn)) { say('起點附近沒有安全落點，請稍後再試或返回校園地圖。',7000); return; } clearPassenger();gestures.close();recoveryFailed=false; avatar.face(-Math.PI / 2); rig.yaw = -Math.PI / 2; rig.pitch = -.18; rig.snap(physics.position); chooseMode(false); say('已回到理工長廊前的安全位置。'); }
+  function resetToSpawn() { clearAuto(); if(!moveSafely(world.spawn)) { say('起點附近沒有安全落點，請稍後再試或返回校園地圖。',7000); return; } clearPassenger();v12?.reset();gestures.close();recoveryFailed=false; avatar.face(-Math.PI / 2); rig.yaw = -Math.PI / 2; rig.pitch = -.18; rig.snap(physics.position); chooseMode(false); say('已回到理工長廊前的安全位置。'); }
 
   // ---- menu (Esc) ------------------------------------------------------------------------
   const menu = get('.walk-menu');
@@ -668,7 +687,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     exited: () => rig.snap(physics.position),
   });
   function enterPhoto() {
-    if (passenger.carried || overview || !walking || director?.blocking) return;
+    if (v12?.ownsMotion || passenger.carried || overview || !walking || director?.blocking) return;
     gestures.close();setMenu(false); clearAuto(); autoFollow = false; photo.enter(physics.position, rig.yaw);
   }
 
@@ -691,6 +710,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     say, cue: id => sound.cue(id),
   });
   function toggleBike() {
+    if(v12?.ownsMotion||v12?.fitness.portal)return;
     if (!bike.riding && !avatar.rideReady) { say('腳踏車與人物姿勢仍在準備，請稍候。', 2500); return; }
     bike.toggle(physics.position);
     if(bike.riding && (eventPose.requested || rhythm))cancelCampusActivity();
@@ -727,6 +747,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   window.addEventListener('keydown',captureRhythmKey,{capture:true});
   const input = new WalkInput(renderer.domElement, get('.walk-joystick'), get('.walk-stick'), {
     modal(k, mode) {
+      if(v12?.locked&&k==='escape'){if(v12.fitness.equipment&&v12.key(k))return;setMenu(!menuOpen(),'play');return;}
+      if(v12?.key(k))return;
       if(passenger.carried){liftKey(k);return;}
       if(gestures.open){gestures.key(k);return;}
       if(k==='t'){toggleGestures();return;}
@@ -738,6 +760,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       else if (mode === 'menu') { if (k === 'j') { openNotebook(); return; } if (k === 'h') { toggleHelp(); return; } if (k === 'escape') setMenu(false); else if (k === '/') { setMenu(true, 'play'); get<HTMLInputElement>('.walk-search input').focus(); } }
     },
     press(k) {
+      if(v12?.locked&&k==='escape'){if(v12.fitness.equipment&&v12.key(k))return;setMenu(!menuOpen(),'play');return;}
+      if(v12?.key(k))return;
       if(passenger.carried){liftKey(k);return;}
       if(gestures.open){gestures.key(k);return;}
       if(k==='t'){toggleGestures();return;}
@@ -764,10 +788,14 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     },
     interactionListOpen: () => shownInteractions.length > 1,
     moveStarted() { avatar.cancelGesture();movementRequested=true;eventPose.update(true,false);if(rhythm)cancelCampusActivity();if (!walking || overview) chooseMode(false); clearAuto(true); },
-    look(dx, dy) { if(passenger.carried||gestures.open)return; if (photo.active) photo.look(dx, dy); else rig.rotate(dx, dy); },
-    zoom(d) { if(passenger.carried||gestures.open)return; if (photo.active) photo.zoom(d); else rig.zoom(d); },
-    canLook: () => !overview && !passenger.carried && !gestures.open,
+    look(dx, dy) { if(v12?.locked||passenger.carried||gestures.open)return; if (photo.active) photo.look(dx, dy); else rig.rotate(dx, dy); },
+    zoom(d) { if(v12?.locked||passenger.carried||gestures.open)return; if (photo.active) photo.zoom(d); else rig.zoom(d); },
+    canLook: () => !overview && !v12?.locked && !passenger.carried && !gestures.open,
   });
+  v12=new V12Runtime({host,scene,data:v12Data,physics,avatar,asset,say,ground:(x,z)=>terrainRef!.heightAt(x,z),cue:id=>sound.cue(id),params:new URLSearchParams(location.search),modeChanged:()=>{
+    if(document.pointerLockElement)document.exitPointerLock();if(campusEvents?.activity)cancelCampusActivity();clearAuto(true);input.release();bike.riding=false;avatar.riding=false;avatar.setSeated(false);physics.setRiding(false);passenger.clear();rig.snap(physics.position);rig.protect();
+  }});
+  startupJobs.push(v12.load());
   input.mode='menu';
   renderer.domElement.addEventListener('click', () => { if (rig.firstPerson && !overview && !coarse && !document.pointerLockElement && !cameraBlocked()) void renderer.domElement.requestPointerLock?.()?.catch(()=>{}); });
   host.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') host.classList.add('has-touch'); });
@@ -798,7 +826,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   });
   host.addEventListener('click', e => {
     const target = e.target as HTMLElement;
-    if(passenger.carried&&!target.closest('[data-stop],[data-lift-hold],[data-action=exit],[data-action=reset]'))return;
+    if((passenger.carried||v12?.locked)&&!target.closest('[data-stop],[data-bus-stop],[data-lift-hold],[data-action=door],[data-action=exit],[data-action=reset],[data-action=menu],[data-action=menu-close]'))return;
     const bodyBtn = target.closest<HTMLElement>('[data-body]'), palBtn = target.closest<HTMLElement>('[data-palette]');
     if (bodyBtn) { if (bodyBtn.dataset.body !== look().body) { campus.setPlayer({ body: bodyBtn.dataset.body as Body, palette: 0 }); markChar(); loadCharacter(); } return; }
     if (palBtn) { campus.setPlayer({ palette: Number(palBtn.dataset.palette) }); markChar(); loadCharacter(); return; }
@@ -807,7 +835,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     const destination = target.closest<HTMLElement>('[data-destination]')?.dataset.destination;
     if (destination) { const d = world.destinations.find(d => d.id === destination); if (d) { setMenu(false); goTo(d); } return; }
     const action = target.closest<HTMLElement>('[data-action]')?.dataset.action;
-    if(passenger.carried&&action!=='exit'&&action!=='reset')return;
+    if((passenger.carried||v12?.locked)&&action!=='exit'&&action!=='reset'&&action!=='door'&&action!=='menu'&&action!=='menu-close')return;
     switch (action) {
       case 'start': case 'walk': chooseMode(false); break;
       case 'overview': chooseMode(true); break;
@@ -964,7 +992,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   }
 
   function close() {
-    clearPassenger();gestures.dispose();alive = false; stopLoadingTips(); campusUi?.dispose(); clearTimeout(statusTimer); cancelAnimationFrame(frameId);
+    clearPassenger();v12?.dispose();gestures.dispose();alive = false; stopLoadingTips(); campusUi?.dispose(); clearTimeout(statusTimer); cancelAnimationFrame(frameId);
     characterQa.dispose(); input.dispose(); window.removeEventListener('keydown',captureRhythmKey,{capture:true});document.removeEventListener('visibilitychange', soundVisibility); window.removeEventListener('campus-storage-error',storageFailed); window.removeEventListener('resize', resize); orbit.dispose(); navigation?.dispose();
     eventQueue.clear(); npcs?.releaseAllBorrowed(); eventInvite.remove();
     encounterScene.dispose();
@@ -1081,7 +1109,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     return !!npcs && !npcs.isAbsent(id) && !npcs.get(id)?.talking && !storyUsesNpc(id) && !(id==='m3-thief' && (chase.active || miniGameActive));
   }
   function eventPaused() {
-    return document.hidden || campusEventsPaused({walking:walking && storyStarted && routesValidated,overview,dialogue:!!director?.ui.dialogueOpen,
+    return !!v12?.ownsMotion || document.hidden || campusEventsPaused({walking:walking && storyStarted && routesValidated,overview,dialogue:!!director?.ui.dialogueOpen,
       menu:menuOpen(),notebook:!!notebook?.open,photo:photo.active,game:miniGameActive||chase.active||!!quiz?.open,
       blocking:!!director?.blocking,encounter:!!encounters?.active,guide:guide.open});
   }
@@ -1133,17 +1161,18 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   }
   function startRhythm(command:RhythmCommand) {
     clearAuto();autoFollow=false;
+    if(command.presentation==='surf'&&!v12?.beginSurf(physics.position)){say('目前海況或場景尚未開放衝浪課。');cancelCampusActivity();return;}
     rhythmOwner=campusEvents?.activity?.instance;
     rhythm=sound.startRhythm(command);
-    director?.ui.rhythm(rhythm.round.sample(),clapRhythm);
+    director?.ui.rhythm(rhythm.round.sample(),clapRhythm,rhythm.round.spec.presentation);
   }
-  function stopRhythm() { sound.stopRhythm();rhythm=undefined;rhythmOwner=undefined;director?.ui.rhythm(null); }
+  function stopRhythm() { v12?.endSurf();sound.stopRhythm();rhythm=undefined;rhythmOwner=undefined;director?.ui.rhythm(null); }
   function clapRhythm(eventTimestamp?:number) {
     if(!rhythm)return;
     const at=rhythm.captureTime(eventTimestamp),paused=eventPaused();
     sound.prepareActivity();sound.updateRhythm(paused,at);
     if(!paused)rhythm.clap(at);
-    director?.ui.rhythm(rhythm.round.sample(),clapRhythm);
+    director?.ui.rhythm(rhythm.round.sample(),clapRhythm,rhythm.round.spec.presentation);
   }
   function updateActivityPresentation(paused:boolean) {
     const activity=campusEvents && activityPresentation(campusEvents);
@@ -1152,7 +1181,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       if(!activity || activity.instance!==rhythmOwner){stopRhythm();}
       else {
         const frame=sound.updateRhythm(paused)!;
-        director?.ui.rhythm(frame,clapRhythm);
+        director?.ui.rhythm(frame,clapRhythm,rhythm.round.spec.presentation);
         if(frame.done&&!paused) {
           const id=rhythm.round.spec.id,hits=frame.hits;stopRhythm();
           eventQueue.push(submitRhythmResult(campusEvents!,id,hits));eventQueue.flush();
@@ -1404,7 +1433,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   }
   /** G and the objective card: set off, or call off the walk under way. */
   function toggleFollow() {
-    if(passenger.carried)return;gestures.close();
+    if(passenger.carried||v12?.ownsMotion)return;gestures.close();
     if (autoPath.length && autoDestination?.id === 'quest' && autoFollow) { clearAuto(); autoFollow = false; say('已停止帶路；再按一次可繼續。', 2500); return; }
     followQuest();
   }
@@ -1442,7 +1471,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     clearAuto();
     const reference=keepY?p.y:(physics.supportAt(p.x,p.z,p.y)??terrainRef?.heightAt(p.x,p.z)??p.y);
     if(!moveSafely(p.clone().setY(reference+.15),face)) { say('目的地附近沒有安全落點，這次移動尚未完成；請改用步道前往。',7000);return false; }
-    clearPassenger();gestures.close();recoveryFailed=false;if(bike.riding)rig.protect();bike.riding=false;
+    clearPassenger();v12?.reset();gestures.close();recoveryFailed=false;if(bike.riding)rig.protect();bike.riding=false;
     const yaw=face?Math.atan2(-(face.x-p.x),-(face.z-p.z)):rig.yaw;
     avatar.face(yaw);rig.yaw=yaw;rig.snap(physics.position);return true;
   }
@@ -1458,6 +1487,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       ]);
       collectionData = collection;
       if (!alive) return;
+      for(const [id,p]of Object.entries(v12?.anchors()??{}))if(!zones.zones[id])zones.zones[id]={label:v12?.anchorLabel(id)??id,p:[p[0],p[2]],y:p[1],r:8};
       routes = graph;storySeatZones=Object.fromEntries(Object.entries(zones.zones).filter(([,z])=>z.seat).map(([id,z])=>[id,z.seat!]));
       zoneLabels = Object.fromEntries(Object.entries(zones.zones).map(([id,z]) => [id,z.label]));
       validateRoutes();
@@ -1481,7 +1511,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
         open: (x, z) => !occ || occ.at(x, z) !== 1,
         pathDistance: (x, z) => g.edgeDistance(x, z),
         ground: (x, z) => terrainRef ? terrainRef.heightAt(x, z) : -.055,
-        seaLevel: terrainRef?.seaLevel ?? -.4, keepClear: keep,
+        seaLevel: terrainRef?.seaLevel ?? -.4, keepClear: keep,allowed:world.display.userData.placementAllowed,tetrapodZones:v12Data.sea?.hazards?.filter(h=>h.kind==='breakwater').map(h=>h.polygon),
       }), TIERS[tier].detail.props), asset, (x, z) => terrainRef ? terrainRef.heightAt(x, z) : -.055, () => alive).then(group => { if (!alive) return; const specs = (group.userData.obstacles ?? []) as Obstacle[]; physics.addObstacles(specs); obstacleField.add(specs); growable?.setVolumes('campus-props', vegetationBoxes(specs)); featureStatus.props='ready'; });
       } catch(e) { featureStatus.props='degraded'; console.warn('props',e); }
       finally { propsReady=true;validateRoutes(); } })());
@@ -1618,7 +1648,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   /** Close enough to talk to the person being walked to: stop short rather than lean on them. */
   const atAutoPerson = () => { if (!autoTarget?.startsWith('npc:')) return false; const n = npcs?.get(autoTarget.slice(4)); return !!n && Math.hypot(n.position.x - physics.position.x, n.position.z - physics.position.z) < NPC_ARRIVE && Math.abs(n.position.y - physics.position.y) < 1.2; };
   /** At the end of a walk, turn to what the walk was for, so it is in the picture without the player hunting for it. */
-  function cameraBlocked(){return passenger.carried || gestures.open || !walking || overview || !!notebook?.open || menuOpen() || !!director?.blocking || photo.active || !!quiz?.open || guide.open || chase.active || recoveryFailed;}
+  function cameraBlocked(){return !!v12?.locked || passenger.carried || gestures.open || !walking || overview || !!notebook?.open || menuOpen() || !!director?.blocking || photo.active || !!quiz?.open || guide.open || chase.active || recoveryFailed;}
   function faceTarget(target: string | undefined) {
     if (!target) return;
     const [kind, id] = target.split(':'), door = kind === 'dest' ? world.doors.find(d => d.id === findDestination(world.destinations, id)?.doorId) : undefined;
@@ -1667,15 +1697,23 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   function animate(time: number) {
     if (!alive) return;
     frameId = requestAnimationFrame(animate);
-    const rawDt = time - lastTime, dt = Math.min(Math.max(0, rawDt / 1000), maxFrame); lastTime = time; // rAF time can precede a lastTime reset (resume, QA stepping); never pass a negative dt
+    if(document.hidden){lastTime=time;return;}
+    // rAF time can precede a lastTime reset (resume, QA stepping); never pass a negative dt
+    const rawDt = time - lastTime, realDt=Math.max(0,rawDt/1000),dt = Math.min(realDt, maxFrame); lastTime = time;
     renderer.info.reset();
     previous.copy(physics.position); direction.set(0, 0, 0); jumped = false;
     guide.update();
     if(wasBlocking&&!director?.blocking)rig.protect();
     const wasRiding=bike.riding;
-    const feet=[physics.position,...(npcs?.bodies(physics.position)??[]).map(b=>b.position)];
+    const externalMode=passenger.carried?passenger.motion:bike.riding?BIKE_MOTION:WALK_MOTION;
+    const actorBodies=npcs?.bodies(physics.position)??[];
+    const motionPaused=!walking||overview||menuOpen()||!!notebook?.open||!!director?.blocking||photo.active||guide.open||!!quiz?.open||gestures.open;
+    const extraFoot=v12?.update(realDt,input.direction(rig.forward),actorBodies,sky.preset,externalMode,motionPaused,dt);
+    if(extraFoot)physics.carry(extraFoot);
+    if(rhythm?.round.spec.presentation==='surf'&&!v12?.surfActive)cancelCampusActivity();
+    const feet=[physics.position,...actorBodies.map(b=>b.position)];
     // Observe the car before it moves, so the anchor is captured at its old pose.
-    passenger.update(world,physics.position,walking&&!overview&&!bike.riding);
+    passenger.update(world,physics.position,walking&&!overview&&!bike.riding&&!v12?.ownsMotion);
     let liftsChanged=false;
     for(const lift of world.lifts){
       const cabin=insideLift(lift,physics.position);
@@ -1683,8 +1721,10 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       const s=lift.runtime.update(dt,{doorway:liftDoorOccupied(lift,feet),cabin}),key=`${s.phase}|${s.carPositionWorld[1]}|${s.doorOpen01}|${s.atFloorId}|${s.targetFloorId}`;
       if(liftPoses.get(lift)!==key){liftPoses.set(lift,key);syncLift(lift);liftsChanged=true;}
     }
-    if(liftsChanged)physics.setLiftObstacles(liftObstacles(world.lifts));
-    const carried=passenger.update(world,physics.position,walking&&!overview&&!bike.riding);
+    if(liftsChanged)cachedLiftObstacles=liftObstacles(world.lifts);
+    const busObstacles=v12?.busObstacles()??[],busKey=JSON.stringify(busObstacles);
+    if(liftsChanged||busKey!==lastBusObstacleKey){physics.setLiftObstacles([...cachedLiftObstacles,...busObstacles]);lastBusObstacleKey=busKey;}
+    const carried=passenger.update(world,physics.position,walking&&!overview&&!bike.riding&&!v12?.ownsMotion);
     if(carried){
       physics.carry(carried);clearAuto(true);avatar.cancelGesture();
       if(!carriedCamera){carriedCamera={yaw:rig.yaw,pitch:rig.pitch,distance:rig.distance,locked:rig.locked};gestures.close();if(photo.active)photo.exit();if(document.pointerLockElement)document.exitPointerLock();}
@@ -1694,13 +1734,13 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     if(!passenger.carried&&carriedCamera){rig.yaw=carriedCamera.doorYaw??carriedCamera.yaw;rig.pitch=carriedCamera.pitch;rig.distance=carriedCamera.distance;rig.locked=carriedCamera.locked;carriedCamera=undefined;rig.snap(physics.position);rig.protect();}
     // Publish this frame's passenger state before accepting input between frames. The opening
     // frame must already accept walking; a one-frame lag discards the first exit key/pointerdown.
-    input.mode = passenger.carried?'carried':gestures.open?'menu':director?.ui.dialogueOpen ? 'dialogue' : guide.open || notebook?.open || menuOpen() || quiz?.open ? 'menu' : photo.active ? 'photo' : 'walk';
+    input.mode = passenger.carried||v12?.locked?'carried':gestures.open?'menu':director?.ui.dialogueOpen ? 'dialogue' : guide.open || notebook?.open || menuOpen() || quiz?.open ? 'menu' : photo.active ? 'photo' : 'walk';
     scheduleNpcs();
-    const pausedEvents = passenger.carried || gestures.open || !walking || overview || !!notebook?.open || menuOpen() || !!director?.blocking || photo.active || !!quiz?.open || chase.active || autoPath.length > 0;
+    const pausedEvents = !!v12?.ownsMotion || passenger.carried || gestures.open || !walking || overview || !!notebook?.open || menuOpen() || !!director?.blocking || photo.active || !!quiz?.open || chase.active || autoPath.length > 0;
     encounters?.update(dt, encounterWorld(), pausedEvents || !!campusEvents?.activity || eventQueue.busy);
     animateEncounter(dt, time, pausedEvents);
     if (!notebook?.open && !menuOpen() && !director?.blocking) quests?.update(questWorld());
-    if (walking && !overview && !recoveryFailed && !carried && !passenger.carried) {
+    if (walking && !overview && !recoveryFailed && !carried && !passenger.carried && !extraFoot && !v12?.ownsMotion) {
       if (gestures.open || photo.active || notebook?.open || menuOpen()) direction.set(0, 0, 0); else steer(time);
       // Dialogue and chapter cards hold the player; Space advances like E.
       if (director?.blocking) { direction.set(0, 0, 0); if (input.takeJump()) director.press(); }
@@ -1717,13 +1757,15 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       physics.step(direction, dt, jump, bike.riding ? RIDE_SPEED : input.running && !autoPath.length ? RUN_SPEED : WALK_SPEED);
       jumped = jump && wasGround && !physics.onGround;
       if (pendingDestination && physics.onGround) { const d = pendingDestination; pendingDestination = undefined; goTo(d); }
-      if (physics.position.y < -20) { clearAuto();if(physics.recoverSafe() || moveSafely(world.spawn)) {rig.snap(physics.position);say('已回到最近的安全位置。');}else{recoveryFailed=true;setMenu(true,'play');say('目前找不到安全落點，已暫停移動；請使用回到起點或返回校園地圖。',0);} }
+      if (physics.position.y < -20 && !v12?.fitness.portal) { clearAuto();if(physics.recoverSafe() || moveSafely(world.spawn)) {rig.snap(physics.position);say('已回到最近的安全位置。');}else{recoveryFailed=true;setMenu(true,'play');say('目前找不到安全落點，已暫停移動；請使用回到起點或返回校園地圖。',0);} }
     }
+    v12?.afterMovement(motionPaused?0:dt,externalMode);
     const speed = Math.hypot(physics.position.x - previous.x, physics.position.z - previous.z) / Math.max(dt, 1e-3);
     const surfaceHeight = physics.supportAt(physics.position.x, physics.position.z, physics.position.y);
     playerMoved=speed>.05 || Math.abs(physics.position.y-previous.y)>.03;
     updatePlayerPose();
     avatar.update(dt, { foot: physics.position, onGround: physics.onGround, airborneFor: physics.airborneFor, speed, intendedSpeed: physics.intendedSpeed, heading: direction, jumped, runSpeed: RUN_SPEED, surfaceHeight, supportAt: routeSurface.support });
+    v12?.afterAvatar();
     if (bike.riding && !avatar.riding) { bike.riding = false; physics.setRiding(false, avatar.heading); say('前後輪無法同時貼住路面，已下車步行。', 2500); }
     if(wasRiding&&!bike.riding)rig.protect();
     animateDoors(world.doors, physics.position, dt);
@@ -1747,7 +1789,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       const model = notebookModel(), key = JSON.stringify(model);
       if (key !== journalKey) { journalKey = key; notebook.update(model); }
     }
-    if (!passenger.carried && !gestures.open && !overview && storyStarted && !photo.active && !notebook?.open && !menuOpen()) director?.update(time, dt);
+    if (!v12?.ownsMotion && !passenger.carried && !gestures.open && !overview && storyStarted && !photo.active && !notebook?.open && !menuOpen()) director?.update(time, dt);
     else director?.ui.badge(null);
     if(eventPose.sitting || rhythm){director?.ui.badge(null);director?.ui.pointer(null);}
     updateEventSpeech(time);
@@ -1787,11 +1829,19 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       if (time - lastSea > 1000) { lastSea = time; seaMix = seaProximity(physics.position); }
       const indoors = physics.position.y > 1.5 || placeIndoors;
       sound.ambience(seaMix, sky.preset === 'night' ? 0 : sky.preset === 'sunset' ? .4 : 1, indoors);
-      if (walking && !overview && physics.onGround) sound.footsteps(speed, dt, indoors ? 'hard' : 'soft');
+      if (walking && !overview && physics.onGround && !v12?.ownsMotion) sound.footsteps(speed, dt, indoors ? 'hard' : 'soft');
     }
     if (photo.active) { photo.update(dt, input.keys); avatar.setOpacity(1); }
     else if(passenger.carried){
       passenger.updateCamera(camera);
+      avatar.setOpacity(0);
+    }
+    else if(v12?.hideAvatar){
+      // A fixed eye anchor (bus seat) cannot lag through a floor or keep an arm outside the vehicle.
+      camera.position.copy(physics.position).y+=1.55;
+      // On the bus look out of the windscreen (QA: the free orbit yaw often faced a side wall).
+      const busYaw=v12?.busYaw,viewYaw=busYaw===undefined?rig.yaw:busYaw+Math.PI,viewPitch=busYaw===undefined?rig.pitch:-.06;
+      camera.lookAt(camera.position.clone().add(new T.Vector3(-Math.sin(viewYaw)*Math.cos(viewPitch),Math.sin(viewPitch),-Math.cos(viewYaw)*Math.cos(viewPitch))));
       avatar.setOpacity(0);
     }
     else if (!overview) {
@@ -1831,7 +1881,9 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   (window as unknown as { campusWalk: unknown }).campusWalk = {
     get position() { return physics.position.toArray(); },
     get lifts(){return world.lifts.map(l=>l.runtime.snapshot);},
-    get motion(){return bike.riding?{kind:'bike'}:passenger.motion;},
+    get motion(){return v12?.ownsMotion?v12.mode:bike.riding?{kind:'bike'}:passenger.motion;},
+    get water(){return {conditions:v12?.policy.conditions,stamina:v12?.swim.stamina,phase:v12?.swim.phase};},
+    get buses(){return v12?.fleet?.buses.map(b=>({id:b.id,position:b.position.toArray(),phase:b.phase,stop:b.atStop}));},
     get mode() { return { overview, cameraMode:rig.mode, firstPerson: rig.firstPerson, walking, running: input.running, locked: rig.locked, tier }; },
     get heading() { return rig.yaw; },
     get onGround() { return physics.onGround; },

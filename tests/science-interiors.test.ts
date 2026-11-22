@@ -124,15 +124,15 @@ it('v12 split rooms: eight sub-rooms replace SC2005, SC2003 and SC1011, each wit
  for(const [parent,codes] of Object.entries(children)){
   expect(rooms.filter(x=>x.r.code===parent),parent).toHaveLength(0);
   expect(world.destinations.filter(d=>d.label===parent),parent).toHaveLength(0);
-  let west=-Infinity;
+  let east=Infinity;
   for(const code of codes){
    const found=rooms.filter(x=>x.r.code===code);expect(found,code).toHaveLength(1);
    const {f,r}=found[0],xs=r.polygon.map(p=>p[0]);
    expect(r.kind).toBe('room');expect(r.aliases).toEqual([parent]);expect(r.splitFrom).toBe(`${f.id}-${parent}`);expect(r.designNote).toBe('隔間依使用者回報，位置示意');
-   expect(Math.min(...xs),`${code} is east of the previous sub-room`).toBeGreaterThanOrEqual(west-1e-6);west=Math.max(...xs);
+   expect(Math.max(...xs),`${code} is west of the previous sub-room`).toBeLessThanOrEqual(east+1e-6);east=Math.min(...xs);
    expect(r.door.width).toBe(1);
-   // SC1011-1 keeps the v9.1 plan door; every other sub-room door is centred on its corridor wall.
-   if(code==='SC1011-1')expect(r.door.position).toEqual([-22.21,14.051]);
+   // SC1011-3 keeps the v9.1 plan door; every other sub-room door is centred on its corridor wall.
+   if(code==='SC1011-3')expect(r.door.position).toEqual([-22.21,14.051]);
    else expect(r.door.position[0]).toBeCloseTo((Math.min(...xs)+Math.max(...xs))/2,3);
    expect(world.destinations.filter(d=>d.roomId===r.id),code).toHaveLength(1);
    const portal=f.access!.portals.find(p=>p.id===f.access!.primaryPortalByRoom[r.id])!;

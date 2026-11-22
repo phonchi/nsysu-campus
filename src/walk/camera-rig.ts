@@ -64,7 +64,7 @@ export class CameraRig {
   get mode(){return this._mode;}
   get firstPerson(){return this._mode==='firstPerson';}
   setMode(mode:CameraMode){
-    try { this.storage?.setItem(CAMERA_MODE_KEY,mode);this._mode=mode; }
+    try { this.storage?.setItem(CAMERA_MODE_KEY,mode);if(mode==='firstPerson'&&this._mode!==mode)this.pitch=-Math.PI/60;this._mode=mode; }
     catch { this._mode='follow'; }
     return this._mode;
   }

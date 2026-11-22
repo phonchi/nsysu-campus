@@ -1,7 +1,7 @@
 {
   "scope": "only final three source cases",
   "sourceBuildingSHA256": {
-    "SC": "c8163d2b98629abd1d7901b18a7b0ee23e88d94eac6f2a83b1385f58587374ea",
+    "SC": "64e461c44d281a11cc925ac81eb85a671d8b6dc480218bdaf9265313fdf18fa1",
     "EV": "62cda45259e9fbffc445059db3d2a53c2081e0e70bb7810efdf8ed6074eac5d8"
   },
   "entries": [
@@ -235,6 +235,13 @@
       "oldSHA256": "c17de1f275e1ca67b26d63d7f4a4ca94f0cb4cac6bcddefec6dd48a08a24c031",
       "newSHA256": "62cda45259e9fbffc445059db3d2a53c2081e0e70bb7810efdf8ed6074eac5d8",
       "reason": "v12：EV 新增廁所房間（1F 依平面圖 WC 符號，其餘樓層沿用同一位置、示意）。 Reviewed rooms and neighbour geometry unchanged."
+    },
+    {
+      "date": "2026-11-22T16:28:20.901036+00:00",
+      "building": "SC",
+      "oldSHA256": "c8163d2b98629abd1d7901b18a7b0ee23e88d94eac6f2a83b1385f58587374ea",
+      "newSHA256": "64e461c44d281a11cc925ac81eb85a671d8b6dc480218bdaf9265313fdf18fa1",
+      "reason": "v12：SC2005/SC2003/SC1011 依使用者回報拆成子房間（位置示意），SC1011 的 v9.1 固定門遷移到 SC-1F-SC1011-3（座標不變；子房間由東向西編號）；新增 B1–4F 廁所並在 SC1014 裁出 WC 缺口。 Reviewed rooms and neighbour geometry unchanged."
     }
   ]
 }

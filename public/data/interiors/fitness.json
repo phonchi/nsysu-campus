@@ -1,0 +1,315 @@
+{
+ "version": 1,
+ "generatedBy": "tools/apply_v12_sports.py",
+ "id": "fitness-center-1",
+ "name": "第一體適能中心（室內示意）",
+ "frame": "區域公尺：x 向東、y 向上、z 向南；世界座標 = origin + 區域座標（yaw 0）",
+ "origin": [
+  -23.8,
+  -30.0,
+  189.94
+ ],
+ "yaw": 0,
+ "room": {
+  "polygon": [
+   [
+    -8.0,
+    -5.0
+   ],
+   [
+    8.0,
+    -5.0
+   ],
+   [
+    8.0,
+    5.0
+   ],
+   [
+    -8.0,
+    5.0
+   ]
+  ],
+  "height": 3.6,
+  "floorY": 0.0
+ },
+ "door": {
+  "position": [
+   0.0,
+   0.0,
+   5.0
+  ],
+  "width": 1.8,
+  "wall": "south",
+  "exitTrigger": [
+   0.0,
+   0.0,
+   4.3
+  ],
+  "portalId": "fitness-portal-gym"
+ },
+ "spawn": [
+  0.0,
+  0.0,
+  3.2
+ ],
+ "spawnYaw": 0.0,
+ "equipment": [
+  {
+   "id": "treadmill-1",
+   "kind": "treadmill",
+   "position": [
+    -5.0,
+    0.0,
+    -3.6
+   ],
+   "yaw": 0.0,
+   "approach": [
+    -5.0,
+    0.0,
+    -2.2
+   ],
+   "exitPoints": [
+    [
+     -5.0,
+     0.0,
+     -2.0
+    ],
+    [
+     -3.9,
+     0.0,
+     -2.6
+    ]
+   ]
+  },
+  {
+   "id": "treadmill-2",
+   "kind": "treadmill",
+   "position": [
+    -2.5,
+    0.0,
+    -3.6
+   ],
+   "yaw": 0.0,
+   "approach": [
+    -2.5,
+    0.0,
+    -2.2
+   ],
+   "exitPoints": [
+    [
+     -2.5,
+     0.0,
+     -2.0
+    ],
+    [
+     -1.4,
+     0.0,
+     -2.6
+    ]
+   ]
+  },
+  {
+   "id": "treadmill-3",
+   "kind": "treadmill",
+   "position": [
+    0.0,
+    0.0,
+    -3.6
+   ],
+   "yaw": 0.0,
+   "approach": [
+    0.0,
+    0.0,
+    -2.2
+   ],
+   "exitPoints": [
+    [
+     0.0,
+     0.0,
+     -2.0
+    ],
+    [
+     1.1,
+     0.0,
+     -2.6
+    ]
+   ]
+  },
+  {
+   "id": "bike-1",
+   "kind": "stationary-bike",
+   "position": [
+    6.2,
+    0.0,
+    -2.5
+   ],
+   "yaw": -1.5708,
+   "approach": [
+    4.0,
+    0.0,
+    -2.5
+   ],
+   "exitPoints": [
+    [
+     3.8,
+     0.0,
+     -2.5
+    ],
+    [
+     3.8,
+     0.0,
+     -1.6
+    ]
+   ]
+  },
+  {
+   "id": "bike-2",
+   "kind": "stationary-bike",
+   "position": [
+    6.2,
+    0.0,
+    0.0
+   ],
+   "yaw": -1.5708,
+   "approach": [
+    4.0,
+    0.0,
+    0.0
+   ],
+   "exitPoints": [
+    [
+     3.8,
+     0.0,
+     0.0
+    ],
+    [
+     3.8,
+     0.0,
+     0.9
+    ]
+   ]
+  },
+  {
+   "id": "bike-3",
+   "kind": "stationary-bike",
+   "position": [
+    6.2,
+    0.0,
+    2.5
+   ],
+   "yaw": -1.5708,
+   "approach": [
+    4.0,
+    0.0,
+    2.5
+   ],
+   "exitPoints": [
+    [
+     3.8,
+     0.0,
+     2.5
+    ],
+    [
+     3.8,
+     0.0,
+     3.4
+    ]
+   ]
+  }
+ ],
+ "decor": [
+  {
+   "kind": "fitness_station",
+   "position": [
+    -6.5,
+    0.0,
+    1.5
+   ],
+   "yaw": 0
+  },
+  {
+   "kind": "fitness_station",
+   "position": [
+    -6.5,
+    0.0,
+    3.5
+   ],
+   "yaw": 0
+  },
+  {
+   "kind": "mirror-wall",
+   "wall": "north"
+  },
+  {
+   "kind": "sign",
+   "text": "第一體適能中心（示意）",
+   "position": [
+    0.0,
+    2.4,
+    4.9
+   ]
+  }
+ ],
+ "npcSpots": [
+  [
+   -3.5,
+   0.0,
+   1.0
+  ],
+  [
+   3.0,
+   0.0,
+   2.0
+  ]
+ ],
+ "basis": "schematic",
+ "designNote": "室內配置示意，不是依實際樓層重建；不進 walkthrough/index.json",
+ "sources": [],
+ "sourceIds": [
+  "S8",
+  "S9"
+ ],
+ "sourceFiles": [
+  "data/sources/sea/sports-venue-rules-20231208.pdf"
+ ],
+ "scenes": [
+  {
+   "id": "fitness-center-1",
+   "polygon": [
+    [
+     -31.8,
+     184.94
+    ],
+    [
+     -15.8,
+     184.94
+    ],
+    [
+     -15.8,
+     194.94
+    ],
+    [
+     -31.8,
+     194.94
+    ]
+   ],
+   "floorY": -30.0,
+   "exitPoint": [
+    -23.8,
+    -30.0,
+    194.24
+   ],
+   "equipment": [],
+   "basis": "schematic",
+   "designNote": "室內配置示意，不是依實際樓層重建；不進 walkthrough/index.json",
+   "sources": [],
+   "sourceIds": [
+    "S8",
+    "S9"
+   ],
+   "sourceFiles": [
+    "data/sources/sea/sports-venue-rules-20231208.pdf"
+   ]
+  }
+ ]
+}

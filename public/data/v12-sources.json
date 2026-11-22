@@ -1,0 +1,94 @@
+{
+ "version": 1,
+ "note": "只收 artifacts/v12/research/source-check.md 標 ✅ 的 S1–S14。url 是核准的精確網址；file 是 data/sources/ 下的本機來源，不當成網頁連結顯示。",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "西子灣海域運動中心管理要點（浪高與天候）",
+   "locator": "第（五）款：浪高 1 米、2 米門檻，海上颱風警報與打雷",
+   "file": "data/sources/sea/sea-center-rules-20250901.pdf"
+  },
+  {
+   "id": "S2",
+   "title": "西子灣海域運動中心管理要點（開放時間與人數）",
+   "locator": "第二點、第六點",
+   "file": "data/sources/sea/sea-center-rules-20250901.pdf"
+  },
+  {
+   "id": "S3",
+   "title": "西子灣海域運動中心管理要點（器材收費表）",
+   "locator": "附表",
+   "file": "data/sources/sea/sea-center-rules-20250901.pdf"
+  },
+  {
+   "id": "S4",
+   "title": "水域救生員相關要點",
+   "locator": "第二、三條",
+   "file": "data/sources/sea/lifeguard-rules-20251002.pdf"
+  },
+  {
+   "id": "S5",
+   "title": "救生艇借用辦法",
+   "locator": "第二、五點",
+   "file": "data/sources/sea/rescue-boat-rules-20191017.pdf"
+  },
+  {
+   "id": "S6",
+   "title": "1111 產經新聞網：首開「初級衝浪」課程",
+   "locator": "2023-05-12",
+   "url": "https://www.1111.com.tw/news/jobns/151338"
+  },
+  {
+   "id": "S7",
+   "title": "1111 產經新聞網：第四屆臺日風帆友誼賽",
+   "locator": "2025-03-19",
+   "url": "https://www.1111.com.tw/news/160002/amp/"
+  },
+  {
+   "id": "S8",
+   "title": "運動場館管理要點（場館清單）",
+   "locator": "第二點",
+   "file": "data/sources/sea/sports-venue-rules-20231208.pdf"
+  },
+  {
+   "id": "S9",
+   "title": "運動場館管理要點（體育館含體適能中心）",
+   "locator": "第三點",
+   "file": "data/sources/sea/sports-venue-rules-20231208.pdf"
+  },
+  {
+   "id": "S10",
+   "title": "校園公車與橘1延時刻表（站序）",
+   "locator": "時刻表欄位",
+   "file": "data/sources/bus/campus-bus-20250217.pdf",
+   "files": [
+    "data/sources/bus/campus-bus-20250217.pdf",
+    "data/sources/bus/orange1-ext-20250203.pdf"
+   ]
+  },
+  {
+   "id": "S11",
+   "title": "管理學院公告：校園公車出示證件免費",
+   "locator": "公告內文",
+   "url": "https://www.cm.nsysu.edu.tw/p/406-1024-361192,r159.php"
+  },
+  {
+   "id": "S12",
+   "title": "中山新聞：夕陽獨木舟",
+   "locator": "2020-11-16",
+   "url": "https://news.nsysu.edu.tw/p/406-1120-247014.php"
+  },
+  {
+   "id": "S13",
+   "title": "中山新聞：水中救生課",
+   "locator": "2021-11-23",
+   "url": "https://news.nsysu.edu.tw/p/406-1120-271505.php"
+  },
+  {
+   "id": "S14",
+   "title": "中山新聞：衝浪課教學內容",
+   "locator": "校方新聞",
+   "url": "https://news.nsysu.edu.tw/p/406-1120-308729,r2910.php?Lang=zh-tw"
+  }
+ ]
+}

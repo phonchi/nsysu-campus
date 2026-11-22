@@ -143,16 +143,18 @@ export function decorateCampus(world:WalkWorld,structure:CampusStructure,terrain
  }
  instances(art,box,solid(PALETTE.cream,.8),caps,'Parapet caps');instances(art,new T.CylinderGeometry(.5,.5,1,10),solid(PALETTE.roofEquip,.6,{metalness:.2}),tanks,'Roof water tanks');instances(art,box,solid('#aab1ad',.6,{metalness:.25}),units,'Roof plant');
  // 4. Ground features: occupancy, roads, crosswalks, beach, hills, trees, props.
+ const allowed=(world.display.userData.placementAllowed??((x:number,z:number)=>!terrain||terrain.heightAt(x,z)>=terrain.seaLevel+.05)) as (x:number,z:number,radius?:number)=>boolean;
  const [gx0,gz0,gx1,gz1]=CAMPUS_GROUND,occ=new Occupancy(gx0,gz0,gx1,gz1);
  for(const floor of world.floors){if(floor.data.level!==1)continue;const frame=world.frames.get(floor.buildingId)!,pts=(floor.data.access?.walkOutline??floor.data.outline).map(([x,z])=>{const v=new T.Vector3(x,0,z).applyMatrix4(frame);return [v.x,v.z] as Point2;});occ.polygon(pts,3);}
  for(const c of structure.connectors)occ.line([c.a,c.b],2.5);
  for(const l of [...structure.context.landmarks,...structure.context.background])occ.polygon(l.polygon,2.5);
+ for(const polygon of (world.display.userData.sportsPolygons??[]) as Point2[][])occ.polygon(polygon,.5,5);
  const roads=structure.context.roads.filter(r=>!r.tunnel&&r.points.length>=2);
  for(const r of roads)occ.line(r.points,r.width/2+1.2,3);
  const shore=-232; // 西子灣: sand from the ground edge to here, south of the coastal hill
- const beach:Point2[]=[[gx0,40],[-262,48],[-240,120],[shore,220],[-246,330],[gx0,380]];occ.polygon(beach,0,4);
+ const beach:Point2[]=[[-330,40],[-262,48],[-240,120],[shore,220],[-250,258],[-330,258]];occ.polygon(beach,0,4);
  // Lawn: worn bands by paths and buildings, and the free-lawn mask for grass tufts (render/ground.ts).
- const mask=groundMask(occ.grid,occ.nx,occ.nz,occ.x0,occ.z0,occ.cell);world.display.userData.groundMask=mask;world.display.userData.occupancy=occ;
+ const mask=groundMask(occ.grid,occ.nx,occ.nz,occ.x0,occ.z0,occ.cell),free=mask.free;mask.free=(x,z)=>free(x,z)&&allowed(x,z,.6);world.display.userData.groundMask=mask;world.display.userData.occupancy=occ;
  { const lawn=cache.get('ground');if(lawn)setLawnMask(lawn,mask); }
  // Roads (OSM): asphalt with lane markings; footways as paving.
  const roadMats={main:new T.MeshStandardMaterial({map:roadTexture(true),roughness:.92}),side:new T.MeshStandardMaterial({map:roadTexture(false),roughness:.92}),foot:textured(tex.paving,'#ffffff',.9)};
@@ -198,17 +200,17 @@ export function decorateCampus(world:WalkWorld,structure:CampusStructure,terrain
  const rand=rng(2026),trees:{x:number;z:number;s:number;y:number;kind?:'street'|'lawn';i?:number}[]=[],palms:{x:number;z:number;s:number}[]=[];
  // Keep the arrival view and story gems clear of trunks and crowns.
  occ.polygon([[world.spawn.x-14,world.spawn.z-14],[world.spawn.x+14,world.spawn.z-14],[world.spawn.x+14,world.spawn.z+14],[world.spawn.x-14,world.spawn.z+14]],0,5);
- let streetIndex=0;const addTree=(x:number,z:number,s:number,y=0,kind:'street'|'lawn'='lawn')=>{if(trees.length<4200)trees.push({x,z,s,y,kind,i:kind==='street'?streetIndex++:0});};
+ let streetIndex=0;const addTree=(x:number,z:number,s:number,y=0,kind:'street'|'lawn'='lawn')=>{if(trees.length<4200&&allowed(x,z,4*s))trees.push({x,z,s,y,kind,i:kind==='street'?streetIndex++:0});};
  for(const r of roads.filter(r=>!footKinds.includes(r.kind)&&r.width>=6))for(let j=1;j<r.points.length;j++){const a=r.points[j-1],b=r.points[j],L=Math.hypot(b[0]-a[0],b[1]-a[1]),ux=(b[0]-a[0])/L,uz=(b[1]-a[1])/L;
   for(let t=4;t<L;t+=9)for(const side of [-1,1]){const off=r.width/2+2.6,x=a[0]+ux*t-uz*off*side,z=a[1]+uz*t+ux*off*side;if(x<gx0+2||x>gx1-2||z<gz0+2||z>gz1-2)continue;
-   if(x<-170&&occ.at(x,z)===0){palms.push({x,z,s:.9+rand()*.3});continue;}if(occ.free(x,z,1.2))addTree(x,z,.85+rand()*.3,0,'street');}}
+   if(x<-170&&occ.at(x,z)===0&&allowed(x,z,4)){palms.push({x,z,s:.9+rand()*.3});continue;}if(occ.free(x,z,1.2))addTree(x,z,.85+rand()*.3,0,'street');}}
  for(let z=gz0+4;z<gz1-4;z+=7)for(let x=gx0+4;x<gx1-4;x+=7){const jx=x+(rand()-.5)*5,jz=z+(rand()-.5)*5;
   const campusCore=jx>-200&&jx<170&&jz>-210&&jz<260;if(campusCore&&rand()>.42)continue;if(occ.free(jx,jz,2))addTree(jx,jz,.9+rand()*.5);}
  let hillTrees=0;
  if(dem){// 壽山 forest on the real DTM: above 3 m, off buildings/roads, denser with height.
   const [tx0,tz0,tx1,tz1]=[-900,-1100,900,700];
-  for(let n=0;n<60000&&hillTrees<3600;n++){const x=tx0+rand()*(tx1-tx0),z=tz0+rand()*(tz1-tz0),h=lift(x,z);if(h<3||rand()>Math.min(1,h/25))continue;if(x>gx0&&x<gx1&&z>gz0&&z<gz1&&!occ.free(x,z,2))continue;trees.push({x,z,s:1.6+rand()*1.2,y:h+GROUND_Y-.3});hillTrees++;}
- }else for(let n=0;n<30000&&hillTrees<3200;n++){const x=gx0+(rand()*1.3-.05)*(gx1-gx0+500),z=gz0-450+rand()*(gz1-gz0+700),h=height(x,z);if(h<1.5||h>140||outside(x,z)<6)continue;trees.push({x,z,s:1.6+rand()*1.2,y:h-.3});hillTrees++;}
+  for(let n=0;n<60000&&hillTrees<3600;n++){const x=tx0+rand()*(tx1-tx0),z=tz0+rand()*(tz1-tz0),h=lift(x,z);if(!allowed(x,z,7)||h<3||rand()>Math.min(1,h/25))continue;if(x>gx0&&x<gx1&&z>gz0&&z<gz1&&!occ.free(x,z,2))continue;trees.push({x,z,s:1.6+rand()*1.2,y:h+GROUND_Y-.3});hillTrees++;}
+ }else for(let n=0;n<30000&&hillTrees<3200;n++){const x=gx0+(rand()*1.3-.05)*(gx1-gx0+500),z=gz0-450+rand()*(gz1-gz0+700),h=height(x,z);if(!allowed(x,z,7)||h<1.5||h>140||outside(x,z)<6)continue;trees.push({x,z,s:1.6+rand()*1.2,y:h-.3});hillTrees++;}
  // Triangle budget: campus trees get a trunk + 1–2 crowns with shadows; hill trees one crown, no shadow.
  const mobile=typeof matchMedia!=='undefined'&&matchMedia('(pointer:coarse)').matches;
  const trunkGeo=new T.CylinderGeometry(.14,.22,1,5,1,true),crownGeo=new T.IcosahedronGeometry(1,0);
@@ -233,9 +235,9 @@ hillCrowns.forEach((p,i)=>tint(instances(art,crownGeo,crownMats[i],p,'Hill tree 
  // Street furniture: lamps every 25 m, benches and bike racks near building entrances.
  const lampPole:Piece[]=[],lampHead:Piece[]=[],benches:Piece[]=[],racks:Piece[]=[],bins:Piece[]=[];
  for(const r of roads.filter(r=>!footKinds.includes(r.kind)&&r.width>=6))for(let j=1;j<r.points.length;j++){const a=r.points[j-1],b=r.points[j],L=Math.hypot(b[0]-a[0],b[1]-a[1]),ux=(b[0]-a[0])/L,uz=(b[1]-a[1])/L;
-  for(let t=12;t<L;t+=25){const off=r.width/2+1.1,x=a[0]+ux*t+uz*off,z=a[1]+uz*t-ux*off;if(occ.at(x,z)===1||x<gx0||x>gx1)continue;lampPole.push(piece(x,2.3,z,.12,4.6,.12));lampHead.push(piece(x,4.65,z,.5,.28,.5));}}
+  for(let t=12;t<L;t+=25){const off=r.width/2+1.1,x=a[0]+ux*t+uz*off,z=a[1]+uz*t-ux*off;if(!allowed(x,z,.6)||occ.at(x,z)===1||x<gx0||x>gx1)continue;lampPole.push(piece(x,2.3,z,.12,4.6,.12));lampHead.push(piece(x,4.65,z,.5,.28,.5));}}
  for(const floor of world.floors){if(floor.data.level!==1||!floor.data.access?.entry)continue;const frame=world.frames.get(floor.buildingId)!,e=floor.data.access.entry;const p=new T.Vector3(e[0],0,e[1]).applyMatrix4(frame);
-  for(const [dx,dz,kind] of [[3,2.5,'bench'],[-3,2.5,'rack'],[4.5,-1,'bin']] as const){const x=p.x+dx,z=p.z+dz;if(occ.at(x,z)===1&&kind!=='bin')continue;
+  for(const [dx,dz,kind] of [[3,2.5,'bench'],[-3,2.5,'rack'],[4.5,-1,'bin']] as const){const x=p.x+dx,z=p.z+dz;if(!allowed(x,z,2)||occ.at(x,z)===1&&kind!=='bin')continue;
    if(kind==='bench')benches.push(piece(x,.45,z,1.8,.12,.5),piece(x,.75,z-.22,1.8,.45,.08));else if(kind==='rack')for(let k=0;k<5;k++)racks.push(piece(x+k*.6-1.2,.4,z,.06,.8,.9));else bins.push(piece(x,.45,z,.5,.9,.5));}}
  instances(art,box,solid('#3e4a50',.5,{metalness:.3}),lampPole,'Lamp posts');
  const glow=solid('#fff4dc',.6,{emissive:'#ffd79a',emissiveIntensity:0});NIGHT_MATERIALS.add(glow);instances(art,box,glow,lampHead,'Lamp heads',false);
@@ -377,6 +379,7 @@ export async function addCampusProps(world:WalkWorld,load:(url:string)=>Promise<
  // One InstancedMesh per prop: the GLB's parts are baked into one geometry with their material colour as a
  // vertex colour (v4 draw budget: a multi-part prop costs one draw instead of one per part).
  const toInstances=async(file:string,matrices:T.Matrix4[],name:string,tint?:(i:number)=>T.Color|undefined)=>{
+  if(name!=='Sailboats'&&world.display.userData.placementAllowed)matrices=matrices.filter(m=>{const p=new T.Vector3().setFromMatrixPosition(m);return world.display.userData.placementAllowed(p.x,p.z,1);});
   if(!matrices.length||!alive())return;const gltf=await load(asset('models/campus/'+file)).catch(e=>{console.warn(`campus prop ${file}`,e);return undefined;});if(!gltf)return;
   const parts:T.BufferGeometry[]=[];let metalStart=-1;gltf.scene.updateMatrixWorld(true);
   gltf.scene.traverse(o=>{if(!(o instanceof T.Mesh))return;const mat=(Array.isArray(o.material)?o.material[0]:o.material) as T.MeshStandardMaterial;const g0=o.geometry.clone();

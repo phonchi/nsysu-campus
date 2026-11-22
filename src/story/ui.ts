@@ -340,7 +340,7 @@ ${fact ? `<p class="fact"><b>校史小知識</b>${esc(fact)}${source ? ` <a href
   private rhythmEl?:HTMLElement;
   private rhythmClap?:(eventTimestamp?:number)=>void;
   /** Fixed screen-space cue and touch button, independent of world-anchored hints. */
-  rhythm(frame:RhythmFrame|null,clap?:(eventTimestamp?:number)=>void) {
+  rhythm(frame:RhythmFrame|null,clap?:(eventTimestamp?:number)=>void,presentation:'music'|'surf'='music') {
     this.rhythmClap=clap;
     if(!this.rhythmEl && frame) {
       const el=document.createElement('div');el.className='q-rhythm';el.setAttribute('role','group');el.setAttribute('aria-label','跟著吉他拍手');
@@ -354,8 +354,11 @@ ${fact ? `<p class="fact"><b>校史小知識</b>${esc(fact)}${source ? ` <a href
     ring.style.transform=`scale(${1+frame.ring*1.8})`;ring.style.visibility=frame.visible?'visible':'hidden';
     const count=`第 ${frame.cue}／${frame.cues} 拍 · 已拍中 ${frame.hits} 拍`;
     const countEl=el.querySelector('.q-rhythm-count')!;if(countEl.textContent!==count)countEl.textContent=count;
+    if(this.rhythmEl){this.rhythmEl.setAttribute('aria-label',presentation==='surf'?'衝浪節奏練習':'跟著吉他拍手');const button=this.rhythmEl.querySelector('[data-rhythm=clap]');if(button&&el.dataset.presentation!==presentation)button.innerHTML=(presentation==='surf'?'踏穩浪板':'拍手')+'<span class="q-rhythm-key"> E</span>';}
+    el.dataset.presentation=presentation;el.querySelector('b')!.textContent=presentation==='surf'?'踏':'拍';
     const feedback=frame.paused?'已暫停':frame.feedback==='hit'?'拍中了！':frame.feedback==='miss'?'這一拍錯過了':frame.feedback==='offbeat'?'等光圈合上再拍':'光圈合上時拍手';
-    const feedbackEl=el.querySelector('.q-rhythm-feedback')!;if(feedbackEl.textContent!==feedback)feedbackEl.textContent=feedback;
+    const wording=presentation==='surf'?feedback.replaceAll('拍手','踏穩浪板').replaceAll('拍中','踏準').replaceAll('再拍','再踏'):feedback;
+    const feedbackEl=el.querySelector('.q-rhythm-feedback')!;if(feedbackEl.textContent!==wording)feedbackEl.textContent=wording;
     (el.querySelector('[data-rhythm=clap]') as HTMLButtonElement).disabled=frame.paused||frame.done;
   }
 

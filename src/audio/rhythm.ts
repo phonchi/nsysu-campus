@@ -1,5 +1,5 @@
 /** DOM-free rhythm judge. All times are seconds from the injected transport clock. */
-export interface RhythmSpec { id:string; cues:number; interval:number; lead:number; window:number; need:number; style?:string }
+export interface RhythmSpec { id:string; cues:number; interval:number; lead:number; window:number; need:number; style?:string;presentation?:'music'|'surf' }
 export type CueState='pending'|'hit'|'miss';
 export interface RhythmFrame { elapsed:number; duration:number; hits:number; cues:number; cue:number; visible:boolean; ring:number; feedback:'hit'|'miss'|'offbeat'|''; paused:boolean; done:boolean }
 export function rhythmCueTimes(spec:RhythmSpec):number[] {

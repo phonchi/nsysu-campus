@@ -88,7 +88,7 @@ CARVES = {'SC-1F': {'SC-1F-SC1014': [(-25.48, -8.75, -22.88, -4.53)]}}
 
 
 def split_floor(floor, specs, baseline_index):
-    block = dict(version=1, basis=S, note=DESIGN_NOTE + '；編號由西向東，-1 在西。內牆依據見各子房間 wallBasis。', sourceRooms={}, sourceIndex={}, children={}, sourceOverrides=[])
+    block = dict(version=1, basis=S, note=DESIGN_NOTE + '；編號由東向西，-1 在東。內牆依據見各子房間 wallBasis。', sourceRooms={}, sourceIndex={}, children={}, sourceOverrides=[])
     overrides = floor.setdefault('virtualPortalOverrides', []); made = []
     for pid, spec in specs.items():
         at = next((i for i, r in enumerate(floor['rooms']) if r['id'] == pid), None)
@@ -101,7 +101,8 @@ def split_floor(floor, specs, baseline_index):
         outward = (0, -1) if abs(wall - z0) < 1e-6 else (0, 1)
         block['sourceRooms'][pid] = copy.deepcopy(parent); block['sourceIndex'][pid] = baseline_index[pid]; children = []
         for n, (x0, x1) in enumerate(zip(spec['xs'], spec['xs'][1:]), 1):
-            cid = f'{pid}-{n}'; west, east = spec['walls'][n - 1], spec['walls'][n]; polygon = C.rect(x0, z0, x1, z1)
+            west, east = spec['walls'][n - 1], spec['walls'][n]; n = len(spec['xs']) - n
+            cid = f'{pid}-{n}'; polygon = C.rect(x0, z0, x1, z1)
             keep = spec.get('keepDoor') and x0 <= parent['door']['position'][0] <= x1
             door = copy.deepcopy(parent['door']) if keep else dict(position=[round((x0 + x1) / 2, 4), wall], width=1.0, basis=S, note='v12 隔間後每間正中的示意門，朝向走廊。')
             child = {**copy.deepcopy(parent), 'id': cid, 'code': f"{spec['code']}-{n}", 'polygon': polygon, 'door': door,
@@ -194,7 +195,7 @@ def main():
     summary(updated)
     if args.dry_run: print('dry run: nothing written'); return
     if carved != structure: C.STRUCTURE.write_text(C.dump(carved))
-    wrote = C.commit_building('SC', raw, updated, 'v12：SC2005/SC2003/SC1011 依使用者回報拆成子房間（位置示意），SC1011 的 v9.1 固定門遷移到 SC-1F-SC1011-1（座標不變）；新增 B1–4F 廁所並在 SC1014 裁出 WC 缺口。', check=False)
+    wrote = C.commit_building('SC', raw, updated, 'v12：SC2005/SC2003/SC1011 依使用者回報拆成子房間（位置示意），SC1011 的 v9.1 固定門遷移到 SC-1F-SC1011-3（座標不變；子房間由東向西編號）；新增 B1–4F 廁所並在 SC1014 裁出 WC 缺口。', check=False)
     C.sync_rooms_index()
     print('SC.json', 'written' if wrote else 'already current', C.sha(path.read_bytes()))
 

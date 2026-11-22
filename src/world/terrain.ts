@@ -1,4 +1,5 @@
 import * as T from 'three';
+import {nearestOnPolygon,inside} from '../walk/v12-geometry';
 import {surfaceCutters,subtractSurfacePolygon,type SurfaceVertex} from './road-surface';
 
 type Point2 = [number, number];
@@ -14,6 +15,7 @@ export const PLAY_BOUNDS: [number, number, number, number] = [-700, -1060, 460, 
 export class Terrain {
   /** Polygons where the grid is cut away (tunnel mouth); walkable landmark geometry fills them. */
   carves: Point2[][] = [];
+  levels: {polygon:Point2[];y:number}[] = [];
   constructor(readonly meta: TerrainMeta, readonly heights: Float32Array) {
     if (heights.length !== meta.cols * meta.rows) throw new Error(`terrain: ${heights.length} heights for ${meta.cols}x${meta.rows}`);
   }
@@ -32,7 +34,7 @@ export class Terrain {
   private heightDigest?: string;
   get surfaceVersion() {
     if(!this.heightDigest){let h=2166136261;for(const byte of new Uint8Array(this.heights.buffer,this.heights.byteOffset,this.heights.byteLength)){h=Math.imul(h^byte,16777619);}this.heightDigest=(h>>>0).toString(16);}
-    let holes=2166136261;for(const ch of JSON.stringify({clipping:'exact-triangle-polygons-v1',grid:[this.meta.origin,this.meta.cell,this.meta.cols,this.meta.rows],carves:this.carves}))holes=Math.imul(holes^ch.charCodeAt(0),16777619);
+    let holes=2166136261;for(const ch of JSON.stringify({clipping:'exact-triangle-polygons-v1',grid:[this.meta.origin,this.meta.cell,this.meta.cols,this.meta.rows],carves:this.carves,...(this.levels.length?{levels:this.levels}:{})}))holes=Math.imul(holes^ch.charCodeAt(0),16777619);
     return `terrain-triangles-v2:${this.heightDigest}:${(holes>>>0).toString(16)}`;
   }
 
@@ -41,11 +43,18 @@ export class Terrain {
     const fx = T.MathUtils.clamp((x-origin[0])/cell,0,cols-1.000001), fz = T.MathUtils.clamp((z-origin[1])/cell,0,rows-1.000001);
     return {i:Math.floor(fx),j:Math.floor(fz),u:fx-Math.floor(fx),v:fz-Math.floor(fz)};
   }
+  private levelVertices=new Map<number,number>();
+  cacheLevelVertices(){this.levelVertices.clear();if(!this.levels.length)return;for(let j=0;j<this.meta.rows;j++)for(let i=0;i<this.meta.cols;i++)this.levelVertices.set(j*this.meta.cols+i,this.computeVertexHeight(i,j));}
   /** The exact vertex used by mesh(), including the flat-pad seam rule. */
-  vertexHeight(i:number,j:number) {
+  vertexHeight(i:number,j:number) {return this.levelVertices.get(j*this.meta.cols+i)??this.computeVertexHeight(i,j);}
+  private computeVertexHeight(i:number,j:number) {
     const x=this.meta.origin[0]+i*this.meta.cell,z=this.meta.origin[1]+j*this.meta.cell;
     const [x0,z0,x1,z1]=this.pad, h=this.heights[j*this.meta.cols+i];
-    return (x>=x0&&x<=x1&&z>=z0&&z<=z1?Math.max(0,h):h)+GROUND_Y;
+    let y=(x>=x0&&x<=x1&&z>=z0&&z<=z1?Math.max(0,h):h)+GROUND_Y;
+    for(const level of this.levels){const pad=this.meta.cell+8;if(!level.polygon.some(q=>Math.abs(q[0]-x)<pad+30&&Math.abs(q[1]-z)<pad+30))continue;const p:Point2=[x,z],edge=nearestOnPolygon(p,level.polygon),d=inside(p,level.polygon)?0:Math.hypot(x-edge[0],z-edge[1]);
+      // One grid cell outside the pavement stays flat; blend back over 8 m.
+      y=T.MathUtils.lerp(level.y,y,T.MathUtils.smoothstep(d,this.meta.cell,this.meta.cell+8));}
+    return y;
   }
   /** Underlying 4 m terrain triangles, even below a carved landmark. This is not a support query. */
   heightAt(x:number,z:number) {

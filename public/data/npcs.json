@@ -902,6 +902,484 @@
     "night": null
    },
    "talk": "intl-mia"
+  },
+  {
+   "id": "lifeguard-sea",
+   "name": "救生員",
+   "role": "西子灣沙灘救生員",
+   "model": "npc-volunteer",
+   "look": {
+    "hair": "#2b2622",
+    "top": "#e04b3a",
+    "bottom": "#f3ebdb",
+    "shoes": "#fbf6ea"
+   },
+   "portrait": {
+    "skin": "#d9a77f",
+    "hair": "#2b2622",
+    "hairStyle": "short",
+    "top": "#e04b3a",
+    "topStyle": "vest",
+    "accessory": "cap"
+   },
+   "schedule": {
+    "day": {
+     "at": "beach-lifeguard",
+     "offset": [
+      1.5,
+      1.5
+     ],
+     "activity": "Idle"
+    },
+    "sunset": {
+     "at": "beach-lifeguard",
+     "offset": [
+      1.5,
+      1.5
+     ],
+     "activity": "Idle"
+    },
+    "night": null
+   },
+   "talk": "lifeguard-sea",
+   "sources": [
+    "https://news.nsysu.edu.tw/p/406-1120-271505.php"
+   ],
+   "sourceIds": [
+    "S1",
+    "S4",
+    "S5",
+    "S13"
+   ],
+   "sourceFiles": [
+    "data/sources/sea/sea-center-rules-20250901.pdf",
+    "data/sources/sea/lifeguard-rules-20251002.pdf",
+    "data/sources/sea/rescue-boat-rules-20191017.pdf"
+   ]
+  },
+  {
+   "id": "marine-clerk",
+   "name": "租借員",
+   "role": "海域中心器材租借",
+   "model": "npc-clerk",
+   "look": {
+    "hair": "#3a2a24",
+    "top": "#2c7f91",
+    "bottom": "#2f4a6a",
+    "shoes": "#fbf6ea"
+   },
+   "portrait": {
+    "skin": "#e9bf98",
+    "hair": "#3a2a24",
+    "hairStyle": "ponytail",
+    "top": "#2c7f91",
+    "topStyle": "tee",
+    "accessory": "nametag"
+   },
+   "schedule": {
+    "day": {
+     "at": "sea-center",
+     "offset": [
+      0,
+      1.5
+     ],
+     "activity": "Idle"
+    },
+    "sunset": {
+     "at": "sea-center",
+     "offset": [
+      0,
+      1.5
+     ],
+     "activity": "Idle"
+    },
+    "night": null
+   },
+   "talk": "marine-clerk",
+   "sources": [
+    "https://news.nsysu.edu.tw/p/406-1120-247014.php"
+   ],
+   "sourceIds": [
+    "S2",
+    "S3",
+    "S12"
+   ],
+   "sourceFiles": [
+    "data/sources/sea/sea-center-rules-20250901.pdf"
+   ]
+  },
+  {
+   "id": "surf-coach",
+   "name": "衝浪教練",
+   "role": "運健中心的老師",
+   "model": "npc-teacher",
+   "look": {
+    "hair": "#1f1a18",
+    "top": "#f27a2c",
+    "bottom": "#2a2c4a",
+    "shoes": "#fbf6ea"
+   },
+   "portrait": {
+    "skin": "#d9a77f",
+    "hair": "#1f1a18",
+    "hairStyle": "short",
+    "top": "#f27a2c",
+    "topStyle": "tee"
+   },
+   "schedule": {
+    "day": {
+     "at": "surf-zone",
+     "offset": [
+      1.5,
+      0
+     ],
+     "activity": "Idle"
+    },
+    "sunset": null,
+    "night": null
+   },
+   "talk": "surf-coach",
+   "sources": [
+    "https://www.1111.com.tw/news/jobns/151338",
+    "https://news.nsysu.edu.tw/p/406-1120-308729,r2910.php?Lang=zh-tw"
+   ],
+   "sourceIds": [
+    "S6",
+    "S14"
+   ]
+  },
+  {
+   "id": "sail-student",
+   "name": "風帆社同學",
+   "role": "在海堤看帆船的學生",
+   "model": "npc-student-2",
+   "look": {
+    "hair": "#2b2622",
+    "top": "#62c8d2",
+    "bottom": "#2a2c4a",
+    "shoes": "#fbf6ea"
+   },
+   "portrait": {
+    "skin": "#e9bf98",
+    "hair": "#2b2622",
+    "hairStyle": "bob",
+    "top": "#62c8d2",
+    "topStyle": "jacket"
+   },
+   "schedule": {
+    "day": {
+     "at": "sail-view",
+     "offset": [
+      5.5,
+      -6.0
+     ],
+     "activity": "Idle"
+    },
+    "sunset": {
+     "at": "sail-view",
+     "offset": [
+      5.5,
+      -6.0
+     ],
+     "activity": "Idle"
+    },
+    "night": null
+   },
+   "talk": "sail-student",
+   "sources": [
+    "https://www.1111.com.tw/news/160002/amp/"
+   ],
+   "sourceIds": [
+    "S7"
+   ]
+  },
+  {
+   "id": "bus-driver-campus",
+   "name": "校園公車司機",
+   "role": "校園公車駕駛",
+   "model": "npc-guard",
+   "look": {
+    "hair": "#6b6f78",
+    "top": "#f3ebdb",
+    "bottom": "#2a3a5c",
+    "shoes": "#fbf6ea"
+   },
+   "portrait": {
+    "skin": "#d9a77f",
+    "hair": "#6b6f78",
+    "hairStyle": "short",
+    "top": "#f3ebdb",
+    "topStyle": "uniform",
+    "accessory": "cap"
+   },
+   "schedule": {
+    "day": null,
+    "sunset": null,
+    "night": null
+   },
+   "talk": "bus-driver-campus",
+   "sources": [
+    "https://www.cm.nsysu.edu.tw/p/406-1024-361192,r159.php"
+   ],
+   "sourceIds": [
+    "S10",
+    "S11"
+   ],
+   "sourceFiles": [
+    "data/sources/bus/campus-bus-20250217.pdf",
+    "data/sources/bus/orange1-ext-20250203.pdf"
+   ]
+  },
+  {
+   "id": "bus-driver-orange",
+   "name": "橘一延司機",
+   "role": "橘1延駕駛",
+   "model": "npc-guard",
+   "look": {
+    "hair": "#1f1a18",
+    "top": "#f27a2c",
+    "bottom": "#2a3a5c",
+    "shoes": "#fbf6ea"
+   },
+   "portrait": {
+    "skin": "#e9bf98",
+    "hair": "#1f1a18",
+    "hairStyle": "short",
+    "top": "#f27a2c",
+    "topStyle": "uniform",
+    "accessory": "cap"
+   },
+   "schedule": {
+    "day": null,
+    "sunset": null,
+    "night": null
+   },
+   "talk": "bus-driver-orange",
+   "sources": [],
+   "sourceIds": [
+    "S10"
+   ],
+   "sourceFiles": [
+    "data/sources/bus/campus-bus-20250217.pdf",
+    "data/sources/bus/orange1-ext-20250203.pdf"
+   ]
+  },
+  {
+   "id": "runner-1",
+   "name": "跑步的同學",
+   "role": "在田徑場慢跑",
+   "model": "npc-student-5",
+   "look": {
+    "hair": "#2b2622",
+    "top": "#d9a521",
+    "bottom": "#2a2c4a",
+    "shoes": "#fbf6ea"
+   },
+   "portrait": {
+    "skin": "#e9bf98",
+    "hair": "#2b2622",
+    "hairStyle": "short",
+    "top": "#d9a521",
+    "topStyle": "tee"
+   },
+   "schedule": {
+    "day": {
+     "at": "track",
+     "offset": [
+      0,
+      0
+     ],
+     "activity": "Idle"
+    },
+    "sunset": {
+     "at": "track",
+     "offset": [
+      0,
+      0
+     ],
+     "activity": "Idle"
+    },
+    "night": null
+   },
+   "talk": "runner-1",
+   "sources": [],
+   "sourceIds": [
+    "S8"
+   ],
+   "sourceFiles": [
+    "data/sources/sea/sports-venue-rules-20231208.pdf"
+   ]
+  },
+  {
+   "id": "swimmer-1",
+   "name": "游泳的同學",
+   "role": "剛游完的學生",
+   "model": "npc-student-1",
+   "look": {
+    "hair": "#3a2a24",
+    "top": "#2c7f91",
+    "bottom": "#2a2c4a",
+    "shoes": "#fbf6ea"
+   },
+   "portrait": {
+    "skin": "#e9bf98",
+    "hair": "#3a2a24",
+    "hairStyle": "bob",
+    "top": "#2c7f91",
+    "topStyle": "tee"
+   },
+   "schedule": {
+    "day": {
+     "at": "pool",
+     "offset": [
+      0,
+      0
+     ],
+     "activity": "Idle"
+    },
+    "sunset": {
+     "at": "pool",
+     "offset": [
+      0,
+      0
+     ],
+     "activity": "Idle"
+    },
+    "night": null
+   },
+   "talk": "swimmer-1",
+   "sources": [],
+   "sourceIds": [
+    "S8",
+    "S9"
+   ],
+   "sourceFiles": [
+    "data/sources/sea/sports-venue-rules-20231208.pdf"
+   ]
+  },
+  {
+   "id": "swimmer-2",
+   "name": "泳池邊的同學",
+   "role": "在池邊休息的學生",
+   "model": "npc-student-6",
+   "look": {
+    "hair": "#1f1a18",
+    "top": "#62c8d2",
+    "bottom": "#2f4a6a",
+    "shoes": "#fbf6ea"
+   },
+   "portrait": {
+    "skin": "#e9bf98",
+    "hair": "#1f1a18",
+    "hairStyle": "short",
+    "top": "#62c8d2",
+    "topStyle": "tee"
+   },
+   "schedule": {
+    "day": {
+     "at": "pool",
+     "offset": [
+      6,
+      0.3
+     ],
+     "activity": "Idle"
+    },
+    "sunset": null,
+    "night": null
+   },
+   "talk": "swimmer-2",
+   "sources": [],
+   "sourceIds": [
+    "S4"
+   ],
+   "sourceFiles": [
+    "data/sources/sea/lifeguard-rules-20251002.pdf"
+   ]
+  },
+  {
+   "id": "gym-1",
+   "name": "健身的同學",
+   "role": "要去體適能中心",
+   "model": "npc-student-3",
+   "look": {
+    "hair": "#2b2622",
+    "top": "#7b4a8f",
+    "bottom": "#2a2c4a",
+    "shoes": "#fbf6ea"
+   },
+   "portrait": {
+    "skin": "#e9bf98",
+    "hair": "#2b2622",
+    "hairStyle": "short",
+    "top": "#7b4a8f",
+    "topStyle": "hoodie"
+   },
+   "schedule": {
+    "day": {
+     "at": "gym-portal",
+     "offset": [
+      3,
+      -0.5
+     ],
+     "activity": "Idle"
+    },
+    "sunset": {
+     "at": "gym-portal",
+     "offset": [
+      3,
+      -0.5
+     ],
+     "activity": "Idle"
+    },
+    "night": null
+   },
+   "talk": "gym-1",
+   "sources": [],
+   "sourceIds": [
+    "S9"
+   ],
+   "sourceFiles": [
+    "data/sources/sea/sports-venue-rules-20231208.pdf"
+   ]
+  },
+  {
+   "id": "gym-2",
+   "name": "重訓的同學",
+   "role": "剛練完的學生",
+   "model": "npc-student-4",
+   "look": {
+    "hair": "#5a4030",
+    "top": "#e04b3a",
+    "bottom": "#6b6f78",
+    "shoes": "#fbf6ea"
+   },
+   "portrait": {
+    "skin": "#e9bf98",
+    "hair": "#5a4030",
+    "hairStyle": "ponytail",
+    "top": "#e04b3a",
+    "topStyle": "tee"
+   },
+   "schedule": {
+    "day": {
+     "at": "gym-portal",
+     "offset": [
+      -3.5,
+      -1.0
+     ],
+     "activity": "Idle"
+    },
+    "sunset": null,
+    "night": null
+   },
+   "talk": "gym-2",
+   "sources": [],
+   "sourceIds": [
+    "S8"
+   ],
+   "sourceFiles": [
+    "data/sources/sea/sports-venue-rules-20231208.pdf"
+   ]
   }
  ],
  "trees": {
@@ -5889,6 +6367,479 @@
      "next": "root"
     }
    }
+  },
+  "lifeguard-sea": {
+   "entries": [
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "root": {
+     "lines": [
+      {
+       "who": "lifeguard-sea",
+       "text": "救生橡皮艇會在活動日拉到沙灘，校內也有水中救生課。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「什麼時候不能下水？」",
+       "next": "a"
+      },
+      {
+       "text": "「游泳區到哪裡？」",
+       "next": "b"
+      }
+     ]
+    },
+    "a": {
+     "lines": [
+      {
+       "who": "lifeguard-sea",
+       "text": "遇上海上颱風警報或打雷就得停止活動離場，安全第一。"
+      }
+     ]
+    },
+    "b": {
+     "lines": [
+      {
+       "who": "lifeguard-sea",
+       "text": "游泳只能在浮球圈起來的範圍，別游到外面去。"
+      }
+     ]
+    }
+   }
+  },
+  "marine-clerk": {
+   "entries": [
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "root": {
+     "lines": [
+      {
+       "who": "marine-clerk",
+       "text": "海域中心有立式划槳和獨木舟，想試哪一種？"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「立式划槳。」",
+       "next": "a"
+      },
+      {
+       "text": "「獨木舟。」",
+       "next": "b"
+      }
+     ]
+    },
+    "a": {
+     "lines": [
+      {
+       "who": "marine-clerk",
+       "text": "好喔，借立式划槳請先登記，拿好槳沿著航線慢慢划。"
+      }
+     ]
+    },
+    "b": {
+     "lines": [
+      {
+       "who": "marine-clerk",
+       "text": "獨木舟要推到海水及膝再跨坐上去，傍晚划還能看夕陽！"
+      }
+     ]
+    }
+   }
+  },
+  "surf-coach": {
+   "entries": [
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "root": {
+     "lines": [
+      {
+       "who": "surf-coach",
+       "text": "先練趴板划水和起乘姿勢！看準節奏推板站起來，別急。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「要注意什麼？」",
+       "next": "a"
+      },
+      {
+       "text": "「我先看看。」",
+       "next": "b"
+      }
+     ]
+    },
+    "a": {
+     "lines": [
+      {
+       "who": "surf-coach",
+       "text": "記熟魚雷浮標和上岸召回信號，泳力和體力都很重要喔。"
+      }
+     ]
+    },
+    "b": {
+     "lines": [
+      {
+       "who": "surf-coach",
+       "text": "好，先在沙灘上看大家怎麼划水。"
+      }
+     ]
+    }
+   }
+  },
+  "sail-student": {
+   "entries": [
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "root": {
+     "lines": [
+      {
+       "who": "sail-student",
+       "text": "聽說二零二五年那屆中山在西子灣逆轉奪勝，真熱血！"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「比賽怎麼比？」",
+       "next": "a"
+      },
+      {
+       "text": "「哪裡看得清楚？」",
+       "next": "b"
+      }
+     ]
+    },
+    "a": {
+     "lines": [
+      {
+       "who": "sail-student",
+       "text": "四對四的團隊賽，用雷射帆船，五航次先拿三勝。"
+      }
+     ]
+    },
+    "b": {
+     "lines": [
+      {
+       "who": "sail-student",
+       "text": "站在海堤這邊，整片海面都看得到。"
+      }
+     ]
+    }
+   }
+  },
+  "bus-driver-campus": {
+   "entries": [
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "root": {
+     "lines": [
+      {
+       "who": "bus-driver-campus",
+       "text": "歡迎上車，校園公車出示教職員工生證件就免費，請坐穩。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「這班開到哪？」",
+       "next": "a"
+      },
+      {
+       "text": "「謝謝司機。」",
+       "next": "b"
+      }
+     ]
+    },
+    "a": {
+     "lines": [
+      {
+       "who": "bus-driver-campus",
+       "text": "從校門上山到文學院，再原路開回校門。"
+      }
+     ]
+    },
+    "b": {
+     "lines": [
+      {
+       "who": "bus-driver-campus",
+       "text": "不客氣，車開動時記得坐穩扶好。"
+      }
+     ]
+    }
+   }
+  },
+  "bus-driver-orange": {
+   "entries": [
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "root": {
+     "lines": [
+      {
+       "who": "bus-driver-orange",
+       "text": "歡迎搭橘一延，這班下山會經海科院和海工館，請坐穩。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「這班開到哪？」",
+       "next": "a"
+      },
+      {
+       "text": "「謝謝司機。」",
+       "next": "b"
+      }
+     ]
+    },
+    "a": {
+     "lines": [
+      {
+       "who": "bus-driver-orange",
+       "text": "過了文學院會繞海科院和海工館，再回校門。"
+      }
+     ]
+    },
+    "b": {
+     "lines": [
+      {
+       "who": "bus-driver-orange",
+       "text": "不客氣，車開動時記得坐穩扶好。"
+      }
+     ]
+    }
+   }
+  },
+  "runner-1": {
+   "entries": [
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "root": {
+     "lines": [
+      {
+       "who": "runner-1",
+       "text": "在田徑場邊吹西子灣海風邊慢跑，傍晚時段最舒服了！"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「一起跑？」",
+       "next": "a"
+      },
+      {
+       "text": "「我用走的就好。」",
+       "next": "b"
+      }
+     ]
+    },
+    "a": {
+     "lines": [
+      {
+       "who": "runner-1",
+       "text": "要不要來跑一圈計時？跑完記得到旁邊拉筋收操喔。"
+      }
+     ]
+    },
+    "b": {
+     "lines": [
+      {
+       "who": "runner-1",
+       "text": "散步也很好，海風一樣吹得到。"
+      }
+     ]
+    }
+   }
+  },
+  "swimmer-1": {
+   "entries": [
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "root": {
+     "lines": [
+      {
+       "who": "swimmer-1",
+       "text": "剛在游泳池游完幾個來回，下水前一定要先熱身伸展喔。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「池子有多長？」",
+       "next": "a"
+      },
+      {
+       "text": "「我也去暖身。」",
+       "next": "b"
+      }
+     ]
+    },
+    "a": {
+     "lines": [
+      {
+       "who": "swimmer-1",
+       "text": "從水道入口下水，游到對面再游回來就能計時。"
+      }
+     ]
+    },
+    "b": {
+     "lines": [
+      {
+       "who": "swimmer-1",
+       "text": "記得手腳都動一動，再慢慢下水。"
+      }
+     ]
+    }
+   }
+  },
+  "swimmer-2": {
+   "entries": [
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "root": {
+     "lines": [
+      {
+       "who": "swimmer-2",
+       "text": "這裡池邊就有專任救生員看顧，游累了先靠牆喘口氣吧。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「要不要比一趟？」",
+       "next": "a"
+      },
+      {
+       "text": "「我先休息。」",
+       "next": "b"
+      }
+     ]
+    },
+    "a": {
+     "lines": [
+      {
+       "who": "swimmer-2",
+       "text": "好啊，來回一趟計時，輸的人請喝飲料！"
+      }
+     ]
+    },
+    "b": {
+     "lines": [
+      {
+       "who": "swimmer-2",
+       "text": "慢慢來，游泳本來就不用急。"
+      }
+     ]
+    }
+   }
+  },
+  "gym-1": {
+   "entries": [
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "root": {
+     "lines": [
+      {
+       "who": "gym-1",
+       "text": "體育館裡面就有體適能中心，下課順路來練一組剛剛好！"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「入口在哪裡？」",
+       "next": "a"
+      },
+      {
+       "text": "「今天練什麼？」",
+       "next": "b"
+      }
+     ]
+    },
+    "a": {
+     "lines": [
+      {
+       "who": "gym-1",
+       "text": "從體育館外牆的入口進去就到了。"
+      }
+     ]
+    },
+    "b": {
+     "lines": [
+      {
+       "who": "gym-1",
+       "text": "先上跑步機暖身，再去踩健身車。"
+      }
+     ]
+    }
+   }
+  },
+  "gym-2": {
+   "entries": [
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "root": {
+     "lines": [
+      {
+       "who": "gym-2",
+       "text": "學校有第一和第二兩座體適能中心，練完記得多補充水分。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「一起練？」",
+       "next": "a"
+      },
+      {
+       "text": "「下次吧。」",
+       "next": "b"
+      }
+     ]
+    },
+    "a": {
+     "lines": [
+      {
+       "who": "gym-2",
+       "text": "好啊，跑步機旁邊還有空位。"
+      }
+     ]
+    },
+    "b": {
+     "lines": [
+      {
+       "who": "gym-2",
+       "text": "沒問題，下次有空再一起來運動！"
+      }
+     ]
+    }
+   }
   }
  },
  "events": [
@@ -6146,6 +7097,148 @@
     },
     "achievement": "audience"
    }
+  },
+  {
+   "id": "ev-surf-class",
+   "when": "day",
+   "anchor": "zone:surf-zone",
+   "radius": 22,
+   "npcs": [
+    "surf-coach"
+   ],
+   "banner": "初級衝浪課在沙灘集合了",
+   "title": "沙灘上的初級衝浪課",
+   "journal": "白天的西子灣沙灘，運健中心的老師帶著初級衝浪課。",
+   "lines": [
+    {
+     "who": "surf-coach",
+     "text": "先練趴板划水和起乘姿勢！看準節奏推板站起來，別急。"
+    }
+   ],
+   "seaActivity": "surf-class",
+   "sources": [
+    "https://www.1111.com.tw/news/jobns/151338",
+    "https://news.nsysu.edu.tw/p/406-1120-308729,r2910.php?Lang=zh-tw"
+   ],
+   "sourceIds": [
+    "S6",
+    "S14"
+   ],
+   "activity": {
+    "id": "surf-class",
+    "host": "surf-coach",
+    "invite": "要不要跟著練一次？先趴板划水，再試起乘。",
+    "accept": "好，我來試",
+    "decline": "我先看看",
+    "inviteDelay": 3,
+    "steps": [
+     {
+      "kind": "near",
+      "target": "zone:surf-zone",
+      "max": 8,
+      "text": "走到沙灘上的衝浪教學區"
+     },
+     {
+      "kind": "rhythm",
+      "id": "paddle",
+      "presentation": "surf",
+      "style": "surf-paddle",
+      "cues": 6,
+      "interval": 2.4,
+      "lead": 2,
+      "window": 0.25,
+      "need": 4,
+      "text": "趴板划水：浪到時按下，成功划水 4 次"
+     },
+     {
+      "kind": "rhythm",
+      "id": "popup",
+      "presentation": "surf",
+      "style": "surf-popup",
+      "cues": 5,
+      "interval": 3.2,
+      "lead": 2.5,
+      "window": 0.25,
+      "need": 3,
+      "text": "起乘：看準浪峰按下，站起 3 次"
+     }
+    ],
+    "onDone": [
+     {
+      "kind": "say",
+      "who": "surf-coach",
+      "text": "記熟魚雷浮標和上岸召回信號，泳力和體力都很重要喔。"
+     }
+    ],
+    "timeout": 150,
+    "cooldown": 300,
+    "journal": {
+     "title": "初級衝浪課體驗",
+     "done": "跟著老師練了趴板划水和起乘。",
+     "partial": "這次跟上了 {hits} 個浪，下次再練。",
+     "abandoned": "這次沒有練到最後。",
+     "declined": "這次先在沙灘上看。"
+    }
+   }
+  },
+  {
+   "id": "ev-sail-regatta",
+   "when": "day",
+   "anchor": "zone:sail-view",
+   "radius": 25,
+   "npcs": [
+    "sail-student"
+   ],
+   "banner": "情境重現：臺日風帆友誼賽，八艘帆船出海",
+   "title": "臺日風帆友誼賽（情境重現）",
+   "journal": "海堤外的海面上，重現二零二五年第四屆臺日風帆友誼賽的四對四團隊賽。",
+   "lines": [
+    {
+     "who": "sail-student",
+     "text": "臺日風帆友誼賽開賽了！四對四雷射帆船，五戰三勝喔。"
+    }
+   ],
+   "seaActivity": "sailing-show",
+   "show": "sail-regatta-2025",
+   "reenactment": true,
+   "sources": [
+    "https://www.1111.com.tw/news/160002/amp/"
+   ],
+   "sourceIds": [
+    "S7"
+   ],
+   "activity": {
+    "id": "sail-regatta-watch",
+    "host": "sail-student",
+    "invite": "要一起看嗎？站在這裡看得最清楚。",
+    "accept": "好，一起看",
+    "decline": "我先走走",
+    "inviteDelay": 3,
+    "steps": [
+     {
+      "kind": "stay",
+      "target": "zone:sail-view",
+      "max": 10,
+      "hold": 30,
+      "text": "留在海堤觀賞點看帆船 30 秒"
+     }
+    ],
+    "onDone": [
+     {
+      "kind": "say",
+      "who": "sail-student",
+      "text": "聽說二零二五年那屆中山在西子灣逆轉奪勝，真熱血！"
+     }
+    ],
+    "timeout": 120,
+    "cooldown": 300,
+    "journal": {
+     "title": "看臺日風帆友誼賽重現",
+     "done": "在海堤看完了八艘雷射帆船的情境重現。",
+     "abandoned": "這次沒有看到最後。",
+     "declined": "這次先走走，下次再看。"
+    }
+   }
   }
  ],
  "scheduleOverrides": [
@@ -6177,5 +7270,69 @@
    "activity": "Sit",
    "seat": "library-mia-shade"
   }
- ]
+ ],
+ "v12Sea": {
+  "tool": "tools/apply_v12_sea_events.py",
+  "npcs": [
+   "lifeguard-sea",
+   "marine-clerk",
+   "surf-coach",
+   "sail-student",
+   "bus-driver-campus",
+   "bus-driver-orange",
+   "runner-1",
+   "swimmer-1",
+   "swimmer-2",
+   "gym-1",
+   "gym-2"
+  ],
+  "events": [
+   "ev-surf-class",
+   "ev-sail-regatta"
+  ],
+  "treeSourceIds": {
+   "lifeguard-sea": [
+    "S1",
+    "S4",
+    "S5",
+    "S13"
+   ],
+   "marine-clerk": [
+    "S2",
+    "S3",
+    "S12"
+   ],
+   "surf-coach": [
+    "S6",
+    "S14"
+   ],
+   "sail-student": [
+    "S7"
+   ],
+   "bus-driver-campus": [
+    "S10",
+    "S11"
+   ],
+   "bus-driver-orange": [
+    "S10"
+   ],
+   "runner-1": [
+    "S8"
+   ],
+   "swimmer-1": [
+    "S8",
+    "S9"
+   ],
+   "swimmer-2": [
+    "S4"
+   ],
+   "gym-1": [
+    "S9"
+   ],
+   "gym-2": [
+    "S8"
+   ]
+  },
+  "note": "海域、公車、運動區的 NPC。公車司機不站在世界裡（schedule 全為 null），由 bus runtime 放進車內。"
+ }
 }

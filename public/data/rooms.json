@@ -1468,10 +1468,10 @@
     "v12": true
   },
   {
-    "id": "v12-SC-1F-SC1011-1",
+    "id": "v12-SC-1F-SC1011-3",
     "buildingId": "SC",
     "floorId": "SC-1F",
-    "code": "SC1011-1",
+    "code": "SC1011-3",
     "x": 0.628273,
     "y": 0.690004,
     "sourceId": "oaa-02Room_COS_1",
@@ -1480,7 +1480,7 @@
       "SC1011"
     ],
     "splitFrom": "SC1011",
-    "walkRoomId": "SC-1F-SC1011-1",
+    "walkRoomId": "SC-1F-SC1011-3",
     "floorLabel": "1F",
     "v12": true
   },
@@ -1502,10 +1502,10 @@
     "v12": true
   },
   {
-    "id": "v12-SC-1F-SC1011-3",
+    "id": "v12-SC-1F-SC1011-1",
     "buildingId": "SC",
     "floorId": "SC-1F",
-    "code": "SC1011-3",
+    "code": "SC1011-1",
     "x": 0.668136,
     "y": 0.690004,
     "sourceId": "oaa-02Room_COS_1",
@@ -1514,7 +1514,7 @@
       "SC1011"
     ],
     "splitFrom": "SC1011",
-    "walkRoomId": "SC-1F-SC1011-3",
+    "walkRoomId": "SC-1F-SC1011-1",
     "floorLabel": "1F",
     "v12": true
   },
@@ -1711,28 +1711,11 @@
     "v12": true
   },
   {
-    "id": "v12-SC-2F-SC2005-1",
-    "buildingId": "SC",
-    "floorId": "SC-2F",
-    "code": "SC2005-1",
-    "x": 0.711773,
-    "y": 0.162499,
-    "sourceId": "oaa-02Room_COS_1",
-    "status": "user-reported",
-    "aliases": [
-      "SC2005"
-    ],
-    "splitFrom": "SC2005",
-    "walkRoomId": "SC-2F-SC2005-1",
-    "floorLabel": "2F",
-    "v12": true
-  },
-  {
     "id": "v12-SC-2F-SC2005-2",
     "buildingId": "SC",
     "floorId": "SC-2F",
     "code": "SC2005-2",
-    "x": 0.731773,
+    "x": 0.711773,
     "y": 0.162499,
     "sourceId": "oaa-02Room_COS_1",
     "status": "user-reported",
@@ -1745,10 +1728,27 @@
     "v12": true
   },
   {
-    "id": "v12-SC-2F-SC2003-1",
+    "id": "v12-SC-2F-SC2005-1",
     "buildingId": "SC",
     "floorId": "SC-2F",
-    "code": "SC2003-1",
+    "code": "SC2005-1",
+    "x": 0.731773,
+    "y": 0.162499,
+    "sourceId": "oaa-02Room_COS_1",
+    "status": "user-reported",
+    "aliases": [
+      "SC2005"
+    ],
+    "splitFrom": "SC2005",
+    "walkRoomId": "SC-2F-SC2005-1",
+    "floorLabel": "2F",
+    "v12": true
+  },
+  {
+    "id": "v12-SC-2F-SC2003-3",
+    "buildingId": "SC",
+    "floorId": "SC-2F",
+    "code": "SC2003-3",
     "x": 0.812332,
     "y": 0.162499,
     "sourceId": "oaa-02Room_COS_1",
@@ -1757,7 +1757,7 @@
       "SC2003"
     ],
     "splitFrom": "SC2003",
-    "walkRoomId": "SC-2F-SC2003-1",
+    "walkRoomId": "SC-2F-SC2003-3",
     "floorLabel": "2F",
     "v12": true
   },
@@ -1779,10 +1779,10 @@
     "v12": true
   },
   {
-    "id": "v12-SC-2F-SC2003-3",
+    "id": "v12-SC-2F-SC2003-1",
     "buildingId": "SC",
     "floorId": "SC-2F",
-    "code": "SC2003-3",
+    "code": "SC2003-1",
     "x": 0.853668,
     "y": 0.162499,
     "sourceId": "oaa-02Room_COS_1",
@@ -1791,7 +1791,7 @@
       "SC2003"
     ],
     "splitFrom": "SC2003",
-    "walkRoomId": "SC-2F-SC2003-3",
+    "walkRoomId": "SC-2F-SC2003-1",
     "floorLabel": "2F",
     "v12": true
   },

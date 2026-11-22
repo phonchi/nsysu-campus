@@ -111,7 +111,7 @@ function ribbon(points:Point2[],width:number,y:number){
  for(let i=0;i<points.length;i++){const p=points[i],a=points[Math.max(0,i-1)],b=points[Math.min(points.length-1,i+1)];let dx=b[0]-a[0],dz=b[1]-a[1];const l=Math.hypot(dx,dz)||1;dx/=l;dz/=l;pos.push(p[0]-dz*width/2,y,p[1]+dx*width/2,p[0]+dz*width/2,y,p[1]-dx*width/2);if(i){const k=i*2;idx.push(k-2,k-1,k,k-1,k+1,k);}}
  const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(pos,3));g.setIndex(idx);g.computeVertexNormals();if(g.attributes.normal.getY(0)<0){const ix=g.index!;for(let n=0;n<ix.count;n+=3){const t=ix.getX(n);ix.setX(n,ix.getX(n+2));ix.setX(n+2,t);}g.computeVertexNormals();}return g;
 }
-export const CAMPUS_GROUND:[number,number,number,number]=[-330,-330,260,480];
+export const CAMPUS_GROUND:[number,number,number,number]=[-480,-330,260,510];
 /** With `terrain`, ground outside the flat pad follows the DEM (display + collision) and exterior context extends to PLAY_BOUNDS. */
 export function buildWalkWorld(data:WalkBuilding[],structure:CampusStructure,terrain?:Terrain):WalkWorld{
  const out:WalkWorld={display:new T.Group(),collision:new T.Group(),doors:[],floors:[],destinations:[],spawn:new T.Vector3(),frames:new Map(),scales:new Map(),lifts:[],bounds:new T.Box3()};

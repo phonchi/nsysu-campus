@@ -13691,8 +13691,8 @@
           "note": "人工對照官方圖面描繪房間外界；受圖線寬影響為近似輪廓，非CAD尺寸。房門需另核對。"
         },
         {
-          "id": "SC-1F-SC1011-1",
-          "code": "SC1011-1",
+          "id": "SC-1F-SC1011-3",
+          "code": "SC1011-3",
           "kind": "room",
           "polygon": [
             [
@@ -13817,8 +13817,8 @@
           }
         },
         {
-          "id": "SC-1F-SC1011-3",
-          "code": "SC1011-3",
+          "id": "SC-1F-SC1011-1",
+          "code": "SC1011-1",
           "kind": "room",
           "polygon": [
             [
@@ -14592,18 +14592,18 @@
       ],
       "virtualPortalOverrides": [
         {
-          "roomId": "SC-1F-SC1011-1",
+          "roomId": "SC-1F-SC1011-3",
           "neighborRoomId": "@public",
           "planDoor": true,
           "basis": "map-derived",
           "sourceReview": {
             "report": "tools/apply_v91_sc_doors.py",
-            "entryId": "SC-1F-SC1011-1"
+            "entryId": "SC-1F-SC1011-3"
           },
           "suggestedPortal": {
             "width": 1.0,
             "perRoomPosition": {
-              "SC-1F-SC1011-1": [
+              "SC-1F-SC1011-3": [
                 -22.21,
                 14.051
               ],
@@ -14640,18 +14640,18 @@
           "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
         },
         {
-          "roomId": "SC-1F-SC1011-3",
+          "roomId": "SC-1F-SC1011-1",
           "neighborRoomId": "@public",
           "planDoor": true,
           "basis": "schematic",
           "sourceReview": {
             "report": "tools/apply_v12_sc_rooms.py",
-            "entryId": "SC-1F-SC1011-3"
+            "entryId": "SC-1F-SC1011-1"
           },
           "suggestedPortal": {
             "width": 1.0,
             "perRoomPosition": {
-              "SC-1F-SC1011-3": [
+              "SC-1F-SC1011-1": [
                 -17.255,
                 14.051
               ],
@@ -14859,7 +14859,7 @@
       "roomSplits": {
         "version": 1,
         "basis": "schematic",
-        "note": "隔間依使用者回報，位置示意；編號由西向東，-1 在西。內牆依據見各子房間 wallBasis。",
+        "note": "隔間依使用者回報，位置示意；編號由東向西，-1 在東。內牆依據見各子房間 wallBasis。",
         "sourceRooms": {
           "SC-1F-SC1011": {
             "id": "SC-1F-SC1011",
@@ -14920,9 +14920,9 @@
         },
         "children": {
           "SC-1F-SC1011": [
-            "SC-1F-SC1011-1",
+            "SC-1F-SC1011-3",
             "SC-1F-SC1011-2",
-            "SC-1F-SC1011-3"
+            "SC-1F-SC1011-1"
           ]
         },
         "sourceOverrides": [
@@ -15871,8 +15871,8 @@
           "note": "人工對照官方圖面描繪房間外界；受圖線寬影響為近似輪廓，非CAD尺寸。房門需另核對。"
         },
         {
-          "id": "SC-2F-SC2005-1",
-          "code": "SC2005-1",
+          "id": "SC-2F-SC2005-2",
+          "code": "SC2005-2",
           "kind": "room",
           "polygon": [
             [
@@ -15934,8 +15934,8 @@
           }
         },
         {
-          "id": "SC-2F-SC2005-2",
-          "code": "SC2005-2",
+          "id": "SC-2F-SC2005-1",
+          "code": "SC2005-1",
           "kind": "room",
           "polygon": [
             [
@@ -16050,8 +16050,8 @@
           "note": "人工對照官方圖面描繪房間外界；受圖線寬影響為近似輪廓，非CAD尺寸。房門需另核對。"
         },
         {
-          "id": "SC-2F-SC2003-1",
-          "code": "SC2003-1",
+          "id": "SC-2F-SC2003-3",
+          "code": "SC2003-3",
           "kind": "room",
           "polygon": [
             [
@@ -16176,8 +16176,8 @@
           }
         },
         {
-          "id": "SC-2F-SC2003-3",
-          "code": "SC2003-3",
+          "id": "SC-2F-SC2003-1",
+          "code": "SC2003-1",
           "kind": "room",
           "polygon": [
             [
@@ -17336,30 +17336,6 @@
           "geometryWarning": "官方平面圖門弧把描圖的牆切碎；只在這道門的範圍內修正。"
         },
         {
-          "roomId": "SC-2F-SC2005-1",
-          "neighborRoomId": "@public",
-          "planDoor": true,
-          "basis": "schematic",
-          "sourceReview": {
-            "report": "tools/apply_v12_sc_rooms.py",
-            "entryId": "SC-2F-SC2005-1"
-          },
-          "suggestedPortal": {
-            "width": 1.0,
-            "perRoomPosition": {
-              "SC-2F-SC2005-1": [
-                -10.035,
-                -1.975
-              ],
-              "@public": [
-                -10.035,
-                -1.955
-              ]
-            }
-          },
-          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
-        },
-        {
           "roomId": "SC-2F-SC2005-2",
           "neighborRoomId": "@public",
           "planDoor": true,
@@ -17372,6 +17348,30 @@
             "width": 1.0,
             "perRoomPosition": {
               "SC-2F-SC2005-2": [
+                -10.035,
+                -1.975
+              ],
+              "@public": [
+                -10.035,
+                -1.955
+              ]
+            }
+          },
+          "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
+        },
+        {
+          "roomId": "SC-2F-SC2005-1",
+          "neighborRoomId": "@public",
+          "planDoor": true,
+          "basis": "schematic",
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-2F-SC2005-1"
+          },
+          "suggestedPortal": {
+            "width": 1.0,
+            "perRoomPosition": {
+              "SC-2F-SC2005-1": [
                 -7.835,
                 -1.975
               ],
@@ -17384,18 +17384,18 @@
           "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
         },
         {
-          "roomId": "SC-2F-SC2003-1",
+          "roomId": "SC-2F-SC2003-3",
           "neighborRoomId": "@public",
           "planDoor": true,
           "basis": "schematic",
           "sourceReview": {
             "report": "tools/apply_v12_sc_rooms.py",
-            "entryId": "SC-2F-SC2003-1"
+            "entryId": "SC-2F-SC2003-3"
           },
           "suggestedPortal": {
             "width": 1.0,
             "perRoomPosition": {
-              "SC-2F-SC2003-1": [
+              "SC-2F-SC2003-3": [
                 1.0265,
                 -1.975
               ],
@@ -17432,18 +17432,18 @@
           "geometryWarning": "v12 指定門位；只在這道門的範圍內開洞。"
         },
         {
-          "roomId": "SC-2F-SC2003-3",
+          "roomId": "SC-2F-SC2003-1",
           "neighborRoomId": "@public",
           "planDoor": true,
           "basis": "schematic",
           "sourceReview": {
             "report": "tools/apply_v12_sc_rooms.py",
-            "entryId": "SC-2F-SC2003-3"
+            "entryId": "SC-2F-SC2003-1"
           },
           "suggestedPortal": {
             "width": 1.0,
             "perRoomPosition": {
-              "SC-2F-SC2003-3": [
+              "SC-2F-SC2003-1": [
                 5.5735,
                 -1.975
               ],
@@ -18213,7 +18213,7 @@
       "roomSplits": {
         "version": 1,
         "basis": "schematic",
-        "note": "隔間依使用者回報，位置示意；編號由西向東，-1 在西。內牆依據見各子房間 wallBasis。",
+        "note": "隔間依使用者回報，位置示意；編號由東向西，-1 在東。內牆依據見各子房間 wallBasis。",
         "sourceRooms": {
           "SC-2F-SC2005": {
             "id": "SC-2F-SC2005",
@@ -18328,13 +18328,13 @@
         },
         "children": {
           "SC-2F-SC2005": [
-            "SC-2F-SC2005-1",
-            "SC-2F-SC2005-2"
+            "SC-2F-SC2005-2",
+            "SC-2F-SC2005-1"
           ],
           "SC-2F-SC2003": [
-            "SC-2F-SC2003-1",
+            "SC-2F-SC2003-3",
             "SC-2F-SC2003-2",
-            "SC-2F-SC2003-3"
+            "SC-2F-SC2003-1"
           ]
         },
         "sourceOverrides": []

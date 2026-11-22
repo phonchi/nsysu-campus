@@ -212,6 +212,8 @@ function liftInputFixture(){
   walking:true,overview:false,bike:{riding:false},npcs:undefined,wasBlocking:false,director:undefined,notebook:undefined,quiz:undefined,
   guide:{open:false,update(){}},gestures:{open:false,close(){}},photo:{active:false},menuOpen:()=>false,
   rig:{yaw:0,pitch:0,distance:4,locked:false,snap(){},protect(){}},carriedCamera:undefined,liftPoses:new WeakMap(),clearAuto(){},avatar:{cancelGesture(){}},
+  // v12.1 hooks in the same frame slice: no water/bus/sports runtime in this fixture.
+  v12:undefined,rhythm:undefined,realDt:0,sky:{preset:'day'},BIKE_MOTION:{kind:'bike'},WALK_MOTION:{kind:'walk'},cachedLiftObstacles:[],lastBusObstacleKey:'',cancelCampusActivity(){},
  };
  const update=new Function('context',`with(context){return function(dt){${liftFrameSource}\nreturn carried;};}`)(context) as (dt:number)=>T.Vector3|undefined;
  const step=()=>{const carried=update(1/30);if(!carried&&!passenger.carried)physics.step(input.direction(new T.Vector3(-1,0,0)),1/30,false,1.5);};

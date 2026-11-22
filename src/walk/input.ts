@@ -60,6 +60,7 @@ export class WalkInput {
   private stickId = -1;
   private lastX = 0;
   private lastY = 0;
+  private lockSettleUntil = 0;
   private abort = new AbortController();
   private _mode: InputMode = 'walk';
   get mode() { return this._mode; }
@@ -99,16 +100,19 @@ export class WalkInput {
     }, { capture: true, signal });
     window.addEventListener('keyup', e => this.keys.delete(e.key.toLowerCase()), { capture: true, signal });
     window.addEventListener('blur', () => this.release(), { signal });
-    document.addEventListener('pointerlockchange', () => { if (!document.pointerLockElement) this.lookId = -1; }, { signal });
+    // Chromium often reports one huge movementX/Y right after a pointer-lock grab; ignore that burst so
+    // entering first person keeps the level pitch it was given.
+    document.addEventListener('pointerlockchange', () => { if (!document.pointerLockElement) this.lookId = -1; else this.lockSettleUntil = performance.now() + 120; }, { signal });
 
     canvas.style.touchAction = 'none';
     canvas.addEventListener('pointerdown', e => {
       if (!hooks.canLook() || this.lookId !== -1) return;
       this.lookId = e.pointerId; this.lastX = e.clientX; this.lastY = e.clientY;
-      canvas.setPointerCapture(e.pointerId);
+      // Under pointer lock (first person) capture is invalid and throws InvalidStateError; movement comes from the lock.
+      if (document.pointerLockElement !== canvas) { try { canvas.setPointerCapture(e.pointerId); } catch { /* capture is best-effort */ } }
     }, { signal });
     canvas.addEventListener('pointermove', e => {
-      if (document.pointerLockElement === canvas) { hooks.look(e.movementX, e.movementY); return; }
+      if (document.pointerLockElement === canvas) { if (performance.now() < this.lockSettleUntil || Math.abs(e.movementX) > 300 || Math.abs(e.movementY) > 300) return; hooks.look(e.movementX, e.movementY); return; }
       if (e.pointerId !== this.lookId) return;
       hooks.look(e.clientX - this.lastX, e.clientY - this.lastY);
       this.lastX = e.clientX; this.lastY = e.clientY;

@@ -6,7 +6,7 @@
   "method": "original room polygons + explicitly schematic exterior gallery + body-clearance free-space cores + parallel contact + public-root spanning tree; no grid replacement",
   "planningClearance": 0.42,
   "galleryWidth": 1.4,
-  "sourceReviewHash": "94ff50dc6054bb1754e19c7d1ffd9a310c55662d57b61428c8cd2cb6eb7e1c02",
+  "sourceReviewHash": "492aff38e375ccae4df8de4300acb94f59300ffb4e352eb3c3582eb3d9affee4",
   "sourceReviewFile": "public/data/walkthrough/final-three-door-source-review.json",
   "sourceFiles": [
     "public/data/walkthrough/SC.json",
@@ -19,7 +19,7 @@
     "public/data/walkthrough/EV.json"
   ],
   "sourceSHA256": {
-    "SC.json": "c8163d2b98629abd1d7901b18a7b0ee23e88d94eac6f2a83b1385f58587374ea",
+    "SC.json": "64e461c44d281a11cc925ac81eb85a671d8b6dc480218bdaf9265313fdf18fa1",
     "EN.json": "5d3523582ea1f244c2cb81254bc488d09db5c6077cc0ea37115689f0c2db0bb1",
     "BI.json": "a7cf0844742903ec9f037ed3e3fef1904a25a5ab62c90f8afe06042fd4fabe1f",
     "PH.json": "616131c2793b45c8ccc54e0feae546e62c842286bbbf2bd0aa47e1cda30ad2e3",
@@ -532,7 +532,7 @@
           "sourceReview": {
             "report": "public/data/walkthrough/final-three-door-source-review.json",
             "entryId": "SC-B1:SC-B1-region-053:SC-B1-region-031",
-            "sha256": "94ff50dc6054bb1754e19c7d1ffd9a310c55662d57b61428c8cd2cb6eb7e1c02"
+            "sha256": "492aff38e375ccae4df8de4300acb94f59300ffb4e352eb3c3582eb3d9affee4"
           },
           "cutDepth": 0.65,
           "traceCorrection": {
@@ -3968,10 +3968,10 @@
           ],
           "width": 1.0,
           "roomIds": [
-            "SC-1F-SC1011-1"
+            "SC-1F-SC1011-3"
           ],
           "nodeIds": [
-            "SC-1F-SC1011-1",
+            "SC-1F-SC1011-3",
             "@free-000"
           ],
           "basis": "map-derived",
@@ -3982,7 +3982,7 @@
             0.0
           ],
           "insideClearanceChecks": {
-            "SC-1F-SC1011-1": {
+            "SC-1F-SC1011-3": {
               "passed": true,
               "insidePosition": [
                 -22.21,
@@ -3994,7 +3994,7 @@
             }
           },
           "clearancePositions": {
-            "SC-1F-SC1011-1": [
+            "SC-1F-SC1011-3": [
               -22.21,
               14.411
             ],
@@ -4004,14 +4004,14 @@
             ]
           },
           "perRoomPosition": {
-            "SC-1F-SC1011-1": [
+            "SC-1F-SC1011-3": [
               -22.21,
               14.051
             ]
           },
           "sourceReview": {
             "report": "tools/apply_v91_sc_doors.py",
-            "entryId": "SC-1F-SC1011-1"
+            "entryId": "SC-1F-SC1011-3"
           },
           "cutDepth": 0.65,
           "traceCorrection": {
@@ -4088,10 +4088,10 @@
           ],
           "width": 1.0,
           "roomIds": [
-            "SC-1F-SC1011-3"
+            "SC-1F-SC1011-1"
           ],
           "nodeIds": [
-            "SC-1F-SC1011-3",
+            "SC-1F-SC1011-1",
             "@free-000"
           ],
           "basis": "schematic",
@@ -4102,7 +4102,7 @@
             0.0
           ],
           "insideClearanceChecks": {
-            "SC-1F-SC1011-3": {
+            "SC-1F-SC1011-1": {
               "passed": true,
               "insidePosition": [
                 -17.255,
@@ -4114,7 +4114,7 @@
             }
           },
           "clearancePositions": {
-            "SC-1F-SC1011-3": [
+            "SC-1F-SC1011-1": [
               -17.255,
               14.411
             ],
@@ -4124,14 +4124,14 @@
             ]
           },
           "perRoomPosition": {
-            "SC-1F-SC1011-3": [
+            "SC-1F-SC1011-1": [
               -17.255,
               14.051
             ]
           },
           "sourceReview": {
             "report": "tools/apply_v12_sc_rooms.py",
-            "entryId": "SC-1F-SC1011-3"
+            "entryId": "SC-1F-SC1011-1"
           },
           "cutDepth": 0.65,
           "traceCorrection": {
@@ -4631,9 +4631,9 @@
         "SC-1F-SC1004": "SC-1F-portal-008",
         "SC-1F-SC1003": "SC-1F-portal-009",
         "SC-1F-SC1001": "SC-1F-portal-010",
-        "SC-1F-SC1011-1": "SC-1F-portal-014",
+        "SC-1F-SC1011-3": "SC-1F-portal-014",
         "SC-1F-SC1011-2": "SC-1F-portal-015",
-        "SC-1F-SC1011-3": "SC-1F-portal-016",
+        "SC-1F-SC1011-1": "SC-1F-portal-016",
         "SC-1F-SC1015": "SC-1F-portal-011",
         "SC-1F-unnumbered-1": "SC-1F-portal-012",
         "SC-1F-unnumbered-2": "SC-1F-portal-013",
@@ -6251,66 +6251,6 @@
           ],
           "width": 1.0,
           "roomIds": [
-            "SC-2F-SC2005-1"
-          ],
-          "nodeIds": [
-            "SC-2F-SC2005-1",
-            "@free-000"
-          ],
-          "basis": "schematic",
-          "gap": 0.02,
-          "sharedSpan": 1.0,
-          "tangent": [
-            -1.0,
-            0.0
-          ],
-          "insideClearanceChecks": {
-            "SC-2F-SC2005-1": {
-              "passed": true,
-              "insidePosition": [
-                -10.035,
-                -2.335
-              ],
-              "distanceToRoomCore": 0.36,
-              "traceCorrection": false,
-              "reviewedDoorBandOnly": true
-            }
-          },
-          "clearancePositions": {
-            "SC-2F-SC2005-1": [
-              -10.035,
-              -2.335
-            ],
-            "@free-000": [
-              -10.035,
-              -1.555
-            ]
-          },
-          "perRoomPosition": {
-            "SC-2F-SC2005-1": [
-              -10.035,
-              -1.975
-            ]
-          },
-          "sourceReview": {
-            "report": "tools/apply_v12_sc_rooms.py",
-            "entryId": "SC-2F-SC2005-1"
-          },
-          "cutDepth": 0.65,
-          "traceCorrection": {
-            "basis": "schematic",
-            "note": "v12 指定門位；只在這道門的範圍內開洞。",
-            "parallelLeafLines": []
-          }
-        },
-        {
-          "id": "SC-2F-portal-022",
-          "position": [
-            -7.835,
-            -1.965
-          ],
-          "width": 1.0,
-          "roomIds": [
             "SC-2F-SC2005-2"
           ],
           "nodeIds": [
@@ -6328,7 +6268,7 @@
             "SC-2F-SC2005-2": {
               "passed": true,
               "insidePosition": [
-                -7.835,
+                -10.035,
                 -2.335
               ],
               "distanceToRoomCore": 0.36,
@@ -6338,6 +6278,66 @@
           },
           "clearancePositions": {
             "SC-2F-SC2005-2": [
+              -10.035,
+              -2.335
+            ],
+            "@free-000": [
+              -10.035,
+              -1.555
+            ]
+          },
+          "perRoomPosition": {
+            "SC-2F-SC2005-2": [
+              -10.035,
+              -1.975
+            ]
+          },
+          "sourceReview": {
+            "report": "tools/apply_v12_sc_rooms.py",
+            "entryId": "SC-2F-SC2005-2"
+          },
+          "cutDepth": 0.65,
+          "traceCorrection": {
+            "basis": "schematic",
+            "note": "v12 指定門位；只在這道門的範圍內開洞。",
+            "parallelLeafLines": []
+          }
+        },
+        {
+          "id": "SC-2F-portal-022",
+          "position": [
+            -7.835,
+            -1.965
+          ],
+          "width": 1.0,
+          "roomIds": [
+            "SC-2F-SC2005-1"
+          ],
+          "nodeIds": [
+            "SC-2F-SC2005-1",
+            "@free-000"
+          ],
+          "basis": "schematic",
+          "gap": 0.02,
+          "sharedSpan": 1.0,
+          "tangent": [
+            -1.0,
+            0.0
+          ],
+          "insideClearanceChecks": {
+            "SC-2F-SC2005-1": {
+              "passed": true,
+              "insidePosition": [
+                -7.835,
+                -2.335
+              ],
+              "distanceToRoomCore": 0.36,
+              "traceCorrection": false,
+              "reviewedDoorBandOnly": true
+            }
+          },
+          "clearancePositions": {
+            "SC-2F-SC2005-1": [
               -7.835,
               -2.335
             ],
@@ -6347,14 +6347,14 @@
             ]
           },
           "perRoomPosition": {
-            "SC-2F-SC2005-2": [
+            "SC-2F-SC2005-1": [
               -7.835,
               -1.975
             ]
           },
           "sourceReview": {
             "report": "tools/apply_v12_sc_rooms.py",
-            "entryId": "SC-2F-SC2005-2"
+            "entryId": "SC-2F-SC2005-1"
           },
           "cutDepth": 0.65,
           "traceCorrection": {
@@ -6371,10 +6371,10 @@
           ],
           "width": 1.0,
           "roomIds": [
-            "SC-2F-SC2003-1"
+            "SC-2F-SC2003-3"
           ],
           "nodeIds": [
-            "SC-2F-SC2003-1",
+            "SC-2F-SC2003-3",
             "@free-000"
           ],
           "basis": "schematic",
@@ -6385,7 +6385,7 @@
             0.0
           ],
           "insideClearanceChecks": {
-            "SC-2F-SC2003-1": {
+            "SC-2F-SC2003-3": {
               "passed": true,
               "insidePosition": [
                 1.0265,
@@ -6397,7 +6397,7 @@
             }
           },
           "clearancePositions": {
-            "SC-2F-SC2003-1": [
+            "SC-2F-SC2003-3": [
               1.0265,
               -2.335
             ],
@@ -6407,14 +6407,14 @@
             ]
           },
           "perRoomPosition": {
-            "SC-2F-SC2003-1": [
+            "SC-2F-SC2003-3": [
               1.0265,
               -1.975
             ]
           },
           "sourceReview": {
             "report": "tools/apply_v12_sc_rooms.py",
-            "entryId": "SC-2F-SC2003-1"
+            "entryId": "SC-2F-SC2003-3"
           },
           "cutDepth": 0.65,
           "traceCorrection": {
@@ -6491,10 +6491,10 @@
           ],
           "width": 1.0,
           "roomIds": [
-            "SC-2F-SC2003-3"
+            "SC-2F-SC2003-1"
           ],
           "nodeIds": [
-            "SC-2F-SC2003-3",
+            "SC-2F-SC2003-1",
             "@free-000"
           ],
           "basis": "schematic",
@@ -6505,7 +6505,7 @@
             0.0
           ],
           "insideClearanceChecks": {
-            "SC-2F-SC2003-3": {
+            "SC-2F-SC2003-1": {
               "passed": true,
               "insidePosition": [
                 5.5735,
@@ -6517,7 +6517,7 @@
             }
           },
           "clearancePositions": {
-            "SC-2F-SC2003-3": [
+            "SC-2F-SC2003-1": [
               5.5735,
               -2.335
             ],
@@ -6527,14 +6527,14 @@
             ]
           },
           "perRoomPosition": {
-            "SC-2F-SC2003-3": [
+            "SC-2F-SC2003-1": [
               5.5735,
               -1.975
             ]
           },
           "sourceReview": {
             "report": "tools/apply_v12_sc_rooms.py",
-            "entryId": "SC-2F-SC2003-3"
+            "entryId": "SC-2F-SC2003-1"
           },
           "cutDepth": 0.65,
           "traceCorrection": {
@@ -6850,12 +6850,12 @@
         "SC-2F-SC2009": "SC-2F-portal-003",
         "SC-2F-SC2007": "SC-2F-portal-004",
         "SC-2F-SC2006": "SC-2F-portal-005",
-        "SC-2F-SC2005-1": "SC-2F-portal-021",
-        "SC-2F-SC2005-2": "SC-2F-portal-022",
+        "SC-2F-SC2005-2": "SC-2F-portal-021",
+        "SC-2F-SC2005-1": "SC-2F-portal-022",
         "SC-2F-SC2004": "SC-2F-portal-006",
-        "SC-2F-SC2003-1": "SC-2F-portal-023",
+        "SC-2F-SC2003-3": "SC-2F-portal-023",
         "SC-2F-SC2003-2": "SC-2F-portal-024",
-        "SC-2F-SC2003-3": "SC-2F-portal-025",
+        "SC-2F-SC2003-1": "SC-2F-portal-025",
         "SC-2F-SC2001": "SC-2F-portal-020",
         "SC-2F-SC2008": "SC-2F-portal-007",
         "SC-2F-SC2012": "SC-2F-portal-008",
@@ -71018,7 +71018,7 @@
           "sourceReview": {
             "report": "public/data/walkthrough/final-three-door-source-review.json",
             "entryId": "EV-4F:EV-4F-region-009:EV-4F-region-008",
-            "sha256": "94ff50dc6054bb1754e19c7d1ffd9a310c55662d57b61428c8cd2cb6eb7e1c02"
+            "sha256": "492aff38e375ccae4df8de4300acb94f59300ffb4e352eb3c3582eb3d9affee4"
           },
           "cutDepth": 0.65,
           "traceCorrection": {
@@ -72955,7 +72955,7 @@
           "sourceReview": {
             "report": "public/data/walkthrough/final-three-door-source-review.json",
             "entryId": "EV-6F:EV-6F-region-017:EV-6F-region-016",
-            "sha256": "94ff50dc6054bb1754e19c7d1ffd9a310c55662d57b61428c8cd2cb6eb7e1c02"
+            "sha256": "492aff38e375ccae4df8de4300acb94f59300ffb4e352eb3c3582eb3d9affee4"
           },
           "cutDepth": 0.65,
           "traceCorrection": {

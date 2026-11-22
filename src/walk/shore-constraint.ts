@@ -8,7 +8,7 @@ const FOOTPRINT=Array.from({length:8},(_,i)=>[Math.cos(i*Math.PI/4)*RADIUS,Math.
 /** Keep the player's footprint on shore or an actual deck, while allowing coastal sliding.
  * DEM above water also covers basements/tunnels: their lower floors are not open sea.
  * Existing wet positions may escape toward higher ground instead of being locked in. */
-export function shoreConstraint(terrain:ShoreSurface,supportAt:Support):StepConstraint {
+export function shoreConstraint(terrain:ShoreSurface,supportAt:Support,waterAllowed:(x:number,z:number)=>boolean=()=>false,waterRegion:(x:number,z:number)=>boolean=()=>false):StepConstraint {
  const edge=terrain.seaLevel+DRY_MARGIN;
  return (position,velocity,h)=>{
   if(!(h>0)||!Number.isFinite(h)||!Number.isFinite(velocity.x)||!Number.isFinite(velocity.z)||Math.hypot(velocity.x,velocity.z)<1e-8)return;
@@ -20,7 +20,7 @@ export function shoreConstraint(terrain:ShoreSurface,supportAt:Support):StepCons
   };
   const level=(x:number,z:number)=>Math.min(surface(x,z),...FOOTPRINT.map(([dx,dz])=>surface(x+dx,z+dz)));
   const current=level(position.x,position.z),limit=Math.min(edge,current);
-  const permitted=(x:number,z:number)=>level(position.x+x*h,position.z+z*h)>=limit-1e-5;
+  const permitted=(x:number,z:number)=>{const px=position.x+x*h,pz=position.z+z*h;if(waterAllowed(px,pz))return true;if([[0,0],...FOOTPRINT].some(([dx,dz])=>waterRegion(px+dx,pz+dz)))return false;return level(px,pz)>=limit-1e-5;};
   const vx=velocity.x,vz=velocity.z;
   if(permitted(vx,vz))return;
   // Project against the local shore normal. Axis candidates handle deck corners or

@@ -219,3 +219,11 @@
 .walk-lift button{min-height:44px}
 .walk-photo-gesture{pointer-events:auto;display:none;position:absolute;z-index:45;right:24px;top:24px;background:var(--walk-panel);border:1px solid var(--walk-line)}
 .walkthrough.is-photo .walk-photo-gesture{display:inline-flex}
+.walk-v12-status{position:absolute;left:24px;top:180px;z-index:8;max-width:min(340px,70vw);padding:10px 14px;border-radius:8px;background:var(--walk-panel);color:var(--walk-paper);font-size:13px;white-space:pre-line;pointer-events:none}
+.walk-v12-status meter{display:block;width:100%;margin-top:6px}
+.walk-v12-panel{position:absolute;left:50%;bottom:120px;transform:translateX(-50%);z-index:45;width:min(480px,90vw);padding:16px;background:var(--walk-panel);border:1px solid var(--walk-line);border-radius:10px}
+.walk-v12-panel>div{display:flex;flex-wrap:wrap;gap:8px;max-height:35vh;overflow:auto;margin-top:10px}
+.walk-v12-panel button{min-height:44px;padding:8px;border:1px solid var(--walk-line);border-radius:7px;background:transparent;color:var(--walk-paper)}
+.walk-v12-panel button[aria-pressed=true]{color:var(--walk-ink);background:var(--walk-gold)}
+.walkthrough.is-photo .walk-v12-status{display:none}
+@media(max-width:600px){.walk-v12-status{left:12px;top:148px;max-width:65vw;font-size:12px}.walk-v12-panel{bottom:100px}}

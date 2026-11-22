@@ -1,7 +1,7 @@
 import * as T from 'three';
 import type { WorldLift, WalkWorld } from '../walk-world';
 import type { Obstacle } from './obstacles';
-import type { LiftGeometryV12, LiftSnapshot, MotionMode } from '../world/v12-types';
+import type { LiftGeometryV12, LiftSnapshot, MotionMode, P3 } from '../world/v12-types';
 import { LiftRuntime } from './lift';
 const unit=new T.BoxGeometry(1,1,1),metal=new T.MeshStandardMaterial({color:'#8f9c98',roughness:.65}),segment=new T.MeshBasicMaterial({color:'#eedcad'});
 /** World metres. The passenger zone is the cabin inset by the capsule radius; the door sensor reaches
@@ -113,6 +113,13 @@ export function liftDoorOccupied(lift:WorldLift,feet:readonly T.Vector3[]){
  const outside=-DOOR_SENSOR_OUTSIDE/scale,inside=Math.abs(inner)+DOOR_SENSOR_INSIDE/scale,side=width/2+DOOR_SENSOR_SIDE/scale;
  return feet.some(foot=>{const p=stop.landing.worldToLocal(tmp.copy(foot)),z=p.z*sign;return Math.abs(p.y)<.6&&Math.abs(p.x)<side&&z>outside&&z<inside;});
 }
+/** Shared by lifts and buses: a single carrier-local foot anchor, independent of gravity. */
+export class CarrierAnchor {
+ local:P3=[0,0,0];
+ capture(carrier:T.Object3D,foot:T.Vector3){this.local=carrier.worldToLocal(foot.clone()).toArray();return this.local;}
+ follow(carrier:T.Object3D){return carrier.localToWorld(new T.Vector3(...this.local));}
+ clear(){this.local=[0,0,0];}
+}
 /** About to leave or travelling: doors shut and a destination is pending. */
 export function liftDeparting(s:LiftSnapshot){
  return s.doorOpen01<=0&&(s.phase==='moving'||s.phase==='arrived'||((s.phase==='idle'||s.phase==='closing')&&s.requestedFloorIds.length>0));
@@ -123,22 +130,22 @@ export function liftDeparting(s:LiftSnapshot){
 export class LiftPassenger {
  motion:MotionMode={kind:'walk'};
  private lift?:WorldLift;
+ private anchor=new CarrierAnchor();
  get carried(){return this.motion.kind==='carried';}
  updateCamera(camera:T.PerspectiveCamera){if(this.lift&&this.carried)setLiftCamera(this.lift,camera);}
  /** World yaw (camera-rig convention, forward = (-sin, 0, -cos)) that faces the car door, while carried. */
  doorYaw(){if(!this.lift||!this.carried)return undefined;return liftDoorYaw(this.lift);}
  update(world:Pick<WalkWorld,'lifts'>,foot:T.Vector3,enabled=true):T.Vector3|undefined {
   if(this.lift&&this.motion.kind==='carried'){
-   const p=this.lift.car.localToWorld(new T.Vector3(...this.motion.localAnchor)),s=this.lift.runtime.snapshot;
+   const p=this.anchor.follow(this.lift.car),s=this.lift.runtime.snapshot;
    if(s.phase==='open'||(s.phase==='idle'&&!s.requestedFloorIds.length))this.clear();return p;
   }
   if(enabled)for(const lift of world.lifts){
    if(liftDeparting(lift.runtime.snapshot)&&insideLift(lift,foot,PASSENGER_MARGIN)){
-    // Anchor on the car floor: a rider caught mid-jump (or a frame after departure) rides standing.
-    const anchor=lift.car.worldToLocal(foot.clone()).setY(0);
-    this.lift=lift;this.motion={kind:'carried',carrier:'lift',id:lift.id,localAnchor:anchor.toArray()};return lift.car.localToWorld(anchor);
+    this.anchor.capture(lift.car,foot);this.anchor.local[1]=0;
+    this.lift=lift;this.motion={kind:'carried',carrier:'lift',id:lift.id,localAnchor:this.anchor.local};return this.anchor.follow(lift.car);
    }
   }
  }
- clear(){this.lift=undefined;this.motion={kind:'walk'};}
+ clear(){this.lift=undefined;this.anchor.clear();this.motion={kind:'walk'};}
 }

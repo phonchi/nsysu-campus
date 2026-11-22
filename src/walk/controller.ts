@@ -232,6 +232,8 @@ export class RapierController implements CharacterController {
       new RAPIER.Capsule(HALF, RADIUS), undefined, MOVE_GROUPS, this.body);
   }
 
+  canStand(p:Vector3){const y=this.supportAt(p.x,p.z,p.y);return y!==undefined&&Math.abs(y-p.y)<.35&&this.freeFoot(p);}
+
   /** Actual supporting surface near the requested floor. The bounded vertical window
    * prevents jumping to an upper storey or a roof; props and people never become ground. */
   supportAt(x: number, z: number, referenceY: number): number | undefined {
