@@ -1,6 +1,6 @@
 import {loadV12Data,type V12Data} from './v12-data';
 import {prepareBusRoutes} from './bus';
-import {inside as insideWater, nearestOnPolygon} from './v12-geometry';
+import {inside as insideWater} from './v12-geometry';
 import {V12Runtime} from './v12-runtime';
 import {prepareV12Terrain,buildV12Surfaces} from '../world/v12-surfaces';
 import { GestureMenu } from './gestures';
@@ -15,6 +15,9 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { CampusLod } from '../walk-lod';
 import { decorateCampus, addCampusProps, animateCampus } from '../walk-art';
+import { hamasenEastPortalDetails, hamasenStationBoard, hamasenStreetDetails } from './hamasen-street-details';
+import { hamasenStationDetails } from './hamasen-station-detail';
+import { hamasenRailDetails } from './hamasen-rail-detail';
 import { CampusSky, PRESET_LABEL, type SkyPreset } from '../walk-sky';
 import { NIGHT_MATERIALS, NIGHT_FADE } from '../walk-materials';
 import { CampusUi, type CampusInfo } from '../walk-campus-ui';
@@ -54,7 +57,7 @@ import { GrowableSurfaceField, campusVegetationVolumes } from '../world/growable
 import { gateBarrierObstacles } from '../world/gate-barriers';
 import { loadPlacements, landmarkCarves, landmarkLevels, landmarkTransforms, loadLandmarks, REPLACES } from '../world/landmarks';
 import { OutdoorRoutes } from './route';
-import { fullTunnelProfile, tunnelBores } from '../world/tunnel-surface';
+import { fullTunnelProfile, tunnelBores, type TunnelProfile } from '../world/tunnel-surface';
 import { Campus, clearCampus, type Body } from '../story/collection';
 import { clearProgress } from '../story/engine';
 import { GrassTufts, type GroundMask } from '../render/ground';
@@ -331,8 +334,17 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     world.display.userData.sportsPolygons=[...(v12Data.sports?.facilities??[]).filter(f=>!f.id.includes('candidate')).map(f=>f.polygon),...(v12Data.bus?.forecourt?[v12Data.bus.forecourt.polygon]:[])];
     world.display.userData.placementAllowed=placementPolicy(terrain,v12Data);
     world.display.userData.roadExclusions = s.context.landmarks.filter(l => replacedOsm.has(l.id)).map(l => l.polygon);
-    if (placements?.tunnel) world.display.userData.treeBores = tunnelBores(fullTunnelProfile(placements.tunnel, (x,z)=>terrain.heightAt(x,z)));
+    if (placements?.tunnel) {
+      const profile=fullTunnelProfile(placements.tunnel,(x,z)=>terrain.heightAt(x,z));
+      world.display.userData.treeBores=tunnelBores(profile);
+      world.display.userData.hamasenTunnelProfile=profile;
+    }
     decorateCampus(world, structure, terrain, TIERS[tier].detail.leaf);
+    if(structure.context.hamasen)world.display.add(
+      hamasenStreetDetails(structure.context,terrain),
+      hamasenStationDetails(structure.context.background,terrain),
+      hamasenRailDetails(structure.context,terrain),
+    );
     lod = new CampusLod(world, structure);
     scene.add(world.display);
     clouds = buildClouds(24, world.spawn); clouds.count = TIERS[tier].detail.clouds; scene.add(clouds);
@@ -365,6 +377,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     if (!placements) { landmarksReady = true; featureStatus.landmarks='degraded'; growable?.setReady(true); }
     if (placements) startupJobs.push(loadLandmarks(asset, placements, terrain).then(lm => {
       if (!alive) { disposeObject(lm.display); disposeObject(lm.collision); return; }
+      const profile=world.display.userData.hamasenTunnelProfile as TunnelProfile | undefined;
+      if(structure.context.hamasen && profile)hamasenEastPortalDetails(profile,lm.display);
       // Hand-modelled landmarks replace the OSM blocks and the v2 procedural features at those sites.
       world.display.traverse(o => { if (o.name.startsWith('Landmark features')) o.visible = false; });
       scene.add(lm.display); physics.addStatic(lm.collision);
@@ -430,7 +444,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   let walking = false, overview = true, inspectedBuilding = 'SC';
   const buildingSelect = get<HTMLSelectElement>('[data-building]'), floorSelect = get<HTMLSelectElement>('[data-floor]');
 
-  function chooseMode(isOverview: boolean) {
+  function chooseMode(isOverview: boolean, campusBuilding = false) {
     if(sceneLoading)return;
     overview = isOverview; walking = true;
     host.classList.toggle('is-overview', isOverview); get('.walk-welcome').hidden = true;
@@ -439,10 +453,17 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     get('[data-action="overview"]').classList.toggle('is-active', isOverview);
     if (document.pointerLockElement) document.exitPointerLock();
     if (isOverview) {
-      const group = campusData.find(b => b.id === inspectedBuilding) ?? campusData[0];
-      const f = group.floors.find(f => f.level === 1) ?? group.floors[0];
-      const target = new T.Vector3((f.bounds[0] + f.bounds[2]) / 2, 3, (f.bounds[1] + f.bounds[3]) / 2).applyMatrix4(world.frames.get(group.id)!);
-      orbit.target.copy(target); camera.position.copy(target).add(new T.Vector3(-70, 80, 75)); orbit.update();
+      const district=structure.context.hamasen?.polygon,foot=physics.position;
+      if(!campusBuilding&&district&&insideWater([foot.x,foot.z],district)){
+        orbit.target.copy(foot).y+=3;
+        camera.position.copy(orbit.target).add(new T.Vector3(-36,56,44));
+      }else{
+        const group = campusData.find(b => b.id === inspectedBuilding) ?? campusData[0];
+        const f = group.floors.find(f => f.level === 1) ?? group.floors[0];
+        orbit.target.set((f.bounds[0]+f.bounds[2])/2,3,(f.bounds[1]+f.bounds[3])/2).applyMatrix4(world.frames.get(group.id)!);
+        camera.position.copy(orbit.target).add(new T.Vector3(-70,80,75));
+      }
+      orbit.update();
     } else { floorSelect.value = 'all'; rig.snap(physics.position); startStoryWhenReady(); }
     updateUi();
   }
@@ -875,8 +896,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   buildingSelect.innerHTML = campusData.map(b => `<option value="${safe(b.id)}">${safe(b.name)}</option>`).join(''); buildingSelect.value = 'SC';
   const floorOptions = () => { floorSelect.innerHTML = '<option value="all">全棟</option>' + world.floors.filter(f => f.buildingId === inspectedBuilding).map(f => `<option value="${safe(f.data.id)}">${safe(f.data.label)}</option>`).join(''); };
   floorOptions();
-  buildingSelect.addEventListener('change', () => { inspectedBuilding = buildingSelect.value; floorOptions(); chooseMode(true); });
-  floorSelect.addEventListener('change', () => { if (!overview) chooseMode(true); });
+  buildingSelect.addEventListener('change', () => { inspectedBuilding = buildingSelect.value; floorOptions(); chooseMode(true, true); });
+  floorSelect.addEventListener('change', () => { if (!overview) chooseMode(true, true); });
   const campusUi = campusInfo ? new CampusUi(host, scene, world, uiStructure, campusData, campusInfo, {
     goToBuilding: id => { const d = world.destinations.find(d => d.id === `${id}-1F-entrance`); if (d) { chooseMode(false); goTo(d); } else { chooseMode(false); walkOutdoor(({AD:'admin',IL:'library',GATE:'gate'} as Record<string,string>)[id] ?? id); } },
     inspectBuilding: id => { chooseMode(true); buildingSelect.value = id; buildingSelect.dispatchEvent(new Event('change')); },
@@ -1078,7 +1099,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     const selected = world.floors.find(f => f.data.id === floorSelect.value), floorRecord = overview && selected ? selected : currentFloor;
     const buildingName = campusData.find(b => b.id === nearestBuilding)!.name;
     placeIndoors = best < .5;
-    const inHamasen = hamasenEast !== undefined && foot.x >= hamasenEast && foot.z >= 100;
+    const district=structure.context.hamasen?.polygon;
+    const inHamasen = district ? insideWater([foot.x,foot.z],district) : hamasenEast !== undefined && foot.x >= hamasenEast && foot.z >= 100;
     currentPlaceText = actualPlaceText(buildingName, currentFloor.data.label, best, inHamasen ? '哈瑪星' : director?.zoneLabel);
     setText(get('#walk-place'), autoDestination ? `前往 ${autoDestination.label}` : currentPlaceText);
     lod.update(foot, { overview, buildingId: inspectedBuilding, floorId: floorSelect.value });
@@ -1610,18 +1632,30 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       for(const [id,p]of Object.entries(v12?.anchors()??{}))if(!zones.zones[id])zones.zones[id]={label:v12?.anchorLabel(id)??id,p:[p[0],p[2]],y:p[1],r:8};
       routes = graph;storySeatZones=Object.fromEntries(Object.entries(zones.zones).filter(([,z])=>z.seat).map(([id,z])=>[id,z.seat!]));
       hamasenEast = graph.anchor('hamasen-east-link')?.x;
-      for (const station of structure.context.background.filter(b => b.stationExit)) {
-        const entrance = graph.anchor(`hamasen-exit-${station.stationExit}`);
+      for (const station of structure.context.background) {
+        const exit=station.stationExit;
+        if(exit!==1&&exit!==2)continue;
+        const entrance = graph.anchor(`hamasen-exit-${exit}`);
         if (!entrance) continue;
-        const [x, z] = nearestOnPolygon([entrance.x, entrance.z], station.polygon);
-        const outward = new T.Vector3(entrance.x - x, 0, entrance.z - z).normalize();
-        const plate = makeDoorSign(`哈瑪星站 ${station.stationExit} 號出口`);
-        const sign = new T.Sprite(new T.SpriteMaterial({ map: plate.material.map }));
-        sign.name = `Hamasen exit ${station.stationExit} sign`;
-        sign.position.set(x, entrance.y + 2.2, z).addScaledVector(outward, .55);
-        sign.scale.set(2.9, .9, 1);
-        scene.add(sign);
-        plate.geometry.dispose(); plate.material.dispose();
+        const ring=station.polygon,center=polygonCenter(ring);
+        const edges=ring.map((a,i)=>{
+          const b=ring[(i+1)%ring.length], dx=b[0]-a[0],dz=b[1]-a[1],len=Math.hypot(dx,dz);
+          const along=len?T.MathUtils.clamp(((entrance.x-a[0])*dx+(entrance.z-a[1])*dz)/len,0,len):0;
+          return { i, a, len, dx, dz, distance:len?Math.hypot(entrance.x-a[0]-dx*along/len,entrance.z-a[1]-dz*along/len):Infinity };
+        }).filter(edge=>edge.len>1.5).sort((a,b)=>a.distance-b.distance);
+        const front=edges.find(edge=>edge.i===station.frontage?.edge)??edges[0];
+        if(!front)continue;
+        const {a,dx,dz,len}=front, x=a[0]+dx/2,z=a[1]+dz/2;
+        const normal=new T.Vector3(-dz/len,0,dx/len);
+        if(normal.x*(x-center[0])+normal.z*(z-center[1])<0)normal.negate();
+        const firstExit=exit===1;
+        const curb=terrainRef?Math.max(terrainRef.heightAt(x+normal.x*.16,z+normal.z*.16),...ring.map(([px,pz])=>terrainRef!.heightAt(px,pz))):entrance.y;
+        const fascia=Math.min(3.35,.8*(station.heightM??4.4))+(firstExit?.045:-.07);
+        const plate=hamasenStationBoard(exit,Math.min(firstExit?4.1:4.35,len*.72),firstExit?.51:.58);
+        plate.name=`Hamasen exit ${exit} sign`;
+        plate.rotation.y=Math.atan2(normal.x,normal.z);
+        plate.position.set(x,curb+fascia,z).addScaledVector(normal,firstExit?2.24:1.06);
+        scene.add(plate);
       }
       zoneLabels = Object.fromEntries(Object.entries(zones.zones).map(([id,z]) => [id,z.label]));
       validateRoutes();

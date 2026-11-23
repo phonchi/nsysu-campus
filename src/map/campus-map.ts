@@ -4,8 +4,9 @@ import { withGateMapBuilding, type MapBuilding } from './map-landmarks';
 
 type P = [number, number];
 interface MapData {
-  spawn: P; buildings: MapBuilding[]; background: P[][];
+  spawn: P; buildings: MapBuilding[]; background: P[][]; backgroundHoles?: Record<number,P[][]>;
   roads: { kind: string; width: number; points: P[] }[];
+  railways?: { points: P[] }[];
   water: { kind: string; points: P[] }[];
   sport: { kind: string; polygon: P[] }[];
   base?: { url: string; bounds: [number, number, number, number] };
@@ -47,7 +48,7 @@ export async function mountCampusMap(root: HTMLElement, base: string, hooks: Map
 <ol class="cm-chapters"></ol><div class="cm-actions"><button class="primary" data-go="story">開始導覽</button><button data-go="overview">先鳥瞰全校</button></div></section>
 <section class="cm-filter" aria-label="依類別篩選"><h2>地圖圖例</h2><div class="cm-chips"></div></section>
 <section class="cm-card" hidden></section>
-<p class="cm-attrib">底圖：OpenStreetMap contributors（ODbL）・建築位置依開放圖資與官方校園平面圖對位，比例為示意。</p>
+<p class="cm-attrib">底圖 © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>、<a href="https://docs.overturemaps.org/attribution/" target="_blank" rel="noopener">Overture Maps Foundation</a>（ODbL）。建築依開放圖資與校園平面圖對位。</p>
 </aside></div>`;
   const svg = root.querySelector<SVGSVGElement>('.cm-svg')!;
   const card = root.querySelector<HTMLElement>('.cm-card')!;
@@ -92,8 +93,9 @@ ${data.base ? `<image href="${asset(data.base.url)}" x="${data.base.bounds[0]}" 
 <g class="cm-water">${data.base ? '' : data.water.map(w => `<path d="${path(w.points, w.kind !== 'coastline')}" class="${w.kind}"/>`).join('')}</g>
 <g class="cm-sport">${data.sport.map(s => `<path d="${path(s.polygon)}" class="${s.kind}"/>`).join('')}</g>
 <g class="cm-roads">${data.roads.map(r => `<path d="${path(r.points, false)}" class="${r.kind}" stroke-width="${roadW[r.kind] ?? 3}"/>`).join('')}</g>
-<g class="cm-bg">${data.background.map(p => `<path d="${path(p)}"/>`).join('')}</g>
-<g class="cm-buildings">${data.buildings.map(b => `<g class="cm-b" data-id="${esc(b.id)}" data-kind="${b.kind}" tabindex="0" role="button" aria-label="${esc(b.name)}"><path d="${b.id==='GATE'?'M0 0l-7-12a8 8 0 1 1 14 0z':path(b.polygon)}" ${b.id==='GATE'?`transform="translate(${centroid(b.polygon).join(' ')})"`:''} style="--k:${KINDS[b.kind]?.color ?? '#c75f4a'}"/>${b.walkable ? `<path d="${path(b.polygon)}" class="cm-walk"/>` : ''}</g>`).join('')}</g>
+<g fill="none" stroke="#78736a" stroke-width="1.15">${(data.railways??[]).map(r=>`<path d="${path(r.points,false)}"/>`).join('')}</g>
+<g class="cm-bg">${data.background.map((p,i)=>`<path fill-rule="evenodd" d="${path(p)}${(data.backgroundHoles?.[i]??[]).map(h=>path(h)).join('')}"/>`).join('')}</g>
+<g class="cm-buildings">${data.buildings.map(b => `<g class="cm-b" data-id="${esc(b.id)}" data-kind="${b.kind}" tabindex="0" role="button" aria-label="${esc(b.name)}"><path fill-rule="evenodd" d="${b.id==='GATE'?'M0 0l-7-12a8 8 0 1 1 14 0z':path(b.polygon)+(b.holes??[]).map(h=>path(h)).join('')}" ${b.id==='GATE'?`transform="translate(${centroid(b.polygon).join(' ')})"`:''} style="--k:${KINDS[b.kind]?.color ?? '#c75f4a'}"/>${b.walkable ? `<path d="${path(b.polygon)}" class="cm-walk"/>` : ''}</g>`).join('')}</g>
 <g class="cm-labels">${[...data.buildings].sort((a, b) => rank(b) - rank(a) || area(b.polygon) - area(a.polygon)).map(b => { const [x, z] = centroid(b.polygon); return `<g class="cm-l" data-id="${esc(b.id)}" transform="translate(${x} ${b.id==='GATE'?z-26:z})"><text>${esc(b.name.replace(/（.*?）/g, ''))}</text></g>`; }).join('')}</g>
 ${mapPois.filter(p => data.landmarks?.[p.id]).map(p => { const [x, z] = data.landmarks![p.id].centroid; return `<g class="cm-poi" data-poi="${p.id}" transform="translate(${x} ${z})"><path d="M0 0l-7-12a8 8 0 1 1 14 0z"/><text y="-26">${esc(p.label)}</text></g>`; }).join('')}
 <g class="cm-you" transform="translate(${data.spawn[0]} ${data.spawn[1]})"><circle r="9"/><text y="-14">起點・理工長廊</text></g>`;

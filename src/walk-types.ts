@@ -16,10 +16,22 @@ export interface StairCoreLevel {floorId:string;level:number;storey:number;basis
 export interface StairCore {id:string;center:Point2;angle:number;length:number;width:number;apron:number;levels:StairCoreLevel[];basis:Basis;evidence?:string;}
 export interface LiftSpec extends Partial<Omit<LiftGeometryV12, 'id'|'center'|'angle'|'size'|'stops'|'basis'>> {id:string;center:Point2;angle:number;size:number;stops:({floorId:string;level:number;storey:number}&Partial<LiftStopV12>)[];basis:Basis;}
 export interface JoinConnector {id:string;buildings:[string,string];floors:[string,string];storey:number;a:Point2;b:Point2;width:number;openings:Record<string,{p:Point2;width:number}[]>;rails:Point2[][];basis:Basis;}
-export interface ContextBuilding {id:string;name:string|null;polygon:Point2[];storeys:number;tone?:string;heightM?:number;stationExit?:number;}
-export interface ContextRoad {id:string;kind:string;name?:string|null;width:number;tunnel?:boolean;bridge?:boolean;points:Point2[];}
+export interface ContextBuilding {
+ id:string;name:string|null;polygon:Point2[];storeys:number;tone?:string;heightM?:number;stationExit?:number;
+ district?:'hamasen';holes?:Point2[][];roofTone?:string;roofShape?:'flat'|'gable'|'hip'|'shed';signText?:string;
+ facade?:'shophouse'|'residential'|'commercial'|'civic'|'warehouse'|'temple'|'station'|'platform';
+ frontage?:{edge:number;arcadeDepth?:number};
+}
+export interface ContextRoad {id:string;kind:string;name?:string|null;width:number;tunnel?:boolean;bridge?:boolean;points:Point2[];sidewalk?:string;district?:'hamasen';}
+export interface HamasenContext {
+ polygon:Point2[];
+ rails?:{id:string;kind:string;points:Point2[]}[];
+ ground?:{kind:'paving'|'yard'|'grass';polygon:Point2[]}[];
+ trees?:Point2[];
+ streetLights?:Point2[];
+}
 export interface CampusStructure {
  version:number;placements:Record<string,StructurePlacement>;stairCores:Record<string,StairCore[]>;lifts:Record<string,LiftSpec[]>;
  roomOverrides:Record<string,Record<string,Point2[]|null>>;connectors:JoinConnector[];railGaps?:Record<string,{p:Point2;width:number}[]>;
- context:{landmarks:ContextBuilding[];background:ContextBuilding[];roads:ContextRoad[];water:{id:string;kind:string;points:Point2[]}[];sport:{id:string;kind:string;sport?:string;polygon:Point2[]}[]};
+ context:{landmarks:ContextBuilding[];background:ContextBuilding[];roads:ContextRoad[];water:{id:string;kind:string;points:Point2[]}[];sport:{id:string;kind:string;sport?:string;polygon:Point2[]}[];hamasen?:HamasenContext};
 }

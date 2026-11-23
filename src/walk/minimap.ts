@@ -3,8 +3,8 @@ import { contentBounds, layoutMapLabels, mapMarkerRadius, graphPathSegments, pat
 
 type P = [number, number];
 export interface MapLabel { id: string; label: string; x: number; z: number; priority: number; minScale?: number }
-export interface MapBuilding { id: string; name: string; kind: string; walkable: boolean; polygon: P[] }
-interface MapData { base?: { url: string; bounds: [number, number, number, number] }; buildings: MapBuilding[]; background: P[][]; roads: { kind: string; width: number; points: P[] }[] }
+export interface MapBuilding { id: string; name: string; kind: string; walkable: boolean; polygon: P[]; holes?: P[][] }
+interface MapData { base?: { url: string; bounds: [number, number, number, number] }; buildings: MapBuilding[]; background: P[][]; backgroundHoles?: Record<number,P[][]>; roads: { kind: string; width: number; points: P[] }[]; railways?: { points: P[] }[] }
 const KIND: Record<string, string> = { teaching: '#c75f4a', admin: '#e9b949', life: '#4d9a44', scenic: '#2c7f91' };
 
 /** The label sources used by the overview, shared with actual-data uniqueness checks. */
@@ -19,7 +19,7 @@ export type MapMarkerKind = 'quest' | 'bike' | 'stamp' | 'bus' | 'restroom' | 'p
 export interface MapMarker { id: string; kind: MapMarkerKind; x: number; y: number; z: number; label: string; buildingId?: string }
 export interface MapFrame { x0: number; z0: number; scale: number; width: number; height: number }
 /** Full base-sheet fallback; the overview derives its initial extent from loaded content. */
-export const CAMPUS_VIEW = { x0: -900, z0: -1100, x1: 960, z1: 700 };
+export const CAMPUS_VIEW = { x0: -900, z0: -1100, x1: 1008, z1: 752 };
 export const MARKER_STYLE: Record<MapMarkerKind, { color: string; glyph: string }> = { quest: { color: '#e9b949', glyph: '任' }, bike: { color: '#2c7f91', glyph: '車' }, stamp: { color: '#c75f4a', glyph: '章' }, bus: { color: '#4d9a44', glyph: '公' }, restroom: { color: '#2a2c4a', glyph: '廁' }, place: { color: '#2c7f91', glyph: '地' }, building: { color: '#c75f4a', glyph: '樓' } };
 
 /** Fits the campus into a width × height canvas, centred, north up. */
@@ -66,10 +66,17 @@ export class CampusMinimap {
       g.strokeStyle = /footway|path|steps/.test(r.kind) ? '#efe2c6' : '#fffaf0'; g.lineWidth = Math.max(2, r.width);
       g.beginPath(); r.points.forEach(([x, z], i) => i ? g.lineTo(x, z) : g.moveTo(x, z)); g.stroke();
     }
-    const poly = (p: P[]) => { g.beginPath(); p.forEach(([x, z], i) => i ? g.lineTo(x, z) : g.moveTo(x, z)); g.closePath(); };
+    for(const r of data.railways??[]){
+      g.strokeStyle='#78736a';g.lineWidth=1;
+      g.beginPath();r.points.forEach(([x,z],i)=>i?g.lineTo(x,z):g.moveTo(x,z));g.stroke();
+    }
+    const poly = (p: P[],holes: P[][] = []) => {
+      g.beginPath();
+      for(const ring of [p,...holes]){ring.forEach(([x,z],i)=>i?g.lineTo(x,z):g.moveTo(x,z));g.closePath();}
+    };
     g.lineWidth = 1.5; g.strokeStyle = '#2a2c4a';
-    for (const p of data.background) { poly(p); g.fillStyle = '#e1d5bd'; g.fill(); g.stroke(); }
-    for (const b of data.buildings) { poly(b.polygon); g.fillStyle = KIND[b.kind] ?? '#c75f4a'; g.fill(); g.stroke(); }
+    data.background.forEach((p,i)=>{poly(p,data.backgroundHoles?.[i]);g.fillStyle='#e1d5bd';g.fill('evenodd');g.stroke();});
+    for(const b of data.buildings){poly(b.polygon,b.holes);g.fillStyle=KIND[b.kind]??'#c75f4a';g.fill('evenodd');g.stroke();}
     this.sheet = c;
     // Build once from the navigation graph, including the hill links absent from the OSM roads.
     // The base map remains available if this optional overlay cannot be fetched.
@@ -80,7 +87,7 @@ export class CampusMinimap {
       // The marine-sciences building has a graph anchor but no footprint in campus-map.json.
       const marine = graph.nodes.find(node => node.id === graph.anchors?.MA?.node);
       if (marine) this.graphLabels = [{ id: 'building:MA', label: '海洋科學學院', x: marine.p[0], z: marine.p[2], priority: 8 }];
-      this.destinationMarkers = this.buildings.filter(b => /^hamasen-exit-[12]$/.test(b.id)).flatMap(b => {
+      this.destinationMarkers = this.buildings.filter(b => /^hamasen-exit-[12]$/.test(b.id) || b.id === 'hamasen-rail-park').flatMap(b => {
         const node = graph.nodes.find(n => n.id === graph.anchors?.[b.id]?.node);
         if (!node) return [];
         const [x, y, z] = node.p;
@@ -101,7 +108,8 @@ export class CampusMinimap {
     return contentBounds([...this.background, ...this.buildings.flatMap(b => b.polygon), ...this.graphLabels.map(p => [p.x, p.z] as const), ...this.destinationMarkers.map(m => [m.x, m.z] as const), ...extra], this.sheetBounds);
   }
   pickBuilding(frame: MapFrame, px: number, py: number) {
-    return this.buildings.find(b => pointInPolygon(pointAt(frame, px, py), b.polygon));
+    const point=pointAt(frame,px,py);
+    return this.buildings.find(b=>pointInPolygon(point,b.polygon)&&!b.holes?.some(h=>pointInPolygon(point,h)));
   }
   get ready() { return !!this.sheet; }
 
@@ -121,8 +129,11 @@ export class CampusMinimap {
     }
     const selectedBuilding = this.buildings.find(b => `building:${b.id}` === selected);
     if (selectedBuilding) {
-      ctx.beginPath(); selectedBuilding.polygon.forEach(([x, z], i) => i ? ctx.lineTo(frameX(frame, x), frameY(frame, z)) : ctx.moveTo(frameX(frame, x), frameY(frame, z))); ctx.closePath();
-      ctx.fillStyle = '#e9b94966'; ctx.fill(); ctx.strokeStyle = '#173e49'; ctx.lineWidth = 3; ctx.stroke();
+      ctx.beginPath();
+      for(const ring of [selectedBuilding.polygon,...(selectedBuilding.holes??[])]){
+        ring.forEach(([x,z],i)=>i?ctx.lineTo(frameX(frame,x),frameY(frame,z)):ctx.moveTo(frameX(frame,x),frameY(frame,z)));ctx.closePath();
+      }
+      ctx.fillStyle = '#e9b94966'; ctx.fill('evenodd'); ctx.strokeStyle = '#173e49'; ctx.lineWidth = 3; ctx.stroke();
     }
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '700 12px "Noto Sans TC",sans-serif';
     const blocked = [...markers.map(m => { const r = mapMarkerRadius(frame.scale, m.id === selected) + 2; return { x: frameX(frame, m.x) - r, y: frameY(frame, m.z) - r, width: r * 2, height: r * 2, priority: 0 }; }), { x: frameX(frame, foot.x) - 19, y: frameY(frame, foot.z) - 19, width: 38, height: 38, priority: 0 }];

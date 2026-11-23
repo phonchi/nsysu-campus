@@ -9,7 +9,7 @@ export interface TerrainMeta { origin: Point2; cell: number; cols: number; rows:
 /** Ground is 5.5 cm below the walkable floors' zero; the DEM pad is at 0, so shift it to meet the ground plane. */
 export const GROUND_Y = -.055;
 /** Collision/navigation extent; the display grid covers the whole DEM. */
-export const PLAY_BOUNDS: [number, number, number, number] = [-700, -1060, 952, 700];
+export const PLAY_BOUNDS: [number, number, number, number] = [-700, -1060, 1000, 744];
 
 /** MOI 20 m DTM resampled to a 4 m grid by tools/build_terrain.py (public/data/terrain/). Shared by render, Rapier and Recast. */
 export class Terrain {

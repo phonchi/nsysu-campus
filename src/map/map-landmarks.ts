@@ -1,7 +1,7 @@
 /** Enrich only the in-memory map catalog; retain the published source data and hashes. */
 import gateCollision from '../../public/models/landmarks/gate.collision.json';
 export type MapPoint = [number,number];
-export interface MapBuilding {id:string;name:string;kind:string;walkable:boolean;polygon:MapPoint[];storeys?:number}
+export interface MapBuilding {id:string;name:string;kind:string;walkable:boolean;polygon:MapPoint[];holes?:MapPoint[][];storeys?:number}
 interface GateMapData {buildings:MapBuilding[];landmarks?:Record<string,{centroid:MapPoint;yaw?:number}>}
 export function withGateMapBuilding<T extends GateMapData>(data:T):Omit<T,'buildings'> & {buildings:MapBuilding[]} {
   const gate=data.landmarks?.gate;

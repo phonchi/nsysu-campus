@@ -28,7 +28,7 @@ export function hudTemplate(asset: (p: string) => string, base: string) {
 <div class="walk-help"><span><kbd>WASD</kbd>移動</span><span><kbd>Shift</kbd>奔跑</span><span><kbd>Space</kbd>跳躍</span><span><kbd>E</kbd>互動</span><span><kbd>G</kbd>任務自動前往</span><span><kbd>Q</kbd>切換主線／支線</span><span><kbd>L</kbd>鎖定視角</span><span><kbd>V</kbd>切換視角</span><span><kbd>M</kbd>鳥瞰</span><span><kbd>K</kbd>大地圖（也可點小地圖）</span><span><kbd>N</kbd>時段</span><span><kbd>H</kbd>說明</span><span>拖曳轉頭・滾輪遠近</span></div>
 <div class="walk-lock-badge" hidden>視角已鎖定・按 L 解除</div>
 <div class="walk-status" role="status" aria-live="polite"></div>
-<div class="walk-attrib">地圖資料 © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors（ODbL）・建築配置與內裝為示意</div>
+<div class="walk-attrib">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>、<a href="https://docs.overturemaps.org/attribution/" target="_blank" rel="noopener">Overture Maps Foundation</a>（ODbL）・建築配置與內裝為示意</div>
 <div class="walk-lift" role="dialog" aria-label="選擇樓層" hidden></div>
 <button type="button" class="walk-button walk-photo-gesture" data-action="gesture">手勢 T</button>
 <div class="walk-joystick" aria-label="移動搖桿"><div class="walk-stick"></div></div>

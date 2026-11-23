@@ -5,8 +5,8 @@ import type { LiftGeometryV12 } from './world/v12-types';
 import { planRestroom, addRestroomInterior } from './world/restroom-interiors';
 import * as T from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import type { WalkBuilding,WalkFloor,WalkRoom,Point2,WalkDestination,CampusStructure,StairCore,LiftSpec } from './walk-types';
-import { GROUND_Y, PLAY_BOUNDS, type Terrain } from './world/terrain';
+import type { WalkBuilding,WalkFloor,WalkRoom,Point2,WalkDestination,CampusStructure,ContextBuilding,StairCore,LiftSpec } from './walk-types';
+import { GROUND_Y, PLAY_BOUNDS, inPolygon, type Terrain } from './world/terrain';
 import { projectRoadGeometry } from './world/road-surface';
 import { planScienceInterior, addScienceInterior } from './world/science-interiors';
 export const FLOOR_HEIGHT=3.7;
@@ -44,6 +44,87 @@ function batchVisual(group:T.Group){
 }
 const unitBox=new T.BoxGeometry(1,1,1);
 const area=(p:Point2[])=>Math.abs(p.reduce((s,a,i)=>{const b=p[(i+1)%p.length];return s+a[0]*b[1]-b[0]*a[1];},0)/2);
+
+function districtArcade(building:ContextBuilding) {
+ const {polygon,frontage,holes}=building;
+ const depth=frontage?.arcadeDepth ?? 0;
+ if(depth<1 || depth>4 || !frontage || holes?.length)return;
+ const a=polygon[frontage.edge], b=polygon[(frontage.edge+1)%polygon.length];
+ if(!a||!b)return;
+ const length=Math.hypot(b[0]-a[0],b[1]-a[1]);
+ if(length<3)return;
+ const tx=(b[0]-a[0])/length,tz=(b[1]-a[1])/length;
+ const signed=polygon.reduce((sum,p,i)=>sum+p[0]*polygon[(i+1)%polygon.length][1]-p[1]*polygon[(i+1)%polygon.length][0],0);
+ const nx=-tz*Math.sign(signed),nz=tx*Math.sign(signed);
+ const inward=([x,z]:Point2)=>(x-a[0])*nx+(z-a[1])*nz;
+ // Restrict a recess to a single straight frontage. This avoids spanning a side
+ // wing or cutting through more than one connected piece of the building.
+ if(polygon.some(p=>inward(p)<-.05))return;
+ const back:Point2[]=[];
+ let crossings=0;
+ for(let i=0;i<polygon.length;i++){
+  const p=polygon[i],q=polygon[(i+1)%polygon.length],dp=inward(p)-depth,dq=inward(q)-depth;
+  if(dp>=0)back.push(p);
+  if((dp>=0)!==(dq>=0)){
+   const t=dp/(dp-dq);
+   back.push([T.MathUtils.lerp(p[0],q[0],t),T.MathUtils.lerp(p[1],q[1],t)]);
+   crossings++;
+  }
+ }
+ if(crossings!==2 || back.length<3 || area(back)<area(polygon)*.4)return;
+ return {a,tx,tz,nx,nz,length,depth,back};
+}
+
+function addDistrictBuilding(group:T.Group,collision:T.Group,building:ContextBuilding,ground:(x:number,z:number)=>number){
+ const {polygon,holes}=building, baseY=Math.max(...polygon.map(p=>ground(...p)));
+ const lowerY=Math.min(...polygon.map(p=>ground(...p)))-.35;
+ const topY=baseY+(building.heightM??Math.max(3.1,building.storeys*3.25));
+ const addSolid=(footprint:Point2[],lo:number,hi:number,courtyards?:Point2[][])=>{
+  const geometry=new T.ExtrudeGeometry(shapeOf(footprint,courtyards),{depth:hi-lo,bevelEnabled:false});
+  geometry.translate(0,0,lo);
+  const mesh=new T.Mesh(geometry,mat('#c5c3bc'));
+  mesh.rotation.x=-Math.PI/2;mesh.castShadow=true;mesh.receiveShadow=true;
+  group.add(mesh);collision.add(mesh.clone());
+  return mesh;
+ };
+ const addColumn=(x:number,z:number,start:number,end:number,size:number,yaw:number)=>{
+  const column=box(group,size,end-start,size,x,(start+end)/2,z,'#bbb9b0');
+  column.rotation.y=yaw;column.userData.hamasenColumn=true;
+  collision.add(column.clone());
+ };
+ let arcadeDepth=0;
+ if(building.facade==='platform'){
+  const deck=baseY+.16,eave=topY-.24;
+  addSolid(polygon,lowerY,deck,holes).userData.hamasenPlatformDeck=true;
+  addSolid(polygon,eave,topY,holes);
+  // Roofed platform with two rows of supports and a clear walking surface.
+  const longEdges=polygon.map((a,i)=>({a,b:polygon[(i+1)%polygon.length]}))
+   .sort((p,q)=>Math.hypot(q.b[0]-q.a[0],q.b[1]-q.a[1])-Math.hypot(p.b[0]-p.a[0],p.b[1]-p.a[1])).slice(0,2);
+  const center=polygon.reduce(([x,z],p)=>[x+p[0]/polygon.length,z+p[1]/polygon.length] as Point2,[0,0] as Point2);
+  for(const {a,b} of longEdges){
+   const len=Math.hypot(b[0]-a[0],b[1]-a[1]), count=Math.max(2,Math.round(len/7));
+   for(let i=0;i<count;i++){
+    const t=(i+.5)/count,x=T.MathUtils.lerp(a[0],b[0],t),z=T.MathUtils.lerp(a[1],b[1],t);
+    addColumn(T.MathUtils.lerp(x,center[0],.1),T.MathUtils.lerp(z,center[1],.1),deck,eave,.25,0);
+   }
+  }
+ }else{
+  const arcade=topY-baseY>3.6?districtArcade(building):undefined;
+  if(arcade){
+   arcadeDepth=arcade.depth;
+   const ceiling=baseY+2.85;
+   addSolid(arcade.back,lowerY,ceiling);
+   addSolid(polygon,ceiling,topY);
+   const {a,tx,tz,nx,nz,length}=arcade,count=Math.max(1,Math.round(length/3.8));
+   for(let i=0;i<=count;i++){
+    const at=T.MathUtils.clamp(length*i/count,.24,length-.24), x=a[0]+tx*at+nx*.23,z=a[1]+tz*at+nz*.23;
+    addColumn(x,z,ground(x,z)-.04,ceiling,.33,-Math.atan2(tz,tx));
+   }
+  }else addSolid(polygon,lowerY,topY,holes);
+ }
+ group.userData.hamasenVolume={baseY,topY,arcadeDepth};
+}
+
 export const storey=(f:WalkFloor,maxLevel=4)=>f.storeyIndex??(f.level===99?maxLevel+1:f.level);
 function pairWall(display:T.Object3D,collision:T.Object3D,a:Point2,b:Point2,y:number,h:number,c:string,t=.16){const mesh=wall(display,a,b,y,h,c,t);if(mesh)collision.add(mesh.clone());}
 function cutWall(display:T.Object3D,collision:T.Object3D,a:Point2,b:Point2,y:number,height:number,color:string,openings:{p:Point2;width:number;depth?:number}[],lintel=true){
@@ -142,7 +223,10 @@ export function buildWalkWorld(data:WalkBuilding[],structure:CampusStructure,ter
   const fine=new T.Mesh(terrain.mesh(PLAY_BOUNDS,pad),mat('#8b9d79'));
   const coarse=new T.Mesh(terrain.mesh([-1e4,-1e4,1e4,1e4],(x,z)=>pad(x,z)||(x>=PLAY_BOUNDS[0]&&x<=PLAY_BOUNDS[2]&&z>=PLAY_BOUNDS[1]&&z<=PLAY_BOUNDS[3]),2),fine.material);
   for(const [m,n] of [[fine,'DEM terrain'],[coarse,'DEM terrain (far)']] as const){m.name=n;m.receiveShadow=true;out.display.add(m);}
-  const solid=new T.Mesh(terrain.mesh(PLAY_BOUNDS,pad),mat('#8b9d79'));solid.name='DEM terrain collision';out.collision.add(solid);
+  const district=structure.context.hamasen?.polygon;
+  const outsidePlay=(x:number,z:number)=>(x>952||z>700)&&(!district||!inPolygon([x,z],district));
+  const solid=new T.Mesh(terrain.mesh(PLAY_BOUNDS,(x,z)=>pad(x,z)||outsidePlay(x,z)),mat('#8b9d79'));
+  solid.name='DEM terrain collision';out.collision.add(solid);
  }else{
   const ground=plane(out.display,rect(gx0,gz0,gx1,gz1),groundHoles,-.055,'#8b9d79');ground.castShadow=false;out.collision.add(ground.clone());
   const sea=box(out.display,900,.4,1400,gx0-450,-.6,75,'#629caa');sea.castShadow=false;
@@ -160,6 +244,11 @@ export function buildWalkWorld(data:WalkBuilding[],structure:CampusStructure,ter
  for(const [kind,list] of [['landmark',structure.context.landmarks],['background',structure.context.background]] as const){
   for(const lm of list){
    if(lm.polygon.length<3||!inGround(lm.polygon)||overlapsWalkable(lm.polygon))continue;const bb=new T.Box2().setFromPoints(lm.polygon.map(([x,z])=>new T.Vector2(x,z)));
+   if(lm.district==='hamasen'){
+    const group=new T.Group();group.name='Campus exterior '+lm.id;out.display.add(group);
+    addDistrictBuilding(group,out.collision,lm,(x,z)=>terrain?.heightAt(x,z)??GROUND_Y);
+    continue;
+   }
    // On slopes the block is seated on its lowest corner and extended down into the hill.
    const base=terrain?Math.min(...lm.polygon.map(([x,z])=>lift(x,z))):0,rise=terrain?Math.max(...lm.polygon.map(([x,z])=>lift(x,z)))-base:0;
    const h=lm.heightM??Math.max(4,lm.storeys*3.6),group=new T.Group();group.name='Campus exterior '+lm.id;group.userData.lift=base;out.display.add(group);

@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Vector3 } from 'three';
 import graph from '../public/data/walkthrough/outdoor-graph.json';
-import { graphPathSegments, pathLayerAlpha } from '../src/walk/campus-map-view';
+import campusMap from '../public/data/campus-map.json';
+import { graphPathSegments, pathLayerAlpha, pointInPolygon } from '../src/walk/campus-map-view';
 import { CampusMinimap } from '../src/walk/minimap';
 
 afterEach(() => { vi.unstubAllGlobals(); vi.restoreAllMocks(); });
@@ -78,5 +79,14 @@ describe('zoomed-in campus path layer', () => {
     await map.load(p => p);
     expect(map.destinationMarkers).toEqual([{ id: 'building:hamasen-exit-2', buildingId: 'hamasen-exit-2', kind: 'place', label: '哈瑪星站 2 號出口', x: 916.9, y: -.31, z: 540.95 }]);
     expect(map.defaultView().x1).toBe(960);
+  });
+
+  it('puts the railway park goal by the actual platform, on a path outside its footprint', () => {
+    const park=campusMap.buildings.find(b=>b.id==='hamasen-rail-park')!;
+    const anchor=(graph.anchors as Record<string,{node:number}>)['hamasen-rail-park'];
+    const [x,,z]=graph.nodes[anchor.node].p;
+    expect(park.polygon.some(([east])=>east>952)).toBe(true);
+    expect(pointInPolygon([x,z],park.polygon as [number,number][])).toBe(false);
+    expect(graph.edges.some(([a,b])=>a===anchor.node||b===anchor.node)).toBe(true);
   });
 });

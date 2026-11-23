@@ -15,7 +15,7 @@ const mapPolygon = (polygon: P[]) => polygon.map(([x, z]): P => [r1(x), r1(z)]);
 const placementsPath = 'public/models/landmarks/placements.json';
 const landmarkPlacements = fs.existsSync(placementsPath) ? JSON.parse(fs.readFileSync(placementsPath, 'utf8')) as Record<string, { centroid: P; note?: string }> : {};
 
-const buildings: { id: string; name: string; kind: string; walkable: boolean; polygon: P[]; storeys?: number }[] = [];
+const buildings: { id: string; name: string; kind: string; walkable: boolean; polygon: P[]; holes?: P[][]; storeys?: number }[] = [];
 for (const id of WALK_BUILDING_IDS) {
   const b = JSON.parse(fs.readFileSync(`public/data/walkthrough/${id}.json`, 'utf8')) as WalkBuilding;
   const ground = b.floors.find(f => f.level === 1) ?? b.floors[0];
@@ -27,11 +27,15 @@ const KIND: Record<string, string> = { AD: 'admin', IL: 'admin', ACTIVITY: 'life
 for (const l of structure.context.landmarks)
   buildings.push({ id: l.id, name: info.buildings[l.id]?.name ?? l.name, kind: KIND[l.id] ?? 'teaching', walkable: false, polygon: mapPolygon(l.polygon), storeys: l.storeys });
 const background: P[][] = [];
+const backgroundHoles: Record<number, P[][]> = {};
 for (const b of structure.context.background) {
   const polygon = mapPolygon(b.polygon);
   if (b.stationExit === 1 || b.stationExit === 2) {
-    buildings.push({ id: `hamasen-exit-${b.stationExit}`, name: `哈瑪星站 ${b.stationExit} 號出口`, kind: 'life', walkable: false, polygon, storeys: b.storeys });
+    buildings.push({ id: `hamasen-exit-${b.stationExit}`, name: `哈瑪星站 ${b.stationExit} 號出口`, kind: 'life', walkable: false, polygon, holes: b.holes?.map(mapPolygon), storeys: b.storeys });
+  } else if (/^(hamasen-)?osm-435657348$/.test(b.id)) {
+    buildings.push({ id: 'hamasen-rail-park', name: '哈瑪星鐵道園區前場', kind: 'scenic', walkable: false, polygon, holes: b.holes?.map(mapPolygon) });
   } else {
+    if (b.holes?.length) backgroundHoles[background.length] = b.holes.map(mapPolygon);
     background.push(polygon);
   }
 }
@@ -41,8 +45,9 @@ if (seaCenter?.footprint) {
 const roads = structure.context.roads.map(r => ({ kind: r.kind, width: r.width, points: r.points.map(([x, z]) => [r1(x), r1(z)] as P) }));
 const water = structure.context.water.map(w => ({ kind: w.kind, points: w.points.map(([x, z]) => [r1(x), r1(z)] as P) }));
 const sport = structure.context.sport.map(s => ({ kind: s.kind, polygon: s.polygon.map(([x, z]) => [r1(x), r1(z)] as P) }));
+const railways = structure.context.hamasen?.rails?.map(r => ({ kind: r.kind, points: mapPolygon(r.points) })) ?? [];
 const basePath = 'public/data/campus-map-base.json';
 const base = fs.existsSync(basePath) ? JSON.parse(fs.readFileSync(basePath, 'utf8')) as { url: string; bounds: [number, number, number, number] } : undefined;
-const out = { generatedBy: 'tools/build_campus_map.ts', base, frame: 'world metres, x east, z south (north = -z)', spawn: [-69, 119], buildings, background, roads, water, sport, landmarks: landmarkPlacements };
+const out = { generatedBy: 'tools/build_campus_map.ts', base, frame: 'world metres, x east, z south (north = -z)', spawn: [-69, 119], buildings, background, backgroundHoles, roads, railways, water, sport, landmarks: landmarkPlacements };
 fs.writeFileSync('public/data/campus-map.json', JSON.stringify(out) + '\n');
 console.log(JSON.stringify({ buildings: buildings.length, background: background.length, roads: roads.length, water: water.length, sport: sport.length, landmarks: Object.keys(landmarkPlacements).length, bytes: fs.statSync('public/data/campus-map.json').size }));

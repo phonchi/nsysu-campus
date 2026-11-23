@@ -24,6 +24,7 @@ export const MAJOR_MAP_NAMES: Readonly<Record<string, string>> = {
   'building:ACTIVITY': '活動中心', 'building:gate': '校門', 'building:tunnel-west': '隧道',
   'building:sea-center': '西子灣／海域中心',
   'building:hamasen-exit-1': '哈瑪星 1 號出口', 'building:hamasen-exit-2': '哈瑪星 2 號出口',
+  'building:hamasen-rail-park': '哈瑪星鐵道園區',
 };
 
 export interface OutdoorMapGraph {

@@ -11,6 +11,8 @@ import { groundMask, lawnMaterial, setLawnMask } from './render/ground';
 import { seaMaterial } from './render/sea';
 import type { Obstacle, SupportAt } from './walk/obstacles';
 import { PALETTE, FACULTY, BUILDING_FACULTY, surfaceOf, facadeTextures, patternTexture, boxUV, nightGlow, splitRoof, NIGHT_MATERIALS, NIGHT_FADE, FACADE_TILE } from './walk-materials';
+import { hamasenExteriors, hamasenPortalCanopy, hamasenStreetGround, tintHamasenGround, type HamasenExterior } from './world/hamasen-art';
+import type { TunnelProfile } from './world/tunnel-surface';
 
 const solid=(color:string,roughness=.82,extra:T.MeshStandardMaterialParameters={})=>new T.MeshStandardMaterial({color,roughness,...extra});
 interface Piece{position:T.Vector3;scale:T.Vector3;rotation?:T.Euler;}
@@ -108,16 +110,23 @@ export function decorateCampus(world:WalkWorld,structure:CampusStructure,terrain
  const brickMat=nightGlow(textured(brick.map,'#ffffff',.88),brick.emissive),creamMat=nightGlow(textured(cream.map,'#ffffff',.88),cream.emissive);
  const roofMat=textured(tex.roof,'#ffffff',.9);
  const stationWall=solid('#b9cecb'),stationRoof=solid('#347772');
- const stations=new Set(structure.context.background.filter(b=>b.stationExit).map(b=>b.id));
+ const city=structure.context.hamasen;
+ const contextBuildings=new Map([...structure.context.background,...structure.context.landmarks].map(b=>[b.id,b]));
+ const han: HamasenExterior[]=[];
  world.display.traverse(group=>{
   if(!group.name.startsWith('Campus exterior '))return;
-  const id=group.name.slice('Campus exterior '.length),lm=structure.context.landmarks.find(l=>l.id===id),tone=lm?.tone??'brick';
-  group.traverse(o=>{if(!(o instanceof T.Mesh))return;boxUV(o.geometry,undefined,FACADE_TILE.w,FACADE_TILE.h,.08);const g=splitRoof(o.geometry);o.geometry.dispose();o.geometry=g;o.material=stations.has(id)?[stationWall,stationRoof]:[tone==='brick'?brickMat:creamMat,roofMat];});
+  const id=group.name.slice('Campus exterior '.length),building=contextBuildings.get(id);
+  if(building?.district==='hamasen'){han.push({building,group});return;}
+  const landmark=structure.context.landmarks.find(l=>l.id===id),tone=landmark?.tone??'brick';
+  group.traverse(o=>{if(!(o instanceof T.Mesh))return;boxUV(o.geometry,undefined,FACADE_TILE.w,FACADE_TILE.h,.08);const g=splitRoof(o.geometry);o.geometry.dispose();o.geometry=g;o.material=building?.stationExit?[stationWall,stationRoof]:[tone==='brick'?brickMat:creamMat,roofMat];});
  });
  // Draw-call budget: one batch per material for all OSM exteriors, per building for stairs/lifts.
  const exteriors=new T.Group();exteriors.name='Campus exteriors (merged)';
+ const hamasen=hamasenExteriors(han,terrain,leafDensity!==undefined&&leafDensity<.6);
+ for(const {group} of han)group.removeFromParent();
  for(const g of [...world.display.children])if(g.name.startsWith('Campus exterior ')){const lm=g.userData.landmark;if(lm)exteriors.userData.landmarks=[...(exteriors.userData.landmarks??[]),lm];exteriors.add(g);}
  world.display.add(exteriors);mergeByMaterial(exteriors);
+ if(hamasen.children.length)exteriors.add(hamasen);
  const perBuilding=new Map<T.Object3D,T.Object3D[]>();
  world.display.traverse(o=>{if(o.userData.stairGroup||o.name.startsWith('Lift ')){const p=o.parent!;if(!perBuilding.has(p))perBuilding.set(p,[]);perBuilding.get(p)!.push(o);}});
  for(const [parent,groups] of perBuilding){const merged=new T.Group();merged.name='Vertical circulation '+parent.name;merged.userData.stairGroup=true;parent.add(merged);for(const g of groups)merged.add(g);mergeByMaterial(merged);}
@@ -153,11 +162,20 @@ export function decorateCampus(world:WalkWorld,structure:CampusStructure,terrain
  for(const polygon of (world.display.userData.sportsPolygons??[]) as Point2[][])occ.polygon(polygon,.5,5);
  const roads=structure.context.roads.filter(r=>!r.tunnel&&r.points.length>=2);
  for(const r of roads)occ.line(r.points,r.width/2+1.2,3);
+ const inHamasen=(x:number,z:number)=>!!city&&inside([x,z],city.polygon);
+ let cityOcc:Occupancy|undefined;
+ if(city?.polygon.length){
+  const xs=city.polygon.map(p=>p[0]),zs=city.polygon.map(p=>p[1]);
+  cityOcc=new Occupancy(Math.min(...xs),Math.min(...zs),Math.max(...xs),Math.max(...zs));
+  for(const {building} of han)cityOcc.polygon(building.polygon);
+  for(const r of roads)cityOcc.line(r.points,r.width/2);
+ }
  const shore=-232; // 西子灣: sand from the ground edge to here, south of the coastal hill
  const beach:Point2[]=[[-330,40],[-262,48],[-240,120],[shore,220],[-250,258],[-330,258]];occ.polygon(beach,0,4);
  // Lawn: worn bands by paths and buildings, and the free-lawn mask for grass tufts (render/ground.ts).
- const mask=groundMask(occ.grid,occ.nx,occ.nz,occ.x0,occ.z0,occ.cell),free=mask.free;mask.free=(x,z)=>free(x,z)&&allowed(x,z,.6);world.display.userData.groundMask=mask;world.display.userData.occupancy=occ;
- { const lawn=cache.get('ground');if(lawn)setLawnMask(lawn,mask); }
+ const mask=groundMask(occ.grid,occ.nx,occ.nz,occ.x0,occ.z0,occ.cell),free=mask.free;mask.free=(x,z)=>free(x,z)&&!inHamasen(x,z)&&allowed(x,z,.6);world.display.userData.groundMask=mask;
+ world.display.userData.occupancy=cityOcc?{at:(x:number,z:number)=>inHamasen(x,z)?cityOcc.at(x,z):occ.at(x,z)}:occ;
+ { const lawn=cache.get('ground');if(lawn){setLawnMask(lawn,mask);if(city&&terrain)tintHamasenGround(lawn,city,terrain);} }
  // Roads (OSM): asphalt with lane markings; footways as paving.
  const roadMats={main:new T.MeshStandardMaterial({map:roadTexture(true),roughness:.92}),side:new T.MeshStandardMaterial({map:roadTexture(false),roughness:.92}),foot:textured(tex.paving,'#ffffff',.9)};
  roadMats.foot.map=tex.paving.clone();roadMats.foot.map.needsUpdate=true;
@@ -175,6 +193,11 @@ export function decorateCampus(world:WalkWorld,structure:CampusStructure,terrain
  }else for(const r of roads){const pts=r.points;if(pts.length<2)continue;const geo=roadRibbon(pts,r.width);geo.translate(0,.006,0);roadGroup.add(new T.Mesh(geo,footKinds.includes(r.kind)?roadMats.foot:roadMats.main));}
  // Crosswalks share the exact same supporting triangles and stop at building/carve boundaries.
  if(terrain){const g=buildCrosswalkGeometry(roads,terrain,[bx0,bz0,bx1,bz1],roadExclusions);if(g.attributes.position.count){const mesh=new T.Mesh(g,solid(PALETTE.mark,.6));mesh.name='Zebra crossings · terrain surface';mesh.receiveShadow=true;roadGroup.add(mesh);}else g.dispose();}
+ if(city&&terrain){
+  art.add(hamasenStreetGround(city,roads,terrain));
+  const portalProfile=world.display.userData.hamasenTunnelProfile as TunnelProfile|undefined;
+  if(portalProfile)art.add(hamasenPortalCanopy(portalProfile,terrain));
+ }
  // West: sand and shallow sea of 西子灣; the deep sea box is replaced by a two-tone plane.
  const shapeOf=(pts:Point2[])=>new T.Shape(pts.map(([x,z])=>new T.Vector2(x,-z)));
  const sand=new T.Mesh(new T.ShapeGeometry(shapeOf(beach)),textured(tex.sand,'#ffffff',1));sand.rotation.x=-Math.PI/2;sand.position.y=-.045;sand.receiveShadow=true;boxUV(sand.geometry,undefined,6,6);sand.name='西子灣 beach';art.add(sand);
@@ -208,10 +231,11 @@ export function decorateCampus(world:WalkWorld,structure:CampusStructure,terrain
    if(x<-170&&occ.at(x,z)===0&&allowed(x,z,4)){palms.push({x,z,s:.9+rand()*.3});continue;}if(occ.free(x,z,1.2))addTree(x,z,.85+rand()*.3,0,'street');}}
  for(let z=gz0+4;z<gz1-4;z+=7)for(let x=gx0+4;x<gx1-4;x+=7){const jx=x+(rand()-.5)*5,jz=z+(rand()-.5)*5;
   const campusCore=jx>-200&&jx<170&&jz>-210&&jz<260;if(campusCore&&rand()>.42)continue;if(occ.free(jx,jz,2))addTree(jx,jz,.9+rand()*.5);}
+ for(const [x,z] of city?.trees??[])if(inHamasen(x,z)&&cityOcc?.at(x,z)===0)addTree(x,z,1,0,'street');
  let hillTrees=0;
  if(dem){// 壽山 forest on the real DTM: above 3 m, off buildings/roads, denser with height.
   const [tx0,tz0,tx1,tz1]=[-900,-1100,900,700];
-  for(let n=0;n<60000&&hillTrees<3600;n++){const x=tx0+rand()*(tx1-tx0),z=tz0+rand()*(tz1-tz0),h=lift(x,z);if(!allowed(x,z,7)||h<3||rand()>Math.min(1,h/25))continue;if(x>gx0&&x<gx1&&z>gz0&&z<gz1&&!occ.free(x,z,2))continue;trees.push({x,z,s:1.6+rand()*1.2,y:h+GROUND_Y-.3});hillTrees++;}
+  for(let n=0;n<60000&&hillTrees<3600;n++){const x=tx0+rand()*(tx1-tx0),z=tz0+rand()*(tz1-tz0),h=lift(x,z);if(!allowed(x,z,7)||h<3||rand()>Math.min(1,h/25))continue;if(inHamasen(x,z)||x>gx0&&x<gx1&&z>gz0&&z<gz1&&!occ.free(x,z,2))continue;trees.push({x,z,s:1.6+rand()*1.2,y:h+GROUND_Y-.3});hillTrees++;}
  }else for(let n=0;n<30000&&hillTrees<3200;n++){const x=gx0+(rand()*1.3-.05)*(gx1-gx0+500),z=gz0-450+rand()*(gz1-gz0+700),h=height(x,z);if(!allowed(x,z,7)||h<1.5||h>140||outside(x,z)<6)continue;trees.push({x,z,s:1.6+rand()*1.2,y:h-.3});hillTrees++;}
  // Triangle budget: campus trees get a trunk + 1–2 crowns with shadows; hill trees one crown, no shadow.
  const mobile=typeof matchMedia!=='undefined'&&matchMedia('(pointer:coarse)').matches;
@@ -238,6 +262,7 @@ hillCrowns.forEach((p,i)=>tint(instances(art,crownGeo,crownMats[i],p,'Hill tree 
  const lampPole:Piece[]=[],lampHead:Piece[]=[],benches:Piece[]=[],racks:Piece[]=[],bins:Piece[]=[];
  for(const r of roads.filter(r=>!footKinds.includes(r.kind)&&r.width>=6))for(let j=1;j<r.points.length;j++){const a=r.points[j-1],b=r.points[j],L=Math.hypot(b[0]-a[0],b[1]-a[1]),ux=(b[0]-a[0])/L,uz=(b[1]-a[1])/L;
   for(let t=12;t<L;t+=25){const off=r.width/2+1.1,x=a[0]+ux*t+uz*off,z=a[1]+uz*t-ux*off;if(!allowed(x,z,.6)||occ.at(x,z)===1||x<gx0||x>gx1)continue;lampPole.push(piece(x,2.3,z,.12,4.6,.12));lampHead.push(piece(x,4.65,z,.5,.28,.5));}}
+ for(const [x,z] of city?.streetLights??[])if(inHamasen(x,z)&&cityOcc?.at(x,z)!==1&&allowed(x,z,.15)){lampPole.push(piece(x,2.7,z,.11,5.4,.12));lampHead.push(piece(x,5.43,z,.52,.19,.29));}
  for(const floor of world.floors){if(floor.data.level!==1||!floor.data.access?.entry)continue;const frame=world.frames.get(floor.buildingId)!,e=floor.data.access.entry;const p=new T.Vector3(e[0],0,e[1]).applyMatrix4(frame);
   for(const [dx,dz,kind] of [[3,2.5,'bench'],[-3,2.5,'rack'],[4.5,-1,'bin']] as const){const x=p.x+dx,z=p.z+dz;if(!allowed(x,z,2)||occ.at(x,z)===1&&kind!=='bin')continue;
    if(kind==='bench')benches.push(piece(x,.45,z,1.8,.12,.5),piece(x,.75,z-.22,1.8,.45,.08));else if(kind==='rack')for(let k=0;k<5;k++)racks.push(piece(x+k*.6-1.2,.4,z,.06,.8,.9));else bins.push(piece(x,.45,z,.5,.9,.5));}}
