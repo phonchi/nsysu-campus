@@ -10,7 +10,7 @@ import sports from '../public/data/sports.json';
 import sea from '../public/data/sea.json';
 import placements from '../public/models/landmarks/placements.json';
 
-const bounds = { x0: -900, z0: -1100, x1: 900, z1: 700 };
+const bounds = CAMPUS_VIEW;
 afterEach(() => vi.unstubAllGlobals());
 describe('map camera', () => {
   it('zooms about the cursor without moving its world point, until an edge clamps', () => {
@@ -27,8 +27,9 @@ describe('map camera', () => {
     const pan = panFrame(max, 1e8, -1e8, bounds);
     expect(pan.x0).toBe(bounds.x0); expect(pan.z0 + pan.height / pan.scale).toBe(bounds.z1);
   });
-  it.each([[920, 340], [370, 500]])('fits all real buildings, the hill, sea, sports, gate and tunnel at %s × %s', (w, h) => {
-    const points: [number, number][] = [...campus.buildings.flatMap(b => b.polygon), ...sports.facilities.flatMap(f => f.polygon), ...sea.waterBodies.flatMap(b => b.polygon), ...sea.waterRoutes.flatMap(r => r.corridor), ...bus.stops.map(s => [s.boardingPoint[0], s.boardingPoint[2]]), placements['liberal-arts'].centroid, placements.gate.centroid, placements.tunnel.centroid] as [number, number][];
+  it.each([[920, 340], [370, 500]])('fits the campus, sea and Hamasen street blocks at %s × %s', (w, h) => {
+    expect(campus.buildings.filter(b => b.id.startsWith('hamasen-exit-')).map(b => b.id).sort()).toEqual(['hamasen-exit-1', 'hamasen-exit-2']);
+    const points: [number, number][] = [...campus.background.flat(), ...campus.buildings.flatMap(b => b.polygon), ...sports.facilities.flatMap(f => f.polygon), ...sea.waterBodies.flatMap(b => b.polygon), ...sea.waterRoutes.flatMap(r => r.corridor), ...bus.stops.map(s => [s.boardingPoint[0], s.boardingPoint[2]]), placements['liberal-arts'].centroid, placements.gate.centroid, placements.tunnel.centroid] as [number, number][];
     const view = contentBounds(points, CAMPUS_VIEW), f = clampFrame(fitCampusFrame(w, h, view), bounds);
     for (const [x, z] of points) {
       expect(frameX(f, x)).toBeGreaterThanOrEqual(-1e-6); expect(frameX(f, x)).toBeLessThanOrEqual(w + 1e-6);
@@ -55,10 +56,11 @@ describe('map picking and labels', () => {
     expect(declutterLabels([high], 200, 100, 2, [high])).toEqual([]);
   });
   it('deduplicates real bus stops by name and uses the first boarding point, not the sign or berth', () => {
-    const stops = bus.stops.map(s => ({ name: s.name, boardingPoint: s.boardingPoint as [number, number, number] }));
+    const stops = bus.stops.map(s => ({ id: s.id, name: s.name, boardingPoint: s.boardingPoint as [number, number, number] }));
     const markers = busStopMarkers(stops);
     expect(markers).toHaveLength(new Set(stops.map(s => s.name)).size);
-    for (const m of markers) expect([m.x, m.y, m.z]).toEqual(stops.find(s => s.name === m.label)!.boardingPoint);
+    for (const m of markers) expect([m.x, m.y, m.z]).toEqual(stops.find(s => `bus:${s.name}` === m.id)!.boardingPoint);
+    expect(busStopMarkers([{ id: 'hamasen-campus-stop', name: '哈瑪星站 2 號出口', boardingPoint: [0, 0, 0] }])[0].label).toBe('哈瑪星站 2 號出口・校園公車（位置示意）');
   });
 });
 

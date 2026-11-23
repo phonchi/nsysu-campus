@@ -12,6 +12,20 @@ export function planRoute(from: Vector3, to: Vector3, nav?: NavQuery, routes?: O
   const direct = nav?.findPath(from, to) ?? [];
   if (direct.length) return direct;
   if (!routes) return [];
+  const east = routes.anchor('hamasen-east-link');
+  if (east && nav && (from.x < east.x) !== (to.x < east.x)) {
+    // The street graph omits the pedestrian tunnel. Cross it on the baked surface
+    // and switch to the street graph outside the east portal.
+    if (to.x >= east.x) {
+      const lead = nav.findPath(from, east);
+      const street = lead.length ? routes.path(east, to) : [];
+      if (street.length) return [...lead, ...street];
+    } else {
+      const tail = nav.findPath(east, to);
+      const street = tail.length ? routes.path(from, east) : [];
+      if (street.length) return [...street, ...tail];
+    }
+  }
   const junction = routes.anchor('arcade');
   const tail = junction && nav ? nav.findPath(junction, to) : [];
   if (junction && tail.length) { const head = routes.path(from, junction); if (head.length) return [...head.slice(0, -1), ...tail]; }
@@ -21,10 +35,11 @@ export function planRoute(from: Vector3, to: Vector3, nav?: NavQuery, routes?: O
   return routes.path(from, to);
 }
 
-/** Advance along a route: returns the next corner index and the horizontal direction to walk (zero on arrival).
+/** Advance along a route and set the horizontal direction (zero on arrival).
  * A corner counts as reached when the walker is within reach of it or has already passed it (long frames move
- * the walker farther than the reach radius, which would otherwise make it hop back and forth over the corner). */
-export function followRoute(path: Vector3[], index: number, at: Vector3, out: Vector3, arrivalRadius=.34) {
+ * the walker farther than the reach radius). A positive maxFrameDistance slows faster movement near a waypoint
+ * so one frame cannot overshoot it. */
+export function followRoute(path: Vector3[], index: number, at: Vector3, out: Vector3, arrivalRadius=.34, maxFrameDistance=0) {
   const passed = (i: number) => {
     if (i === 0) return false;
     const p = path[i], q = path[i - 1], ex = p.x - q.x, ez = p.z - q.z;
@@ -34,9 +49,11 @@ export function followRoute(path: Vector3[], index: number, at: Vector3, out: Ve
   while (index < path.length - 1 && reached(index, .36)) index++;
   const target = path[index];
   out.copy(target).sub(at); out.y = 0;
+  const distance = out.length();
   const arrived = index === path.length - 1 && (arrivalRadius<.34?Math.abs(target.y-at.y)<.2&&Math.hypot(target.x-at.x,target.z-at.z)<arrivalRadius:reached(index, arrivalRadius));
-  if (arrived) out.set(0, 0, 0); else if (out.lengthSq() > 1e-8) out.normalize();
-  return { index, arrived };
+  if (arrived) out.set(0, 0, 0); else if (distance > 1e-4) out.divideScalar(distance);
+  const speedScale = maxFrameDistance > distance ? distance / maxFrameDistance : 1;
+  return { index, arrived, speedScale };
 }
 
 /** Line of sight at body height for a walker (sphere sweep), used to allow straight shortcuts. */

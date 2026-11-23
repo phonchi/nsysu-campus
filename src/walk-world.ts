@@ -162,7 +162,7 @@ export function buildWalkWorld(data:WalkBuilding[],structure:CampusStructure,ter
    if(lm.polygon.length<3||!inGround(lm.polygon)||overlapsWalkable(lm.polygon))continue;const bb=new T.Box2().setFromPoints(lm.polygon.map(([x,z])=>new T.Vector2(x,z)));
    // On slopes the block is seated on its lowest corner and extended down into the hill.
    const base=terrain?Math.min(...lm.polygon.map(([x,z])=>lift(x,z))):0,rise=terrain?Math.max(...lm.polygon.map(([x,z])=>lift(x,z)))-base:0;
-   const h=Math.max(4,lm.storeys*3.6),group=new T.Group();group.name='Campus exterior '+lm.id;group.userData.lift=base;out.display.add(group);
+   const h=lm.heightM??Math.max(4,lm.storeys*3.6),group=new T.Group();group.name='Campus exterior '+lm.id;group.userData.lift=base;out.display.add(group);
    const geo=new T.ExtrudeGeometry(shapeOf(lm.polygon),{depth:h+rise+.4,bevelEnabled:false});geo.translate(0,0,base-.4); /* local z becomes world y after the mesh's -90° x rotation */const color=kind==='background'?'#c9bfae':lm.tone==='cream'?'#d9ccb2':lm.tone==='white'?'#e4e0d6':'#b4806b';
    const mesh=new T.Mesh(geo,mat(color));mesh.rotation.x=-Math.PI/2;mesh.castShadow=true;mesh.receiveShadow=true;group.add(mesh);out.collision.add(mesh.clone());
    if(kind==='landmark'){const c=bb.getCenter(new T.Vector2());group.userData.landmark={id:lm.id,name:lm.name,position:[c.x,base+h+3,c.y]};}

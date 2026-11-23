@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import { Vector3 } from 'three';
 import { OutdoorRoutes } from '../src/walk/route';
 import { followRoute } from '../src/walk/autopilot';
+import { RIDE_SPEED } from '../src/walk/bike';
 
 const graph = JSON.parse(fs.readFileSync('public/data/walkthrough/outdoor-graph.json', 'utf8'));
 const routes = new OutdoorRoutes(graph);
@@ -47,5 +48,20 @@ describe('followRoute with long frames', () => {
     let index = 0, arrived = false;
     for (let f = 0; f < 200 && !arrived; f++) { ({ index, arrived } = followRoute(path, index, at, dir)); at.addScaledVector(dir, .9); }
     expect(arrived).toBe(true);
+  });
+
+  it.each([.065, .25])('guides a bike around a corner and stops at the goal with %s s frames', dt => {
+    const path = [new Vector3(), new Vector3(3.075, 0, 0), new Vector3(3.075, 0, 3.075)];
+    const at = path[0].clone(), direction = new Vector3(), maxFrameDistance = RIDE_SPEED * dt;
+    let index = 0, arrived = false;
+    for (let frame = 0; frame < 20 && !arrived; frame++) {
+      const step = followRoute(path, index, at, direction, .34, maxFrameDistance);
+      ({ index, arrived } = step);
+      at.addScaledVector(direction, maxFrameDistance * step.speedScale);
+      expect(at.x).toBeLessThanOrEqual(path[1].x + 1e-8);
+      expect(at.z).toBeLessThanOrEqual(path[2].z + 1e-8);
+    }
+    expect(arrived).toBe(true);
+    expect(at.distanceTo(path[2])).toBeLessThan(.34);
   });
 });

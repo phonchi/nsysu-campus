@@ -980,16 +980,16 @@
     "day": {
      "at": "sea-center",
      "offset": [
-      0,
-      1.5
+      2.7,
+      0.5
      ],
      "activity": "Idle"
     },
     "sunset": {
      "at": "sea-center",
      "offset": [
-      0,
-      1.5
+      2.7,
+      0.5
      ],
      "activity": "Idle"
     },

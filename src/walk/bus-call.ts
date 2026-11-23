@@ -10,7 +10,7 @@ import {busGroundPose} from './bus';
 export const BUS_ARRIVE_SECONDS=3,BUS_RIDE_SECONDS=3,BUS_HOLD_SECONDS=2,BUS_LEAVE_SECONDS=3,BUS_WAIT_SECONDS=60,BUS_WAIT_RADIUS=40,BUS_APPROACH_M=35;
 export const BUS_SEAT:P3=[.55,.85,1];
 export type BusPhase='idle'|'arriving'|'boardable'|'onboard'|'riding'|'leaving';
-export interface BusDestination {name:string;stopId:string;routeId:BusRouteSpec['id'];via:string[]}
+export interface BusDestination {name:string;stopId:string;routeId:BusRouteSpec['id'];via:string[];transferAt?:string}
 export const busLineName=(id:BusRouteSpec['id'])=>id==='campus-bus'?'校園公車':'橘1延';
 
 /** The last (or first) `metres` of a path, resampled every 2 m. */
@@ -55,6 +55,24 @@ export class BusService {
   for(const r of this.routes){const occ=r.stopOccurrences;occ.forEach((o,i)=>{if(this.stops.find(s=>s.id===o.stopId)?.name!==here.name)return;/* same-named stop on either line: schematic transfer */const via:string[]=[];
    for(let k=1;k<occ.length;k++){const s=this.stops.find(s=>s.id===occ[(i+k)%occ.length].stopId);if(!s||s.name===here.name)continue;if(via.at(-1)!==s.name)via.push(s.name);
     const prev=best.get(s.name);if(!prev||k<prev.hops||(k===prev.hops&&r.id==='campus-bus'&&prev.d.routeId!=='campus-bus'))best.set(s.name,{hops:k,d:{name:s.name,stopId:s.id,routeId:r.id,via:[...via]}});}});}
+  // An exclusive stop (such as a metro exit) may require changing lines at a shared stop.
+  const direct=[...best.values()];
+  const directNames=new Set(best.keys());
+  for(const {hops,d} of direct)for(const route of this.routes){
+   if(route.id===d.routeId)continue;
+   const stops=route.stopOccurrences.map(o=>this.stops.find(s=>s.id===o.stopId)!);
+   stops.forEach((stop,index)=>{
+    if(stop.name!==d.name)return;
+    const via=[...d.via];
+    for(let k=1;k<stops.length;k++){
+     const next=stops[(index+k)%stops.length];
+     if(next.name===stop.name||next.name===here.name)continue;
+     if(via.at(-1)!==next.name)via.push(next.name);
+     if(!directNames.has(next.name)&&hops+k<(best.get(next.name)?.hops??Infinity))
+      best.set(next.name,{hops:hops+k,d:{name:next.name,stopId:next.id,routeId:route.id,via:[...via],transferAt:stop.name}});
+    }
+   });
+  }
   const order=[...new Set(this.routes.flatMap(r=>r.stopOccurrences.map(o=>this.stops.find(s=>s.id===o.stopId)?.name??'')))];
   return [...best.values()].map(v=>v.d).sort((a,b)=>order.indexOf(a.name)-order.indexOf(b.name));
  }
@@ -82,7 +100,8 @@ export class BusService {
  private depart(){
   const route=this.route,stop=this.stop;this.phase='leaving';this.t=0;this.path=undefined;if(!route||!stop)return;
   const occurrence=route.stopOccurrences.find(o=>o.stopId===stop.id),leg=occurrence&&route.legs.find(l=>l.fromOccurrenceId===occurrence.occurrenceId);
-  if(leg&&leg.path.length>1)this.path=new PathSampler(pathPart(leg.path,BUS_APPROACH_M,'head'));
+  const departure=leg?.departurePath??leg?.path;
+  if(departure&&departure.length>1)this.path=new PathSampler(pathPart(departure,BUS_APPROACH_M,'head'));
  }
  private park(){const s=this.stop!;this.position.fromArray(s.berth.position);this.yaw=s.berth.yaw+Math.PI;this.pitch=0;this.settle();}
  private follow(u:number){const p=this.path!,pose=p.pose(p.length*Math.max(0,Math.min(1,u)));this.position.fromArray(pose.position);this.yaw=pose.yaw;this.pitch=T.MathUtils.clamp(pose.pitch,-Math.PI/15,Math.PI/15);this.settle();}

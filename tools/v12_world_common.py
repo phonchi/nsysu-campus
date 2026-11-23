@@ -19,7 +19,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / 'public/data'
 GROUND_Y = -0.055                                  # src/world/terrain.ts
-PLAY_BOUNDS = (-700.0, -1060.0, 460.0, 700.0)      # src/world/terrain.ts（x0, z0, x1, z1）
+PLAY_BOUNDS = (-700.0, -1060.0, 952.0, 700.0)      # src/world/terrain.ts（x0, z0, x1, z1）
 CAMPUS_GROUND = (-330.0, -330.0, 260.0, 480.0)     # src/walk-world.ts
 # src/walk-art.ts:153 目前的沙灘多邊形（Astra 之後會把南端從網球區退開）。
 BEACH_POLYGON = [[-330.0, 40.0], [-262.0, 48.0], [-240.0, 120.0], [-232.0, 220.0], [-246.0, 330.0], [-330.0, 380.0]]
@@ -608,8 +608,9 @@ def lint_line(text: str, expansions: list[str] | None = None, limit: int = 28) -
         return ['空字串']
     out = []
     for version in expansions or [text]:
-        if len(version) > limit:
-            out.append(f'超過 {limit} 字（{len(version)}）：{version}')
+        count = len(''.join(version.split()))
+        if count > limit:
+            out.append(f'超過 {limit} 字（{count}）：{version}')
     plain = _PLACEHOLDER.sub('', text)
     half = sorted({c for c in plain if c in HALF_WIDTH_PUNCTUATION})
     if half:

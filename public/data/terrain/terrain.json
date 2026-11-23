@@ -4,7 +4,7 @@
   -1100
  ],
  "cell": 4.0,
- "cols": 451,
+ "cols": 466,
  "rows": 451,
  "layout": "Float32 LE, row-major: index = row*cols+col, x = origin[0]+col*cell, z = origin[1]+row*cell (vertex grid)",
  "minY": -2.0,
@@ -13,7 +13,8 @@
  "seabed": -2.0,
  "zeroDatum": {
   "twvd2001_m": 5.454,
-  "method": "median DTM under SC+EN placement footprints"
+  "method": "median DTM under SC+EN placement footprints",
+  "scOutline": "data/sources/dem/terrain-t3-sc-outline.json"
  },
  "pad": {
   "shape": "convex hull of the 8 placement footprints + buffer, plus spawn disc",
@@ -35,7 +36,7 @@
   "crs": "TWD97 / TM2 zone 121 (EPSG:3826), heights TWVD2001 metres; ASCII 'E N H' per line, 20 m spacing, -999 = no data (sea)"
  },
  "license": "政府資料開放授權條款－第1版 (Open Government Data License, Taiwan, v1.0); attribution: 內政部",
- "sha256": "bc9a8003c40e8b86ab6b23b1a7d2df6f81bfc6d62e648408540210b9f6fe6e9c",
- "bytes": 813604,
+ "sha256": "a14a8d42976fb43e29875421168e86a9fdc1b813636aa0955c0a172cbce58a0e",
+ "bytes": 840664,
  "note": "Relative heights (science/engineering ground = 0). Sea = DTM no-data minus OSM roads/buildings, set to seabed. Lowland below 0 is vertically compressed by 0.110 so real sea level sits at seaLevel (true MSL is -5.45 relative). Hills unchanged; the 4 m grid resamples a 20 m DTM (bare earth). Road flattening not applied."
 }

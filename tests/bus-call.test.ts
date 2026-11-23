@@ -42,12 +42,29 @@ describe('schematic bus with shipped routes and stops',()=>{
   expect(bus.destinations().map(d=>d.name).sort()).toEqual([...new Set(data.stops.map(s=>s.name))].filter(name=>name!==stop.name).sort());
  });
 
- it('lists seven unique destinations from 文學院, including 海科院 via 橘1延',()=>{
+ it('lists nine unique destinations from 文學院, including 海科院 via 橘1延',()=>{
   const bus=boarded(),destinations=bus.destinations(),names=[...new Set(data.stops.map(s=>s.name))];
-  expect(names).toHaveLength(8);expect(destinations).toHaveLength(7);
+  expect(names).toHaveLength(10);expect(destinations).toHaveLength(9);
   expect(destinations.map(d=>d.name).sort()).toEqual(names.filter(n=>n!==origin.name).sort());
   expect(destinations.find(d=>d.name===marine.name)).toMatchObject({stopId:marine.id,routeId:'orange-1-ext',via:[marine.name]});
   for(const d of destinations){expect(d.via.at(-1)).toBe(d.name);expect(d.via.every((name,i)=>i===0||name!==d.via[i-1])).toBe(true);}
+ });
+
+ it('arrives and departs locally at both metro stops and can connect them via a shared stop',()=>{
+  for(const [id,nextId] of [['hamasen-campus-stop','hamasen-orange-stop'],['hamasen-orange-stop','hamasen-campus-stop']]){
+   const bus=make(),stop=data.stops.find(s=>s.id===id)!,next=data.stops.find(s=>s.id===nextId)!;
+   expect(bus.call(id)).toBe(true);
+   expect(bus.position.distanceTo(new Vector3(...stop.berth.position))).toBeLessThan(36);
+   advance(bus,3);expect(bus.board()).toBe(true);
+   const trip=bus.destinations().find(d=>d.stopId===nextId)!;
+   expect(trip.via).toContain('校門站');
+   expect(trip.transferAt).toBe('校門站');
+   expect(bus.choose(next.name)).toBe(true);
+   expect(advance(bus,3)).toMatchObject({foot:next.alightingPoints[0],exit:true});
+   advance(bus,BUS_HOLD_SECONDS+1);
+   expect(bus.position.distanceTo(new Vector3(...next.berth.position))).toBeGreaterThan(1);
+   expect(bus.position.distanceTo(new Vector3(...next.berth.position))).toBeLessThan(36);
+  }
  });
 
  it('uses the minimum-hop line from 文學院, with campus winning ties even when listed last',()=>{

@@ -1,7 +1,7 @@
 {
   "status": "ready",
   "scope": "campus-science-engineering-v2",
-  "createdAt": "2026-11-23T07:09:57.227Z",
+  "createdAt": "2026-11-23T14:17:50.952Z",
   "agent": {
     "radius": 0.28,
     "height": 1.7
@@ -32,16 +32,16 @@
     "public/data/walkthrough/MS.json": "33e484bb1731814897c72a10f3a77df2020431a7b47928cfa087b2d9664364f1",
     "public/data/walkthrough/EV.json": "62cda45259e9fbffc445059db3d2a53c2081e0e70bb7810efdf8ed6074eac5d8",
     "public/data/walkthrough/index.json": "fed5ff26e4cfb35956bf4181fb8a26879e666637cfd94dfe3da943f2c5273b2c",
-    "public/data/walkthrough/access-plan.json": "98deb20d005abe6fc5a739635d2c1889cb045f93b8e728242a3cc40869341ecb",
-    "public/data/walkthrough/campus-structure.json": "a0f91a628a342591ec335b608f829308ad289784a6bbfad3e8ff15563fadb606",
-    "src/walk-world.ts": "c53ce13603d96040f061f63d338d7160d162885c3d437d28b890544b38000b44",
+    "public/data/walkthrough/access-plan.json": "2e8226ad06b28116817a968e7552fa252eb5dc81ee486e301ece09b98893003f",
+    "public/data/walkthrough/campus-structure.json": "be1b5024a7804ece4d4aa5a8f10c27d846037a552777b9773ee8564137e1706f",
+    "src/walk-world.ts": "47e341269e6715cc9e81a5103fae39bf5a8f72628ef938fc3a51f9e2269126ca",
     "src/world/science-interiors.ts": "5f4455d56faf3ef34843137acd70719ded8f738086d74c309c8abd454c0aa42c",
-    "src/walk-types.ts": "a737ba3051a66b7ade67bff0f124a2afe17aea6d1b95925f0d5fcf91f34c767a",
+    "src/walk-types.ts": "5c610734f133c0483116415e294e6b5896d729c1e0688ce932f33f68d966ca1a",
     "src/walk-nav.ts": "6f058c6dc04ec9f4b7fa08d8d5000b1e884dc42a06cd4734b5e5d285fb166134",
     "tools/bake_walk_nav.ts": "28bbab2ac713b0d77d341c8cae526662c056207d3deb16ea6c088adcb5558a9a",
-    "public/data/terrain/terrain.json": "3a4dd5c58977df6944adbb1762fcf6c15a215a9c45966bbcd3d48272e5482d7c",
-    "public/data/terrain/terrain.bin": "bc9a8003c40e8b86ab6b23b1a7d2df6f81bfc6d62e648408540210b9f6fe6e9c",
-    "src/world/terrain.ts": "ec461815eca9aa31bd221cf6c3fad9616bf2f09c8d11694beb26bc8b1759cf9f",
+    "public/data/terrain/terrain.json": "e1adacf459367b1a1352c3c6ffd3f738c13a44b81e8bf659778ef548b8efb420",
+    "public/data/terrain/terrain.bin": "a14a8d42976fb43e29875421168e86a9fdc1b813636aa0955c0a172cbce58a0e",
+    "src/world/terrain.ts": "df65e13f628f7fb56b74bbd69d7e6c3fc5136f7ef7289271968b04d188b3d7ec",
     "src/world/road-surface.ts": "da836965e71b5eb39a0274fa533f77a4865b9df0116c8399f3b8bf086a5d617d",
     "public/data/story-zones.json": "886d94f04a7151d9428657c98b29f5d2cbfdf59ef6f69429241e9b12f47bbc4e",
     "public/models/landmarks/placements.json": "de84a88081742888a746250c19f5f572afec9876990137256cc18b60ae395cbb",
@@ -59,15 +59,15 @@
     "src/world/landmarks.ts": "fb03b8e5320757ef3aaab35f3e55ace299f277ae6e77fac82ebc00ebf40761b5",
     "src/world/tunnel-surface.ts": "b455b79561c897e030ef4b0fb08affeb80216e628cc45545a1a561803491cf03",
     "tests/world-fixture.ts": "21c10ae9b90040d63991c990e85d0fd7d17e771a9cbaca5304c1d731093f5eb6",
-    "src/world/placement-policy.ts": "1c5ee0347df1b27759caf29a53cf61053fe5214d32420eab982323ad4fd67035",
-    "src/walk-art.ts": "344b4bc8a50544cc366096cc26db0674a1c1951895a364c78fda5353f1e0d6f2",
+    "src/world/placement-policy.ts": "5364a5c4b8a2aa8c0d425a111743712ae23e67255c3bbc6d66a4806eba245ce6",
+    "src/walk-art.ts": "bc9255af4be26687a30723cf117ddfaef286a960e0e3a5b9b5c7f04bf05f3817",
     "src/world/props.ts": "9501398edf2810f2db7a08ce38eb93c1dc3e4e8fa3107aae33c76338ac74ece3",
-    "src/world/v12-surfaces.ts": "d95ca2790807a979bec108ea41516211bf602d2cd102f8e82f2d695ba583b14a",
+    "src/world/v12-surfaces.ts": "cf69602f9f0417205ff48af4b8a6b08ee9e6346b2df05fd8d47760efda0669da",
     "src/world/sports-field.ts": "d9553eb071833f765ce4207a385d7e42f62643035627f4fe84532e8c063b981b",
-    "src/walk/v12-data.ts": "385fec53e23e0be61b00d5ff6988715536fe8824d0b6782a8ccf2ea3d88f1316",
+    "src/walk/v12-data.ts": "a723482c0b93cc7386e6f6bd11cd4927d02a1aedde9fb65574ce76d945917fd1",
     "src/walk/v12-geometry.ts": "db77f03faaa1b138e1ca20fa9d66baaae75969421c6f9021e19876730abe3591",
-    "public/data/sea.json": "a9408c9ef87b9632f3664067055818a97475e3c7de8b949d5c241fe5276d9269",
-    "public/data/bus-routes.json": "3b01df3d906822d559004ee7b542bc75caf10966b27ec6e3c8db6b17ec0686dc",
+    "public/data/sea.json": "ce7bb467428b5caffc2a9e823aee1bffea30f35b73b5aeb3b0620f70b25ec0a7",
+    "public/data/bus-routes.json": "e823e3c7e23c2a787a3360c5595f9e538cd75080cfad4cdead1bf470dbb0a181",
     "public/data/sports.json": "68f233591959b992c77b673e34294a7b1f636d8af4ba85148970be57def66c91",
     "public/data/interiors/fitness.json": "ae1cb67fed57d3522e4125d5f85169d01d6778eb36948585715b2dadd8a9ff75",
     "public/data/walkthrough/chemistry-door-source-review.json": "c829366d32b07cc20cc8646670bb5f2f3aa755e1f3d31762fea443e4cbefa544",
@@ -79,10 +79,10 @@
     "Virtual walkthrough only; not verified real-world navigation.",
     "Closed animated doors are excluded; runtime must open doors before traversing."
   ],
-  "surfaceVersion": "terrain-triangles-v2:c0aecf0d:1dd23f1f",
+  "surfaceVersion": "terrain-triangles-v2:db855e31:acabccc5",
   "geometry": {
-    "vertices": 1908133,
-    "triangles": 642045,
+    "vertices": 2234617,
+    "triangles": 750925,
     "bounds": [
       [
         -102.02,
@@ -108,7 +108,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -124,7 +124,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -140,7 +140,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -156,7 +156,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -172,7 +172,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -188,7 +188,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -204,7 +204,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -220,7 +220,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -236,7 +236,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -252,7 +252,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -268,7 +268,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -284,7 +284,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -300,7 +300,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -316,7 +316,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -332,7 +332,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -348,7 +348,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -364,7 +364,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -380,7 +380,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -396,7 +396,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -412,7 +412,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -440,7 +440,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -456,7 +456,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -472,7 +472,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -504,7 +504,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -600,7 +600,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -616,7 +616,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -636,7 +636,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -652,7 +652,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -668,7 +668,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -684,7 +684,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -700,7 +700,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -716,7 +716,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -732,7 +732,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -748,7 +748,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -764,7 +764,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -812,7 +812,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -828,7 +828,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -844,7 +844,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -880,7 +880,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -896,7 +896,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -916,7 +916,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -940,7 +940,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -956,7 +956,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -972,7 +972,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -988,7 +988,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -1004,7 +1004,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -1020,7 +1020,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -1036,7 +1036,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -1052,7 +1052,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -1068,7 +1068,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -1084,7 +1084,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -1100,7 +1100,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -1116,7 +1116,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -1156,7 +1156,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -1252,7 +1252,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -1268,7 +1268,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -1284,7 +1284,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -1300,7 +1300,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -1316,7 +1316,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -1332,7 +1332,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -1348,7 +1348,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -1364,7 +1364,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -1384,7 +1384,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -1480,7 +1480,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -1496,7 +1496,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -1512,7 +1512,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -1528,7 +1528,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -1544,7 +1544,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -1560,7 +1560,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -1576,7 +1576,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -1592,7 +1592,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -1608,7 +1608,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -1624,7 +1624,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -1640,7 +1640,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -1708,7 +1708,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -1724,7 +1724,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -1940,7 +1940,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -1956,7 +1956,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -1972,7 +1972,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -2164,7 +2164,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -2180,7 +2180,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -2196,7 +2196,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -2212,7 +2212,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -2228,7 +2228,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -2244,7 +2244,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -2260,7 +2260,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -2276,7 +2276,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -2292,7 +2292,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -2308,7 +2308,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -2324,7 +2324,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -2340,7 +2340,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -2372,7 +2372,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -2408,7 +2408,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -2424,7 +2424,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -2440,7 +2440,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -2456,7 +2456,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -2540,7 +2540,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -2556,7 +2556,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -2572,7 +2572,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -2588,7 +2588,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -2628,7 +2628,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -2644,7 +2644,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -2660,7 +2660,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -2676,7 +2676,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -2692,7 +2692,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -2708,7 +2708,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -2724,7 +2724,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -2740,7 +2740,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -2756,7 +2756,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -2804,7 +2804,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -2820,7 +2820,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -2836,7 +2836,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -2852,7 +2852,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -2868,7 +2868,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -2884,7 +2884,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -2900,7 +2900,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -2916,7 +2916,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -2932,7 +2932,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -2948,7 +2948,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -2964,7 +2964,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -2980,7 +2980,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -3008,7 +3008,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3024,7 +3024,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3040,7 +3040,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3056,7 +3056,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3072,7 +3072,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3088,7 +3088,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3104,7 +3104,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -3124,7 +3124,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3140,7 +3140,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3156,7 +3156,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3172,7 +3172,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3188,7 +3188,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3204,7 +3204,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3220,7 +3220,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3236,7 +3236,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3252,7 +3252,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -3448,7 +3448,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3464,7 +3464,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3480,7 +3480,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3496,7 +3496,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -3512,7 +3512,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3528,7 +3528,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3544,7 +3544,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3560,7 +3560,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -3576,7 +3576,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -3592,7 +3592,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -3608,7 +3608,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -3624,7 +3624,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -3640,7 +3640,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -3656,7 +3656,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -3756,7 +3756,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3772,7 +3772,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3788,7 +3788,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3804,7 +3804,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3820,7 +3820,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3836,7 +3836,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3852,7 +3852,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3868,7 +3868,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3884,7 +3884,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3900,7 +3900,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3916,7 +3916,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3932,7 +3932,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3948,7 +3948,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3964,7 +3964,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3980,7 +3980,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -3996,7 +3996,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -4280,7 +4280,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -4296,7 +4296,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -5080,7 +5080,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -5116,7 +5116,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -5132,7 +5132,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -5148,7 +5148,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -5164,7 +5164,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -5180,7 +5180,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -5196,7 +5196,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -5212,7 +5212,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -5228,7 +5228,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -5244,7 +5244,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -5260,7 +5260,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -5276,7 +5276,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -5524,7 +5524,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -5540,7 +5540,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -5556,7 +5556,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -5572,7 +5572,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -5592,7 +5592,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -5620,7 +5620,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -5636,7 +5636,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -5652,7 +5652,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -5668,7 +5668,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -5684,7 +5684,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -5700,7 +5700,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -5716,7 +5716,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -5732,7 +5732,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -5748,7 +5748,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -5764,7 +5764,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -5820,7 +5820,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -5836,7 +5836,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -5852,7 +5852,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -5868,7 +5868,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -5884,7 +5884,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -5900,7 +5900,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -5916,7 +5916,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -5932,7 +5932,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -5948,7 +5948,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -5964,7 +5964,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -5980,7 +5980,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -5996,7 +5996,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -6012,7 +6012,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -6028,7 +6028,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -6044,7 +6044,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -6360,7 +6360,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -6376,7 +6376,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -6392,7 +6392,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -6408,7 +6408,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -6424,7 +6424,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -6440,7 +6440,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -6456,7 +6456,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -6604,7 +6604,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -6620,7 +6620,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -6636,7 +6636,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -6652,7 +6652,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -6668,7 +6668,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -6684,7 +6684,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -6700,7 +6700,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -6716,7 +6716,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -6732,7 +6732,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -6748,7 +6748,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -6764,7 +6764,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -7016,7 +7016,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -7032,7 +7032,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -7048,7 +7048,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -7064,7 +7064,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -7080,7 +7080,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -7096,7 +7096,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -7112,7 +7112,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -7128,7 +7128,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -7144,7 +7144,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -7160,7 +7160,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -7176,7 +7176,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -7192,7 +7192,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -7360,7 +7360,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -7404,7 +7404,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -7420,7 +7420,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -7436,7 +7436,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -7452,7 +7452,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -7472,7 +7472,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -7488,7 +7488,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -7504,7 +7504,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -7540,7 +7540,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -7568,7 +7568,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -7584,7 +7584,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -7600,7 +7600,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -7616,7 +7616,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -7632,7 +7632,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -7648,7 +7648,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -7664,7 +7664,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -7680,7 +7680,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -7696,7 +7696,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -7712,7 +7712,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -7728,7 +7728,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -7744,7 +7744,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -7760,7 +7760,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -7776,7 +7776,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -7792,7 +7792,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -7808,7 +7808,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -7824,7 +7824,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -7840,7 +7840,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -7856,7 +7856,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -7872,7 +7872,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -7888,7 +7888,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -7904,7 +7904,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -7920,7 +7920,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -7936,7 +7936,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -7952,7 +7952,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -8000,7 +8000,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -8016,7 +8016,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -8032,7 +8032,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -8048,7 +8048,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -8108,7 +8108,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -8124,7 +8124,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -8140,7 +8140,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -8156,7 +8156,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -8172,7 +8172,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -8196,7 +8196,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -8212,7 +8212,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -8228,7 +8228,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -8244,7 +8244,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -8260,7 +8260,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -8276,7 +8276,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -8312,7 +8312,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -8328,7 +8328,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -8344,7 +8344,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -8360,7 +8360,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -8376,7 +8376,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -8392,7 +8392,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -8408,7 +8408,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -8424,7 +8424,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -8440,7 +8440,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -8456,7 +8456,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -8472,7 +8472,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -8488,7 +8488,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -8504,7 +8504,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -8520,7 +8520,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -8536,7 +8536,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -8552,7 +8552,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -8632,7 +8632,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -8648,7 +8648,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -8664,7 +8664,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -8680,7 +8680,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -8700,7 +8700,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -8920,7 +8920,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -8936,7 +8936,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -9096,7 +9096,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -9112,7 +9112,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -9128,7 +9128,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -9144,7 +9144,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -9160,7 +9160,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -9176,7 +9176,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -9192,7 +9192,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -9208,7 +9208,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -9224,7 +9224,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -9240,7 +9240,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -9256,7 +9256,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -9272,7 +9272,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -9288,7 +9288,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -9304,7 +9304,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -9320,7 +9320,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -9336,7 +9336,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -11156,7 +11156,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11172,7 +11172,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11188,7 +11188,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11204,7 +11204,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11220,7 +11220,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11236,7 +11236,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11252,7 +11252,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11268,7 +11268,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11284,7 +11284,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11300,7 +11300,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11316,7 +11316,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11332,7 +11332,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11348,7 +11348,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11364,7 +11364,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11380,7 +11380,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11396,7 +11396,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11412,7 +11412,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11428,7 +11428,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11444,7 +11444,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11460,7 +11460,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11476,7 +11476,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -11492,7 +11492,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -11508,7 +11508,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -11524,7 +11524,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -11540,7 +11540,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -11556,7 +11556,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -11572,7 +11572,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -11588,7 +11588,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -11604,7 +11604,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -11620,7 +11620,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11636,7 +11636,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -11660,7 +11660,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -11876,7 +11876,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11892,7 +11892,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11908,7 +11908,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11924,7 +11924,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11940,7 +11940,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11956,7 +11956,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11972,7 +11972,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -11988,7 +11988,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -12004,7 +12004,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -12020,7 +12020,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -12252,7 +12252,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -12268,7 +12268,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -12284,7 +12284,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -12300,7 +12300,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -12316,7 +12316,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -12332,7 +12332,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -12348,7 +12348,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -12416,7 +12416,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -12432,7 +12432,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -12448,7 +12448,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -12464,7 +12464,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -12480,7 +12480,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -12496,7 +12496,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -12512,7 +12512,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -12528,7 +12528,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -12544,7 +12544,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -12560,7 +12560,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -12576,7 +12576,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -12592,7 +12592,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -12608,7 +12608,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -12784,7 +12784,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -12800,7 +12800,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -12816,7 +12816,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -12832,7 +12832,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -12848,7 +12848,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -12868,7 +12868,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -12884,7 +12884,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -12900,7 +12900,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -12916,7 +12916,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -12932,7 +12932,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -12956,7 +12956,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -12992,7 +12992,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -13020,7 +13020,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -13036,7 +13036,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -13052,7 +13052,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -13084,7 +13084,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -13100,7 +13100,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -13116,7 +13116,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -13132,7 +13132,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -13148,7 +13148,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -13164,7 +13164,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -13180,7 +13180,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -13196,7 +13196,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -13212,7 +13212,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -13228,7 +13228,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -13244,7 +13244,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -13260,7 +13260,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -13276,7 +13276,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -13292,7 +13292,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -13308,7 +13308,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -13348,7 +13348,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -13364,7 +13364,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -13380,7 +13380,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -13396,7 +13396,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -13412,7 +13412,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -13428,7 +13428,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -13444,7 +13444,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -13460,7 +13460,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -13476,7 +13476,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -13552,7 +13552,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -13568,7 +13568,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -13584,7 +13584,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -13600,7 +13600,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -13620,7 +13620,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -13636,7 +13636,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -14128,7 +14128,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -14144,7 +14144,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -14160,7 +14160,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -14176,7 +14176,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -14192,7 +14192,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -14208,7 +14208,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -14224,7 +14224,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -14240,7 +14240,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -14256,7 +14256,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -14272,7 +14272,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -14288,7 +14288,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -14304,7 +14304,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -14320,7 +14320,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -14336,7 +14336,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -14352,7 +14352,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -14376,7 +14376,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -14392,7 +14392,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -14408,7 +14408,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -14424,7 +14424,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -14440,7 +14440,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -14456,7 +14456,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -14472,7 +14472,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -14488,7 +14488,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -14632,7 +14632,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -14648,7 +14648,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -14664,7 +14664,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -14680,7 +14680,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -14696,7 +14696,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -14712,7 +14712,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -14728,7 +14728,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -14780,7 +14780,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -14796,7 +14796,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -14812,7 +14812,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -14828,7 +14828,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -14844,7 +14844,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -14860,7 +14860,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -14876,7 +14876,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -14892,7 +14892,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -14908,7 +14908,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -14924,7 +14924,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -14940,7 +14940,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -14956,7 +14956,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -14972,7 +14972,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -14988,7 +14988,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -15004,7 +15004,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -15020,7 +15020,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -15036,7 +15036,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -15052,7 +15052,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -15068,7 +15068,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -15180,7 +15180,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -15212,7 +15212,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -15228,7 +15228,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -15244,7 +15244,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -15260,7 +15260,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -15276,7 +15276,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -15292,7 +15292,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -15312,7 +15312,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -17176,7 +17176,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -17700,7 +17700,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -17720,7 +17720,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -17736,7 +17736,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -17752,7 +17752,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -17768,7 +17768,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -17784,7 +17784,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -17800,7 +17800,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -17816,7 +17816,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -17832,7 +17832,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -17848,7 +17848,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -17864,7 +17864,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -17880,7 +17880,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -17896,7 +17896,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -17912,7 +17912,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -17928,7 +17928,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -17944,7 +17944,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -17960,7 +17960,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -18056,7 +18056,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -18072,7 +18072,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -18088,7 +18088,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -18104,7 +18104,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -18120,7 +18120,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -18136,7 +18136,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -18152,7 +18152,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -18168,7 +18168,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -18184,7 +18184,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -18200,7 +18200,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -18216,7 +18216,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -18236,7 +18236,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -18252,7 +18252,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -18276,7 +18276,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -18292,7 +18292,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -18308,7 +18308,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -18324,7 +18324,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -18340,7 +18340,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -18356,7 +18356,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -18372,7 +18372,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -18388,7 +18388,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -18404,7 +18404,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -18420,7 +18420,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -18436,7 +18436,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -18452,7 +18452,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -18468,7 +18468,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -18484,7 +18484,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -18500,7 +18500,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -18604,7 +18604,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -18644,7 +18644,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -18660,7 +18660,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -18676,7 +18676,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -18692,7 +18692,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -18708,7 +18708,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -18724,7 +18724,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -18740,7 +18740,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -18756,7 +18756,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -18772,7 +18772,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -18800,7 +18800,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -18816,7 +18816,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -18832,7 +18832,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -18848,7 +18848,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -18864,7 +18864,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -18880,7 +18880,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -18896,7 +18896,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -18912,7 +18912,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -18928,7 +18928,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -18944,7 +18944,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -18960,7 +18960,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -18976,7 +18976,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -18992,7 +18992,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -19008,7 +19008,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -19024,7 +19024,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -19040,7 +19040,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -19056,7 +19056,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -19072,7 +19072,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -19088,7 +19088,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -19108,7 +19108,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -19168,7 +19168,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -19196,7 +19196,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -19240,7 +19240,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -19256,7 +19256,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -19272,7 +19272,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -19288,7 +19288,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -19304,7 +19304,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -19320,7 +19320,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -20656,7 +20656,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -20672,7 +20672,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -20688,7 +20688,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -20704,7 +20704,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -20720,7 +20720,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -20736,7 +20736,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -20852,7 +20852,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -20868,7 +20868,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -20884,7 +20884,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -20900,7 +20900,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -20916,7 +20916,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -20932,7 +20932,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -20948,7 +20948,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -20964,7 +20964,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -20980,7 +20980,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -20996,7 +20996,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -21012,7 +21012,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -21028,7 +21028,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -21044,7 +21044,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -21060,7 +21060,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -21076,7 +21076,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -21092,7 +21092,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -21108,7 +21108,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -21124,7 +21124,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -21328,7 +21328,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -21344,7 +21344,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -21360,7 +21360,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -21376,7 +21376,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -21392,7 +21392,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -21408,7 +21408,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -21432,7 +21432,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -21448,7 +21448,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -21464,7 +21464,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -21480,7 +21480,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -21496,7 +21496,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -21512,7 +21512,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -21564,7 +21564,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -21580,7 +21580,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -21656,7 +21656,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -21672,7 +21672,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -21688,7 +21688,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -21704,7 +21704,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -21720,7 +21720,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -21736,7 +21736,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -21752,7 +21752,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -21768,7 +21768,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -21784,7 +21784,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -21800,7 +21800,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -21816,7 +21816,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -21832,7 +21832,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -21848,7 +21848,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -21864,7 +21864,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -21880,7 +21880,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -21912,7 +21912,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -21936,7 +21936,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -21952,7 +21952,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -21968,7 +21968,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -21984,7 +21984,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -22000,7 +22000,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -22016,7 +22016,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -22032,7 +22032,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -22048,7 +22048,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -22200,7 +22200,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -22216,7 +22216,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -22232,7 +22232,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -22284,7 +22284,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -22300,7 +22300,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -22316,7 +22316,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -22332,7 +22332,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -22348,7 +22348,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -22364,7 +22364,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -22380,7 +22380,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -22396,7 +22396,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -22412,7 +22412,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -22428,7 +22428,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -22444,7 +22444,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -22460,7 +22460,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -22476,7 +22476,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -22492,7 +22492,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -22508,7 +22508,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -22524,7 +22524,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -22540,7 +22540,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -22556,7 +22556,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -22572,7 +22572,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -22660,7 +22660,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -22676,7 +22676,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -22800,7 +22800,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -22816,7 +22816,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -22856,7 +22856,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -22872,7 +22872,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -22888,7 +22888,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -22928,7 +22928,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -22948,7 +22948,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -22972,7 +22972,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -22988,7 +22988,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -23004,7 +23004,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -23020,7 +23020,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -23036,7 +23036,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -23052,7 +23052,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -23068,7 +23068,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -23084,7 +23084,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -23100,7 +23100,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -23116,7 +23116,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -23132,7 +23132,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -23148,7 +23148,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -23164,7 +23164,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -23180,7 +23180,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -23196,7 +23196,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -23212,7 +23212,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -23228,7 +23228,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -23244,7 +23244,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -23260,7 +23260,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -23276,7 +23276,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -23292,7 +23292,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -23308,7 +23308,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -23340,7 +23340,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -23356,7 +23356,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -23372,7 +23372,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -23388,7 +23388,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -23428,7 +23428,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -23448,7 +23448,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -23464,7 +23464,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -23580,7 +23580,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -23612,7 +23612,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -23628,7 +23628,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -23644,7 +23644,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -23660,7 +23660,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -23676,7 +23676,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -23692,7 +23692,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -23708,7 +23708,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -23724,7 +23724,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -23740,7 +23740,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -23756,7 +23756,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -23772,7 +23772,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -23788,7 +23788,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -23804,7 +23804,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -23820,7 +23820,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -23836,7 +23836,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -23852,7 +23852,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -23892,7 +23892,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -23908,7 +23908,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -23928,7 +23928,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -23944,7 +23944,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -23960,7 +23960,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -23976,7 +23976,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -23992,7 +23992,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24008,7 +24008,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24024,7 +24024,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24040,7 +24040,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24056,7 +24056,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24072,7 +24072,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24088,7 +24088,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -24108,7 +24108,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24124,7 +24124,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24140,7 +24140,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24156,7 +24156,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24172,7 +24172,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -24196,7 +24196,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24212,7 +24212,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24228,7 +24228,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -24244,7 +24244,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -24260,7 +24260,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -24276,7 +24276,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -24292,7 +24292,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -24308,7 +24308,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -24324,7 +24324,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -24340,7 +24340,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -24356,7 +24356,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -24372,7 +24372,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -24396,7 +24396,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24412,7 +24412,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24428,7 +24428,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24444,7 +24444,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24460,7 +24460,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24476,7 +24476,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24492,7 +24492,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24508,7 +24508,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24524,7 +24524,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24540,7 +24540,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24556,7 +24556,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24572,7 +24572,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24588,7 +24588,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -24812,7 +24812,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24828,7 +24828,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24844,7 +24844,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24860,7 +24860,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24876,7 +24876,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24892,7 +24892,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -24944,7 +24944,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24960,7 +24960,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24976,7 +24976,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -24992,7 +24992,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -25008,7 +25008,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -25024,7 +25024,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -25040,7 +25040,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -25056,7 +25056,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -25072,7 +25072,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -25088,7 +25088,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -25104,7 +25104,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -25120,7 +25120,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -25136,7 +25136,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -25152,7 +25152,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -25168,7 +25168,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -25184,7 +25184,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -25200,7 +25200,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -25216,7 +25216,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -25232,7 +25232,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -25248,7 +25248,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -25264,7 +25264,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -25280,7 +25280,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -25296,7 +25296,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -25312,7 +25312,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -25400,7 +25400,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -25416,7 +25416,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -25432,7 +25432,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -25448,7 +25448,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -25464,7 +25464,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -25496,7 +25496,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -25584,7 +25584,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -25600,7 +25600,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -25616,7 +25616,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -25632,7 +25632,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -25648,7 +25648,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -25912,7 +25912,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -25932,7 +25932,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -25948,7 +25948,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -25964,7 +25964,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -25980,7 +25980,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -25996,7 +25996,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26012,7 +26012,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26028,7 +26028,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26044,7 +26044,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26060,7 +26060,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -26132,7 +26132,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26148,7 +26148,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26164,7 +26164,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26180,7 +26180,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26196,7 +26196,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26212,7 +26212,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26228,7 +26228,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26244,7 +26244,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -26264,7 +26264,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26280,7 +26280,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26296,7 +26296,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26312,7 +26312,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26328,7 +26328,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26344,7 +26344,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26360,7 +26360,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -26376,7 +26376,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -26392,7 +26392,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -26408,7 +26408,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -26424,7 +26424,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -26440,7 +26440,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -26456,7 +26456,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -26472,7 +26472,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26488,7 +26488,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26504,7 +26504,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -26616,7 +26616,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26632,7 +26632,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26648,7 +26648,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26664,7 +26664,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26680,7 +26680,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26696,7 +26696,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -26732,7 +26732,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26748,7 +26748,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26764,7 +26764,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26780,7 +26780,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26796,7 +26796,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26812,7 +26812,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26828,7 +26828,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -26960,7 +26960,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26976,7 +26976,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -26992,7 +26992,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -27008,7 +27008,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -27024,7 +27024,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -27040,7 +27040,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -27056,7 +27056,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -27072,7 +27072,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -27088,7 +27088,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -27104,7 +27104,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -27120,7 +27120,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -27136,7 +27136,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -27152,7 +27152,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -27168,7 +27168,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -27184,7 +27184,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -27200,7 +27200,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -27216,7 +27216,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -27240,7 +27240,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -27256,7 +27256,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -27272,7 +27272,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -27300,7 +27300,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -27348,7 +27348,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -27368,7 +27368,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -27644,7 +27644,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -27660,7 +27660,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -27676,7 +27676,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -27692,7 +27692,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -27708,7 +27708,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -27724,7 +27724,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -27980,7 +27980,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -27996,7 +27996,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -28012,7 +28012,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -28032,7 +28032,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -28048,7 +28048,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -28064,7 +28064,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -28080,7 +28080,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -28096,7 +28096,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -28112,7 +28112,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -28128,7 +28128,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -28144,7 +28144,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -28160,7 +28160,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -28176,7 +28176,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -28192,7 +28192,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -28208,7 +28208,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -28224,7 +28224,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -28240,7 +28240,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 3,
@@ -28256,7 +28256,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -28276,7 +28276,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -28292,7 +28292,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -28308,7 +28308,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -28332,7 +28332,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,
@@ -28348,7 +28348,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 2,
@@ -28424,7 +28424,7 @@
     },
     {
       "category": 1,
-      "msg": " - 1908.133K verts, 642.045K tris"
+      "msg": " - 2234.617K verts, 750.925K tris"
     },
     {
       "category": 1,

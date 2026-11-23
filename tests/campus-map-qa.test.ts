@@ -48,8 +48,8 @@ describe('big-map browser QA regressions', () => {
     }
     const marine = graph.nodes.find(n => n.id === graph.anchors.MA.node)!;
     labels.push({id:'building:MA',label:'海洋科學學院',x:marine.p[0],z:marine.p[2],priority:8});
-    labels.push({id:'sea-center',label:'海域中心',x:sea.seaCenter.position[0],z:sea.seaCenter.position[2],priority:8});
-    const points = [...campus.buildings.flatMap(b=>b.polygon),...sports.facilities.flatMap(f=>f.polygon),...sea.waterBodies.flatMap(w=>w.polygon),...sea.waterRoutes.flatMap(r=>r.corridor),...bus.stops.map(s=>[s.boardingPoint[0],s.boardingPoint[2]]),...labels.map(l=>[l.x,l.z])] as [number,number][];
+    labels.push({id:'building:sea-center',label:'海域中心',x:sea.seaCenter.rentalDesk[0],z:sea.seaCenter.rentalDesk[2],priority:8});
+    const points = [...campus.background.flat(),...campus.buildings.flatMap(b=>b.polygon),...sports.facilities.flatMap(f=>f.polygon),...sea.waterBodies.flatMap(w=>w.polygon),...sea.waterRoutes.flatMap(r=>r.corridor),...bus.stops.map(s=>[s.boardingPoint[0],s.boardingPoint[2]]),...labels.map(l=>[l.x,l.z])] as [number,number][];
     const frame=clampFrame(fitCampusFrame(width,height,contentBounds(points,CAMPUS_VIEW)),CAMPUS_VIEW);
     const markerPoints=[...bus.stops.map(s=>[s.boardingPoint[0],s.boardingPoint[2]]),...campus.buildings.filter(b=>b.walkable).map(b=>polygonCenter(b.polygon as [number,number][])),...Array.from({length:12},(_,i)=>[-70+(i%4)*12,90+Math.floor(i/4)*12])];
     const blocked=markerPoints.map(([x,z])=>({x:frameX(frame,x)-8,y:frameY(frame,z)-8,width:16,height:16,priority:0}));
@@ -78,7 +78,7 @@ describe('big-map browser QA regressions', () => {
   it.each([[932,434],[366,580]])('draws each actual-data label text once at the default view (%s × %s)', (width,height) => {
     const landmarkIds:Record<string,string>={...REPLACES,'liberal-arts':'LA',gate:'gate',tunnel:'tunnel-west',seawall:'sunset','sci-eng-arcade':'arcade'};
     const names:Record<string,string>={LA:'文學院',gate:'校門','tunnel-west':'西子灣隧道',sunset:'海堤',arcade:'理工長廊'};
-    const places:MapLabel[]=[],markers:MapMarker[]=busStopMarkers(bus.stops.map(s=>({name:s.name,boardingPoint:s.boardingPoint as [number,number,number]})));
+    const places:MapLabel[]=[],markers:MapMarker[]=busStopMarkers(bus.stops.map(s=>({id:s.id,name:s.name,boardingPoint:s.boardingPoint as [number,number,number]})));
     for(const [key,p] of Object.entries(placements)){
       if(typeof p!=='object'||!('centroid' in p))continue;
       const id=landmarkIds[key];if(!id)continue;
@@ -88,7 +88,7 @@ describe('big-map browser QA regressions', () => {
     }
     for(const f of sports.facilities){if(f.id.includes('candidate'))continue;const [x,z]=polygonCenter(f.polygon as [number,number][]);places.push({id:f.id,label:f.name,x,z,priority:3,minScale:.45});}
     for(const w of sea.waterBodies){const [x,z]=polygonCenter(w.polygon as [number,number][]);places.push({id:w.id,label:w.name,x,z,priority:7});}
-    places.push({id:'sea-center',label:sea.seaCenter.name,x:sea.seaCenter.position[0],z:sea.seaCenter.position[2],priority:8});
+    places.push({id:'building:sea-center',label:sea.seaCenter.name,x:sea.seaCenter.rentalDesk[0],z:sea.seaCenter.rentalDesk[2],priority:8});
     const m=graph.nodes.find(n=>n.id===graph.anchors.MA.node)!;
     const labels=collectMapLabels(campus.buildings.map(b=>({...b,polygon:b.polygon.map(([x,z]):[number,number]=>[x,z])})),places,markers,[{id:'building:MA',label:'海洋科學學院',x:m.p[0],z:m.p[2],priority:8}]);
     // The apparent southern SC label was not another footprint/source: there is one SC candidate.

@@ -33,6 +33,8 @@ SURF_POLYGON = [[-350.0, 242.0], [-378.0, 242.0], [-378.0, 274.0], [-350.0, 274.
 SURF_BEACH_POINT = (-307.0, 252.0)
 SEA_CENTER = (-228.0, -37.0)     # spec §5：位置示意
 SEA_CENTER_SIZE = (16.0, 10.0)
+SEA_KIOSK = (-235.1, -37.0)      # 櫃台設在租借點東側，面向海
+SEA_KIOSK_APRON = (-236.25, -37.0, 10.5, 8.8)
 RACK = (-304.0, 58.0)            # 沙灘北端的器材架（示意），下水點旁
 VIEWPOINT = (-316.0, 296.0)      # 海堤觀賞點（示意）：沙灘南端、海堤道路邊
 # 依棒壘球場與溜冰場描圖外推約 15 m 的禁入區；實際防波堤與消波塊沒有描繪。
@@ -148,6 +150,8 @@ def build(terrain, trace, warnings: list[str]) -> dict:
     }
 
     sx, sz = SEA_CENTER_SIZE
+    rental_x, rental_z = SEA_CENTER[0] - sx / 2 - 1.5, SEA_CENTER[1]
+    kiosk_x, kiosk_z = SEA_KIOSK
     return {
         'version': 1,
         'generatedBy': 'tools/apply_v12_sea.py',
@@ -167,8 +171,9 @@ def build(terrain, trace, warnings: list[str]) -> dict:
         'waterRoutes': routes,
         'seaCenter': {
             'id': 'sea-center', 'name': '海域中心', 'position': P3(SEA_CENTER[0], ground(*SEA_CENTER), SEA_CENTER[1]),
-            'footprint': rect(SEA_CENTER[0], SEA_CENTER[1], sx, sz), 'rentalDesk': P3(SEA_CENTER[0] - sx / 2 - 1.5, ground(SEA_CENTER[0] - sx / 2 - 1.5, SEA_CENTER[1]), SEA_CENTER[1]),
-            'signboard': {'position': P3(SEA_CENTER[0] - sx / 2 - 2.5, ground(SEA_CENTER[0] - sx / 2 - 2.5, SEA_CENTER[1] + 3), SEA_CENTER[1] + 3), 'yaw': C.yaw_of(-1, 0)},
+            'footprint': rect(SEA_CENTER[0], SEA_CENTER[1], sx, sz),
+            'rentalDesk': P3(rental_x, ground(rental_x, rental_z), rental_z),
+            'kiosk': {'position': P3(kiosk_x, ground(kiosk_x, kiosk_z), kiosk_z), 'yaw': C.yaw_of(-1, 0), 'apron': rect(*SEA_KIOSK_APRON)},
             'craftRack': {'position': P3(RACK[0], sand(*RACK), RACK[1]), 'note': '沙灘北端的器材架（示意），SUP 與獨木舟由此下水'},
             'equipment': ['立式划槳', '獨木舟', '衝浪板', '風浪板', '帆船', '雷射型帆船'],
             'basis': 'schematic', 'designNote': '位置示意', **C.binding('S2', 'S3'),
@@ -234,7 +239,10 @@ def probe(data: dict, terrain, warnings: list[str]):
     checks += [(f'衝浪區頂點 {p}', p, 'water') for p in data['surfZone']['polygon'][1:3]]
     for boat in data['sailingShow']['boats'][::4]:
         checks += [(f'帆船 {boat["team"]} 航線點', [p[0], p[2]], 'water') for p in boat['path'][::6]]
-    checks += [('海域中心', [data['seaCenter']['position'][0], data['seaCenter']['position'][2]], 'land'),
+    center = data['seaCenter']
+    checks += [('海域中心', center['position'][::2], 'land'),
+               ('海域中心租借點', center['rentalDesk'][::2], 'land'),
+               ('海域中心櫃台', center['kiosk']['position'][::2], 'land'),
                ('救生員椅', [data['lifeguardChair']['position'][0], data['lifeguardChair']['position'][2]], 'land'),
                ('帆船觀賞點', [data['sailingViewPoint']['position'][0], data['sailingViewPoint']['position'][2]], 'land')]
     bad = 0
@@ -268,6 +276,12 @@ def summary(data: dict):
 def self_check(data: dict) -> list[str]:
     """寫檔前的硬性幾何檢查（與 verify_v12_world.py 重疊的最小集合，錯了就不寫）。"""
     errors = []
+    center = data['seaCenter']
+    kiosk = center['kiosk']
+    errors += C.polygon_problems(kiosk['apron'], '海域中心櫃台前空地')
+    for p in (center['rentalDesk'], kiosk['position']):
+        if not C.in_poly(p[::2], kiosk['apron']):
+            errors.append(f'海域中心：{p} 不在櫃台前空地內')
     swim = data['waterBodies'][0]['polygon']
     beach = data['beachReference']['polygon']
     for label, poly in [('游泳區', swim), ('衝浪區', data['surfZone']['polygon'])] + [(r['id'] + ' corridor', r['corridor']) for r in data['waterRoutes']] + [(h['id'], h['polygon']) for h in data['hazards']] + [(b['id'], b['polygon']) for b in data['waterBodies'][1:]]:

@@ -26,6 +26,10 @@ import math
 
 import v12_world_common as C
 from v12_world_common import P2, P3
+from shapely.geometry import LineString, Point
+from shapely.ops import substring
+from apply_hamasen import SNAPSHOT, add_graph, district
+from hamasen_bus_alignment import alignments, provenance
 
 GRAPH = C.DATA / 'walkthrough/outdoor-graph.json'
 OUT = C.DATA / 'bus-routes.json'
@@ -54,7 +58,9 @@ STOPS = [
     ('liberal-arts', 'liberal-arts', None), ('marine-sci', 'marine-sci', 2901), ('marine-eng', 'marine-eng', 255),
 ]
 GROUPS = {
-    'gate': ('校門站', ['西子灣校門站', '校門', '捷運哈瑪星站（替代端點）']),
+    'gate': ('校門站', ['西子灣校門站', '校門']),
+    'hamasen-orange-stop': ('哈瑪星站 1 號出口', ['捷運哈瑪星站', '橘1延']),
+    'hamasen-campus-stop': ('哈瑪星站 2 號出口', ['捷運哈瑪星站', '校園公車']),
     'admin': ('行政大樓站', ['行政大樓／國研大樓', '國研大樓']),
     'dorm-h': ('H棟宿舍站', ['H棟宿舍', '翠亨山莊H棟']),
     'activity': ('活動中心站', ['活動中心', '學生活動中心']),
@@ -83,6 +89,8 @@ LAST_BUS = '這班是今天末班車囉，沒搭到就得自己走路囉，快�
 NOTICE = '簡化遊戲班表，實際班次以學校公告為準。'
 STOP_NODE = {sid: node for sid, _, node in STOPS}
 STOP_GROUP = {sid: group for sid, group, _ in STOPS}
+TERMINALS = {'campus-bus': 'hamasen-campus-stop', 'orange-1-ext': 'hamasen-orange-stop'}
+STOP_GROUP.update((sid, sid) for sid in TERMINALS.values())
 
 
 def eid(a: int, b: int) -> str:
@@ -138,6 +146,7 @@ class Network:
         self.nodes = g['nodes']
         self.kind: dict[tuple[int, int], str] = {}
         self.adj: list[list[tuple[int, float]]] = [[] for _ in self.nodes]
+        reverse_only = {(edge['to'], edge['from']) for edge in g.get('hamasen', {}).get('edges', []) if edge.get('oneway')}
         for (a, b, w), k in zip(g['edges'], g['edgeKind']):
             if k not in WIDTH:
                 continue
@@ -145,8 +154,10 @@ class Network:
             if key in self.kind:
                 continue
             self.kind[key] = k
-            self.adj[a].append((b, w))
-            self.adj[b].append((a, w))
+            if (a, b) not in reverse_only:
+                self.adj[a].append((b, w))
+            if (b, a) not in reverse_only:
+                self.adj[b].append((a, w))
 
     def xz(self, n: int) -> tuple[float, float]:
         p = self.nodes[n]['p']
@@ -166,7 +177,7 @@ class Network:
             C.die(f'{what}：節點 {n} {self.nodes[n]["p"]} 沒有可行車的邊')
 
 
-def shortest(net: Network, src: int, dst: int, came_from: int | None = None) -> list[int] | None:
+def shortest(net: Network, src: int, dst: int, came_from: int | None = None, arrive_from: set[int] | None = None) -> list[int] | None:
     """可行車邊上的最短路；狀態是（節點, 前一個節點），不准立刻折返。came_from 是抵達 src 時的前一個節點。"""
     start = (src, -1 if came_from is None else came_from)
     dist = {start: 0.0}
@@ -177,7 +188,7 @@ def shortest(net: Network, src: int, dst: int, came_from: int | None = None) -> 
         d, u, p = heapq.heappop(heap)
         if d > dist.get((u, p), math.inf):
             continue
-        if u == dst and (u, p) != start:
+        if u == dst and (u, p) != start and (arrive_from is None or p in arrive_from):
             end = (u, p)
             break
         for v, w in net.adj[u]:
@@ -196,6 +207,55 @@ def shortest(net: Network, src: int, dst: int, came_from: int | None = None) -> 
         state = prev[state]
         out.append(state[0])
     return out[::-1]
+
+
+def street_preview(net, alignment, node, *, arriving, reach):
+    """Match the visible end of a sourced alignment to directed edges in the game."""
+    trace = LineString(alignment[::-1] if arriving else alignment)
+    if Point(net.xz(node)).distance(Point(trace.coords[0])) > .15:
+        C.die(f'站位節點 {node} 與 OSM 行車端點不符')
+    neighbors = [[] for _ in net.nodes] if arriving else net.adj
+    if arriving:
+        for a, edges in enumerate(net.adj):
+            for b, w in edges:
+                neighbors[b].append((a, w))
+    path, progress = [node], 0
+    while progress < reach:
+        choices = []
+        for next_node, distance in neighbors[path[-1]]:
+            point = Point(net.xz(next_node))
+            along = trace.project(point)
+            if along <= progress + .02 or along > progress + distance + 2:
+                continue
+            if trace.distance(point) <= .85 and C.in_bounds(point.x, point.y):
+                choices.append((along, trace.distance(point), next_node))
+        if not choices:
+            C.die(f'站位節點 {node} 的街道預覽只能接續 {progress:.1f} m')
+        progress, _, next_node = min(choices)
+        path.append(next_node)
+    return path[::-1] if arriving else path
+
+
+def city_leg(departure, arrival, nodes_out, nodes_in, alignment, source, occurrences, net, terrain, *, wrap=False):
+    def positions(nodes, limit, *, arriving):
+        line = LineString([net.xz(n) for n in nodes])
+        if line.length > limit:
+            line = substring(line, line.length - limit if arriving else 0, line.length if arriving else limit)
+        return [P3(x, terrain.height_at(x, z), z) for x, z in line.coords]
+
+    length = C.path_length(alignment)
+    return {
+        'fromOccurrenceId': occurrences[0], 'toOccurrenceId': occurrences[1],
+        'departurePath': positions(nodes_out, departure, arriving=False),
+        'path': positions(nodes_in, arrival, arriving=True),
+        'departureNodeIds': nodes_out, 'nodeIds': nodes_in,
+        'departureSourceEdgeIds': [eid(a, b) for a, b in zip(nodes_out, nodes_out[1:])],
+        'sourceEdgeIds': [eid(a, b) for a, b in zip(nodes_in, nodes_in[1:])],
+        'cruiseMpsGame': C.num(CRUISE, 3), 'lengthM': C.num(length, 1),
+        'osmAlignment': {'path': alignment, **source},
+        'designNote': '依 OSM 行車道路連接；超出遊玩範圍的路段以乘車淡出呈現。',
+        **({'terminalTransfer': True} if wrap else {}),
+    }
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -462,6 +522,8 @@ def main():
 
     graph = load_graph()
     stripped = strip_v12(graph)
+    osm = json.loads(SNAPSHOT.read_text())
+    graph = add_graph(graph, osm, *district(osm))
     base_nodes, base_edges = len(graph['nodes']), len(graph['edges'])
     base_stats = {k: graph.get('stats', {}).get(k) for k in ('nodes', 'edges', 'totalLength') if k in graph.get('stats', {})}
     print(f'graph：{base_nodes} 個節點、{base_edges} 條邊' + ('（已先移除上次的 v12 節點）' if stripped else ''))
@@ -533,7 +595,18 @@ def main():
     digest = terrain.height_digest() if terrain else None
     surface_version = f'terrain-triangle+GROUND_Y:{str(graph.get("source", {}).get("terrainSha256", "unknown"))[:16]}'
     for rid, spec in ROUTES.items():
-        legs_n, stops = route_legs[rid], spec['stops']
+        terminal = TERMINALS[rid]
+        legs_n, stops = route_legs[rid], [*spec['stops'], terminal]
+        terminal_anchor = graph['anchors'][terminal]
+        terminal_node = terminal_anchor['roadNode']
+        align_out, align_in = alignments(terminal)
+        alignment_source = provenance(terminal)
+        directions = alignment_source.pop('directions')
+        arrival_limit = 33 if terminal == 'hamasen-orange-stop' else 35
+        gate_departure = street_preview(net, align_out, GATE_NODE, arriving=False, reach=35)
+        terminal_arrival = street_preview(net, align_out, terminal_node, arriving=True, reach=arrival_limit)
+        terminal_departure = street_preview(net, align_in, terminal_node, arriving=False, reach=35)
+        gate_arrival = street_preview(net, align_in, GATE_NODE, arriving=True, reach=35)
         occurrences = [{'occurrenceId': f'{i:02d}-{sid}', 'stopId': sid} for i, sid in enumerate(stops)]
         legs, full = [], []
         for k, nodes in enumerate(legs_n):
@@ -552,7 +625,7 @@ def main():
             })
             full += [(p[0], p[2]) for p in (pts if not full else pts[1:])]
         # 站：每個站 id 只定義一次，方向取所在路線的行進方向
-        for k, sid in enumerate(stops):
+        for k, sid in enumerate(spec['stops']):
             if sid == 'liberal-arts':
                 node, heading = fc['berth'], fc['berthHeading']
             else:
@@ -572,7 +645,7 @@ def main():
             if sid == 'liberal-arts':
                 extra = {'designNote': '站位在文學院站前廣場的迴轉圈上（示意）；車門朝圈外', 'forecourtId': 'la-forecourt'}
             if STOP_GROUP[sid] == 'gate':
-                extra = {'designNote': '以校門代替捷運哈瑪星站端點；隧道是人行道，不行車。站位依路網推定'}
+                extra = {'designNote': '蓮海路校門站位，依遊戲路網推定。'}
             record = stop_record(sid, node, f'node:{node}', net.world(node), heading, extra)
             for p in [record['berth']['position'], record['sign'], record['boardingPoint'], *record['alightingPoints']]:
                 p[1] = C.num(terrain.height_at(p[0], p[2]), 3)
@@ -581,14 +654,31 @@ def main():
                 if hit:
                     warnings.append(f'{sid}：{label} {p} 落在地標 {hit} 的輪廓內，需要換到路的另一側或調整')
             stop_data[sid] = record
-        # Loader/fleet traverses a cyclic list: explicitly include the terminal transfer.
-        terminal_nodes = spawn_nodes[::-1] + spawn_nodes[1:]
-        terminal_path = [P3(net.xz(n)[0], terrain.height_at(*net.xz(n)), net.xz(n)[1]) for n in terminal_nodes]
-        legs.append({'fromOccurrenceId': occurrences[-1]['occurrenceId'], 'toOccurrenceId': occurrences[0]['occurrenceId'],
-                     'path': terminal_path, 'sourceEdgeIds': [eid(a,b) for a,b in zip(terminal_nodes,terminal_nodes[1:])],
-                     'nodeIds': terminal_nodes, 'cruiseMpsGame': C.num(CRUISE,3),
-                     'lengthM': C.num(C.path_length([(p[0],p[2]) for p in terminal_path]),1),
-                     'terminalTransfer': True, 'designNote': '經 1726 的生成／消失接續段；需 runtime 隱藏折返過程'})
+        # The bus follows the same direction through the metro stop on both local previews.
+        tx, tz = net.xz(terminal_node)
+        bx, bz = net.xz(terminal_arrival[-2])
+        ax, az = net.xz(terminal_departure[1])
+        approach = C.unit(tx - bx, tz - bz)
+        heading = C.unit(ax - tx, az - tz)
+        cx, cz = net.xz(terminal_anchor['node'])
+        if approach[0]*heading[0] + approach[1]*heading[1] < .9 or (cx-tx)*(-heading[1])+(cz-tz)*heading[0] < 2.25:
+            C.die(f'{terminal}：車道方向與候車側不符')
+        source_note = ('橘1延往校側站牌，採 OSM 候車節點。' if terminal == 'hamasen-orange-stop'
+                       else '校園公車候車點位置示意，鄰近哈瑪星站 2 號出口。')
+        curb = P3(cx, terrain.height_at(cx, cz), cz)
+        record = stop_record(terminal, terminal_node, f'node:{terminal_anchor["node"]}', net.world(terminal_node), heading,
+                             {'designNote': source_note, 'sign': curb, 'boardingPoint': list(curb)})
+        for p in [record['berth']['position'], record['boardingPoint'], *record['alightingPoints']]:
+            p[1] = C.num(terrain.height_at(p[0], p[2]), 3)
+        for p in [record['sign'], record['boardingPoint'], *record['alightingPoints']]:
+            if any(C.in_poly((p[0], p[2]), polygon) for _, polygon in landmarks):
+                C.die(f'{terminal}：站牌或上下車點 {p} 位於建物輪廓內')
+        stop_data[terminal] = record
+        gate_out, metro, gate_in = (occurrences[i]['occurrenceId'] for i in (-2, -1, 0))
+        legs.append(city_leg(35, arrival_limit, gate_departure, terminal_arrival, align_out,
+                             directions['gateToTerminal'], (gate_out, metro), net, terrain))
+        legs.append(city_leg(35, 35, terminal_departure, gate_arrival, align_in,
+                             directions['terminalToGate'], (metro, gate_in), net, terrain, wrap=True))
         length = sum(leg['lengthM'] for leg in legs)
         issues = []
         for corner in C.corner_report(full, VEHICLE['minTurnRadiusM']):
@@ -604,6 +694,7 @@ def main():
         routes_out.append({
             'id': rid, 'name': spec['name'], 'vehicleId': spec['vehicleId'], 'driverNpcId': spec['driver'],
             'stopOccurrences': occurrences, 'legs': legs,
+            'hamasenSource': alignment_source,
             'schedule': {**SCHEDULE, 'initialPhaseGameSeconds': spec['initialPhaseGameSeconds']},
             'vehicle': dict(VEHICLE), 'surfaceVersion': surface_version, 'graphRevision': revision,
             'spawn': {'nodeId': SPAWN_NODE, 'nodeIds': spawn_nodes, 'path': [P3(*net.world(n)) for n in spawn_nodes], 'sourceEdgeIds': [eid(a, b) for a, b in zip(spawn_nodes, spawn_nodes[1:])]},
@@ -621,10 +712,14 @@ def main():
             'basis': 'map-derived', 'designNote': spec['note'] + '；班表是簡化的遊戲班表，路徑依 OSM 路網', **C.binding(*spec['sourceIds']),
         })
 
-    blocks = lane_blocks(net, route_legs, fc['edges'])
+    visible_nodes = {route['id']: [nodes for leg in route['legs'] for nodes in
+                                  [leg['nodeIds'], *([leg['departureNodeIds']] if 'departureNodeIds' in leg else [])]]
+                     for route in routes_out}
+    blocks = lane_blocks(net, visible_nodes, fc['edges'])
     for route in routes_out:
         for leg in route['legs']:
-            leg['narrowSectionIds'] = [b['id'] for b in blocks if set(b['edgeIds']) & set(leg['sourceEdgeIds'])]
+            edges = set(leg['sourceEdgeIds'] + leg.get('departureSourceEdgeIds', []))
+            leg['narrowSectionIds'] = [b['id'] for b in blocks if set(b['edgeIds']) & edges]
     road_patches = [{
         'id': 'la-forecourt', 'kind': 'forecourt', 'centerline': [P3(x, fc['levelY'], z) for x, z in fc['centerline']], 'widthM': 7.0,
         'turnRadiusM': LOOP_R, 'filletRadiusM': FILLET_R, 'basis': 'schematic', 'designNote': '文學院站前廣場的支線與迴轉圈，位置示意；路面需要新增並整平',
@@ -652,12 +747,12 @@ def main():
             'heights': '路徑的 Y = runtime 三角形插值地表（含 GROUND_Y）；60 m 平滑後仍超過 7° 的坡段列在 issues，待路面整平',
             'pedestrianAnchorId': '「node:<節點號>」，是 outdoor-graph.json 上可步行抵達的節點',
             'stops': '同一個站在不同行進方向是不同的 stop（例如 admin-up／admin-down），用 group 與 name 歸成同一站',
-            'cycle': '每台車的循環：spawn.path → legs 依序 → despawn.path → 終點停留 → 重新生成',
+            'cycle': 'legs 依序循環；帶 departurePath 的路段分開儲存進出站畫面，完整 OSM 路徑保存在 osmAlignment。',
         },
         'graphRevision': revision, 'surfaceVersion': surface_version, 'terrainHeightDigest': digest, 'pathSource': path_source,
         'timeCompression': {'gameSecondsPerRealSecond': SCHEDULE['gameSecondsPerRealSecond'], 'cruiseKmh': 30, 'note': '路徑前進 ds = cruiseMpsGame × 5 × realDt；停站、開關門用真實秒'},
         'notice': NOTICE,
-        'stops': [stop_data[sid] for sid, _, _ in STOPS if sid in stop_data],
+        'stops': list(stop_data.values()),
         'routes': routes_out,
         'forecourt': {
             'id': 'la-forecourt', 'junctionNode': fc['junction'], 'side': fc['side'], 'center': P2(*fc['centre']), 'turnRadiusM': LOOP_R,

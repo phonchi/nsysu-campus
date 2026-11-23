@@ -26,10 +26,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import v12_world_common as C  # noqa: E402
 
 DRIVABLE = {'tertiary', 'residential', 'unclassified', 'living_street', 'service'}
+HAMASEN_OSM_URLS = {
+    'https://www.openstreetmap.org/copyright',
+    'https://api.openstreetmap.org/api/0.6/map?bbox=120.26815,22.62,120.27582,22.62555',
+    'https://api.openstreetmap.org/api/0.6/map?bbox=120.2635,22.613,120.273,22.6214',
+}
 BASES = {'map-derived', 'schematic'}
 EXPECTED_STOPS = {
-    'campus-bus': ['gate', 'admin', 'dorm-h', 'activity', 'wuling', 'liberal-arts', 'wuling', 'activity', 'dorm-h', 'gate'],
-    'orange-1-ext': ['gate', 'admin', 'dorm-h', 'activity', 'wuling', 'liberal-arts', 'marine-sci', 'marine-eng', 'dorm-h', 'activity', 'admin', 'gate'],
+    'campus-bus': ['gate', 'admin', 'dorm-h', 'activity', 'wuling', 'liberal-arts', 'wuling', 'activity', 'dorm-h', 'gate', 'hamasen-campus-stop'],
+    'orange-1-ext': ['gate', 'admin', 'dorm-h', 'activity', 'wuling', 'liberal-arts', 'marine-sci', 'marine-eng', 'dorm-h', 'activity', 'admin', 'gate', 'hamasen-orange-stop'],
 }
 REQUIRED_VENUES = {'track': 0, 'infield': 0, 'basketball-w': 4, 'basketball-e': 3, 'volleyball-n': 2, 'volleyball-s': 2, 'tennis-outdoor': 2, 'tennis-covered': 0,
                    'baseball': 0, 'rink': 0, 'grandstand': 0, 'jump-runway': 0, 'pool-building': 0}
@@ -81,7 +86,8 @@ def check_sources(doc, label: str, errors: list[str], registry_ids: set[str]):
             for i, v in enumerate(node):
                 walk(v, f'{where}[{i}]')
         elif isinstance(node, str) and node.startswith(('http://', 'https://')) and node not in C.APPROVED_URLS:
-            errors.append(f'{where}：網址 {node!r} 不是核准的來源')
+            if not (label == 'bus' and '.hamasenSource.' in where and node in HAMASEN_OSM_URLS):
+                errors.append(f'{where}：網址 {node!r} 不是核准的來源')
     walk(doc, label)
 
 
@@ -266,6 +272,7 @@ def check_bus(bus, graph, errors: list[str], warnings: list[str]):
     kinds = {}
     for (a, b, _), k in zip(graph['edges'], graph['edgeKind']):
         kinds.setdefault(f'{min(a, b)}-{max(a, b)}', k)
+    forbidden = {(e['to'], e['from']) for e in graph.get('hamasen', {}).get('edges', []) if e.get('oneway')}
     # graph 連通（含新增的支線）
     adj = [[] for _ in nodes]
     for a, b, _ in graph['edges']:
@@ -318,7 +325,7 @@ def check_bus(bus, graph, errors: list[str], warnings: list[str]):
             errors.append(f'bus 線 {rid}：schedule 必須是 schematic、5 倍、每站至少 6 秒')
         if not (isinstance(vehicle.get('minTurnRadiusM'), (int, float)) and vehicle['minTurnRadiusM'] >= MIN_TURN):
             errors.append(f'bus 線 {rid}：vehicle.minTurnRadiusM 必須 ≥ {MIN_TURN}')
-        # legs 是循環：停靠之間的段落，最後可再接一段經生成點折返的終點接續段（terminalTransfer）。
+        # 最後一段從哈瑪星接回校門。場景外的路段有獨立的進站與出站預覽。
         legs = r.get('legs') or []
         transfers = [l for l in legs if l.get('terminalTransfer')]
         if len(legs) - len(transfers) != len(occ) - 1 or len(transfers) > 1 or (transfers and legs[-1] is not transfers[0]):
@@ -331,33 +338,57 @@ def check_bus(bus, graph, errors: list[str], warnings: list[str]):
             if leg.get('fromOccurrenceId') != ring[k].get('occurrenceId') or leg.get('toOccurrenceId') != ring[k + 1].get('occurrenceId'):
                 errors.append(f'{label}：起訖停靠與 stopOccurrences 不符')
             path = leg.get('path') or []
-            check_points(path, 3, label, errors)
-            if len(path) < 2 or not all(finite_point(p, 3) for p in path):
+            departure = leg.get('departurePath', path)
+            split = 'departurePath' in leg
+            expect_split = k >= len(occ) - 2
+            if split != expect_split:
+                errors.append(f'{label}：只有校門與哈瑪星之間的路段須分開進出站預覽')
+            samples = [(departure, 'departure')] if split else []
+            samples.append((path, 'arrival'))
+            for sample, _ in samples:
+                check_points(sample, 3, label, errors)
+            if any(not isinstance(sample, list) or len(sample) < 2 or not all(finite_point(p, 3) for p in sample) for sample, _ in samples):
                 errors.append(f'{label}：路徑至少 2 個點')
                 continue
-            for end, o in ((path[0], ring[k]), (path[-1], ring[k + 1])):
+            for end, o in ((departure[0], ring[k]), (path[-1], ring[k + 1])):
                 berth = (stops.get(o.get('stopId'), {}).get('berth') or {}).get('position')
                 if not finite_point(berth, 3) or math.dist(xz(end), xz(berth)) > 0.5:
                     errors.append(f'{label}：端點 {end} 不在 {o.get("stopId")} 的 berth 上')
-            if previous_end is not None and math.dist(xz(previous_end), xz(path[0])) > 0.05:
+            if previous_end is not None and math.dist(xz(previous_end), xz(departure[0])) > 0.05:
                 errors.append(f'{label}：起點與上一段的終點不連續')
             previous_end = path[-1]
             if not (isinstance(leg.get('cruiseMpsGame'), (int, float)) and leg['cruiseMpsGame'] > 0):
                 errors.append(f'{label}：cruiseMpsGame 必須大於 0')
-            edges = leg.get('sourceEdgeIds') or []
-            if not edges:
-                errors.append(f'{label}：沒有 sourceEdgeIds')
-            for e in edges:
-                if kinds.get(e) not in DRIVABLE:
-                    errors.append(f'{label}：邊 {e!r} 不是 graph 上的可行車邊')
-                    break
-                if previous_edge is not None and not set(previous_edge.split('-')) & set(e.split('-')):
-                    errors.append(f'{label}：邊 {previous_edge} 與 {e} 不相連，路徑斷開')
-                    break
-                previous_edge = e
-            gap = max(math.dist(xz(a), xz(b)) for a, b in zip(path, path[1:]))
-            if gap > 25:
-                errors.append(f'{label}：路徑有 {gap:.1f} m 的跳躍')
+            if split:
+                alignment = leg.get('osmAlignment') or {}
+                whole = alignment.get('path') or []
+                if (len(whole) < 2 or not all(finite_point(p, 2) for p in whole) or not alignment.get('osmWayIds')
+                        or math.dist(whole[0], xz(departure[0])) > .15 or math.dist(whole[-1], xz(path[-1])) > .15
+                        or not any(not C.in_bounds(*p) for p in whole)):
+                    errors.append(f'{label}：缺少連接兩站且經場景外道路的 OSM 路徑')
+            for sample, direction in samples:
+                edge_key, node_key = ('departureSourceEdgeIds', 'departureNodeIds') if direction == 'departure' else ('sourceEdgeIds', 'nodeIds')
+                edges = leg.get(edge_key) or []
+                if split and direction == 'arrival':
+                    previous_edge = None
+                if not edges:
+                    errors.append(f'{label}：沒有 {edge_key}')
+                for e in edges:
+                    if kinds.get(e) not in DRIVABLE:
+                        errors.append(f'{label}：邊 {e!r} 不是 graph 上的可行車邊')
+                        break
+                    if previous_edge is not None and not set(previous_edge.split('-')) & set(e.split('-')):
+                        errors.append(f'{label}：邊 {previous_edge} 與 {e} 不相連，路徑斷開')
+                        break
+                    previous_edge = e
+                if split:
+                    trace = leg.get(node_key) or []
+                    if len(trace) != len(edges) + 1 or any(e != f'{min(a,b)}-{max(a,b)}' or (a,b) in forbidden
+                                                         for (a,b), e in zip(zip(trace, trace[1:]), edges)):
+                        errors.append(f'{label}：進出站預覽的節點與道路方向不符')
+                gap = max(math.dist(xz(a), xz(b)) for a, b in zip(sample, sample[1:]))
+                if gap > 25:
+                    errors.append(f'{label}：路徑有 {gap:.1f} m 的跳躍')
         for key in ('spawn', 'despawn'):
             check_points((r.get(key) or {}).get('path'), 3, f'bus 線 {rid} {key}', errors)
         opened = [i for i in r.get('issues', []) if i.get('status') == 'open']
@@ -596,7 +627,7 @@ def check_spatial(d, errors, warnings):
                 errors.append(f'{label}：路段碰到防波堤禁入區');break
             if min(C.dist_point_seg((x,z),a,b) for a,b in zip(wall,wall[1:]))<8:
                 errors.append(f'{label}：路段碰到海堤／消波塊 8 m 保留帶');break
-    paths=[l['path'] for r in bus.get('routes',[]) for l in r.get('legs',[]) if len(l.get('path',[]))>=2]
+    paths=[p for r in bus.get('routes',[]) for l in r.get('legs',[]) for p in (l.get('path',[]),l.get('departurePath',[])) if len(p)>=2]
     clearance=max((r['vehicle']['widthM']/2+1 for r in bus['routes']),default=2.25)
     for s in bus.get('stops',[]):
         p=s.get('boardingPoint')

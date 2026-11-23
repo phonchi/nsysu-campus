@@ -16,7 +16,7 @@ export interface StairCoreLevel {floorId:string;level:number;storey:number;basis
 export interface StairCore {id:string;center:Point2;angle:number;length:number;width:number;apron:number;levels:StairCoreLevel[];basis:Basis;evidence?:string;}
 export interface LiftSpec extends Partial<Omit<LiftGeometryV12, 'id'|'center'|'angle'|'size'|'stops'|'basis'>> {id:string;center:Point2;angle:number;size:number;stops:({floorId:string;level:number;storey:number}&Partial<LiftStopV12>)[];basis:Basis;}
 export interface JoinConnector {id:string;buildings:[string,string];floors:[string,string];storey:number;a:Point2;b:Point2;width:number;openings:Record<string,{p:Point2;width:number}[]>;rails:Point2[][];basis:Basis;}
-export interface ContextBuilding {id:string;name:string|null;polygon:Point2[];storeys:number;tone?:string;}
+export interface ContextBuilding {id:string;name:string|null;polygon:Point2[];storeys:number;tone?:string;heightM?:number;stationExit?:number;}
 export interface ContextRoad {id:string;kind:string;name?:string|null;width:number;tunnel?:boolean;bridge?:boolean;points:Point2[];}
 export interface CampusStructure {
  version:number;placements:Record<string,StructurePlacement>;stairCores:Record<string,StairCore[]>;lifts:Record<string,LiftSpec[]>;

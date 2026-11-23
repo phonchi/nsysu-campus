@@ -107,10 +107,12 @@ export function decorateCampus(world:WalkWorld,structure:CampusStructure,terrain
  // 2. OSM landmarks/background: brick or cream facades with night windows.
  const brickMat=nightGlow(textured(brick.map,'#ffffff',.88),brick.emissive),creamMat=nightGlow(textured(cream.map,'#ffffff',.88),cream.emissive);
  const roofMat=textured(tex.roof,'#ffffff',.9);
+ const stationWall=solid('#b9cecb'),stationRoof=solid('#347772');
+ const stations=new Set(structure.context.background.filter(b=>b.stationExit).map(b=>b.id));
  world.display.traverse(group=>{
   if(!group.name.startsWith('Campus exterior '))return;
   const id=group.name.slice('Campus exterior '.length),lm=structure.context.landmarks.find(l=>l.id===id),tone=lm?.tone??'brick';
-  group.traverse(o=>{if(!(o instanceof T.Mesh))return;boxUV(o.geometry,undefined,FACADE_TILE.w,FACADE_TILE.h,.08);const g=splitRoof(o.geometry);o.geometry.dispose();o.geometry=g;o.material=[tone==='brick'?brickMat:creamMat,roofMat];});
+  group.traverse(o=>{if(!(o instanceof T.Mesh))return;boxUV(o.geometry,undefined,FACADE_TILE.w,FACADE_TILE.h,.08);const g=splitRoof(o.geometry);o.geometry.dispose();o.geometry=g;o.material=stations.has(id)?[stationWall,stationRoof]:[tone==='brick'?brickMat:creamMat,roofMat];});
  });
  // Draw-call budget: one batch per material for all OSM exteriors, per building for stairs/lifts.
  const exteriors=new T.Group();exteriors.name='Campus exteriors (merged)';

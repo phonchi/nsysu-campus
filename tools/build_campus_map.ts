@@ -1,5 +1,5 @@
 /** Build public/data/campus-map.json for the 2D campus map from the same world data the 3D walk uses.
- * Run: npx tsx tools/build_campus_map.ts  (re-run whenever campus-structure.json or landmark placements change). */
+ * Run: npm run map:build after changing the campus structure, base map, sea center, or landmark placements. */
 import fs from 'node:fs';
 import * as T from 'three';
 import { buildingFrame } from '../src/walk-world';
@@ -10,6 +10,8 @@ type P = [number, number];
 const r1 = (v: number) => Math.round(v * 10) / 10;
 const structure = JSON.parse(fs.readFileSync('public/data/walkthrough/campus-structure.json', 'utf8')) as CampusStructure;
 const info = JSON.parse(fs.readFileSync('public/data/campus-info.json', 'utf8')) as { buildings: Record<string, { name: string; college?: string }> };
+const { seaCenter } = JSON.parse(fs.readFileSync('public/data/sea.json', 'utf8')) as { seaCenter?: { id: string; name: string; footprint?: P[] } };
+const mapPolygon = (polygon: P[]) => polygon.map(([x, z]): P => [r1(x), r1(z)]);
 const placementsPath = 'public/models/landmarks/placements.json';
 const landmarkPlacements = fs.existsSync(placementsPath) ? JSON.parse(fs.readFileSync(placementsPath, 'utf8')) as Record<string, { centroid: P; note?: string }> : {};
 
@@ -23,8 +25,19 @@ for (const id of WALK_BUILDING_IDS) {
 }
 const KIND: Record<string, string> = { AD: 'admin', IL: 'admin', ACTIVITY: 'life', BEACH: 'scenic', YH: 'life', SPORT: 'life', GALLERY: 'scenic', KINDER: 'life', STARTUP: 'life', CMSS: 'teaching', ME: 'teaching', MB: 'teaching', IR: 'teaching' };
 for (const l of structure.context.landmarks)
-  buildings.push({ id: l.id, name: info.buildings[l.id]?.name ?? l.name, kind: KIND[l.id] ?? 'teaching', walkable: false, polygon: l.polygon.map(([x, z]) => [r1(x), r1(z)] as P), storeys: l.storeys });
-const background = structure.context.background.map(l => l.polygon.map(([x, z]) => [r1(x), r1(z)] as P));
+  buildings.push({ id: l.id, name: info.buildings[l.id]?.name ?? l.name, kind: KIND[l.id] ?? 'teaching', walkable: false, polygon: mapPolygon(l.polygon), storeys: l.storeys });
+const background: P[][] = [];
+for (const b of structure.context.background) {
+  const polygon = mapPolygon(b.polygon);
+  if (b.stationExit === 1 || b.stationExit === 2) {
+    buildings.push({ id: `hamasen-exit-${b.stationExit}`, name: `哈瑪星站 ${b.stationExit} 號出口`, kind: 'life', walkable: false, polygon, storeys: b.storeys });
+  } else {
+    background.push(polygon);
+  }
+}
+if (seaCenter?.footprint) {
+  buildings.push({ id: seaCenter.id, name: seaCenter.name, kind: 'scenic', walkable: false, polygon: mapPolygon(seaCenter.footprint) });
+}
 const roads = structure.context.roads.map(r => ({ kind: r.kind, width: r.width, points: r.points.map(([x, z]) => [r1(x), r1(z)] as P) }));
 const water = structure.context.water.map(w => ({ kind: w.kind, points: w.points.map(([x, z]) => [r1(x), r1(z)] as P) }));
 const sport = structure.context.sport.map(s => ({ kind: s.kind, polygon: s.polygon.map(([x, z]) => [r1(x), r1(z)] as P) }));

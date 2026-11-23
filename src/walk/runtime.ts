@@ -1,6 +1,6 @@
 import {loadV12Data,type V12Data} from './v12-data';
 import {prepareBusRoutes} from './bus';
-import {inside as insideWater} from './v12-geometry';
+import {inside as insideWater, nearestOnPolygon} from './v12-geometry';
 import {V12Runtime} from './v12-runtime';
 import {prepareV12Terrain,buildV12Surfaces} from '../world/v12-surfaces';
 import { GestureMenu } from './gestures';
@@ -523,11 +523,13 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     if(!routesValidated) { say('場景碰撞與步道仍在準備，請稍候再開始帶路。');return; }
     routes?.avoid.splice(0);
     const tunnel = uiPlacements?.tunnel && terrainRef ? fullTunnelProfile(uiPlacements.tunnel,(x,z)=>terrainRef!.heightAt(x,z)) : undefined;
-    const goal = anchor==='tunnel-east' ? tunnel?.east : anchor==='tunnel-west' ? tunnel?.west : routes?.anchor(anchor) ?? npcs?.anchorPoint(anchor);
+    const point = v12?.anchors()[anchor];
+    const goal = anchor==='tunnel-east' ? tunnel?.east : anchor==='tunnel-west' ? tunnel?.west
+      : routes?.anchor(anchor) ?? (point ? new T.Vector3(...point) : npcs?.anchorPoint(anchor));
     const p = goal ? planRoute(goal) : [];
     if (!p.length) { say('找不到通往這裡的步道；請從地圖查看位置。', 5000); return; }
     clearAuto(); autoPath = p; pathIndex = 0; replans = 0; progressTime = performance.now(); progressPosition.copy(physics.position);
-    autoDestination = { id: anchor, label: routes!.label(anchor), position: p[p.length - 1].toArray() as [number, number, number], buildingId: anchor, floorId: 'outdoor' } as WalkDestination;
+    autoDestination = { id: anchor, label: v12?.anchorLabel(anchor) ?? routes?.label(anchor) ?? anchor, position: p[p.length - 1].toArray() as [number, number, number], buildingId: anchor, floorId: 'outdoor' } as WalkDestination;
     chooseMode(false); drawRoute(p); say(`沿校園步道走到 ${autoDestination.label}`, 6000);
   }
   function goTo(destination: WalkDestination) {
@@ -927,10 +929,13 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     const [x, z] = polygonCenter(water.polygon);
     mapPlaces.push({ id: water.id, x, z, label: 'name' in water && typeof water.name === 'string' ? water.name : '游泳區', priority: 7 });
   }
-  if (sea?.center) {
-    const [x, , z] = sea.center.position;
-    mapPlaces.push({ id: 'sea-center', x, z, label: sea.center.name ?? '海域中心', priority: 8 });
-  }
+  const seaCenter = sea?.center;
+  const seaDesk = seaCenter && (seaCenter.rentalDesk ?? seaCenter.position);
+  const seaPlace: MapMarker | undefined = seaDesk && {
+    id: 'building:sea-center', kind: 'place', buildingId: 'sea-center',
+    x: seaDesk[0], y: seaDesk[1], z: seaDesk[2], label: seaCenter?.name ?? '海域中心',
+  };
+  if (seaPlace) mapPlaces.push({ id: seaPlace.id, x: seaPlace.x, z: seaPlace.z, label: seaPlace.label, priority: 8 });
   const restroomMarkers: MapMarker[] = [];
   for (const floor of [...world.floors].sort((a, b) => a.y - b.y)) {
     if (restroomMarkers.some(m => m.buildingId === floor.buildingId)) continue;
@@ -947,7 +952,9 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   ];
   const collectMarkers = () => {
     const out: MapMarker[] = [{ id: 'bike', kind: 'bike', x: bike.stand.x, y: bike.stand.y, z: bike.stand.z, label: '租車點' }, ...busMarkers, ...restroomMarkers,
+      ...minimapSheet.destinationMarkers,
       ...placeMarkers.filter(m => !minimapSheet.buildings.some(b => b.id === m.buildingId))];
+    if (seaPlace) out.push(seaPlace);
     const state = questWorld();
     for (const v of quests?.list() ?? []) {
       if (v.state?.status === 'completed' || (!v.state && !quests!.unlocked(v.definition, state))) continue;
@@ -1038,6 +1045,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     }
     if (picked.kind === 'building' || picked.kind === 'place') {
       const id = picked.buildingId!;
+      if (id === 'sea-center' && seaDesk) { setMenu(false); walkToPoint(new T.Vector3(...seaDesk), picked.label); return; }
       const anchorId = ({ AD: 'admin', IL: 'library', GATE: 'gate', TUNNEL: 'tunnel-west' } as Record<string, string>)[id] ?? id;
       const anchor = routes?.anchor(anchorId);
       if (anchor) { setMenu(false); walkToPoint(anchor, picked.label); return; }
@@ -1070,7 +1078,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     const selected = world.floors.find(f => f.data.id === floorSelect.value), floorRecord = overview && selected ? selected : currentFloor;
     const buildingName = campusData.find(b => b.id === nearestBuilding)!.name;
     placeIndoors = best < .5;
-    currentPlaceText = actualPlaceText(buildingName, currentFloor.data.label, best, director?.zoneLabel);
+    const inHamasen = hamasenEast !== undefined && foot.x >= hamasenEast && foot.z >= 100;
+    currentPlaceText = actualPlaceText(buildingName, currentFloor.data.label, best, inHamasen ? '哈瑪星' : director?.zoneLabel);
     setText(get('#walk-place'), autoDestination ? `前往 ${autoDestination.label}` : currentPlaceText);
     lod.update(foot, { overview, buildingId: inspectedBuilding, floorId: floorSelect.value });
     const runBtn = get('[data-action=run]'); runBtn.classList.toggle('is-running', input.running); runBtn.setAttribute('aria-pressed', String(input.running));
@@ -1112,8 +1121,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     Reflect.deleteProperty(window, 'campusWalk'); sky.dispose();
     const seen = new Set<unknown>();
     scene.traverse(o => {
-      if (!(o instanceof T.Mesh || o instanceof T.Line || o instanceof T.Points)) return;
-      o.geometry.dispose();
+      if (!(o instanceof T.Mesh || o instanceof T.Line || o instanceof T.Points || o instanceof T.Sprite)) return;
+      if (!(o instanceof T.Sprite)) o.geometry.dispose();
       for (const m of [o.material].flat() as T.Material[]) {
         if (seen.has(m)) continue; seen.add(m);
         for (const v of Object.values(m)) if (v instanceof T.Texture && !seen.has(v)) { seen.add(v); v.dispose(); }
@@ -1485,6 +1494,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   let seatProps:T.Group|undefined;
   let storySeatZones:Record<string,string>={};
   let routes: OutdoorRoutes | undefined, npcs: NpcManager | undefined, director: StoryDirector | undefined, storyStarted = false, talk: TalkDirector | undefined;
+  let hamasenEast: number | undefined;
   let scheduledKey = '', album: Album | undefined;
   /** Re-place NPCs when the light preset or story progress changes (spec-v4 §15.1). */
   function scheduleNpcs(force = false) {
@@ -1599,6 +1609,20 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       if (!alive) return;
       for(const [id,p]of Object.entries(v12?.anchors()??{}))if(!zones.zones[id])zones.zones[id]={label:v12?.anchorLabel(id)??id,p:[p[0],p[2]],y:p[1],r:8};
       routes = graph;storySeatZones=Object.fromEntries(Object.entries(zones.zones).filter(([,z])=>z.seat).map(([id,z])=>[id,z.seat!]));
+      hamasenEast = graph.anchor('hamasen-east-link')?.x;
+      for (const station of structure.context.background.filter(b => b.stationExit)) {
+        const entrance = graph.anchor(`hamasen-exit-${station.stationExit}`);
+        if (!entrance) continue;
+        const [x, z] = nearestOnPolygon([entrance.x, entrance.z], station.polygon);
+        const outward = new T.Vector3(entrance.x - x, 0, entrance.z - z).normalize();
+        const plate = makeDoorSign(`哈瑪星站 ${station.stationExit} 號出口`);
+        const sign = new T.Sprite(new T.SpriteMaterial({ map: plate.material.map }));
+        sign.name = `Hamasen exit ${station.stationExit} sign`;
+        sign.position.set(x, entrance.y + 2.2, z).addScaledVector(outward, .55);
+        sign.scale.set(2.9, .9, 1);
+        scene.add(sign);
+        plate.geometry.dispose(); plate.material.dispose();
+      }
       zoneLabels = Object.fromEntries(Object.entries(zones.zones).map(([id,z]) => [id,z.label]));
       validateRoutes();
       npcs = new NpcManager(zones, routes, terrainRef, asset, npcData);npcs.seatPropsReady(false); scene.add(npcs.group);
@@ -1768,11 +1792,12 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     const p = physics.position, yaw = Math.atan2(-(at.x - p.x), -(at.z - p.z)) + (Math.hypot(at.x - p.x, at.z - p.z) < 6 ? ARRIVAL_OFFSET : 0);
     avatar.face(yaw); if(!cameraBlocked())rig.faceRoute(yaw);
   }
-  function steer(time: number) {
+  function steer(time: number, dt: number) {
     input.direction(rig.forward, direction);
     if (autoPath.length && pathIndex < autoPath.length) {
       followMovedTarget(time);
-      const step = followRoute(autoPath, pathIndex, physics.position, direction,autoTarget&&seatForTarget(autoTarget)?.08:.34);
+      const arrivalRadius = autoTarget && seatForTarget(autoTarget) ? .08 : .34;
+      const step = followRoute(autoPath, pathIndex, physics.position, direction, arrivalRadius, bike.riding ? RIDE_SPEED * dt : 0);
       pathIndex = step.index;
       if (atAutoPerson()) { step.arrived = true; direction.set(0, 0, 0); }
       if (step.arrived) {
@@ -1802,7 +1827,9 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       }
       // Auto-walk opens doors it is about to pass through, as a person would.
       for (const d of world.doors) if (d.target === 0 && d.position.distanceToSquared(physics.position) < 13 && wouldEnterDoor(d, physics.position, direction, 1 / 30, WALK_SPEED)) d.target = 1;
+      return step.speedScale;
     }
+    return 1;
   }
   function animate(time: number) {
     if (!alive) return;
@@ -1851,7 +1878,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     animateEncounter(dt, time, pausedEvents);
     if (!notebook?.open && !menuOpen() && !director?.blocking) quests?.update(questWorld());
     if (walking && !overview && !recoveryFailed && !carried && !passenger.carried && !extraFoot && !v12?.ownsMotion) {
-      if (gestures.open || photo.active || notebook?.open || menuOpen()) direction.set(0, 0, 0); else steer(time);
+      const speedScale = gestures.open || photo.active || notebook?.open || menuOpen() ? 1 : steer(time, dt);
       // Dialogue and chapter cards hold the player; Space advances like E.
       if (director?.blocking) { direction.set(0, 0, 0); if (input.takeJump()) director.press(); }
       // A dialogue ends the walk under way (its goal may be out of date by the end); G's walk resumes to whatever is next.
@@ -1864,7 +1891,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       if (bike.riding && !avatar.rideReady) { bike.riding = false; say('腳踏車與人物姿勢仍在準備，請稍候。', 2500); }
       if (!physics.setRiding(bike.riding, avatar.heading)) { bike.riding = false; physics.setRiding(false,avatar.heading); say('前方空間不足，請下車步行。',2500); }
       avatar.riding = bike.riding;
-      physics.step(direction, dt, jump, bike.riding ? RIDE_SPEED : input.running && !autoPath.length ? RUN_SPEED : WALK_SPEED);
+      physics.step(direction, dt, jump, bike.riding ? RIDE_SPEED * speedScale : input.running && !autoPath.length ? RUN_SPEED : WALK_SPEED);
       jumped = jump && wasGround && !physics.onGround;
       if (pendingDestination && physics.onGround) { const d = pendingDestination; pendingDestination = undefined; goTo(d); }
       if (physics.position.y < -20 && !v12?.fitness.portal) { clearAuto();if(physics.recoverSafe() || moveSafely(world.spawn)) {rig.snap(physics.position);say('已回到最近的安全位置。');}else{recoveryFailed=true;setMenu(true,'play');say('目前找不到安全落點，已暫停移動；請使用回到起點或返回校園地圖。',0);} }

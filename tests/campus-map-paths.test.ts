@@ -30,9 +30,11 @@ describe('zoomed-in campus path layer', () => {
     for (let scale = .55; scale < 1.3; scale += .025) expect(pathLayerAlpha(scale)).toBeLessThanOrEqual(pathLayerAlpha(scale + .025));
   });
 
-  function fixture(graphOk = true) {
-    const base = { base: { url: 'base.webp', bounds: [-900, -1100, 900, 700] }, roads: [], buildings: [], background: [] };
-    const fetchMock = vi.fn(async (url: string) => ({ ok: graphOk || !url.endsWith('outdoor-graph.json'), status: 503, json: async () => url.endsWith('outdoor-graph.json') ? { nodes: [{ id: 1, p: [-604, 49, -881] }, { id: 2, p: [-590, 45, -860] }], edges: [[1, 2, 30]] } : base }));
+  function fixture(graphOk = true, exits = false) {
+    const buildings = exits ? [{ id: 'hamasen-exit-2', name: '哈瑪星站 2 號出口', kind: 'life', walkable: false, polygon: [[908, 543], [926, 543], [926, 570], [908, 570]] }] : [];
+    const base = { base: { url: 'base.webp', bounds: [-900, -1100, 960, 700] }, roads: [], buildings, background: [] };
+    const outdoors = { nodes: [{ id: 1, p: [-604, 49, -881] }, { id: 2, p: [-590, 45, -860] }, { id: 78, p: [916.9, -.31, 540.95] }], edges: [[1, 2, 30]], anchors: { 'hamasen-exit-2': { node: 78 } } };
+    const fetchMock = vi.fn(async (url: string) => ({ ok: graphOk || !url.endsWith('outdoor-graph.json'), status: 503, json: async () => url.endsWith('outdoor-graph.json') ? outdoors : base }));
     vi.stubGlobal('fetch', fetchMock);
     vi.stubGlobal('Image', class { src = ''; async decode() {} });
     const paths: { moveTo: ReturnType<typeof vi.fn>; lineTo: ReturnType<typeof vi.fn> }[] = [];
@@ -68,5 +70,13 @@ describe('zoomed-in campus path layer', () => {
     const { paths } = fixture(false), warn = vi.spyOn(console, 'warn').mockImplementation(() => {}), map = new CampusMinimap();
     await map.load(p => p);
     expect(map.ready).toBe(true); expect(paths).toHaveLength(0); expect(warn).toHaveBeenCalledWith('minimap paths', expect.any(Error));
+  });
+
+  it('puts the station marker at its walking anchor outside the exterior footprint', async () => {
+    fixture(true, true);
+    const map = new CampusMinimap();
+    await map.load(p => p);
+    expect(map.destinationMarkers).toEqual([{ id: 'building:hamasen-exit-2', buildingId: 'hamasen-exit-2', kind: 'place', label: '哈瑪星站 2 號出口', x: 916.9, y: -.31, z: 540.95 }]);
+    expect(map.defaultView().x1).toBe(960);
   });
 });

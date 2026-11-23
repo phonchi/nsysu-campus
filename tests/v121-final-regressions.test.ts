@@ -27,8 +27,8 @@ let built:ReturnType<typeof buildRuntimeWorld>;const world=()=>built??=buildRunt
 // Only leaf-card textures require DOM: retain all actual placement and exclusion logic.
 const recorded=vi.hoisted(()=>({trees:[] as {x:number;y:number;z:number;s:number}[]}));
 vi.mock('../src/render/foliage',async original=>({...await original<typeof import('../src/render/foliage')>(),buildTrees:(spots:typeof recorded.trees)=>{recorded.trees=spots;return new T.Group();}}));
-it('all 14 real stops resolve from terrain, canStand and lie outside every serving bus',async()=>{
- await initPhysics();const w=world(),physics=new RapierController(w.world.collision);expect(bus.stops).toHaveLength(14);const failures:string[]=[];
+it('all 16 stops resolve from terrain, canStand and lie outside every serving bus',async()=>{
+ await initPhysics();const w=world(),physics=new RapierController(w.world.collision);expect(bus.stops).toHaveLength(16);const failures:string[]=[];
  for(const stop of bus.stops)for(const route of bus.routes.filter(r=>r.stopOccurrences.some(o=>o.stopId===stop.id))){
   const sign=supportedStopPoint(stop.sign,(x,z,y)=>physics.supportAt(x,z,y),(x,z)=>w.terrain.heightAt(x,z));expect(sign,stop.id+' sign').toBeDefined();if(stop.id==='liberal-arts'){expect(sign![1]).toBeGreaterThanOrEqual(bus.forecourt!.levelY-.001);expect(sign![1]).toBeLessThanOrEqual(bus.forecourt!.levelY+.03);}
   const b={position:new T.Vector3(...stop.berth.position),yaw:stop.berth.yaw+Math.PI,route};

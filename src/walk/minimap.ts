@@ -19,7 +19,7 @@ export type MapMarkerKind = 'quest' | 'bike' | 'stamp' | 'bus' | 'restroom' | 'p
 export interface MapMarker { id: string; kind: MapMarkerKind; x: number; y: number; z: number; label: string; buildingId?: string }
 export interface MapFrame { x0: number; z0: number; scale: number; width: number; height: number }
 /** Full base-sheet fallback; the overview derives its initial extent from loaded content. */
-export const CAMPUS_VIEW = { x0: -900, z0: -1100, x1: 900, z1: 700 };
+export const CAMPUS_VIEW = { x0: -900, z0: -1100, x1: 960, z1: 700 };
 export const MARKER_STYLE: Record<MapMarkerKind, { color: string; glyph: string }> = { quest: { color: '#e9b949', glyph: '任' }, bike: { color: '#2c7f91', glyph: '車' }, stamp: { color: '#c75f4a', glyph: '章' }, bus: { color: '#4d9a44', glyph: '公' }, restroom: { color: '#2a2c4a', glyph: '廁' }, place: { color: '#2c7f91', glyph: '地' }, building: { color: '#c75f4a', glyph: '樓' } };
 
 /** Fits the campus into a width × height canvas, centred, north up. */
@@ -47,11 +47,14 @@ export class CampusMinimap {
   private paths?: Path2D;
   private graphLabels: MapLabel[] = [];
   buildings: readonly MapBuilding[] = [];
+  destinationMarkers: readonly MapMarker[] = [];
+  private background: readonly MapPoint[] = [];
   private bounds: [number, number, number, number] = [0, 0, 1, 1];
 
   async load(asset: (p: string) => string) {
     const data = await fetch(asset('data/campus-map.json')).then(r => r.json() as Promise<MapData>);
     this.buildings = data.buildings;
+    this.background = data.background.flat();
     if (!data.base) return;
     const img = new Image(); img.src = asset(data.base.url); await img.decode();
     const [x0, z0, x1, z1] = this.bounds = data.base.bounds;
@@ -77,6 +80,12 @@ export class CampusMinimap {
       // The marine-sciences building has a graph anchor but no footprint in campus-map.json.
       const marine = graph.nodes.find(node => node.id === graph.anchors?.MA?.node);
       if (marine) this.graphLabels = [{ id: 'building:MA', label: '海洋科學學院', x: marine.p[0], z: marine.p[2], priority: 8 }];
+      this.destinationMarkers = this.buildings.filter(b => /^hamasen-exit-[12]$/.test(b.id)).flatMap(b => {
+        const node = graph.nodes.find(n => n.id === graph.anchors?.[b.id]?.node);
+        if (!node) return [];
+        const [x, y, z] = node.p;
+        return [{ id: `building:${b.id}`, buildingId: b.id, kind: 'place', label: b.name, x, y, z }];
+      });
       for (const [a, b] of graphPathSegments(graph)) {
         paths.moveTo(a[0], a[1]); paths.lineTo(b[0], b[1]);
       }
@@ -89,7 +98,7 @@ export class CampusMinimap {
     return this.sheet ? { x0, z0, x1, z1 } : CAMPUS_VIEW;
   }
   defaultView(extra: readonly MapPoint[] = []) {
-    return contentBounds([...this.buildings.flatMap(b => b.polygon), ...this.graphLabels.map(p => [p.x, p.z] as const), ...extra], this.sheetBounds);
+    return contentBounds([...this.background, ...this.buildings.flatMap(b => b.polygon), ...this.graphLabels.map(p => [p.x, p.z] as const), ...this.destinationMarkers.map(m => [m.x, m.z] as const), ...extra], this.sheetBounds);
   }
   pickBuilding(frame: MapFrame, px: number, py: number) {
     return this.buildings.find(b => pointInPolygon(pointAt(frame, px, py), b.polygon));

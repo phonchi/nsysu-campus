@@ -22,7 +22,8 @@ export const MAJOR_MAP_NAMES: Readonly<Record<string, string>> = {
   'building:LA': '文學院', 'building:SC': '理學院', 'building:IL': '圖書館',
   'building:AD': '行政大樓', 'building:MA': '海洋科學學院', 'building:SPORT': '體育館',
   'building:ACTIVITY': '活動中心', 'building:gate': '校門', 'building:tunnel-west': '隧道',
-  'sea-center': '西子灣／海域中心',
+  'building:sea-center': '西子灣／海域中心',
+  'building:hamasen-exit-1': '哈瑪星 1 號出口', 'building:hamasen-exit-2': '哈瑪星 2 號出口',
 };
 
 export interface OutdoorMapGraph {
@@ -116,9 +117,16 @@ export function layoutMapLabels(labels: readonly MapLabel[], frame: MapFrame, me
   }
   return out;
 }
-export function busStopMarkers(stops: readonly { name: string; boardingPoint: readonly [number, number, number] }[]): MapMarker[] {
+const BUS_MARKER_SUFFIX: Readonly<Record<string, string>> = {
+  'hamasen-orange-stop': '・橘1延', 'hamasen-campus-stop': '・校園公車（位置示意）',
+};
+export function busStopMarkers(stops: readonly { id?: string; name: string; boardingPoint: readonly [number, number, number] }[]): MapMarker[] {
   const names = new Set<string>();
-  return stops.filter(stop => { if (names.has(stop.name)) return false; names.add(stop.name); return true; }).map(stop => ({ id: `bus:${stop.name}`, kind: 'bus', label: stop.name, x: stop.boardingPoint[0], y: stop.boardingPoint[1], z: stop.boardingPoint[2] }));
+  return stops.filter(stop => { if (names.has(stop.name)) return false; names.add(stop.name); return true; }).map(stop => {
+    const [x, y, z] = stop.boardingPoint;
+    const suffix = stop.id ? BUS_MARKER_SUFFIX[stop.id] ?? '' : '';
+    return { id: `bus:${stop.name}`, kind: 'bus', label: stop.name + suffix, x, y, z };
+  });
 }
 
 /** Pointer capture keeps touch panning/pinching on the map. Six CSS pixels still count as a tap. */

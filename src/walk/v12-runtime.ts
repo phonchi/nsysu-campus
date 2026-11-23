@@ -16,6 +16,7 @@ import {BusService,busLineName,BUS_RIDE_SECONDS} from './bus-call';
 const BUS_REACH=6;
 import {TimedSports,FitnessRuntime} from './sports-activity';
 import {SailingShow} from '../world/sailing-show';
+import {SEA_RENTAL_DISPLAY,SEA_RENTAL_SIGN,seaRentalFrame} from '../world/v12-surfaces';
 import {inside,distance,nearestOnPolygon,SHORE_REACH,validLanding,motionDt} from './v12-geometry';
 import {safe,makeDoorSign} from './hud';
 import {disposeObject} from '../world/npc';
@@ -55,16 +56,30 @@ export class V12Runtime {
  allowsWater(x:number,z:number){return !!this.swim.water&&inside([x,z],this.swim.water.polygon)||!!this.craft.water&&inside([x,z],this.craft.water.polygon);}
  private decision(w:WaterBodySpec,activity:SeaActivity):WaterDecision {if(w.kind!=='pool')return evaluateSea(activity,this.policy.conditions);const reasons:WaterDecision['reasons']=[];if(w.open===false)reasons.push('operator');if(this.policy.conditions.period==='night')reasons.push('night');return {allowed:!reasons.length,recall:!!reasons.length,reasons};}
  async load(){
+  const sea=this.d.data.sea,center=sea?.center;
+  const kiosk=center?.kiosk ? seaRentalFrame(center.kiosk,this.d.ground) : undefined;
+  if(kiosk){
+   const sign=makeDoorSign('海域中心 SUP・獨木舟租借');
+   sign.position.fromArray(SEA_RENTAL_SIGN);sign.rotation.y=Math.PI;sign.scale.set(2.45,1.3,1);
+   kiosk.name='Sea rental sign and equipment';kiosk.add(sign);this.group.add(kiosk);
+  }else if(center)this.sign('海域中心 位置示意・租借 E',center.rentalDesk??center.position);
   const names=new Set<string>();if(this.d.data.bus){names.add('bus_campus');names.add('bus_orange1');names.add('bus_stop');}
-  if(this.d.data.sea){for(const n of ['sup_board','sup_paddle','kayak','kayak_paddle','surfboard','swim_buoy','lifeguard_chair'])names.add(n);if(this.d.data.sea.sailingShow)names.add('laser_dinghy');}
+  if(sea){for(const n of ['sup_board','sup_paddle','kayak','kayak_paddle','surfboard','swim_buoy','lifeguard_chair'])names.add(n);if(sea.sailingShow)names.add('laser_dinghy');}
   if(this.d.data.sports||this.d.data.fitness)for(const n of ['treadmill','fitness_station','start_gate'])names.add(n);
   const loader=new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   // Sequential asset loads keep memory bounded while other startup jobs run.
   for(const name of names)try{const g=await loader.loadAsync(this.d.asset(`models/props/${name}.glb`));if(!this.alive){disposeObject(g.scene);return;}this.assets.set(name,g.scene);}catch(error){this.d.data.issues.push(`${name}.glb: ${String(error)}`);}
   if(!this.alive)return;
+  if(kiosk)for(const item of SEA_RENTAL_DISPLAY){
+   const gear=this.asset(item.model);
+   if(!gear)continue;
+   gear.position.fromArray(item.position);gear.rotation.x=-Math.PI/2;gear.scale.setScalar(item.scale);
+   gear.traverse(o=>{if(o instanceof T.Mesh){o.castShadow=true;o.receiveShadow=true;}});
+   kiosk.add(gear);
+  }
   if(this.bus)for(const name of ['bus_campus','bus_orange1']){const m=this.asset(name);if(m){m.visible=false;this.group.add(m);this.vehicles.set(name,m);}}
-  for(const s of this.d.data.bus?.stops??[]){const p=this.supported(s.sign);if(p){this.place('bus_stop',p);this.sign(`${s.name}・隨時可叫車 E`,p);}}
-  const sea=this.d.data.sea;if(sea){if(sea.sailingShow&&this.assets.has('laser_dinghy')){this.sailing=new SailingShow(sea.sailingShow,this.assets.get('laser_dinghy')!,text=>{const plate=makeDoorSign(text,76),sprite=new T.Sprite(new T.SpriteMaterial({map:plate.material.map}));sprite.scale.set(1.35,.38,1);plate.geometry.dispose();plate.material.dispose();return sprite;});this.group.add(this.sailing.group);}for(const p of sea.buoys??[])this.place('swim_buoy',p);if(sea.lifeguardChair)this.place('lifeguard_chair',sea.lifeguardChair);if(sea.sailingShow&&sea.viewingPoint)this.sign('帆船賽 情境重現',sea.viewingPoint);if(sea.center)this.sign('海域中心 位置示意・租借 E',sea.center.rentalDesk??sea.center.position);for(const w of sea.waterBodies)for(const p of w.entryPoints){this.sign(w.kind==='pool'?'游泳池・下水 E':'游泳區・下水 E',p);if(w.kind==='sea'){this.sign('夜間、颱風、打雷關閉',[p[0],p[1]-.4,p[2]]);this.sign('浪高達1m 衝浪課／核准訓練',[p[0],p[1]-.8,p[2]]);this.sign('浪高達2m 全面關閉',[p[0],p[1]-1.2,p[2]]);}}}
+  for(const s of this.d.data.bus?.stops??[]){const p=this.supported(s.sign);if(p){this.place('bus_stop',p);const label=s.id==='hamasen-campus-stop'?'校園公車（站位示意）':s.id==='hamasen-orange-stop'?'橘1延往校':s.name;this.sign(`${label}・隨時可叫車 E`,p);}}
+  if(sea){if(sea.sailingShow&&this.assets.has('laser_dinghy')){this.sailing=new SailingShow(sea.sailingShow,this.assets.get('laser_dinghy')!,text=>{const plate=makeDoorSign(text,76),sprite=new T.Sprite(new T.SpriteMaterial({map:plate.material.map}));sprite.scale.set(1.35,.38,1);plate.geometry.dispose();plate.material.dispose();return sprite;});this.group.add(this.sailing.group);}for(const p of sea.buoys??[])this.place('swim_buoy',p);if(sea.lifeguardChair)this.place('lifeguard_chair',sea.lifeguardChair);if(sea.sailingShow&&sea.viewingPoint)this.sign('帆船賽 情境重現',sea.viewingPoint);for(const w of sea.waterBodies)for(const p of w.entryPoints){this.sign(w.kind==='pool'?'游泳池・下水 E':'游泳區・下水 E',p);if(w.kind==='sea'){this.sign('夜間、颱風、打雷關閉',[p[0],p[1]-.4,p[2]]);this.sign('浪高達1m 衝浪課／核准訓練',[p[0],p[1]-.8,p[2]]);this.sign('浪高達2m 全面關閉',[p[0],p[1]-1.2,p[2]]);}}}
   for(const p of this.d.data.sports?.portals??[])this.sign('體適能中心・示意 E',p.exteriorTrigger);
   for(const e of this.equipment())this.place(e.kind==='treadmill'?'treadmill':'fitness_station',e.position,e.yaw);
   for(const c of this.d.data.sports?.courses??[]){const g=c.gates[0];this.place('start_gate',g.a.map((n,i)=>(n+g.b[i])/2) as P3);}
@@ -85,7 +100,7 @@ export class V12Runtime {
  }
  anchors():Record<string,P3>{
   const sea=this.d.data.sea,out:Record<string,P3>={...sea?.anchors};
-  if(sea?.center)out[sea.center.id??'sea-center']=sea.center.position;
+  if(sea?.center)out[sea.center.id??'sea-center']=sea.center.rentalDesk??sea.center.position;
   for(const w of sea?.waterBodies??[])out[w.id]=w.entryPoints[0];for(const r of sea?.routes??[])out[r.id]=r.launchPoint;
   if(sea?.surfZone?.position)out['surf-zone']=sea.surfZone.position;
   if(sea?.sailingShow&&sea.viewingPoint)out[sea.sailingShow.viewingAnchorId]=sea.viewingPoint;
@@ -163,12 +178,12 @@ export class V12Runtime {
   if(this.swim.water){let meter=this.status.querySelector('meter');if(!meter){meter=document.createElement('meter');meter.min=0;meter.max=1;meter.setAttribute('aria-label','游泳體力');this.status.append(meter);}meter.value=this.swim.stamina;}
   this.status.hidden=!text;
   const b=this.bus,choosing=b?.phase==='onboard';this.panel.hidden=!choosing;
-  if(b&&choosing){const dests=b.destinations(),key=b.stop?.id+':'+b.notice;if(key!==this.lastPanel){this.lastPanel=key;this.panel.innerHTML=`<strong>${safe(b.stop?.name??'')}・選擇目的地</strong>${b.notice?`<p class="walk-v12-note">${safe(b.notice)}</p>`:''}<div>${dests.map((d,i)=>`<button type="button" data-bus-dest="${safe(d.name)}">${i<9?i+1+' · ':''}${safe(d.name)}<small>${busLineName(d.routeId)}・${d.via.length} 站</small></button>`).join('')}<button type="button" data-bus-dest="__exit">在本站下車（Esc）</button></div>`;}}
+  if(b&&choosing){const dests=b.destinations(),key=b.stop?.id+':'+b.notice;if(key!==this.lastPanel){this.lastPanel=key;this.panel.innerHTML=`<strong>${safe(b.stop?.name??'')}・選擇目的地</strong>${b.notice?`<p class="walk-v12-note">${safe(b.notice)}</p>`:''}<div>${dests.map((d,i)=>`<button type="button" data-bus-dest="${safe(d.name)}">${i<9?i+1+' · ':''}${safe(d.name)}<small>${d.transferAt?safe(d.transferAt)+'轉乘 ':''}${busLineName(d.routeId)}・${d.via.length} 站</small></button>`).join('')}<button type="button" data-bus-dest="__exit">在本站下車（Esc）</button></div>`;}}
   else this.lastPanel='';
   const r=b?.phase==='riding'&&b.trip?b:undefined;this.ride.hidden=!r;
   if(r){const t=r.trip!,stops=[r.stop?.name??'',...t.via],at=Math.min(stops.length-1,Math.floor(r.rideProgress*(stops.length-1)+.0001)),key=`${t.name}:${at}`;
    this.ride.style.setProperty('--progress',String(r.rideProgress));
-   if(key!==this.lastRide){this.lastRide=key;this.ride.innerHTML=`<div class="walk-v12-busride-card"><strong>${busLineName(t.routeId)}・往${safe(t.name)}</strong><ol>${stops.map((n,i)=>`<li class="${i<at?'passed':i===at?'here':''}">${safe(n)}</li>`).join('')}</ol><div class="walk-v12-busride-bar"><span></span></div><small>行車過程以示意呈現（約 ${BUS_RIDE_SECONDS} 秒）</small></div>`;}}
+   if(key!==this.lastRide){this.lastRide=key;this.ride.innerHTML=`<div class="walk-v12-busride-card"><strong>${t.transferAt?`往${safe(t.name)}・${safe(t.transferAt)}轉乘`:`${busLineName(t.routeId)}・往${safe(t.name)}`}</strong><ol>${stops.map((n,i)=>`<li class="${i<at?'passed':i===at?'here':''}">${safe(n)}</li>`).join('')}</ol><div class="walk-v12-busride-bar"><span></span></div><small>行車過程以示意呈現（約 ${BUS_RIDE_SECONDS} 秒）</small></div>`;}}
   else this.lastRide='';
  }
  busObstacles():Obstacle[]{const b=this.bus;if(!b?.route||!b.parked||b.onBoard)return [];const v=b.route.vehicle;return [{id:'bus:service',shape:'box',center:[b.position.x,b.position.y+v.heightM/2,b.position.z],half:[v.widthM/2,v.heightM/2,v.lengthM/2],yaw:b.yaw,navigation:false}];}

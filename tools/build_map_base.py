@@ -12,7 +12,9 @@ meta = json.loads((ROOT / 'public/data/terrain/terrain.json').read_text())
 h = np.fromfile(ROOT / 'public/data/terrain/terrain.bin', dtype='<f4').reshape(meta['rows'], meta['cols'])
 ox, oz, cell = meta['origin'][0], meta['origin'][1], meta['cell']
 # Map window (world x0, z0, x1, z1) and resolution.
-X0, Z0, X1, Z1, PPM = -900.0, -1100.0, 900.0, 700.0, 1.2
+X0, Z0 = ox, oz
+X1, Z1 = ox + (meta['cols']-1)*cell, oz + (meta['rows']-1)*cell
+PPM = 1.2
 W, H = int((X1 - X0) * PPM), int((Z1 - Z0) * PPM)
 xs = X0 + (np.arange(W) + .5) / PPM; zs = Z0 + (np.arange(H) + .5) / PPM
 fx = np.clip((xs - ox) / cell, 0, meta['cols'] - 1.001); fz = np.clip((zs - oz) / cell, 0, meta['rows'] - 1.001)

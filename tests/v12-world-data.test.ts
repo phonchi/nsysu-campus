@@ -32,7 +32,7 @@ it('9c7850c loader retains every facility, portal, water route and interior scen
   const s = parseV12('sea', sea), b = parseV12('bus', bus), p = parseV12('sports', sports), f = parseV12('fitness', fitness);
   expect(s.waterBodies).toHaveLength(3); expect(s.routes).toHaveLength(2);
   expect(s.buoys).toHaveLength(sea.buoys.length); expect(s.viewingPoint).toEqual(sea.sailingViewPoint.position);
-  expect(b.routes).toHaveLength(2); expect(b.stops).toHaveLength(14);
+  expect(b.routes).toHaveLength(2); expect(b.stops).toHaveLength(16);
   expect(p.facilities).toHaveLength(17); expect(p.courses).toHaveLength(2); expect(p.portals).toHaveLength(1);
   expect(p.equipment).toHaveLength(6); expect(f.scenes).toHaveLength(1);
   expect(f.scenes[0].id).toBe(p.portals[0].interiorSceneId);
@@ -98,8 +98,8 @@ describe('sea.json', () => {
 describe('bus-routes.json', () => {
   const stops = new Map<string, Json>(bus.stops.map((s: Json) => [s.id, s]));
   const expected: Record<string, string[]> = {
-    'campus-bus': ['gate', 'admin', 'dorm-h', 'activity', 'wuling', 'liberal-arts', 'wuling', 'activity', 'dorm-h', 'gate'],
-    'orange-1-ext': ['gate', 'admin', 'dorm-h', 'activity', 'wuling', 'liberal-arts', 'marine-sci', 'marine-eng', 'dorm-h', 'activity', 'admin', 'gate'],
+    'campus-bus': ['gate', 'admin', 'dorm-h', 'activity', 'wuling', 'liberal-arts', 'wuling', 'activity', 'dorm-h', 'gate', 'hamasen-campus-stop'],
+    'orange-1-ext': ['gate', 'admin', 'dorm-h', 'activity', 'wuling', 'liberal-arts', 'marine-sci', 'marine-eng', 'dorm-h', 'activity', 'admin', 'gate', 'hamasen-orange-stop'],
   };
   const edges = new Map<string, string>();
   (graph.edges as [number, number, number][]).forEach(([a, b], i) => { const k = `${Math.min(a, b)}-${Math.max(a, b)}`; if (!edges.has(k)) edges.set(k, graph.edgeKind[i]); });
@@ -113,16 +113,21 @@ describe('bus-routes.json', () => {
     for (const r of bus.routes) {
       let end: P3 | undefined, last: string | undefined;
       for (const [k, leg] of (r.legs as Json[]).entries()) {
-        const path = leg.path as P3[];
-        expect(path.length, `${r.id}#${k}`).toBeGreaterThanOrEqual(2);
-        for (const [x, y, z] of path) { expect(Number.isFinite(y)).toBe(true); expect(inBounds(x, z), `${r.id}#${k} ${x},${z}`).toBe(true); }
-        if (end) expect(Math.hypot(end[0] - path[0][0], end[2] - path[0][2]), `${r.id}#${k} 起點`).toBeLessThan(0.05);
-        end = path[path.length - 1];
-        expect(leg.sourceEdgeIds.length, `${r.id}#${k}`).toBeGreaterThan(0);
-        for (const e of leg.sourceEdgeIds as string[]) {
-          expect(drivable, `${r.id}#${k} ${e}`).toContain(edges.get(e));
-          if (last) expect(e.split('-').some(n => last!.split('-').includes(n)), `${r.id}#${k} ${last} → ${e}`).toBe(true);
-          last = e;
+        const departure = (leg.departurePath ?? leg.path) as P3[];
+        if (end) expect(Math.hypot(end[0] - departure[0][0], end[2] - departure[0][2]), `${r.id}#${k} 起點`).toBeLessThan(0.05);
+        end = leg.path.at(-1);
+        if (leg.departurePath) expect(leg.osmAlignment.path.some(([x, z]: P2) => !inBounds(x, z))).toBe(true);
+        const samples = leg.departurePath ? [[departure, leg.departureSourceEdgeIds], [leg.path, leg.sourceEdgeIds]] : [[leg.path, leg.sourceEdgeIds]];
+        for (const [i, [path, trace]] of samples.entries()) {
+          if (i > 0) last = undefined;
+          expect(path.length, `${r.id}#${k}`).toBeGreaterThanOrEqual(2);
+          for (const [x, y, z] of path as P3[]) { expect(Number.isFinite(y)).toBe(true); expect(inBounds(x, z), `${r.id}#${k} ${x},${z}`).toBe(true); }
+          expect(trace.length, `${r.id}#${k}`).toBeGreaterThan(0);
+          for (const e of trace as string[]) {
+            expect(drivable, `${r.id}#${k} ${e}`).toContain(edges.get(e));
+            if (last) expect(e.split('-').some(n => last!.split('-').includes(n)), `${r.id}#${k} ${last} → ${e}`).toBe(true);
+            last = e;
+          }
         }
       }
       expect(r.graphRevision).toBe(graph.v12.revision);

@@ -39,7 +39,7 @@ def at(zone, offset, day=True, sunset=True, night=False, activity='Idle'):
 NOWHERE = {'day': None, 'sunset': None, 'night': None}
 PEOPLE = [
     person('lifeguard-sea', '救生員', '西子灣沙灘救生員', 'npc-volunteer', '#2b2622', '#e04b3a', '#f3ebdb', 'short', 'vest', at('beach-lifeguard', (1.5, 1.5)), 'cap', '#d9a77f'),
-    person('marine-clerk', '租借員', '海域中心器材租借', 'npc-clerk', '#3a2a24', '#2c7f91', '#2f4a6a', 'ponytail', 'tee', at('sea-center', (0, 1.5)), 'nametag'),
+    person('marine-clerk', '租借員', '海域中心器材租借', 'npc-clerk', '#3a2a24', '#2c7f91', '#2f4a6a', 'ponytail', 'tee', at('sea-center', (2.7, 0.5)), 'nametag'),
     person('surf-coach', '衝浪教練', '運健中心的老師', 'npc-teacher', '#1f1a18', '#f27a2c', '#2a2c4a', 'short', 'tee', at('surf-zone', (1.5, 0), sunset=False), None, '#d9a77f'),
     person('sail-student', '風帆社同學', '在海堤看帆船的學生', 'npc-student-2', '#2b2622', '#62c8d2', '#2a2c4a', 'bob', 'jacket', at('sail-view', (5.5, -6.0))),
     person('bus-driver-campus', '校園公車司機', '校園公車駕駛', 'npc-guard', '#6b6f78', '#f3ebdb', '#2a3a5c', 'short', 'uniform', dict(NOWHERE), 'cap', '#d9a77f'),

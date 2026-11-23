@@ -40,7 +40,9 @@ export interface FitnessPortal {id:string;exteriorTrigger:P3;exteriorReturnPoint
 export interface EquipmentSpec {id:string;kind:'treadmill'|'stationary-bike';position:P3;yaw:number;approach:P3;exitPoints:P3[]}
 export interface SailingShowSpec extends SourceBinding {id:string;waterId:string;viewingAnchorId:string;boats:{id:string;team:'nsysu'|'osaka';path:P3[];startProgress:number}[];teamLabels?:Record<'nsysu'|'osaka',string>}
 export interface SportFacility {id:string;kind:string;polygon:Point2[];name?:string;name_zh?:string;courts?:Point2[][];surfaceY?:number;lanes?:number;center?:Point2;size?:Point2;angleDeg?:number;fence?:boolean}
-export interface SeaData {hazards?:{kind?:string;polygon:Point2[]}[];waterBodies:WaterBodySpec[];routes:WaterRouteSpec[];center?:{id?:string;position:P3;name?:string;rentalDesk?:P3};buoys?:P3[];lifeguardChair?:P3;surfZone?:{polygon:Point2[];position?:P3};sailingShow?:SailingShowSpec;viewingPoint?:P3;anchors?:Record<string,P3>}
+export interface SeaRentalKiosk {position:P3;yaw:number;apron:Point2[]}
+export interface SeaCenter {id?:string;position:P3;name?:string;rentalDesk?:P3;kiosk?:SeaRentalKiosk}
+export interface SeaData {hazards?:{kind?:string;polygon:Point2[]}[];waterBodies:WaterBodySpec[];routes:WaterRouteSpec[];center?:SeaCenter;buoys?:P3[];lifeguardChair?:P3;surfZone?:{polygon:Point2[];position?:P3};sailingShow?:SailingShowSpec;viewingPoint?:P3;anchors?:Record<string,P3>}
 export interface SportsData {facilities:SportFacility[];courses:TimedCourse[];portals:FitnessPortal[];equipment:EquipmentSpec[]}
 export interface FitnessScene {id:string;polygon:Point2[];floorY:number;equipment:EquipmentSpec[];exitPoint:P3}
 export interface FitnessData {scenes:FitnessScene[]}

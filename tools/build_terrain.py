@@ -24,10 +24,11 @@ import build_campus_structure as B
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 DEM = ROOT/'data/sources/dem'
+SC_DATUM_OUTLINE = DEM/'terrain-t3-sc-outline.json'
 STRUCT = ROOT/'public/data/walkthrough/campus-structure.json'
 OUT = ROOT/'public/data/terrain'
 ART = ROOT/'artifacts/v3/T3'
-X0, X1, Z0, Z1, CELL = -900, 900, -1100, 700, 4.0
+X0, X1, Z0, Z1, CELL = -900, 960, -1100, 700, 4.0
 PAD, BLEND, BLEND_MAX = 6.0, 12.0, 40.0
 SPAWN, SPAWN_R = (-69.0, 119.0), 25.0
 SEA_LEVEL, SEABED = -0.6, -2.0
@@ -54,12 +55,21 @@ def bilinear(g, gi, gj):
 
 
 def footprints(struct):
-    return {b: Polygon(B.frame_xy(list(B.floor_outline(b)[2].exterior.coords), p['rotation'], p['scale'], p['x'], p['z'])).buffer(0)
-            for b, p in struct['placements'].items()}
+    # The T3 DEM and campus navigation share this survey datum. Changes to the
+    # SC level 1 collision outline must not move the ground across the map.
+    sc_outline = Polygon(json.loads(SC_DATUM_OUTLINE.read_text())['outline']).buffer(0)
+    projected = {}
+    for building, placement in struct['placements'].items():
+        outline = sc_outline if building == 'SC' else B.floor_outline(building)[2]
+        projected[building] = B.frame_poly(outline, (placement['rotation'], placement['scale'], placement['x'], placement['z']))
+    return projected
 
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument('--out', type=pathlib.Path, default=OUT); a = ap.parse_args()
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--out', type=pathlib.Path, default=OUT)
+    ap.add_argument('--preview', type=pathlib.Path, default=ART/'terrain-preview.png')
+    a = ap.parse_args()
     struct = json.loads(STRUCT.read_text()); fp = footprints(struct)
     g, e0, n0, prov = load_dem(); nodata = np.isnan(g)
     idx = ndimage.distance_transform_edt(nodata, return_distances=False, return_indices=True)
@@ -97,7 +107,8 @@ def main():
     a.out.mkdir(parents=True, exist_ok=True); blob = h.astype('<f4').tobytes(); (a.out/'terrain.bin').write_bytes(blob)
     meta = dict(origin=[X0, Z0], cell=CELL, cols=cols, rows=rows, layout='Float32 LE, row-major: index = row*cols+col, x = origin[0]+col*cell, z = origin[1]+row*cell (vertex grid)',
                 minY=round(float(h.min()), 3), maxY=round(float(h.max()), 3), seaLevel=SEA_LEVEL, seabed=SEABED,
-                zeroDatum=dict(twvd2001_m=round(zero, 3), method='median DTM under SC+EN placement footprints'),
+                zeroDatum=dict(twvd2001_m=round(zero, 3), method='median DTM under SC+EN placement footprints',
+                               scOutline=str(SC_DATUM_OUTLINE.relative_to(ROOT))),
                 pad=dict(shape='convex hull of the 8 placement footprints + buffer, plus spawn disc', buffer_m=PAD, blend_m=f'clamp(2.5*|h|, {BLEND}, {BLEND_MAX})', spawn=list(SPAWN), spawnRadius=SPAWN_R, height=0.0),
                 source=dict(name=prov['title'], dataset=prov['dataset'], url=prov['url'], archiveSha256=prov['archiveSha256'], retrievedAt=prov['retrievedAt'], crs=prov['crs']),
                 license=prov['license'], sha256=hashlib.sha256(blob).hexdigest(), bytes=len(blob),
@@ -137,8 +148,8 @@ def main():
     for geom in getattr(pad, 'geoms', [pad]): dr.line(P(list(geom.exterior.coords)), fill=(255, 255, 0), width=1)
     for w in ctx['water']: dr.line(P(w['points']), fill=(0, 255, 255), width=1)
     dr.rectangle([0, 0, 640, 18], fill=(0, 0, 0)); dr.text((4, 3), f'terrain {cols}x{rows} @ {CELL} m  h {h.min():.1f}..{h.max():.1f} m  yellow=pad  cyan=OSM coast  red=placements', fill=(255, 255, 255))
-    ART.mkdir(parents=True, exist_ok=True); im.save(ART/'terrain-preview.png')
-    print('wrote', a.out/'terrain.bin', a.out/'terrain.json', ART/'terrain-preview.png', 'sha256', meta['sha256'])
+    a.preview.parent.mkdir(parents=True, exist_ok=True); im.save(a.preview)
+    print('wrote', a.out/'terrain.bin', a.out/'terrain.json', a.preview, 'sha256', meta['sha256'])
 
 
 if __name__ == '__main__':

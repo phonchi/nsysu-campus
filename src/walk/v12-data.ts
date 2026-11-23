@@ -1,7 +1,7 @@
 import {PLAY_BOUNDS} from '../world/terrain';
 import {boardingIssue} from './bus';
 import {validLanding} from './v12-geometry';
-import type {SeaData,SportsData,FitnessData,WaterBodySpec,WaterRouteSpec,TimedCourse,P3} from '../world/v12-types';
+import type {SeaCenter,SeaData,SportsData,FitnessData,WaterBodySpec,WaterRouteSpec,TimedCourse,P3} from '../world/v12-types';
 import type {BusData,BusRouteSpec} from './bus-types';
 export interface V12Data {sea?:SeaData;bus?:BusData;sports?:SportsData;fitness?:FitnessData;issues:string[]}
 const object=(v:unknown):v is Record<string,any>=>!!v&&typeof v==='object'&&!Array.isArray(v);
@@ -9,6 +9,16 @@ const point=(v:any,n=3)=>Array.isArray(v)&&v.length===n&&v.every(Number.isFinite
 const position=(v:any):P3|undefined=>point(v)?v:point(v?.position)?v.position:undefined;
 const points=(v:any,n=3,min=1)=>Array.isArray(v)&&v.length>=min&&v.every(p=>point(p,n));
 const list=(v:any,...keys:string[])=>keys.map(k=>v[k]).find(Array.isArray)??[];
+function parseSeaCenter(raw:unknown):SeaCenter|undefined {
+ if(!object(raw)||!point(raw.position))return undefined;
+ const kiosk=raw.kiosk;
+ return {
+  id:typeof raw.id==='string'?raw.id:undefined, name:typeof raw.name==='string'?raw.name:undefined,
+  position:raw.position, rentalDesk:point(raw.rentalDesk)?raw.rentalDesk:undefined,
+  kiosk:object(kiosk)&&point(kiosk.position)&&Number.isFinite(kiosk.yaw)&&points(kiosk.apron,2,3)
+   ? {position:kiosk.position,yaw:kiosk.yaw,apron:kiosk.apron} : undefined,
+ };
+}
 function water(w:any):w is WaterBodySpec{return object(w)&&typeof w.id==='string'&&['sea','pool'].includes(w.kind)&&points(w.polygon,2,3)&&Number.isFinite(w.surfaceY)&&points(w.entryPoints)&&points(w.exitPoints)&&points(w.safeReturnPoints)&&Array.isArray(w.rescuePaths)&&w.rescuePaths.length>0&&w.rescuePaths.every((p:any)=>points(p))&&[...w.entryPoints,...w.exitPoints,...w.safeReturnPoints].every((p:P3)=>validLanding(p,w.polygon));}
 function route(r:any):r is WaterRouteSpec{return object(r)&&typeof r.id==='string'&&typeof r.waterId==='string'&&['sup','kayak'].includes(r.craft)&&point(r.launchPoint)&&point(r.returnPoint)&&points(r.waypoints,2,2)&&points(r.corridor,2,3)&&Array.isArray(r.exclusions)&&r.exclusions.every((p:any)=>points(p,2,3));}
 function course(c:any):c is TimedCourse{return object(c)&&typeof c.id==='string'&&['run','swim'].includes(c.mode)&&points(c.corridor,2,3)&&Array.isArray(c.gates)&&c.gates.length>0&&c.gates.every((g:any)=>object(g)&&typeof g.id==='string'&&point(g.a)&&point(g.b)&&point(g.direction,2))&&Array.isArray(c.requiredGateSequence)&&c.requiredGateSequence.length>0&&c.requiredGateSequence.every((id:any)=>c.gates.some((g:any)=>g.id===id));}
@@ -26,14 +36,15 @@ export function parseV12(kind:'sea'|'bus'|'sports'|'fitness',raw:unknown):SeaDat
  if(kind==='sea'){
   const bodies=list(raw,'waterBodies','waters','bodies'),routes=list(raw,'routes','waterRoutes');if(!bodies.length||!bodies.every(water)||new Set(bodies.map((w:any)=>w.id)).size!==bodies.length||!routes.every(route)||routes.some((r:any)=>!bodies.some((w:any)=>w.id===r.waterId)))throw Error('sea: 無效水域或航線');
   const show=raw.sailingShow??raw.sailingShows?.[0];if(show&&(!Array.isArray(show.boats)||show.boats.length!==8||show.boats.filter((b:any)=>b.team==='nsysu').length!==4||show.boats.filter((b:any)=>b.team==='osaka').length!==4||show.boats.some((b:any)=>!points(b.path,3,2)||!Number.isFinite(b.startProgress))))throw Error('sea: 帆船必須兩隊各四艘');
-  const center=raw.center??raw.seaCenter;return {hazards:Array.isArray(raw.hazards)?raw.hazards.filter((h:any)=>points(h.polygon,2,3)):undefined,waterBodies:bodies,routes,center:center&&point(center.position)?center:undefined,buoys:Array.isArray(raw.buoys)?raw.buoys.map(position).filter((p:unknown):p is P3=>!!p):undefined,lifeguardChair:position(raw.lifeguardChair),surfZone:raw.surfZone,sailingShow:show,viewingPoint:position(raw.viewingPoint??raw.sailingViewPoint),anchors:object(raw.anchors)?Object.fromEntries(Object.entries(raw.anchors).filter(([,v])=>point(v))):undefined};
+  return {hazards:Array.isArray(raw.hazards)?raw.hazards.filter((h:any)=>points(h.polygon,2,3)):undefined,waterBodies:bodies,routes,center:parseSeaCenter(raw.center??raw.seaCenter),buoys:Array.isArray(raw.buoys)?raw.buoys.map(position).filter((p:unknown):p is P3=>!!p):undefined,lifeguardChair:position(raw.lifeguardChair),surfZone:raw.surfZone,sailingShow:show,viewingPoint:position(raw.viewingPoint??raw.sailingViewPoint),anchors:object(raw.anchors)?Object.fromEntries(Object.entries(raw.anchors).filter(([,v])=>point(v))):undefined};
  }
  if(kind==='bus'){
   const stops=list(raw,'stops'),routes=list(raw,'routes');
+  const busPath=(path:P3[])=>points(path,3,2)&&path.every(([x,,z])=>x>=PLAY_BOUNDS[0]&&x<=PLAY_BOUNDS[2]&&z>=PLAY_BOUNDS[1]&&z<=PLAY_BOUNDS[3]);
   if(routes.length!==2||!stops.length||stops.some((s:any)=>!object(s)||typeof s.id!=='string'||typeof s.name!=='string'||!point(s.sign)||!point(s.boardingPoint)||!points(s.alightingPoints)||!point(s.berth?.position)||!Number.isFinite(s.berth.yaw)))throw Error('bus: 預期兩條公車線及完整站點');
   if(new Set(routes.map((r:any)=>r.id)).size!==2||new Set(routes.map((r:any)=>r.vehicleId)).size!==2||new Set(stops.map((s:any)=>s.id)).size!==stops.length)throw Error('bus: 重複 ID');
   for(const r of routes as BusRouteSpec[]){if(typeof r.vehicleId!=='string'||!r.vehicleId||!Array.isArray(r.stopOccurrences)||r.stopOccurrences.length<2||!Array.isArray(r.legs)||r.legs.length<2||!['campus-bus','orange-1-ext'].includes(r.id)||r.schedule?.gameSecondsPerRealSecond!==5||!Number.isFinite(r.schedule.initialPhaseGameSeconds)||!Number.isFinite(r.schedule.terminalLayoverRealSeconds)||r.schedule.minDwellRealSeconds!==6||![r.vehicle?.lengthM,r.vehicle?.widthM,r.vehicle?.heightM].every(n=>Number.isFinite(n)&&n>0))throw Error('bus: 路線／倍率／車體無效');
-   if(new Set(r.stopOccurrences.map(o=>o.occurrenceId)).size!==r.stopOccurrences.length||r.stopOccurrences.some(o=>!stops.some((s:any)=>s.id===o.stopId)||r.legs.filter(l=>l.fromOccurrenceId===o.occurrenceId).length!==1)||r.legs.some(l=>!points(l.path,3,2)||l.path.some(p=>p[0]<PLAY_BOUNDS[0]||p[0]>PLAY_BOUNDS[2]||p[2]<PLAY_BOUNDS[1]||p[2]>PLAY_BOUNDS[3])||l.narrowSectionIds!==undefined&&(!Array.isArray(l.narrowSectionIds)||!l.narrowSectionIds.every(id=>typeof id==='string'))||!Array.isArray(l.sourceEdgeIds)||!l.sourceEdgeIds.every(id=>typeof id==='string')||(!Number.isFinite(l.cruiseMpsGame)||!(l.cruiseMpsGame>0))||!r.stopOccurrences.some(o=>o.occurrenceId===l.toOccurrenceId)))throw Error('bus: 站序路徑不完整');}
+   if(new Set(r.stopOccurrences.map(o=>o.occurrenceId)).size!==r.stopOccurrences.length||r.stopOccurrences.some(o=>!stops.some((s:any)=>s.id===o.stopId)||r.legs.filter(l=>l.fromOccurrenceId===o.occurrenceId).length!==1)||r.legs.some(l=>!busPath(l.path)||l.departurePath!==undefined&&!busPath(l.departurePath)||l.narrowSectionIds!==undefined&&(!Array.isArray(l.narrowSectionIds)||!l.narrowSectionIds.every(id=>typeof id==='string'))||!Array.isArray(l.sourceEdgeIds)||!l.sourceEdgeIds.every(id=>typeof id==='string')||(!Number.isFinite(l.cruiseMpsGame)||!(l.cruiseMpsGame>0))||!r.stopOccurrences.some(o=>o.occurrenceId===l.toOccurrenceId)))throw Error('bus: 站序路徑不完整');}
   const issue=boardingIssue(stops,routes);if(issue)throw Error(issue);
   const fc=raw.forecourt;if(fc&&(!points(fc.polygon,2,3)||!Number.isFinite(fc.levelY)))throw Error('bus: 無效廣場地表');
   return {stops,routes,forecourt:fc};
