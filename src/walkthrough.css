@@ -221,9 +221,23 @@
 .walkthrough.is-photo .walk-photo-gesture{display:inline-flex}
 .walk-v12-status{position:absolute;left:24px;top:180px;z-index:8;max-width:min(340px,70vw);padding:10px 14px;border-radius:8px;background:var(--walk-panel);color:var(--walk-paper);font-size:13px;white-space:pre-line;pointer-events:none}
 .walk-v12-status meter{display:block;width:100%;margin-top:6px}
-.walk-v12-panel{position:absolute;left:50%;bottom:120px;transform:translateX(-50%);z-index:45;width:min(480px,90vw);padding:16px;background:var(--walk-panel);border:1px solid var(--walk-line);border-radius:10px}
+.walk-v12-panel{pointer-events:auto;position:absolute;left:50%;bottom:120px;transform:translateX(-50%);z-index:45;width:min(480px,90vw);padding:16px;background:var(--walk-panel);border:1px solid var(--walk-line);border-radius:10px}
 .walk-v12-panel>div{display:flex;flex-wrap:wrap;gap:8px;max-height:35vh;overflow:auto;margin-top:10px}
 .walk-v12-panel button{min-height:44px;padding:8px;border:1px solid var(--walk-line);border-radius:7px;background:transparent;color:var(--walk-paper)}
 .walk-v12-panel button[aria-pressed=true]{color:var(--walk-ink);background:var(--walk-gold)}
+.walk-v12-panel button small{display:block;font-size:11px;opacity:.75}
+.walk-v12-panel .walk-v12-note{margin:8px 0 0;color:var(--walk-gold)}
+.walk-v12-busride{position:absolute;inset:0;z-index:60;display:grid;place-items:center;background:rgba(6,10,14,.94);color:var(--walk-paper);animation:walk-busride-in .35s ease-out;pointer-events:none}
+.walk-v12-busride[hidden]{display:none}
+.walk-v12-busride-card{width:min(520px,88vw);padding:20px;border:1px solid var(--walk-line);border-radius:12px;background:var(--walk-panel)}
+.walk-v12-busride-card ol{display:flex;flex-wrap:wrap;gap:6px 4px;margin:14px 0;padding:0;list-style:none;font-size:13px}
+.walk-v12-busride-card li{padding:3px 8px;border-radius:999px;border:1px solid var(--walk-line);opacity:.6}
+.walk-v12-busride-card li.passed{opacity:.35}
+.walk-v12-busride-card li.here{opacity:1;color:var(--walk-ink);background:var(--walk-gold);border-color:var(--walk-gold)}
+.walk-v12-busride-bar{height:6px;border-radius:3px;background:rgba(255,255,255,.15);overflow:hidden}
+.walk-v12-busride-bar span{display:block;height:100%;width:calc(var(--progress,0)*100%);background:var(--walk-gold)}
+.walk-v12-busride-card small{display:block;margin-top:10px;opacity:.7}
+@keyframes walk-busride-in{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.walk-v12-busride{animation:none}}
 .walkthrough.is-photo .walk-v12-status{display:none}
 @media(max-width:600px){.walk-v12-status{left:12px;top:148px;max-width:65vw;font-size:12px}.walk-v12-panel{bottom:100px}}

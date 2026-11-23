@@ -68,6 +68,7 @@ export class Avatar {
   private vehicle?: T.Object3D;
   private rideRig?: RideRig;
   private wasRiding=false;
+  private wasExternal=false;
   private lastFrame?: AvatarInput;
   /** On the rental bike: seated pose, raised onto the saddle, the bike drawn under the avatar. */
   riding = false;
@@ -166,12 +167,19 @@ export class Avatar {
     this.rideRig?.releaseGround();
     this.lastFrame=f;
     if(this.externalPose){
+      // Water/craft/equipment take over from the bike: that ride has ended, and its exit
+      // (current=undefined below) must not later orphan the swim clip at full weight.
+      if(this.wasRiding){this.rideRig?.reset();this.wasRiding=false;}
+      this.wasExternal=true;
       const pose=this.externalPose;this.root.position.fromArray(pose.position);this.visualY=pose.position[1];this.facing=pose.heading;this.root.rotation.set(0,pose.heading,0);this.root.scale.set(1,1,1);
       if(this.vehicle)this.vehicle.visible=pose.clip==='Ride';
       if(pose.clip==='Ride'&&this.rideRig){this.state='ride';this.mixer?.stopAllAction();this.current=undefined;this.rideRig.apply(new T.Vector3(...pose.position),{front:pose.position[1],rear:pose.position[1]});}
       else {const state=({Swim:'swim',Tread:'tread',PaddleStand:'paddleStand',PaddleSit:'paddleSit',Walk:'walk',Run:'run',Idle:'idle',Ride:'sit'} as const)[pose.clip];this.setState(state);this.mixer?.update(dt);}
       this.wasGround=true;return;
     }
+    // Leaving the water/equipment is a teleport onto the shore: cut to the ground clips instead of
+    // crossfading a prone/treading pose whose feet the ground IK would pin into a deep squat.
+    if(this.wasExternal){this.wasExternal=false;this.rideRig?.reset();this.mixer?.stopAllAction();this.current=undefined;}
 
     // Visual height: follows the feet closely, but filters millimetre contact noise and stair-step pops.
     // The grounded capsule can retain a small collision offset above its support.

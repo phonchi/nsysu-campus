@@ -5,8 +5,7 @@ import {loadTerrain} from './terrain-fixture';
 import {landmarkCarves} from '../src/world/landmarks';
 import {SwimRuntime} from '../src/walk/swim';
 import {TimedSports} from '../src/walk/sports-activity';
-import {BusRuntime,BusPassenger,SectionOccupancy} from '../src/walk/bus';
-import {bus,stops,clear,water} from './v121-fixtures';
+import {clear,water} from './v121-fixtures';
 import {evaluateSea} from '../src/walk/water-policy';
 import {prepareV12Terrain} from '../src/world/v12-surfaces';
 import {buildRuntimeWorld} from './world-fixture';
@@ -23,11 +22,6 @@ it('BUG-A actual v12 runtime pool cuts match the shipped navmesh version',async(
  const baked=world();expect(baked.world.collision.userData.surfaceVersion).toBe(t.surfaceVersion);
  expect(t.surfaceVersion).toBe(read('data/walkthrough/navmesh-meta.json').surfaceVersion);
 });
-it('BUG-B keeps the selected stop during blocked alighting, including a long frame',()=>{
- const b=new BusRuntime(structuredClone(bus),structuredClone(stops),new SectionOccupancy()),p=new BusPassenger();p.board(b,stops[0].boardingPoint);p.select('a0');
- for(let i=0;i<20;i++){b.update(1);p.update(()=>false,1);}expect(b.atStop).toBe('a');expect(p.selected).toBe('a0');
- b.update(20);expect(b.atStop).toBe('a');expect(p.update(()=>true,0)?.exit).toBe(true);
-});
 it('OBS-1 rescue immediately reduces distance to the nearest shore and stays latched',()=>{
  const w=sea.waterBodies[0],s=new SwimRuntime();s.adoptForRescue(w,[-331,w.surfaceY,116]);const before=s.position.clone();
  s.update(.1,new Vector3(),allowed);expect(s.position.x).toBeGreaterThan(before.x);expect(s.phase).toBe('rescue');
@@ -43,7 +37,7 @@ it('OBS-3 holding a safe pool edge for one second climbs out without a rescue wh
 });
 
 import {RapierController,initPhysics} from '../src/walk/controller';
-import {busGroundPose,supportedStopPoint} from '../src/walk/bus';
+import {busGroundPose,supportedStopPoint,outsideBus} from '../src/walk/bus';
 import {planProps} from '../src/world/props';
 import {inside} from '../src/walk/v12-geometry';
 import {SailingShow} from '../src/world/sailing-show';
@@ -51,12 +45,11 @@ import {Group,Object3D,PerspectiveCamera} from 'three';
 import type {BusData} from '../src/walk/bus-types';
 it('BUG-B actual forecourt collision supports both alighting positions outside the bus',async()=>{
  await initPhysics();const w=world(),p=new RapierController(w.world.collision),data=parseV12('bus',read('data/bus-routes.json')) as BusData;
- const r=structuredClone(data.routes[0]);r.schedule.initialPhaseGameSeconds=0;const stop=data.stops.find(s=>s.id==='liberal-arts')!;
- const b=new BusRuntime(r,data.stops,new SectionOccupancy(),(x,z)=>w.terrain.heightAt(x,z));b.occurrence=r.stopOccurrences.findIndex(o=>o.stopId===stop.id);b.position.fromArray(stop.berth.position);b.update(0);
+ const r=data.routes[0],stop=data.stops.find(s=>s.id==='liberal-arts')!;
+ const b={position:new Vector3(...stop.berth.position),yaw:stop.berth.yaw+Math.PI,route:r};
  const resolve=(q:[number,number,number])=>supportedStopPoint([q[0],w.terrain.heightAt(q[0],q[2]),q[2]],(x,z,y)=>p.supportAt(x,z,y));
- for(const q of stop.alightingPoints){const at=resolve(q)!;expect(at).toBeDefined();expect(p.canStand(new Vector3(...at)),JSON.stringify(at)).toBe(true);}
- const passenger=new BusPassenger();expect(passenger.board(b,resolve(stop.boardingPoint)!,resolve)).toBe(true);passenger.select(r.stopOccurrences[b.occurrence].occurrenceId);
- expect(passenger.update(q=>p.canStand(new Vector3(...q)),.1,resolve)?.exit).toBe(true);p.dispose();b.dispose();
+ for(const q of [stop.boardingPoint,...stop.alightingPoints]){const at=resolve(q)!;expect(at).toBeDefined();expect(p.canStand(new Vector3(...at)),JSON.stringify(at)).toBe(true);expect(outsideBus(b,at)).toBe(true);}
+ p.dispose();
 },20000);
 it('OBS-1 actual sea rescue lands on runtime support and never returns to swim',async()=>{
  await initPhysics();const w=world(),p=new RapierController(w.world.collision),water=sea.waterBodies[0];

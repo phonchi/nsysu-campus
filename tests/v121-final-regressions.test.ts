@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import * as T from 'three';
 import {buildRuntimeWorld} from './world-fixture';
 import {parseV12} from '../src/walk/v12-data';
-import {BusRuntime,BusFleet,SectionOccupancy,supportedStopPoint,outsideBus,busGroundPose} from '../src/walk/bus';
+import {supportedStopPoint,outsideBus,busGroundPose} from '../src/walk/bus';
 import type {BusData} from '../src/walk/bus-types';
 import type {SeaData,SportsData} from '../src/world/v12-types';
 import {RapierController,initPhysics} from '../src/walk/controller';
@@ -31,12 +31,12 @@ it('all 14 real stops resolve from terrain, canStand and lie outside every servi
  await initPhysics();const w=world(),physics=new RapierController(w.world.collision);expect(bus.stops).toHaveLength(14);const failures:string[]=[];
  for(const stop of bus.stops)for(const route of bus.routes.filter(r=>r.stopOccurrences.some(o=>o.stopId===stop.id))){
   const sign=supportedStopPoint(stop.sign,(x,z,y)=>physics.supportAt(x,z,y),(x,z)=>w.terrain.heightAt(x,z));expect(sign,stop.id+' sign').toBeDefined();if(stop.id==='liberal-arts'){expect(sign![1]).toBeGreaterThanOrEqual(bus.forecourt!.levelY-.001);expect(sign![1]).toBeLessThanOrEqual(bus.forecourt!.levelY+.03);}
-  const b=new BusRuntime({...route,schedule:{...route.schedule,initialPhaseGameSeconds:0}},bus.stops,new SectionOccupancy(),(x,z)=>w.terrain.heightAt(x,z));b.parkAt(route.stopOccurrences.find(o=>o.stopId===stop.id)!.occurrenceId);
+  const b={position:new T.Vector3(...stop.berth.position),yaw:stop.berth.yaw+Math.PI,route};
   for(const [i,p] of [stop.boardingPoint,...stop.alightingPoints].entries()){
    // Deliberately corrupt authored y: the real runtime resolver must ignore it.
    const q=supportedStopPoint([p[0],p[1]+100,p[2]],(x,z,y)=>physics.supportAt(x,z,y),(x,z)=>w.terrain.heightAt(x,z));
    if(!q||!physics.canStand(new T.Vector3(...q))||!outsideBus(b,q))failures.push(`${route.id}/${stop.id}/${i}: ${JSON.stringify(q)}`);
-  }b.dispose();
+  }
  }
  physics.dispose();expect(failures).toEqual([]);
 },30000);
@@ -68,10 +68,6 @@ it('craft stays put without input, accepts opposite directions and returns withi
  c.update(.1,new T.Vector3(-1,0,0),allowed);expect(c.position.x).toBeLessThan(start.x);const left=c.position.x;c.update(.1,new T.Vector3(1,0,0),allowed);expect(c.position.x).toBeGreaterThan(left);
  c.position.set(r.returnPoint[0]-14,w.surfaceY,r.returnPoint[2]);expect(c.returnToShore()).toEqual(r.returnPoint);}
 });
-it('QA bus only parks with qa=1 and holds the specified repeated occurrence',()=>{
- const fleet=new BusFleet(bus.routes,bus.stops);expect(fleet.applyQa(new URLSearchParams('qaBus=orange-1-ext:la-down'))).toBe(false);expect(fleet.applyQa(new URLSearchParams('qa=1&qaBus=orange-1-ext:bogus'))).toBe(false);
- expect(fleet.applyQa(new URLSearchParams('qa=1&qaBus=orange-1-ext:la-down'))).toBe(true);const b=fleet.buses.find(b=>b.route.id==='orange-1-ext')!;fleet.update(120,[]);expect(b.route.stopOccurrences[b.occurrence].occurrenceId).toBe('05-liberal-arts');expect(b.phase).toBe('dwell');b.departureHold=undefined;fleet.update(10,[]);expect(b.phase).toBe('moving');fleet.dispose();
-});
 it('first person starts near horizontal and bus pitch stays within 12 degrees',()=>{
  const rig=new CameraRig(new T.PerspectiveCamera(),()=>100,{getItem:()=>null,setItem:()=>{}});rig.setMode('free');rig.pitch=.5;rig.setMode('firstPerson');expect(rig.pitch).toBeLessThanOrEqual(0);expect(rig.pitch).toBeGreaterThanOrEqual(-5*Math.PI/180);
  const pose=busGroundPose(new T.Vector3(),0,9.5,2.5,(_x,z)=>z*2);expect(Math.abs(pose.pitch)).toBeLessThanOrEqual(12*Math.PI/180);for(const z of [-4.75,0,4.75])expect(pose.y+Math.tan(pose.pitch)*z).toBeGreaterThanOrEqual(z*2);
@@ -82,8 +78,4 @@ it('sailing sprite glyphs are at least 20 pixels high at 200 m on a 960 by 600 v
  const label=show.group.children[0].getObjectByName('team-label')!;expect(label.position.y-label.scale.y/2).toBeGreaterThan(6.5);
  const glyphPixels=label.scale.y*(76/112)*600/(2*Math.tan(58*Math.PI/360)*200);
  expect(glyphPixels).toBeGreaterThanOrEqual(20);show.dispose();
-});
-it('bus turning and arrival remain bounded to 90 degrees per second',()=>{
- const route=bus.routes[1],b=new BusRuntime({...route,schedule:{...route.schedule,initialPhaseGameSeconds:0}},bus.stops,new SectionOccupancy());
- let prev=b.yaw;for(let i=0;i<4000;i++){b.update(.05);const delta=Math.atan2(Math.sin(b.yaw-prev),Math.cos(b.yaw-prev));expect(Math.abs(delta)).toBeLessThanOrEqual(Math.PI/2*.05+1e-8);prev=b.yaw;}b.dispose();
 });

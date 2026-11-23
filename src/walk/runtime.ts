@@ -747,7 +747,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   window.addEventListener('keydown',captureRhythmKey,{capture:true});
   const input = new WalkInput(renderer.domElement, get('.walk-joystick'), get('.walk-stick'), {
     modal(k, mode) {
-      if(v12?.locked&&k==='escape'){if(v12.fitness.equipment&&v12.key(k))return;setMenu(!menuOpen(),'play');return;}
+      if(v12?.locked&&k==='escape'){if((v12.fitness.equipment||v12.onBus)&&v12.key(k))return;setMenu(!menuOpen(),'play');return;}
       if(v12?.key(k))return;
       if(passenger.carried){liftKey(k);return;}
       if(gestures.open){gestures.key(k);return;}
@@ -760,7 +760,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       else if (mode === 'menu') { if (k === 'j') { openNotebook(); return; } if (k === 'h') { toggleHelp(); return; } if (k === 'escape') setMenu(false); else if (k === '/') { setMenu(true, 'play'); get<HTMLInputElement>('.walk-search input').focus(); } }
     },
     press(k) {
-      if(v12?.locked&&k==='escape'){if(v12.fitness.equipment&&v12.key(k))return;setMenu(!menuOpen(),'play');return;}
+      if(v12?.locked&&k==='escape'){if((v12.fitness.equipment||v12.onBus)&&v12.key(k))return;setMenu(!menuOpen(),'play');return;}
       if(v12?.key(k))return;
       if(passenger.carried){liftKey(k);return;}
       if(gestures.open){gestures.key(k);return;}
@@ -826,7 +826,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   });
   host.addEventListener('click', e => {
     const target = e.target as HTMLElement;
-    if((passenger.carried||v12?.locked)&&!target.closest('[data-stop],[data-bus-stop],[data-lift-hold],[data-action=door],[data-action=exit],[data-action=reset],[data-action=menu],[data-action=menu-close]'))return;
+    if((passenger.carried||v12?.locked)&&!target.closest('[data-stop],[data-bus-dest],[data-lift-hold],[data-action=door],[data-action=exit],[data-action=reset],[data-action=menu],[data-action=menu-close]'))return;
     const bodyBtn = target.closest<HTMLElement>('[data-body]'), palBtn = target.closest<HTMLElement>('[data-palette]');
     if (bodyBtn) { if (bodyBtn.dataset.body !== look().body) { campus.setPlayer({ body: bodyBtn.dataset.body as Body, palette: 0 }); markChar(); loadCharacter(); } return; }
     if (palBtn) { campus.setPlayer({ palette: Number(palBtn.dataset.palette) }); markChar(); loadCharacter(); return; }
@@ -1883,7 +1883,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     get lifts(){return world.lifts.map(l=>l.runtime.snapshot);},
     get motion(){return v12?.ownsMotion?v12.mode:bike.riding?{kind:'bike'}:passenger.motion;},
     get water(){return {conditions:v12?.policy.conditions,stamina:v12?.swim.stamina,phase:v12?.swim.phase};},
-    get buses(){return v12?.fleet?.buses.map(b=>({id:b.id,position:b.position.toArray(),phase:b.phase,stop:b.atStop}));},
+    get bus(){const b=v12?.bus;return b&&{phase:b.phase,stop:b.stop?.id,route:b.route?.id,position:b.position.toArray(),visible:b.visible,progress:b.rideProgress,notice:b.notice,destinations:b.phase==='onboard'?b.destinations().map(d=>({name:d.name,route:d.routeId,via:d.via})):[]};},
     get mode() { return { overview, cameraMode:rig.mode, firstPerson: rig.firstPerson, walking, running: input.running, locked: rig.locked, tier }; },
     get heading() { return rig.yaw; },
     get onGround() { return physics.onGround; },
