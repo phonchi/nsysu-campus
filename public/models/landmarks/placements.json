@@ -26,7 +26,9 @@
   ],
   "yaw": -0.7278,
   "note": "v12：依 NLSC 2024 正射影像描圖重新對位（本機參考，artifacts/v12/reference/sports-trace.json）。中庭式院館群中心 (-564.5,-889.5)、長軸西北—東南 41.7°、外包約 87×42 m，信心中；量體仍為通用院館，拱廊面朝西南（海側）。",
-  "elevation": null,
+  "elevation": 49.9,
+  "levelPad": [[-35, 7], [35, 7], [35, 26], [-35, 26]],
+  "levelPadNote": "拱廊平台與四階樓梯的 local X/Z 外包加 2 m；以樓梯前土壤 49.9 m 整平，避免高基座與上坡埋覆",
   "uncertainty_m": 8,
   "basis": "orthophoto-trace"
  },

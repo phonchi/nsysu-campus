@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import { buildWalkWorld } from '../src/walk-world';
 import { WALK_BUILDING_IDS } from '../src/walk-nav';
-import { landmarkCarves, landmarkCollision, LANDMARK_IDS, REPLACES, type Box, type Placement } from '../src/world/landmarks';
+import { landmarkCarves, landmarkLevels, landmarkCollision, LANDMARK_IDS, REPLACES, type Box, type Placement } from '../src/world/landmarks';
 import type { CampusStructure, FloorAccess, WalkBuilding } from '../src/walk-types';
 import { loadTerrain } from './terrain-fixture';
 import {placementPolicy} from '../src/world/placement-policy';
@@ -21,6 +21,7 @@ export function buildRuntimeWorld() {
   const data = WALK_BUILDING_IDS.map(id => { const b = JSON.parse(fs.readFileSync(`public/data/walkthrough/${id}.json`, 'utf8')) as WalkBuilding; for (const f of b.floors) f.access = access.floors[f.id]; return b; });
   const terrain = loadTerrain();
   terrain.carves = landmarkCarves(placements,(x,z)=>terrain.heightAt(x,z));
+  terrain.levels.push(...landmarkLevels(placements));
   const v12:V12Data={issues:[]};for(const [kind,file] of Object.entries({sea:'sea.json',bus:'bus-routes.json',sports:'sports.json',fitness:'interiors/fitness.json'}))Object.assign(v12,{[kind]:parseV12(kind as 'sea'|'bus'|'sports'|'fitness',JSON.parse(fs.readFileSync('public/data/'+file,'utf8')))});
   prepareV12Terrain(terrain,v12);
   const world = buildWalkWorld(data, structure, terrain);

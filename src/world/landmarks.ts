@@ -9,7 +9,7 @@ import type { Terrain } from './terrain';
 import { fullTunnelProfile,fullTunnelGeometry,tunnelGroundCuts,tunnelVegetationVolumes } from './tunnel-surface';
 
 type P2 = [number, number];
-export interface Placement { osmId?: number | null; centroid: P2; yaw: number; elevation?: number | null; path?: P2[]; moduleLength?: number; parts?: string[]; walkableLength?: number; seaOffset?: number; centerline?: P2[]; eastPortal?: P2 }
+export interface Placement { osmId?: number | null; centroid: P2; yaw: number; elevation?: number | null; levelPad?: P2[]; path?: P2[]; moduleLength?: number; parts?: string[]; walkableLength?: number; seaOffset?: number; centerline?: P2[]; eastPortal?: P2 }
 export interface Box { center: [number, number, number]; size: [number, number, number]; yaw: number; walkable?: boolean }
 
 /** Hand-modelled landmarks (T4, tools/create_landmarks.py) and the OSM blocks / v2 features they replace. */
@@ -26,6 +26,16 @@ export async function loadPlacements(asset: (p: string) => string) {
 export function landmarkCarves(placements: Record<string, Placement>,ground?:(x:number,z:number)=>number): P2[][] {
  const t=placements.tunnel;if(!t)return [];
  return tunnelGroundCuts(fullTunnelProfile(t,ground??(()=>0)),ground);
+}
+
+/** Local X/Z pads at an explicit seat, shared by terrain rendering, collision and the nav bake.
+ * Register before prepareV12Terrain caches the grid; Terrain supplies the flat margin and blend skirt. */
+export function landmarkLevels(placements: Record<string, Placement>): { polygon: P2[]; y: number }[] {
+  return Object.values(placements).flatMap(p => {
+    if (!p.levelPad || p.elevation == null) return [];
+    const c = Math.cos(p.yaw), s = Math.sin(p.yaw);
+    return [{ y: p.elevation, polygon: p.levelPad.map(([x, z]): P2 => [p.centroid[0] + x*c + z*s, p.centroid[1] - x*s + z*c]) }];
+  });
 }
 
 function boxesToMeshes(boxes: Box[], into: T.Group, matrix: T.Matrix4) {

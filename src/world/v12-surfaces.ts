@@ -5,7 +5,8 @@ import {buildSportsField} from './sports-field';
 /** Identical v12 terrain inputs and collision additions for browser, bake and tests. */
 export function prepareV12Terrain(terrain:Terrain,data:V12Data){
  terrain.carves.push(...(data.sea?.waterBodies.filter(w=>w.kind==='pool').map(w=>w.polygon)??[]));
- const fc=data.bus?.forecourt;if(fc)terrain.levels.push({polygon:fc.polygon,y:fc.levelY});
+ // Broad forecourt grading comes first; explicit landmark seats must stay flat under their walkable boxes.
+ const fc=data.bus?.forecourt;if(fc)terrain.levels.unshift({polygon:fc.polygon,y:fc.levelY});
  terrain.cacheLevelVertices();
 }
 export function buildV12Surfaces(terrain:Terrain,data:V12Data){

@@ -2,7 +2,7 @@ import {expect,it} from 'vitest';
 import fs from 'node:fs';
 import {Vector3} from 'three';
 import {loadTerrain} from './terrain-fixture';
-import {landmarkCarves} from '../src/world/landmarks';
+import {landmarkCarves,landmarkLevels} from '../src/world/landmarks';
 import {SwimRuntime} from '../src/walk/swim';
 import {TimedSports} from '../src/walk/sports-activity';
 import {clear,water} from './v121-fixtures';
@@ -18,6 +18,7 @@ const allowed=evaluateSea('swim',clear);
 let cached:ReturnType<typeof buildRuntimeWorld>;const world=()=>cached??=buildRuntimeWorld();
 it('BUG-A actual v12 runtime pool cuts match the shipped navmesh version',async()=>{
  const t=loadTerrain();t.carves=landmarkCarves(read('models/landmarks/placements.json'),(x,z)=>t.heightAt(x,z));
+ t.levels.push(...landmarkLevels(read('models/landmarks/placements.json')));
  const data=await loadV12Data(x=>x,(async url=>new Response(JSON.stringify(read(String(url))))) as typeof fetch);expect(data.issues).toEqual([]);prepareV12Terrain(t,data);
  const baked=world();expect(baked.world.collision.userData.surfaceVersion).toBe(t.surfaceVersion);
  expect(t.surfaceVersion).toBe(read('data/walkthrough/navmesh-meta.json').surfaceVersion);

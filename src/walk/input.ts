@@ -4,7 +4,7 @@ import { Vector2, Vector3 } from 'three';
 const MOVE_KEYS = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
 const STICK_RUN_THRESHOLD = .85;
 /** Keys the walkthrough owns while focus is not in a text field. */
-const OWNED = [...MOVE_KEYS, ' ', 'e', 'g', 'v', 'm', 'n', 'l', 'p', 'b', 'j', 'r', 'h', 't', 'q', 'shift', '/', 'escape', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+const OWNED = [...MOVE_KEYS, ' ', 'e', 'g', 'v', 'm', 'k', 'n', 'l', 'p', 'b', 'j', 'r', 'h', 't', 'q', 'shift', '/', 'escape', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
 /** Raw camera-relative intent, shared by movement and follow-camera policy. */
 export interface MoveAxes { forward: number; right: number }
@@ -82,6 +82,8 @@ export class WalkInput {
       const k = e.key.toLowerCase();
       const typing = (e.target as HTMLElement).matches?.('input,select,textarea');
       if (typing && k !== 'escape') return;
+      // The clickable minimap owns its button activation keys, including Space (normally jump).
+      if ((k === 'enter' || k === ' ') && (e.target as HTMLElement).matches?.('.walk-minimap')) return;
       const mode = this._mode;
       if(mode==='dialogue'&&nativeDialogueLinkKey(k,e.target,!!document.querySelector?.('.q-dialog:not([hidden]) a[data-content-link]')))return;
       if (mode === 'dialogue' || mode === 'menu' || mode === 'photo' || mode === 'carried') {

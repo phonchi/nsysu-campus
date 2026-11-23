@@ -241,3 +241,38 @@
 @media(prefers-reduced-motion:reduce){.walk-v12-busride{animation:none}}
 .walkthrough.is-photo .walk-v12-status{display:none}
 @media(max-width:600px){.walk-v12-status{left:12px;top:148px;max-width:65vw;font-size:12px}.walk-v12-panel{bottom:100px}}
+
+/* Full-screen map: at 960x600 the canvas is 434px high (600 - 166px chrome).
+   Below 760px tabs and controls wrap: 390x844 leaves 580px before safe-area adjustment. */
+.walk-minimap{pointer-events:auto;cursor:pointer;touch-action:manipulation}
+.walk-minimap:focus-visible{outline:3px solid var(--walk-gold);outline-offset:4px}
+.walk-menu.is-map .walk-menu-panel{position:relative;width:100%;height:100%;max-height:none;border-radius:0;padding:8px 12px;display:flex;flex-direction:column;overflow:hidden}
+.walk-menu.is-map .walk-menu-panel header{height:44px;flex:0 0 44px;margin:0 0 4px}
+.walk-menu.is-map .walk-menu-panel header strong{font-size:18px;letter-spacing:1px}
+.walk-menu.is-map .walk-menu-panel header small{display:none}
+.walk-menu.is-map .walk-menu-panel header .walk-icon{margin-left:auto;width:44px;height:44px;min-width:44px;min-height:44px}
+.walk-menu.is-map .walk-menu-tabs{position:absolute;top:8px;left:170px;right:68px;height:44px;margin:0;border-bottom:0;gap:4px}
+.walk-menu.is-map .walk-menu-tabs button{height:44px;padding:6px 12px;font-size:14px;line-height:20px}
+.walk-menu.is-map [data-pane=map]{display:flex;flex-direction:column;flex:1;min-height:0}
+.walk-menu.is-map .walk-map-canvas{flex:1;min-height:0;height:0;touch-action:none;cursor:grab;background:#e9e1cc}
+.walk-menu.is-map .walk-map-canvas:active{cursor:grabbing}
+.walk-menu.is-map .walk-map-toolbar{display:flex;align-items:center;gap:8px;flex:0 0 44px;min-width:0;margin-bottom:6px}
+.walk-menu.is-map .walk-map-legend{flex:0 1 auto;min-width:0;height:44px;flex-wrap:nowrap;overflow-x:auto;gap:4px;margin:0}
+.walk-menu.is-map .walk-map-legend button{flex-shrink:0;min-height:44px;padding:0 8px;font-size:12px;white-space:nowrap}
+.walk-menu.is-map .walk-map-legend button:focus-visible{outline-offset:-4px}
+.walk-map-place{flex:1;min-width:0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.walk-map-tools{display:flex;gap:4px;flex-shrink:0}
+.walk-map-tools button{min-width:44px;height:44px;padding:0 10px;border:2px solid #2a2c4a;border-radius:12px;background:#fbf6ea;color:#1d2a3a;font:inherit;font-size:13px;white-space:nowrap;cursor:pointer}
+.walk-map-tools button:hover,.walk-map-legend button:hover{background:#e9b94933}
+.walk-map-tools button:active{background:#e9b949}
+.walk-menu.is-map .walk-map-pick{flex:0 0 44px;min-height:44px;margin-top:4px;font-size:13px}
+.walk-map-pick span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.walk-map-pick button{flex-shrink:0;padding:0 18px}
+@media(max-width:759px){
+ .walk-menu.is-map .walk-menu-panel{padding:8px 10px max(8px,env(safe-area-inset-bottom))}
+ .walk-menu.is-map .walk-menu-tabs{position:static;flex:0 0 44px;margin-bottom:6px;gap:0}
+ .walk-menu.is-map .walk-menu-tabs button{padding:6px 12px}
+ .walk-menu.is-map .walk-map-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:44px 44px;gap:4px;flex:0 0 92px}
+ .walk-menu.is-map .walk-map-legend{grid-column:1/-1;width:100%}
+ .walk-map-place{font-size:12px;white-space:normal;line-height:18px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+}

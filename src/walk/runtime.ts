@@ -47,11 +47,12 @@ import { AdaptiveQuality, TIERS, initialTier, type Tier } from '../render/qualit
 import { addOutlines, OUTLINE_UNIFORMS } from '../render/outline';
 import { mergeStatic } from '../render/batch';
 import { CampusSound } from '../audio/sound';
-import { CampusMinimap, fitCampusFrame, pickMarker, type MapMarker, type MapMarkerKind } from './minimap';
+import { CampusMinimap, fitCampusFrame, pickMarker, type MapMarker, type MapMarkerKind, type MapLabel } from './minimap';
+import { actualPlaceText, coalesceMapDraw, bindMapGestures, bindMinimapOpen, busStopMarkers, clampFrame, pointAt, polygonCenter, zoomFrame, type MapPoint } from './campus-map-view';
 import { Terrain } from '../world/terrain';
 import { GrowableSurfaceField, campusVegetationVolumes } from '../world/growable-surface';
 import { gateBarrierObstacles } from '../world/gate-barriers';
-import { loadPlacements, landmarkCarves, landmarkTransforms, loadLandmarks, REPLACES } from '../world/landmarks';
+import { loadPlacements, landmarkCarves, landmarkLevels, landmarkTransforms, loadLandmarks, REPLACES } from '../world/landmarks';
 import { OutdoorRoutes } from './route';
 import { fullTunnelProfile, tunnelBores } from '../world/tunnel-surface';
 import { Campus, clearCampus, type Body } from '../story/collection';
@@ -315,6 +316,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     uiPlacements = placements; uiStructure = s;
     if (placements) {
       terrain.carves = landmarkCarves(placements, (x,z)=>terrain.heightAt(x,z));
+      terrain.levels.push(...landmarkLevels(placements));
       // OSM blocks that a hand-modelled landmark replaces are never built (display or collision).
       const gone = new Set(Object.keys(placements).map(id => REPLACES[id]).filter(Boolean));
       replacedOsm = gone;
@@ -649,10 +651,12 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   const menuOpen = () => !menu.hidden;
   function setMenu(open: boolean, tab?: string) {
     menu.hidden = !open;
-    if (open) { notebook?.close(); input.release(); clearAuto(); autoFollow = false; if (tab) showTab(tab); menu.querySelector<HTMLElement>('[data-tab][aria-selected=true]')?.focus(); }
+    if (open) { notebook?.close(); input.release(); /* the map is a glance: guidance stays and resumes on close (motion is paused while the menu is open) */ if (tab !== 'map') { clearAuto(); autoFollow = false; } if (tab) showTab(tab); menu.querySelector<HTMLElement>('[data-tab][aria-selected=true]')?.focus(); }
     get('[data-action=menu]').setAttribute('aria-pressed', String(open));
   }
   function showTab(tab: string) {
+    menu.classList.toggle('is-map', tab === 'map');
+    if (tab === 'map' && document.pointerLockElement) document.exitPointerLock();
     menu.querySelectorAll<HTMLElement>('[data-tab]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
     menu.querySelectorAll<HTMLElement>('[data-pane]').forEach(p => { p.hidden = p.dataset.pane !== tab; });
     if (tab === 'album') renderAlbum();
@@ -747,6 +751,10 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   window.addEventListener('keydown',captureRhythmKey,{capture:true});
   const input = new WalkInput(renderer.domElement, get('.walk-joystick'), get('.walk-stick'), {
     modal(k, mode) {
+      if (menuOpen() && (k === 'k' || (k === 'escape' && menu.classList.contains('is-map')))) {
+        setMenu(k === 'k' && !menu.classList.contains('is-map'), 'map'); return;
+      }
+      if (k === 'k' && mode === 'carried') { setMenu(true, 'map'); return; }
       if(v12?.locked&&k==='escape'){if((v12.fitness.equipment||v12.onBus)&&v12.key(k))return;setMenu(!menuOpen(),'play');return;}
       if(v12?.key(k))return;
       if(passenger.carried){liftKey(k);return;}
@@ -774,6 +782,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       if (k === 'escape' && !autoPath.length && get('.walk-results').hidden) { setMenu(true, 'play'); return; }
       if (k === 'escape') { get('.walk-results').hidden = true; get<HTMLInputElement>('.walk-search input').blur(); input.release(); clearAuto(); autoFollow = false; say('已暫停帶路'); return; }
       if (k === '/') { setMenu(true, 'play'); get<HTMLInputElement>('.walk-search input').focus(); return; }
+      if (k === 'k') { setMenu(true, 'map'); return; }
       if (k === 'm') { chooseMode(walking ? !overview : true); return; }
       if (k === 'v') { cycleCameraMode(); return; }
       if (k === 'l') { toggleLock(); return; }
@@ -887,16 +896,61 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
 
   // ---- HUD refresh (7 Hz) ----------------------------------------------------------------
   const minimap = get<HTMLCanvasElement>('.walk-minimap'), ctx = minimap.getContext('2d')!;
-  const minimapSheet = new CampusMinimap(); void minimapSheet.load(asset).catch(e => console.warn('minimap', e));
+  const minimapSheet = new CampusMinimap();
   const mapCanvas = get<HTMLCanvasElement>('.walk-map-canvas'), mapPick = get('.walk-map-pick'), mapGo = get('[data-map-go]');
   const mapHidden = new Set<MapMarkerKind>();
   let collectionData: CollectionData | undefined;
   let mapMarkers: MapMarker[] = [], mapSelected: MapMarker | undefined, mapFrame = fitCampusFrame(1, 1);
+  let mapNotice = '', mapLoadFailed = false;
+  let currentPlaceText = '中山・理工校園';
+  let mapInitialized = false, mapTimer: ReturnType<typeof setTimeout> | undefined;
+  const mapVisible = () => alive && menuOpen() && !get('[data-pane=map]').hidden;
+  const mapPlaces: MapLabel[] = [];
+  const landmarkIds: Record<string, string> = { ...REPLACES, 'liberal-arts': 'LA', gate: 'gate', tunnel: 'tunnel-west', seawall: 'sunset', 'sci-eng-arcade': 'arcade' };
+  const landmarkNames: Record<string, string> = { LA: '文學院', gate: '校門', 'tunnel-west': '西子灣隧道', sunset: '海堤', arcade: '理工長廊' };
+  const placeMarkers: MapMarker[] = [];
+  for (const [key, placement] of Object.entries(uiPlacements ?? {})) {
+    if (!placement.centroid) continue;
+    const id = landmarkIds[key]; if (!id) continue;
+    const [x, z] = placement.centroid;
+    const label = campusInfo?.buildings[id]?.name ?? landmarkNames[id] ?? id;
+    mapPlaces.push({ id: `building:${id}`, x, z, label, priority: 8 });
+    placeMarkers.push({ id: `place:${id}`, kind: 'place', buildingId: id, x, y: terrainRef?.heightAt(x, z) ?? 0, z, label });
+  }
+  for (const facility of v12Data.sports?.facilities ?? []) {
+    if (facility.id.includes('candidate')) continue;
+    const [x, z] = polygonCenter(facility.polygon);
+    mapPlaces.push({ id: facility.id, x, z, label: facility.name ?? facility.id, priority: 3, minScale: .45 });
+  }
+  const sea = v12Data.sea;
+  for (const water of sea?.waterBodies ?? []) {
+    const [x, z] = polygonCenter(water.polygon);
+    mapPlaces.push({ id: water.id, x, z, label: 'name' in water && typeof water.name === 'string' ? water.name : '游泳區', priority: 7 });
+  }
+  if (sea?.center) {
+    const [x, , z] = sea.center.position;
+    mapPlaces.push({ id: 'sea-center', x, z, label: sea.center.name ?? '海域中心', priority: 8 });
+  }
+  const restroomMarkers: MapMarker[] = [];
+  for (const floor of [...world.floors].sort((a, b) => a.y - b.y)) {
+    if (restroomMarkers.some(m => m.buildingId === floor.buildingId)) continue;
+    const room = floor.data.rooms.find(r => r.kind === 'restroom'), frame = world.frames.get(floor.buildingId);
+    if (!room || !frame) continue;
+    const [x, z] = polygonCenter(room.polygon), p = new T.Vector3(x, floor.y, z).applyMatrix4(frame);
+    restroomMarkers.push({ id: `restroom:${floor.buildingId}`, kind: 'restroom', buildingId: floor.buildingId, x: p.x, y: p.y, z: p.z, label: `${campusData.find(b => b.id === floor.buildingId)?.name ?? floor.buildingId}・廁所` });
+  }
+  const busMarkers = busStopMarkers(v12Data.bus?.stops ?? []);
+  const mapExtentPoints: MapPoint[] = [
+    ...mapPlaces.map(p => [p.x, p.z] as const), ...busMarkers.map(p => [p.x, p.z] as const),
+    ...(v12Data.sports?.facilities.flatMap(f => f.polygon) ?? []),
+    ...(sea?.waterBodies.flatMap(w => w.polygon) ?? []), ...(sea?.routes.flatMap(r => r.corridor) ?? []),
+  ];
   const collectMarkers = () => {
-    const out: MapMarker[] = [{ id: 'bike', kind: 'bike', x: bike.stand.x, y: bike.stand.y, z: bike.stand.z, label: '租車點' }];
-    const world = questWorld();
+    const out: MapMarker[] = [{ id: 'bike', kind: 'bike', x: bike.stand.x, y: bike.stand.y, z: bike.stand.z, label: '租車點' }, ...busMarkers, ...restroomMarkers,
+      ...placeMarkers.filter(m => !minimapSheet.buildings.some(b => b.id === m.buildingId))];
+    const state = questWorld();
     for (const v of quests?.list() ?? []) {
-      if (v.state?.status === 'completed' || (!v.state && !quests!.unlocked(v.definition, world))) continue;
+      if (v.state?.status === 'completed' || (!v.state && !quests!.unlocked(v.definition, state))) continue;
       const point = questPoint(trackedTarget(v));
       if (point) out.push({ id: `quest:${v.definition.id}`, kind: 'quest', x: point.x, y: point.y, z: point.z, label: v.definition.title });
     }
@@ -912,34 +966,89 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     out.push(...places.values());
     return out;
   };
-  renderMap = () => {
+  renderMap = coalesceMapDraw(() => {
+    clearTimeout(mapTimer); mapTimer = undefined;
+    if (!mapVisible()) return;
     const box = mapCanvas.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
     if (!box.width || !box.height) return;
-    mapCanvas.width = Math.round(box.width * dpr); mapCanvas.height = Math.round(box.height * dpr);
+    const width = Math.round(box.width * dpr), height = Math.round(box.height * dpr);
+    if (mapCanvas.width !== width || mapCanvas.height !== height) { mapCanvas.width = width; mapCanvas.height = height; }
     const ctx = mapCanvas.getContext('2d');
     if (!ctx) return;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    mapFrame = fitCampusFrame(box.width, box.height);
+    if (!mapInitialized && minimapSheet.ready) {
+      mapFrame = clampFrame(fitCampusFrame(box.width, box.height, minimapSheet.defaultView(mapExtentPoints)), minimapSheet.sheetBounds);
+      mapInitialized = true;
+    } else if (box.width !== mapFrame.width || box.height !== mapFrame.height) {
+      const center = pointAt(mapFrame, mapFrame.width / 2, mapFrame.height / 2);
+      mapFrame = clampFrame({ ...mapFrame, width: box.width, height: box.height, x0: center[0] - box.width / mapFrame.scale / 2, z0: center[1] - box.height / mapFrame.scale / 2 }, minimapSheet.sheetBounds);
+    }
     mapMarkers = collectMarkers().filter(m => !mapHidden.has(m.kind));
-    if (mapSelected && !mapMarkers.some(m => m.id === mapSelected!.id)) mapSelected = undefined;
-    minimapSheet.drawOverview(ctx, mapFrame, mapMarkers, mapSelected?.id, physics.position, rig.yaw, guideOverride?.point ?? director?.goal());
-    mapPick.querySelector('span')!.textContent = mapSelected?.label ?? '點地圖上的標記查看地點。';
+    if (mapSelected && mapSelected.kind !== 'building' && !mapMarkers.some(m => m.id === mapSelected!.id)) { mapSelected = undefined; mapNotice = ''; }
+    minimapSheet.drawOverview(ctx, mapFrame, mapMarkers, mapSelected?.id, physics.position, rig.yaw, guideOverride?.point ?? director?.goal(), mapPlaces.map(p => ({ ...p, label: minimapSheet.buildings.find(b => `building:${b.id}` === p.id)?.name ?? p.label })));
+    mapPick.querySelector('span')!.textContent = mapNotice || mapSelected?.label || (mapLoadFailed ? '地圖暫時無法載入，請重新進入校園。' : minimapSheet.ready ? '點選標記或建築，再按「帶我去」。' : '地圖載入中…');
+    get('[data-map-place]').textContent = `你在：${currentPlaceText}`;
+    get('[data-map-place]').title = `你在：${currentPlaceText}`;
     mapGo.hidden = !mapSelected;
-  };
-  mapCanvas.addEventListener('click', e => {
-    const box = mapCanvas.getBoundingClientRect();
-    mapSelected = pickMarker(mapMarkers, mapFrame, e.clientX - box.left, e.clientY - box.top);
-    renderMap();
+    // No map work on the animation loop. This timer stops on close/disposal; a visible map updates at 3 Hz.
+    mapTimer = setTimeout(renderMap, 350);
+  });
+  void minimapSheet.load(asset).then(() => renderMap()).catch(e => { console.warn('minimap', e); mapLoadFailed = true; renderMap(); });
+  bindMinimapOpen(minimap, () => {
+    if (photo.active || director?.blocking || notebook?.open || guide.open || quiz?.open || gestures.open) return;
+    setMenu(true, 'map');
+  });
+  bindMapGestures(mapCanvas, {
+    frame: () => mapFrame, bounds: () => minimapSheet.sheetBounds,
+    change: frame => { mapFrame = frame; renderMap(); },
+    pick: (x, y) => {
+      mapNotice = '';
+      mapSelected = pickMarker(mapMarkers, mapFrame, x, y, 16);
+      if (!mapSelected) {
+        const b = minimapSheet.pickBuilding(mapFrame, x, y);
+        if (b) { const [x, z] = polygonCenter(b.polygon); mapSelected = { id: `building:${b.id}`, kind: 'building', buildingId: b.id, label: b.name, x, y: 0, z }; }
+      }
+      renderMap();
+    },
+  });
+  host.querySelectorAll<HTMLElement>('[data-map-zoom]').forEach(button => button.addEventListener('click', () => {
+    mapFrame = zoomFrame(mapFrame, Number(button.dataset.mapZoom), mapFrame.width / 2, mapFrame.height / 2, minimapSheet.sheetBounds); renderMap();
+  }));
+  get('[data-map-center]').addEventListener('click', () => {
+    const scale = Math.max(1, mapFrame.scale);
+    mapFrame = clampFrame({ ...mapFrame, scale, x0: physics.position.x - mapFrame.width / scale / 2, z0: physics.position.z - mapFrame.height / scale / 2 }, minimapSheet.sheetBounds); renderMap();
   });
   host.querySelectorAll<HTMLElement>('[data-map-kind]').forEach(button => button.addEventListener('click', () => {
     const kind = button.dataset.mapKind as MapMarkerKind, show = mapHidden.has(kind);
     if (show) mapHidden.delete(kind); else mapHidden.add(kind);
-    button.setAttribute('aria-pressed', String(show));
-    renderMap();
+    button.setAttribute('aria-pressed', String(show)); renderMap();
   }));
   mapGo.addEventListener('click', () => {
     const picked = mapSelected;
     if (!picked) return;
+    if (picked.kind === 'restroom') {
+      // Reuse the route-aware restroom search, restricted to the building the player picked.
+      const destination = searchDestinations(world.destinations.filter(d => d.buildingId === picked.buildingId), '廁所', d => {
+        if (!routesValidated || !navigation) return Infinity;
+        const path = planRoute(new T.Vector3(...d.position));
+        return path.length ? path.reduce((sum, p, i) => sum + p.distanceTo(i ? path[i - 1] : physics.position), 0) : Infinity;
+      })[0];
+      if (!destination) { mapNotice = '目前找不到通往這棟廁所的路線。'; renderMap(); return; }
+      setMenu(false); goTo(destination); return;
+    }
+    if (picked.kind === 'building' || picked.kind === 'place') {
+      const id = picked.buildingId!;
+      const anchorId = ({ AD: 'admin', IL: 'library', GATE: 'gate', TUNNEL: 'tunnel-west' } as Record<string, string>)[id] ?? id;
+      const anchor = routes?.anchor(anchorId);
+      if (anchor) { setMenu(false); walkToPoint(anchor, picked.label); return; }
+      const entrances = world.destinations.filter(d => d.buildingId === id && d.category === 'entrance' && d.level === 1);
+      const reachable = entrances.map(d => {
+        const path = routesValidated ? planRoute(new T.Vector3(...d.position)) : [];
+        return { d, length: path.length ? path.reduce((sum, p, i) => sum + p.distanceTo(i ? path[i - 1] : physics.position), 0) : Infinity };
+      }).filter(v => Number.isFinite(v.length)).sort((a, b) => a.length - b.length);
+      if (reachable[0]) { setMenu(false); walkToPoint(new T.Vector3(...reachable[0].d.position), picked.label); return; }
+      mapNotice = `${picked.label}：目前沒有可用的步行入口。`; renderMap(); return;
+    }
     setMenu(false);
     if (picked.kind === 'quest') { quests?.track(picked.id.slice(6), questWorld()); refreshNotebook(); followQuest(); }
     else walkToPoint(new T.Vector3(picked.x, picked.y, picked.z), picked.label);
@@ -961,7 +1070,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     const selected = world.floors.find(f => f.data.id === floorSelect.value), floorRecord = overview && selected ? selected : currentFloor;
     const buildingName = campusData.find(b => b.id === nearestBuilding)!.name;
     placeIndoors = best < .5;
-    setText(get('#walk-place'), autoDestination ? `前往 ${autoDestination.label}` : best < 8 ? `${buildingName}・${currentFloor.data.label}` : director?.zoneLabel ?? (best < 60 ? '中山・理工校園' : '中山大學・西子灣'));
+    currentPlaceText = actualPlaceText(buildingName, currentFloor.data.label, best, director?.zoneLabel);
+    setText(get('#walk-place'), autoDestination ? `前往 ${autoDestination.label}` : currentPlaceText);
     lod.update(foot, { overview, buildingId: inspectedBuilding, floorId: floorSelect.value });
     const runBtn = get('[data-action=run]'); runBtn.classList.toggle('is-running', input.running); runBtn.setAttribute('aria-pressed', String(input.running));
     for (const door of world.doors) {

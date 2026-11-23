@@ -710,7 +710,8 @@ def lm_liberal_arts():
     lm = LM('liberal-arts', '文學院', 3000)
     # v12: re-placed from the local NLSC 2024 orthophoto trace (artifacts/v12/reference/sports-trace.json, hill.liberal-arts).
     place('liberal-arts', None, (-564.5, -889.5), -0.7278, 'v12：依 NLSC 2024 正射影像描圖重新對位（本機參考，artifacts/v12/reference/sports-trace.json）。中庭式院館群中心 (-564.5,-889.5)、長軸西北—東南 41.7°、外包約 87×42 m，信心中；量體仍為通用院館，拱廊面朝西南（海側）。',
-          elevation=None, uncertainty_m=8, basis='orthophoto-trace')
+          # Seat at the downhill stair-front soil, not the higher centroid (which creates an unclimbable footing).
+          elevation=49.9, uncertainty_m=8, basis='orthophoto-trace')
     brick = '#b85a45'; B = lm.tile('brick', 'brick', span=(2, 2), color=brick); R = lm.solid(P['roof']); T = lm.solid(P['trim'])
     win = wintiles(lm, 'win', wall=brick, win=(.18, .26, .82, .76), mull=1)
     arch = lm.tile('arch', 'arch', span=(2, 3), wall=brick, box=(.12, .06, .88, 1), shape='semi', lit='warm')
@@ -734,6 +735,16 @@ def lm_liberal_arts():
     lm.prism([(-n * bw / 2, y + 1), (n * bw / 2, y + 1), (n * bw / 2, y + 4.4), (-n * bw / 2, y + 4.4)], .9, 9.1, B, None, sides={1, 3})
     lm.quad((-n * bw / 2, y + .02, 9.1), (n * bw / 2, y + .02, 9.1), (n * bw / 2, y + .02, 9.7), (-n * bw / 2, y + .02, 9.7), T)
     lm.stairs(0, -24, 0, 20, 2.8, .9, 4, lm.solid('#c98d7a'))
+    # Join the top tread (local three Z=21.2) to the terrace edge (Z=18), at the same .9 m top.
+    lm.box(0, -19.6, 0, 20, 3.2, .9, lm.solid('#c98d7a'), lm.solid(P['plaza']), col=True, walk=True)
+    # Local three.js X/Z: terrace + treads, with a 2 m apron. Level the uphill soil to the seat as well.
+    walk = [b for b in lm.boxes if b.get('walkable')]
+    x0 = min(b['center'][0] - b['size'][0] / 2 for b in walk) - 2
+    x1 = max(b['center'][0] + b['size'][0] / 2 for b in walk) + 2
+    z0 = min(b['center'][2] - b['size'][2] / 2 for b in walk) - 2
+    z1 = max(b['center'][2] + b['size'][2] / 2 for b in walk) + 2
+    PLACEMENTS['liberal-arts']['levelPad'] = [[x0, z0], [x1, z0], [x1, z1], [x0, z1]]
+    PLACEMENTS['liberal-arts']['levelPadNote'] = '拱廊平台與四階樓梯的 local X/Z 外包加 2 m；以樓梯前土壤 49.9 m 整平，避免高基座與上坡埋覆'
     # towers: octagonal stair tower (west) with pyramid cap, wedge-topped tower at the junction
     lm.cyl(-34, 4, 0, 4.0, 23, 8, B, None); lm.cyl(-34, 4, 23, 4.6, 4.2, 8, roof, None, r2=.2)
     lm.col(-34, 4, 0, 7, 7, 23)

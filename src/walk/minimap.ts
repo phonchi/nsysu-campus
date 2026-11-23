@@ -1,15 +1,26 @@
 import type { Vector3 } from 'three';
+import { contentBounds, layoutMapLabels, mapMarkerRadius, graphPathSegments, pathLayerAlpha, pointAt, pointInPolygon, polygonCenter, type MapBounds, type MapPoint, type OutdoorMapGraph } from './campus-map-view';
 
 type P = [number, number];
-interface MapData { base?: { url: string; bounds: [number, number, number, number] }; buildings: { kind: string; walkable: boolean; polygon: P[] }[]; background: P[][]; roads: { kind: string; width: number; points: P[] }[] }
+export interface MapLabel { id: string; label: string; x: number; z: number; priority: number; minScale?: number }
+export interface MapBuilding { id: string; name: string; kind: string; walkable: boolean; polygon: P[] }
+interface MapData { base?: { url: string; bounds: [number, number, number, number] }; buildings: MapBuilding[]; background: P[][]; roads: { kind: string; width: number; points: P[] }[] }
 const KIND: Record<string, string> = { teaching: '#c75f4a', admin: '#e9b949', life: '#4d9a44', scenic: '#2c7f91' };
 
-export type MapMarkerKind = 'quest' | 'bike' | 'stamp';
-export interface MapMarker { id: string; kind: MapMarkerKind; x: number; y: number; z: number; label: string }
+/** The label sources used by the overview, shared with actual-data uniqueness checks. */
+export function collectMapLabels(buildings: readonly MapBuilding[], places: readonly MapLabel[], markers: readonly MapMarker[], graphLabels: readonly MapLabel[], selected?: string): MapLabel[] {
+  return [...graphLabels, ...places, ...buildings.filter(b => !places.some(p => p.id === `building:${b.id}`)).map(b => {
+    const [x, z] = polygonCenter(b.polygon);
+    return { id: `building:${b.id}`, label: b.name, x, z, priority: b.walkable ? 4 : 2, minScale: b.walkable ? .35 : .65 };
+  }), ...markers.map(m => ({ ...m, priority: m.id === selected ? 20 : 1, minScale: m.id === selected ? 0 : .8 }))];
+}
+
+export type MapMarkerKind = 'quest' | 'bike' | 'stamp' | 'bus' | 'restroom' | 'place' | 'building';
+export interface MapMarker { id: string; kind: MapMarkerKind; x: number; y: number; z: number; label: string; buildingId?: string }
 export interface MapFrame { x0: number; z0: number; scale: number; width: number; height: number }
-/** The part of the DEM sheet people can actually walk: gate, seawall, tunnel and the campus core. */
-export const CAMPUS_VIEW = { x0: -420, z0: -180, x1: 180, z1: 700 };
-export const MARKER_STYLE: Record<MapMarkerKind, { color: string; glyph: string }> = { quest: { color: '#e9b949', glyph: '任' }, bike: { color: '#2c7f91', glyph: '車' }, stamp: { color: '#c75f4a', glyph: '章' } };
+/** Full base-sheet fallback; the overview derives its initial extent from loaded content. */
+export const CAMPUS_VIEW = { x0: -900, z0: -1100, x1: 900, z1: 700 };
+export const MARKER_STYLE: Record<MapMarkerKind, { color: string; glyph: string }> = { quest: { color: '#e9b949', glyph: '任' }, bike: { color: '#2c7f91', glyph: '車' }, stamp: { color: '#c75f4a', glyph: '章' }, bus: { color: '#4d9a44', glyph: '公' }, restroom: { color: '#2a2c4a', glyph: '廁' }, place: { color: '#2c7f91', glyph: '地' }, building: { color: '#c75f4a', glyph: '樓' } };
 
 /** Fits the campus into a width × height canvas, centred, north up. */
 export function fitCampusFrame(width: number, height: number, view = CAMPUS_VIEW): MapFrame {
@@ -33,10 +44,14 @@ export function pickMarker(markers: readonly MapMarker[], frame: MapFrame, px: n
  * then cropped around the player (north up) with the quest goal marked. */
 export class CampusMinimap {
   private sheet?: HTMLCanvasElement;
+  private paths?: Path2D;
+  private graphLabels: MapLabel[] = [];
+  buildings: readonly MapBuilding[] = [];
   private bounds: [number, number, number, number] = [0, 0, 1, 1];
 
   async load(asset: (p: string) => string) {
     const data = await fetch(asset('data/campus-map.json')).then(r => r.json() as Promise<MapData>);
+    this.buildings = data.buildings;
     if (!data.base) return;
     const img = new Image(); img.src = asset(data.base.url); await img.decode();
     const [x0, z0, x1, z1] = this.bounds = data.base.bounds;
@@ -53,28 +68,76 @@ export class CampusMinimap {
     for (const p of data.background) { poly(p); g.fillStyle = '#e1d5bd'; g.fill(); g.stroke(); }
     for (const b of data.buildings) { poly(b.polygon); g.fillStyle = KIND[b.kind] ?? '#c75f4a'; g.fill(); g.stroke(); }
     this.sheet = c;
+    // Build once from the navigation graph, including the hill links absent from the OSM roads.
+    // The base map remains available if this optional overlay cannot be fetched.
+    try {
+      const response = await fetch(asset('data/walkthrough/outdoor-graph.json'));
+      if (!response.ok) throw new Error(`Outdoor map paths: HTTP ${response.status}`);
+      const graph: OutdoorMapGraph = await response.json(), paths = new Path2D();
+      // The marine-sciences building has a graph anchor but no footprint in campus-map.json.
+      const marine = graph.nodes.find(node => node.id === graph.anchors?.MA?.node);
+      if (marine) this.graphLabels = [{ id: 'building:MA', label: '海洋科學學院', x: marine.p[0], z: marine.p[2], priority: 8 }];
+      for (const [a, b] of graphPathSegments(graph)) {
+        paths.moveTo(a[0], a[1]); paths.lineTo(b[0], b[1]);
+      }
+      this.paths = paths;
+    } catch (error) { console.warn('minimap paths', error); }
   }
 
+  get sheetBounds(): MapBounds {
+    const [x0, z0, x1, z1] = this.bounds;
+    return this.sheet ? { x0, z0, x1, z1 } : CAMPUS_VIEW;
+  }
+  defaultView(extra: readonly MapPoint[] = []) {
+    return contentBounds([...this.buildings.flatMap(b => b.polygon), ...this.graphLabels.map(p => [p.x, p.z] as const), ...extra], this.sheetBounds);
+  }
+  pickBuilding(frame: MapFrame, px: number, py: number) {
+    return this.buildings.find(b => pointInPolygon(pointAt(frame, px, py), b.polygon));
+  }
   get ready() { return !!this.sheet; }
 
   /** The menu's full map: drawn on demand from the existing sheet, so it adds one small canvas and no 3D work. */
-  drawOverview(ctx: CanvasRenderingContext2D, frame: MapFrame, markers: readonly MapMarker[], selected: string | undefined, foot: Vector3, yaw: number, goal?: Vector3) {
+  drawOverview(ctx: CanvasRenderingContext2D, frame: MapFrame, markers: readonly MapMarker[], selected: string | undefined, foot: Vector3, yaw: number, goal?: Vector3, places: readonly MapLabel[] = []) {
     if (!this.sheet) return false;
     const [bx, bz] = this.bounds;
     ctx.fillStyle = '#e9e1cc'; ctx.fillRect(0, 0, frame.width, frame.height);
     ctx.drawImage(this.sheet, (bx - frame.x0) * frame.scale, (bz - frame.z0) * frame.scale, this.sheet.width * frame.scale, this.sheet.height * frame.scale);
+    const pathAlpha = pathLayerAlpha(frame.scale);
+    if (this.paths && pathAlpha > 0) {
+      ctx.save();
+      ctx.translate(-frame.x0 * frame.scale, -frame.z0 * frame.scale); ctx.scale(frame.scale, frame.scale);
+      ctx.globalAlpha = pathAlpha; ctx.strokeStyle = '#2c7f91'; ctx.lineWidth = 1.25 / frame.scale;
+      ctx.lineJoin = ctx.lineCap = 'round'; ctx.stroke(this.paths);
+      ctx.restore();
+    }
+    const selectedBuilding = this.buildings.find(b => `building:${b.id}` === selected);
+    if (selectedBuilding) {
+      ctx.beginPath(); selectedBuilding.polygon.forEach(([x, z], i) => i ? ctx.lineTo(frameX(frame, x), frameY(frame, z)) : ctx.moveTo(frameX(frame, x), frameY(frame, z))); ctx.closePath();
+      ctx.fillStyle = '#e9b94966'; ctx.fill(); ctx.strokeStyle = '#173e49'; ctx.lineWidth = 3; ctx.stroke();
+    }
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '700 12px "Noto Sans TC",sans-serif';
+    const blocked = [...markers.map(m => { const r = mapMarkerRadius(frame.scale, m.id === selected) + 2; return { x: frameX(frame, m.x) - r, y: frameY(frame, m.z) - r, width: r * 2, height: r * 2, priority: 0 }; }), { x: frameX(frame, foot.x) - 19, y: frameY(frame, foot.z) - 19, width: 38, height: 38, priority: 0 }];
+    const labels = collectMapLabels(this.buildings, places, markers, this.graphLabels, selected);
     for (const m of markers) {
-      const x = frameX(frame, m.x), y = frameY(frame, m.z), r = m.id === selected ? 13 : 10;
+      const x = frameX(frame, m.x), y = frameY(frame, m.z), r = mapMarkerRadius(frame.scale, m.id === selected);
       ctx.fillStyle = MARKER_STYLE[m.kind].color; ctx.strokeStyle = '#2a2c4a'; ctx.lineWidth = m.id === selected ? 3 : 1.5;
       ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-      ctx.fillStyle = m.kind === 'quest' ? '#2a2c4a' : '#fff'; ctx.fillText(MARKER_STYLE[m.kind].glyph, x, y + .5);
+      if (frame.scale >= .55) { ctx.fillStyle = m.kind === 'quest' ? '#2a2c4a' : '#fff'; ctx.fillText(MARKER_STYLE[m.kind].glyph, x, y + .5); }
+    }
+    for (const l of layoutMapLabels(labels, frame, text => ctx.measureText(text).width, blocked)) {
+      const ex = Math.max(l.x, Math.min(l.x + l.width, l.anchorX)), ey = Math.max(l.y, Math.min(l.y + l.height, l.anchorY));
+      ctx.strokeStyle = '#2a2c4a80'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(l.anchorX, l.anchorY); ctx.lineTo(ex, ey); ctx.stroke();
+      ctx.fillStyle = '#fbf6eaf0'; ctx.fillRect(l.x, l.y, l.width, l.height);
+      ctx.fillStyle = '#1d2a3a'; ctx.fillText(l.label, l.x + l.width / 2, l.y + l.height / 2);
     }
     if (goal) {
       ctx.strokeStyle = '#e9b949'; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.arc(frameX(frame, goal.x), frameY(frame, goal.z), 16, 0, Math.PI * 2); ctx.stroke();
     }
-    ctx.save(); ctx.translate(frameX(frame, foot.x), frameY(frame, foot.z)); ctx.rotate(-yaw);
+    ctx.save(); ctx.translate(frameX(frame, foot.x), frameY(frame, foot.z));
+    ctx.fillStyle = '#ffffffbb'; ctx.beginPath(); ctx.arc(0, 0, 18, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#173e4980'; ctx.lineWidth = 3; ctx.stroke(); ctx.rotate(-yaw);
     ctx.fillStyle = '#173e49'; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(0, -11); ctx.lineTo(-7, 7); ctx.lineTo(7, 7); ctx.closePath(); ctx.fill(); ctx.stroke();
     ctx.restore();
