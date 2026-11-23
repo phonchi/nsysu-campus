@@ -43,7 +43,7 @@ it('M2 blocked return points enter an announced rescue and retry clearance witho
 });
 it('M3 UI and exit use the same shore-edge reach and reject wet or remote landing data',()=>{
  const w=dryWater(),a=adapter({sea:{waterBodies:[w],routes:[]},issues:[]});a.r.swim.enter(w,w.entryPoints[0],allow);a.r.swim.position.set(2.7,0,1);a.physics.position.copy(a.r.swim.foot);expect(a.r.actions(a.physics.position).some(x=>x.id==='v12:exit-water')).toBe(false);
- a.r.swim.position.set(2.3,0,1);a.physics.position.copy(a.r.swim.foot);const exit=a.r.actions(a.physics.position).find(x=>x.id==='v12:exit-water');expect(exit).toBeDefined();exit!.run();expect(a.r.swim.phase).toBe('dry');
+ a.r.swim.position.set(2.3,0,1);a.physics.position.copy(a.r.swim.foot);expect(a.r.actions(a.physics.position).filter(x=>x.id==='v12:exit-water'),'exactly one shore action').toHaveLength(1);const exit=a.r.actions(a.physics.position).find(x=>x.id==='v12:exit-water');expect(exit).toBeDefined();exit!.run();expect(a.r.swim.phase).toBe('dry');
  for(const p of [[1,0,1],[-.1,0,1],[-30,0,1]] as [number,number,number][])expect(()=>parseV12('sea',{waterBodies:[{...w,exitPoints:[p]}],routes:[]})).toThrow();a.r.dispose();a.avatar.dispose();
 });
 it('M4 failed alighting holds the stop with a notice and allows another-stop recovery',()=>{

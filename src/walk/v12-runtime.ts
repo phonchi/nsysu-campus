@@ -92,7 +92,10 @@ export class V12Runtime {
   const out:V12Action[]=[],at=foot.toArray() as P3,add=(id:string,label:string,p:P3,run:()=>void,reach=3)=>{if(distance(at,p)<reach)out.push({id:`v12:${id}`,label,point:new T.Vector3(...p),run});};
   if(this.busPassenger.bus||this.swim.phase==='rescue')return out;
   if(this.fitness.equipment){out.push({id:'v12:stop',label:'停止運動',point:foot.clone(),run:()=>this.stopEquipment()});return out;}
-  if(this.swim.water){const w=this.swim.water,exit=this.swim.exitPoint();for(const p of [...w.exitPoints,...(exit?[exit]:[])])if(validLanding(p,w.polygon)){const edge=nearestOnPolygon([p[0],p[2]],w.polygon);add('exit-water','上岸 E',[edge[0],foot.y,edge[1]],()=>{const q=this.swim.exit();if(q)this.move(q);else this.d.say('上岸位置暫時受阻，請稍候或使用選單回到起點。');},SHORE_REACH);}}
+  if(this.swim.water){const w=this.swim.water,exit=this.swim.exitPoint();
+   // One shore action only: every candidate runs the same swim.exit(), so offer the nearest edge point once.
+   const edges=[...w.exitPoints,...(exit?[exit]:[])].filter(p=>validLanding(p,w.polygon)).map(p=>nearestOnPolygon([p[0],p[2]],w.polygon)).sort((a,b)=>Math.hypot(a[0]-at[0],a[1]-at[2])-Math.hypot(b[0]-at[0],b[1]-at[2]));
+   const edge=edges[0];if(edge)add('exit-water','上岸 E',[edge[0],foot.y,edge[1]],()=>{const q=this.swim.exit();if(q)this.move(q);else this.d.say('上岸位置暫時受阻，請稍候或使用選單回到起點。');},SHORE_REACH);}
   else if(this.craft.route){const p=this.craft.route.returnPoint;add('return-craft','歸還船具',[p[0],foot.y,p[2]],()=>{if(!this.safe(p))return;const q=this.craft.returnToShore();if(q){this.craftGroup.clear();this.paddleGroup.clear();this.move(q);}},15);return out;}
   else if(this.fitness.portal){const s=this.d.data.fitness?.scenes.find(s=>s.id===this.fitness.portal!.interiorSceneId);if(s)add('exit-fitness','離開體適能中心',s.exitPoint,()=>{const p=this.fitness.exit();if(p)this.move(p);else this.d.say('出口暫時受阻，可從選單回到起點。');});for(const e of this.equipment())add(e.id,e.kind==='treadmill'?'使用跑步機':'使用健身車',e.approach,()=>{if(this.fitness.use(e,at))this.changed();});return out;}
   else {
