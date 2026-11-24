@@ -276,3 +276,19 @@
  .walk-menu.is-map .walk-map-legend{grid-column:1/-1;width:100%}
  .walk-map-place{font-size:12px;white-space:normal;line-height:18px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 }
+.walk-card-links a::after{content:' ↗'}
+.walk-card{overflow-wrap:anywhere;overscroll-behavior:contain}
+.walk-card:not(.walk-story) .walk-card-close{position:sticky;top:0;float:right;margin:-10px -10px 4px 8px;z-index:1}
+@media (min-width:701px){.walk-card:not(.walk-story){max-height:calc(100dvh - 256px)}}
+.walk-map-pick [data-map-info],.walk-map-pick [data-map-go]{padding-inline:12px}
+.walk-actions [data-action=door]{max-width:min(190px,45vw);white-space:normal;overflow-wrap:anywhere}
+/* P9: long info cards. The action bar sticks to the bottom edge, so 帶我去 never needs a scroll to the end;
+   while text remains below the fold the bar fades the text above it and says so. */
+.walk-card:not(.walk-story){scrollbar-width:thin;scrollbar-color:#9db1ab transparent}
+.walk-card:not(.walk-story)::-webkit-scrollbar{width:6px}.walk-card:not(.walk-story)::-webkit-scrollbar-thumb{background:#9db1ab;border-radius:3px}
+.walk-card:not(.walk-story) .walk-card-actions{position:sticky;bottom:-18px;z-index:1;margin:6px -22px 12px;padding:8px 22px 18px;background:#fffdf8;align-items:center}
+.walk-card-more{display:none}
+.walk-card.has-more .walk-card-actions{margin-bottom:0;box-shadow:0 -1px 0 #e3e6dd}
+.walk-card.has-more .walk-card-actions::before{content:'';position:absolute;left:0;right:0;bottom:100%;height:34px;background:linear-gradient(#fffdf800,#fffdf8);pointer-events:none}
+.walk-card.has-more .walk-card-more{display:block;flex-basis:100%;margin:-2px 0 2px;color:#5d7a80;font-size:12px;line-height:1.4;letter-spacing:.5px}
+.walk-card.has-more .walk-card-more::after{content:' ↓'}

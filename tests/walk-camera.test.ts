@@ -30,6 +30,32 @@ describe('camera rig',()=>{
   expect(rig.yaw).toBe(yaw0);expect(Math.max(...arms)-Math.min(...arms)).toBeLessThan(1e-6);
   p.dispose();
  });
+ it('keeps a steady on-screen walk position when short frames are interrupted by long frames', () => {
+  const cam = new PerspectiveCamera(58, 412 / 915);
+  // A clear Rapier sweep reports the full requested distance.
+  const rig = new CameraRig(cam, (from, to) => from.distanceTo(to));
+  const foot = new Vector3();
+  const forward = rig.forward;
+  const speed = 3.6;
+  const at60 = 1 - Math.exp(-14 * DT);
+  const referenceLag = (speed * DT * (1 - at60) - .01) / at60;
+  const samples: number[] = [];
+  const cadence = [16, 16, 16, 16, 33, 16, 16, 16, 50, 16, 33, 33];
+  rig.snap(foot);
+  for (let i = 0; i < 480; i++) {
+   const dt = cadence[i % cadence.length] / 1000;
+   foot.addScaledVector(forward, speed * dt);
+   rig.update(dt, {foot, running: false, moving: true});
+   if (i < 60) continue;
+   cam.updateMatrixWorld();
+   samples.push(foot.clone().add(new Vector3(0, 1, 0)).project(cam).y * 915 / 2);
+  }
+  const maxJump = Math.max(...samples.slice(1).map((value, index) => Math.abs(value - samples[index])));
+  expect(maxJump).toBeLessThan(.015);
+  // Preserve the existing follow distance on a clear, level road at 60 Hz.
+  const actualLag = foot.clone().sub(cam.position).dot(forward) - rig.arm * Math.cos(rig.pitch);
+  expect(actualLag).toBeCloseTo(referenceLag, 3);
+ });
  it('walking along a wall with columns: the arm pulls in but never pops back and forth',()=>{
   // Columns every 4.2 m right behind the walking line force repeated occlusion.
   const p=scene(r=>{r.add(box(.3,4,60,2.2,2,0));for(let z=-28;z<=28;z+=4.2)r.add(box(.5,3,.5,1.5,1.5,z));});

@@ -113,6 +113,7 @@
 @keyframes q-toast-in{from{opacity:0;transform:translateX(30px)}}
 @keyframes q-seal{from{transform:scale(2.2) rotate(-30deg);opacity:0}}
 @media (max-width:759px){.q-toast{top:64px;right:12px;left:12px;max-width:none}}
+@media (max-width:759px){.q-toast-stamp{top:12px;right:168px}}
 .q-timer{display:flex;align-items:center;gap:10px;pointer-events:auto;position:absolute;top:22px;left:50%;transform:translateX(-50%);padding:6px 8px 6px 18px;border-radius:999px;background:#c75f4a;color:#fbf6ea;border:2px solid var(--ui-line);font-weight:800;font-size:16px;letter-spacing:1px;box-shadow:var(--ui-shadow);pointer-events:none}
 .q-timer[hidden]{display:none}
 .q-timer button{padding:2px 10px;border-radius:999px;border:2px solid #fbf6ea;background:transparent;color:#fbf6ea;font:inherit;font-size:13px;cursor:pointer}

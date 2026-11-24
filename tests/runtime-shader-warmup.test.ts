@@ -77,6 +77,21 @@ it('falls back to compile and also prepares screen-output shaders for tiers with
   expect(renderer.info.programs[0].getUniforms).toHaveBeenCalledTimes(2);
   expect(renderer.setRenderTarget.mock.calls.map(([target])=>target)).toEqual([expect.objectContaining({width:1,height:1}),null,f.previous]);
 });
+it('warms the unshadowed screen programs for an adaptive downgrade and restores the active tier', async () => {
+  const f = fixture();
+  const renderer = { ...f.renderer, shadowMap: { ...f.renderer.shadowMap, enabled: true } };
+  const passes: boolean[][] = [];
+  renderer.compileAsync.mockImplementation(async () => {
+    passes.push([renderer.getRenderTarget() === null, renderer.shadowMap.enabled, f.light.castShadow]);
+  });
+  const result = await warmupWalkScene(renderer as unknown as Parameters<typeof warmupWalkScene>[0],
+    f.scene, new T.PerspectiveCamera(), true, true);
+  expect(result.renderPasses).toBe(2);
+  expect(passes).toEqual([[false, true, true], [true, false, false]]);
+  expect(renderer.shadowMap.enabled).toBe(true);
+  expect(f.light.castShadow).toBe(true);
+  expect(f.light.shadow.map).toBe(f.originalShadow);
+});
 it('restores original geometry groups and light state if the shadow first-use render fails',async()=>{
   const f=fixture(),groups=f.geometry.groups;f.mesh.material=[f.material];
   f.renderer.render.mockImplementation(()=>{expect(f.geometry.drawRange.count).toBe(Infinity);throw new Error('context lost');});

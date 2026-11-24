@@ -11,9 +11,17 @@ type Sched = { at: string | [number, number]; offset?: [number, number]; activit
 export interface NpcDef {
   id: string; name: string; role: string; model: string; look?: Record<string, string>; portrait: PortraitSpec;
   schedule: Record<'day' | 'sunset' | 'night', Sched>; talk?: string; minigame?: MinigameId; observe?: boolean;
+  district?: 'hamasen';
 }
 export interface ScheduleOverride { npc: string; preset: 'day' | 'sunset' | 'night'; if: Cond; at: string | [number, number]; offset?: [number, number]; activity?: string; seat?:string }
-export interface NpcData { version: number; npcs: NpcDef[]; trees: Record<string, Tree>; events?: CampusEventDefinition[]; scheduleOverrides?: ScheduleOverride[] }
+export interface AmbientNpcDef {
+  id: string; name: string; role: string; model: string; look?: Record<string, string>;
+  route: [number, number][];
+}
+export interface NpcData {
+  version: number; npcs: NpcDef[]; trees: Record<string, Tree>; events?: CampusEventDefinition[]; scheduleOverrides?: ScheduleOverride[];
+  ambient?: { hamasen?: AmbientNpcDef[] };
+}
 export interface CollectionData {
   version: number;
   items: { id: string; name: string; desc: string; group?: string; variants?: Record<string, { name: string; desc: string }> }[];

@@ -17,7 +17,7 @@
     "MS.json": "33e484bb1731814897c72a10f3a77df2020431a7b47928cfa087b2d9664364f1",
     "EV.json": "62cda45259e9fbffc445059db3d2a53c2081e0e70bb7810efdf8ed6074eac5d8"
   },
-  "accessPlanSHA256": "ae11eba054fab3a2157bf513d51214c6d3634cd20f4207c61fa65f457dc53592",
+  "accessPlanSHA256": "17010a9f1f40c7e114940246f94e77ae7a18aa6cd133346d2ba88a3003677d91",
   "floors": {
     "SC-B1": {
       "reachableRooms": 38,

@@ -516,8 +516,9 @@ def check_sports(sports, fitness, sea, gym_boxes, errors: list[str], warnings: l
 # ---------------------------------------------------------------------------------------------------------------------
 def check_story(npcs, zones, sea, bus, errors: list[str]):
     people = {n.get('id'): n for n in npcs.get('npcs', [])}
+    residents = [pid for pid, person in people.items() if person.get('district') == 'hamasen']
     lines: list[tuple[str, str, list | None]] = []
-    for pid in REQUIRED_NPCS:
+    for pid in [*REQUIRED_NPCS, *residents]:
         if pid not in people:
             errors.append(f'npcs：缺少 NPC {pid}')
             continue
@@ -527,6 +528,8 @@ def check_story(npcs, zones, sea, bus, errors: list[str]):
             continue
         for nid, node in tree.get('nodes', {}).items():
             lines += [(f'npcs {pid}/{nid}', l.get('text'), None) for l in node.get('lines', [])]
+            if pid in residents:
+                lines += [(f'npcs {pid}/{nid} 選項', c.get('text'), None) for c in node.get('choices', [])]
         for t, spot in (people[pid].get('schedule') or {}).items():
             if spot and isinstance(spot.get('at'), str) and spot['at'] not in zones.get('zones', {}):
                 errors.append(f'npcs：{pid} 的 {t} 站位 {spot["at"]} 不是 zone')

@@ -522,8 +522,10 @@ def main():
 
     graph = load_graph()
     stripped = strip_v12(graph)
-    osm = json.loads(SNAPSHOT.read_text())
-    graph = add_graph(graph, osm, *district(osm))
+    # A prepared POI layer already includes the street graph and its approach links.
+    if 'hamasenPois' not in graph:
+        osm = json.loads(SNAPSHOT.read_text())
+        graph = add_graph(graph, osm, *district(osm))
     base_nodes, base_edges = len(graph['nodes']), len(graph['edges'])
     base_stats = {k: graph.get('stats', {}).get(k) for k in ('nodes', 'edges', 'totalLength') if k in graph.get('stats', {})}
     print(f'graph：{base_nodes} 個節點、{base_edges} 條邊' + ('（已先移除上次的 v12 節點）' if stripped else ''))

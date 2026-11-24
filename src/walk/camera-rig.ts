@@ -9,6 +9,11 @@ export const EYE = 1.55, PIVOT = 1.45;
 const PITCH_MIN = -.75, PITCH_MAX = .5;
 const damp = (k: number, dt: number) => 1 - Math.exp(-k * dt);
 const wrap = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
+const PIVOT_HORIZONTAL_RATE = 14;
+const PIVOT_REFERENCE_DT = 1 / 60;
+const PIVOT_REFERENCE_BLEND = damp(PIVOT_HORIZONTAL_RATE, PIVOT_REFERENCE_DT);
+const PIVOT_REFERENCE_LAG = PIVOT_REFERENCE_DT * (1 - PIVOT_REFERENCE_BLEND) / PIVOT_REFERENCE_BLEND;
+const PIVOT_CLEARANCE = .01;
 
 export type CameraMode = 'follow' | 'free' | 'firstPerson';
 export const CAMERA_MODE_KEY = 'nsysu-walk-camera-mode-v11';
@@ -87,6 +92,7 @@ export class CameraRig {
   private readonly look = new Vector3();
   private readonly want = new Vector3();
   private readonly anchor = new Vector3();
+  private readonly previousFoot = new Vector3();
 
   constructor(private camera: PerspectiveCamera, private sweep: Sweep,
     private storage:CameraStorage|undefined=defaultStorage(),private now:()=>number=()=>performance.now()) {
@@ -112,23 +118,35 @@ export class CameraRig {
   toggleLock() { this.locked = !this.locked; if(!this.locked)this.protect(); return this.locked; }
 
   /** Snap the pivot after a teleport so the camera does not sweep across the campus. */
-  snap(foot: Vector3) { this.pivot.copy(foot).y += this.pivotHeight; this.arm = this.distance; this.placed = true; }
+  snap(foot: Vector3) {
+    this.pivot.copy(foot).y += this.pivotHeight;
+    this.previousFoot.copy(foot);
+    this.arm = this.distance;
+    this.placed = true;
+  }
 
   update(dt: number, f: RigFrame) {
     const cam = this.camera;
     if(this.seated&&this.poseView)f={...f,foot:f.foot.clone().add(new Vector3(this.poseView.offsetX,0,this.poseView.offsetZ))};
     if (!this.placed) this.snap(f.foot);
-    // Pivot: quick horizontally, softer vertically so stair steps and landings never jolt the view.
-    const kx = damp(14, dt), ky = damp(7, dt);
-    this.pivot.x += (f.foot.x - this.pivot.x) * kx;
-    this.pivot.z += (f.foot.z - this.pivot.z) * kx;
+    const kx = damp(PIVOT_HORIZONTAL_RATE, dt), ky = damp(7, dt);
+    // Follow the foot's motion during this frame. With steady movement the lag
+    // approaches speed × the 60 Hz reference delay at any frame cadence.
+    const motionWeight = dt > 0 ? 1 - kx - kx * PIVOT_REFERENCE_LAG / dt : 0;
+    this.pivot.x += (f.foot.x - this.pivot.x) * kx + (f.foot.x - this.previousFoot.x) * motionWeight;
+    this.pivot.z += (f.foot.z - this.pivot.z) * kx + (f.foot.z - this.previousFoot.z) * motionWeight;
     this.pivot.y += (f.foot.y + this.pivotHeight - this.pivot.y) * ky;
+    this.previousFoot.copy(f.foot);
     // A smoothed pivot can cut across a corner even while the player's capsule is safe.
     // Keep the pivot on the player's side of the wall before sweeping the camera arm.
     this.anchor.copy(f.foot).y += this.pivotHeight;
     const offset = this.want.copy(this.pivot).sub(this.anchor), span = offset.length();
     if (span > 1e-5) {
-      const free = Math.max(0, this.sweep(this.anchor, this.pivot, .16) - .01);
+      const clearance = this.sweep(this.anchor, this.pivot, .16);
+      // A clear sweep returns its full length. Scale the old inset by the
+      // follow blend there, while keeping a fixed safety margin at actual hits.
+      const inset = clearance < span ? PIVOT_CLEARANCE : PIVOT_CLEARANCE * kx / PIVOT_REFERENCE_BLEND;
+      const free = Math.max(0, clearance - inset);
       if (free < span) this.pivot.copy(this.anchor).addScaledVector(offset, free / span);
     }
     const follow=f.follow??(f.followHeading===undefined?undefined:{yaw:f.followHeading,source:'route' as const});

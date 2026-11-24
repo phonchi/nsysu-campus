@@ -29,6 +29,7 @@ const GRAVITY = 24, JUMP = 6, SUBSTEP = 1 / 120, PRESS = 1, STEP = .3;
 const MOVE_GROUPS = 0x00010005, CAMERA_GROUPS = 0x00010003;
 const STATIC_GROUPS = 0x00010001;
 const ACTOR_GROUPS = 0x0004ffff, DOOR_CAMERA_GROUPS = 0x0002ffff;
+const SUPPORT_QUERIES = 1, CAMERA_QUERIES = 2, ACTOR_QUERIES = 4, PLAYER_QUERIES = 8;
 
 export interface PhysicsStats { triangles: number; colliders: number; buildMs: number }
 
@@ -100,10 +101,13 @@ export class RapierController implements CharacterController {
   private safe: Vector3[] = [];
   private readonly identity = { x: 0, y: 0, z: 0, w: 1 };
   private readonly staticFilter = (c: RAPIER.Collider) => !this.actorHandles.has(c.handle) && !this.cameraHandles.has(c.handle);
-  private queryDirty = false;
+  private queryDirty = 0;
 
-  /** Batch actor, player and door changes until the next actual query. */
-  private flushQueries() { if (this.queryDirty) { this.world.step(); this.queryDirty = false; } }
+  /** The broad phase only needs refreshing when a query can hit a changed collider.
+   * Player motion alone leaves support, camera and the player's own sweeps valid. */
+  private flushQueries(mask: number) {
+    if (this.queryDirty & mask) { this.world.step(); this.queryDirty = 0; }
+  }
   private actorShape(radius: number, height: number) {
     return height < radius * 2 ? new RAPIER.Cylinder(height / 2, radius) : new RAPIER.Capsule(height / 2 - radius, radius);
   }
@@ -124,7 +128,7 @@ export class RapierController implements CharacterController {
 
   /** Diagnostics: contacts a horizontal move of (dx, dz) would hit, without moving. */
   probe(dx: number, dz: number) {
-    this.flushQueries();
+    this.flushQueries(SUPPORT_QUERIES | CAMERA_QUERIES | ACTOR_QUERIES);
     this.kcc.computeColliderMovement(this.body, { x: dx, y: 0, z: dz });
     const m = this.kcc.computedMovement(), out: { normal: number[]; at: number[] }[] = [];
     for (let i = 0; i < this.kcc.numComputedCollisions(); i++) { const c = this.kcc.computedCollision(i)!; out.push({ normal: [c.normal1.x, c.normal1.y, c.normal1.z], at: [c.witness1.x, c.witness1.y, c.witness1.z] }); }
@@ -132,7 +136,12 @@ export class RapierController implements CharacterController {
   }
 
   /** Add more static geometry after construction (landmarks loaded later). */
-  addStatic(root: Object3D) { const s = addStaticTriangles(this.world, root); this.world.step(); return s; }
+  addStatic(root: Object3D) {
+    const stats = addStaticTriangles(this.world, root);
+    this.queryDirty |= SUPPORT_QUERIES;
+    this.flushQueries(SUPPORT_QUERIES);
+    return stats;
+  }
 
   /** Register simplified props/trunks, once per stable id. Never ingest render cells. */
   addObstacles(specs: readonly Obstacle[]) {
@@ -140,7 +149,8 @@ export class RapierController implements CharacterController {
       if (this.staticIds.has(o.id)) continue;
       this.staticIds.add(o.id); this.obstacleHandles.add(this.world.createCollider(this.obstacleDesc(o)).handle);
     }
-    this.world.step();
+    this.queryDirty |= SUPPORT_QUERIES;
+    this.flushQueries(SUPPORT_QUERIES);
   }
 
   private liftColliders=new Map<string, RAPIER.Collider>();
@@ -149,17 +159,17 @@ export class RapierController implements CharacterController {
    * are skipped, so idle lifts cost no collider writes and force no query-world step. */
   setLiftObstacles(specs:readonly Obstacle[]) {
     const keep=new Set(specs.map(s=>s.id));
-    for(const [id,c] of this.liftColliders)if(!keep.has(id)){this.world.removeCollider(c,false);this.liftColliders.delete(id);this.liftPoses.delete(id);this.queryDirty=true;}
+    for(const [id,c] of this.liftColliders)if(!keep.has(id)){this.world.removeCollider(c,false);this.liftColliders.delete(id);this.liftPoses.delete(id);this.queryDirty|=SUPPORT_QUERIES;}
     for(const o of specs){const key=`${o.shape},${o.center.join(',')},${o.half.join(',')},${o.yaw ?? 0}`;if(this.liftPoses.get(o.id)===key)continue;
       let c=this.liftColliders.get(o.id);if(!c){c=this.world.createCollider(this.obstacleDesc(o));this.liftColliders.set(o.id,c);}
       else{c.setTranslation({x:o.center[0],y:o.center[1],z:o.center[2]});const yaw=(o.yaw??0)/2;c.setRotation({x:0,y:Math.sin(yaw),z:0,w:Math.cos(yaw)});}
-      this.liftPoses.set(o.id,key);this.queryDirty=true;}
+      this.liftPoses.set(o.id,key);this.queryDirty|=SUPPORT_QUERIES;}
   }
   /** Carrier owns position during transport; no gravity or walk integration in this mode. */
   carry(p:Vector3){
     this.position.copy(p);this.body.setTranslation({x:p.x,y:p.y+HALF+RADIUS+OFFSET,z:p.z});
     this.velocity.set(0,0,0);this.vy=0;this.onGround=true;this.intendedSpeed=0;this.airTime=0;this.jumpHeld=false;
-    this.groundNormal.set(0,1,0);this.queryDirty=true;
+    this.groundNormal.set(0,1,0);this.queryDirty|=PLAYER_QUERIES;
   }
 
   private obstacleDesc(o: Obstacle) {
@@ -172,7 +182,7 @@ export class RapierController implements CharacterController {
    * They block characters, while camera sweeps ignore them to avoid camera pops. */
   setActors(bodies: readonly ActorBody[]) {
     const keep = new Set(bodies.map(b => b.id));
-    for (const [id, c] of this.actors) if (!keep.has(id)) { this.actorHandles.delete(c.handle); this.world.removeCollider(c, false); this.actors.delete(id); this.actorPoses.delete(id); this.queryDirty = true; }
+    for (const [id, c] of this.actors) if (!keep.has(id)) { this.actorHandles.delete(c.handle); this.world.removeCollider(c, false); this.actors.delete(id); this.actorPoses.delete(id); this.queryDirty |= ACTOR_QUERIES; }
     for (const b of bodies) this.setActor(b);
   }
 
@@ -187,13 +197,13 @@ export class RapierController implements CharacterController {
       }
       c.setShape(this.actorShape(b.radius, b.height));
       c.setTranslation({ x: b.position.x, y: b.position.y + b.height / 2 + OFFSET, z: b.position.z });
-      this.actorPoses.set(b.id, key); this.queryDirty = true;
+      this.actorPoses.set(b.id, key); this.queryDirty |= ACTOR_QUERIES;
   }
 
   /** Moving door panels occlude the camera; the existing door constraint owns walking. */
   setCameraObstacles(specs: readonly Obstacle[]) {
     const keep = new Set(specs.map(o => o.id));
-    for (const [id, c] of this.cameraOnly) if (!keep.has(id)) { this.cameraHandles.delete(c.handle); this.world.removeCollider(c, false); this.cameraOnly.delete(id); this.cameraPoses.delete(id); this.queryDirty = true; }
+    for (const [id, c] of this.cameraOnly) if (!keep.has(id)) { this.cameraHandles.delete(c.handle); this.world.removeCollider(c, false); this.cameraOnly.delete(id); this.cameraPoses.delete(id); this.queryDirty |= CAMERA_QUERIES; }
     for (const o of specs) {
       const key = `${o.shape},${o.center.join(',')},${o.half.join(',')},${o.yaw ?? 0}`;
       if (this.cameraPoses.get(o.id) === key) continue;
@@ -204,7 +214,7 @@ export class RapierController implements CharacterController {
         c.setShape(o.shape === 'cylinder' ? new RAPIER.Cylinder(o.half[1], o.half[0]) : new RAPIER.Cuboid(...o.half));
         c.setRotation({ x: 0, y: Math.sin((o.yaw ?? 0) / 2), z: 0, w: Math.cos((o.yaw ?? 0) / 2) });
       }
-      this.cameraPoses.set(o.id, key); this.queryDirty = true;
+      this.cameraPoses.set(o.id, key); this.queryDirty |= CAMERA_QUERIES;
     }
   }
 
@@ -219,7 +229,7 @@ export class RapierController implements CharacterController {
    * Reject mounting/turning where that footprint does not fit; runtime parks it. */
   setRiding(riding: boolean, yaw = this.bodyYaw): boolean {
     if (!riding && !this.riding) return true;
-    this.flushQueries();
+    this.flushQueries(SUPPORT_QUERIES);
     // People are moving obstacles, not a reason to evict a rider. Movement still sweeps them.
     if (riding && this.world.intersectionWithShape(this.bikeCenter(), this.bikeRotation(yaw), this.bikeShape, undefined, STATIC_GROUPS, this.body)) return false;
     this.bodyYaw = yaw; this.riding = riding; return true;
@@ -227,7 +237,7 @@ export class RapierController implements CharacterController {
 
   /** Capsule clearance from a proposed foot position. The small bottom gap ignores its floor. */
   private freeFoot(p: Vector3) {
-    this.flushQueries();
+    this.flushQueries(SUPPORT_QUERIES | ACTOR_QUERIES);
     return !this.world.intersectionWithShape({ x: p.x, y: p.y + HEIGHT / 2 + OFFSET + .01, z: p.z }, this.identity,
       new RAPIER.Capsule(HALF, RADIUS), undefined, MOVE_GROUPS, this.body);
   }
@@ -238,7 +248,7 @@ export class RapierController implements CharacterController {
    * prevents jumping to an upper storey or a roof; props and people never become ground. */
   supportAt(x: number, z: number, referenceY: number): number | undefined {
     if (![x, z, referenceY].every(Number.isFinite)) return undefined;
-    this.flushQueries();
+    this.flushQueries(SUPPORT_QUERIES);
     const ray = new RAPIER.Ray({ x, y: referenceY + .65, z }, { x: 0, y: -1, z: 0 });
     const hit = this.world.castRayAndGetNormal(ray, 2.15, true, undefined, STATIC_GROUPS, this.body, undefined,
       c => !this.obstacleHandles.has(c.handle));
@@ -272,7 +282,7 @@ export class RapierController implements CharacterController {
 
   /** Actor sweeps include the player and other NPCs, but exclude that actor itself. */
   sweepActor(id: string, from: Vector3, to: Vector3, radius = .32, height = 1.7): number {
-    this.flushQueries();
+    this.flushQueries(SUPPORT_QUERIES | ACTOR_QUERIES | PLAYER_QUERIES);
     const dir = to.clone().sub(from), len = dir.length(), own = this.actors.get(id);
     const shape = own?.shape ?? this.actorShape(radius, height);
     if (len < 1e-6) return this.world.intersectionWithShape(from, this.identity, shape, undefined, MOVE_GROUPS, own) ? 0 : Infinity;
@@ -290,11 +300,11 @@ export class RapierController implements CharacterController {
     this.velocity.set(0, 0, 0);
     this.vy = 0; this.onGround = false; this.jumpHeld = false; this.airTime = 0;
     this.groundNormal.set(0, 1, 0);
-    this.queryDirty = true;
+    this.queryDirty |= PLAYER_QUERIES;
   }
 
   step(direction: Vector3, dt: number, jump: boolean, speed = 4): void {
-    this.flushQueries();
+    this.flushQueries(SUPPORT_QUERIES | ACTOR_QUERIES);
     const pressed = jump && !this.jumpHeld;
     this.jumpHeld = jump;
     if (!Number.isFinite(dt) || dt <= 0) return;
@@ -339,7 +349,7 @@ export class RapierController implements CharacterController {
     }
     this.readFoot();
     this.velocity.copy(this.position).sub(start).divideScalar(total);
-    if (this.position.distanceToSquared(start) > 1e-12) this.queryDirty = true;
+    if (this.position.distanceToSquared(start) > 1e-12) this.queryDirty |= PLAYER_QUERIES;
     // The KCC has already established support. Record sparse candidates without a second
     // triangle-overlap query every frame; recoverSafe revalidates against the current world.
     if (this.onGround && (!this.safe.length || this.position.distanceToSquared(this.safe[this.safe.length - 1]) > .75 * .75)) {
@@ -349,7 +359,7 @@ export class RapierController implements CharacterController {
 
   /** Swept sphere from `from` toward `to`; returns the free distance (camera occlusion). */
   sweep(from: Vector3, to: Vector3, radius = .2): number {
-    this.flushQueries();
+    this.flushQueries(SUPPORT_QUERIES | CAMERA_QUERIES);
     const dir = to.clone().sub(from), len = dir.length();
     if (len < 1e-6) return 0;
     dir.divideScalar(len);

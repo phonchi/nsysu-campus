@@ -4,28 +4,57 @@ import type { OutdoorRoutes } from './route';
 /** Indoor/core navmesh queries (Recast). */
 export interface NavQuery { findPath(from: Vector3, to: Vector3): Vector3[] }
 
+export function crossesHamasenHandoff(from: Vector3, to: Vector3, eastX: number | undefined) {
+  return eastX !== undefined && (from.x < eastX) !== (to.x < eastX);
+}
+
+/** Cross the bore on Recast. At the arcade the campus outdoor network can take
+ * over for destinations the tunnel's navmesh cannot reach in one query. */
+function tunnelLeg(campus: Vector3, east: Vector3, outbound: boolean, nav: NavQuery, routes: OutdoorRoutes) {
+  const direct = outbound ? nav.findPath(campus, east) : nav.findPath(east, campus);
+  if (direct.length) return direct;
+  const arcade = routes.anchor('arcade');
+  if (!arcade) return [];
+  const bore = outbound ? nav.findPath(arcade, east) : nav.findPath(east, arcade);
+  if (!bore.length) return [];
+  const local = outbound
+    ? nav.findPath(campus, arcade)
+    : nav.findPath(arcade, campus);
+  const campusPath = local.length ? local : outbound ? routes.path(campus, arcade) : routes.path(arcade, campus);
+  if (!campusPath.length) return [];
+  return outbound ? [...campusPath, ...bore] : [...bore, ...campusPath];
+}
+
 /** One planner for every auto-walk: a few steps away → straight; the navmesh where it reaches; otherwise the
  * outdoor path network to the arcade junction (inside the navmesh) and Recast from there; otherwise outdoor only. */
 export function planRoute(from: Vector3, to: Vector3, nav?: NavQuery, routes?: OutdoorRoutes, clear?: (a: Vector3, b: Vector3) => boolean): Vector3[] {
   // Straight shortcut only when close and nothing solid stands in between.
   if (Math.hypot(to.x - from.x, to.z - from.z) < 30 && Math.abs(to.y - from.y) < 1.5 && (!clear || clear(from, to))) return [from.clone(), to.clone()];
+  const east = routes?.anchor('hamasen-east-link');
+  if (routes && east && to.x >= east.x) {
+    // The portal is a few metres wide. A clear step to the handoff also counts
+    // as being on its street side when a replan starts just inside its X line.
+    const atPortal = from.distanceToSquared(east) < 12 ** 2 && (!clear || clear(from, east));
+    if (from.x >= east.x || atPortal) {
+      const street = routes.path(from, to);
+      if (street.length) return street;
+      const fromPortal = atPortal ? routes.path(east, to) : [];
+      if (fromPortal.length) return [from.clone(), ...fromPortal];
+      return nav?.findPath(from, to) ?? [];
+    }
+  }
+  if (routes && east && crossesHamasenHandoff(from, to, east.x)) {
+    if (!nav) return [];
+    const outbound = to.x >= east.x;
+    const campus = tunnelLeg(outbound ? from : to, east, outbound, nav, routes);
+    if (!campus.length) return [];
+    const street = outbound ? routes.path(east, to) : routes.path(from, east);
+    if (!street.length) return [];
+    return outbound ? [...campus, ...street] : [...street, ...campus];
+  }
   const direct = nav?.findPath(from, to) ?? [];
   if (direct.length) return direct;
   if (!routes) return [];
-  const east = routes.anchor('hamasen-east-link');
-  if (east && nav && (from.x < east.x) !== (to.x < east.x)) {
-    // The street graph omits the pedestrian tunnel. Cross it on the baked surface
-    // and switch to the street graph outside the east portal.
-    if (to.x >= east.x) {
-      const lead = nav.findPath(from, east);
-      const street = lead.length ? routes.path(east, to) : [];
-      if (street.length) return [...lead, ...street];
-    } else {
-      const tail = nav.findPath(east, to);
-      const street = tail.length ? routes.path(from, east) : [];
-      if (street.length) return [...street, ...tail];
-    }
-  }
   const junction = routes.anchor('arcade');
   const tail = junction && nav ? nav.findPath(junction, to) : [];
   if (junction && tail.length) { const head = routes.path(from, junction); if (head.length) return [...head.slice(0, -1), ...tail]; }

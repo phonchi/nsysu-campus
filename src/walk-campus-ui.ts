@@ -7,10 +7,15 @@ import { FACULTY, BUILDING_FACULTY, PALETTE } from './walk-materials';
 import { PLAY_BOUNDS } from './world/terrain';
 import { landmarkUiLabels, nearbyLandmarkUi, type LandmarkUiOptions } from './campus-label-catalog';
 
+import { hamasenCardCategory, hamasenMarkerStyle, type HamasenPlace } from './map/map-landmarks';
+
 interface Link {label:string;url:string;}
+interface CampusCard extends Partial<HamasenPlace> {
+  name:string;college?:string;summary:string;facts:string[];links:Link[];
+}
 export type StoryCategory = 'history' | 'news' | 'legend' | 'lore';
 export interface CampusStory { id:string; title:string; pos:Point2; y?:number; text:string; sources:Link[]; category?:StoryCategory }
-export interface CampusInfo {buildings:Record<string,{name:string;college:string;summary:string;facts:string[];links:Link[]}>;stories:CampusStory[];}
+export interface CampusInfo {buildings:Record<string,CampusCard>;stories:CampusStory[];}
 export const storyCategoryLabel=(category?:string)=>category==='lore'?'校園口傳':category==='news'?'新聞記載':category==='legend'?'校園趣聞':'校史';
 const categoryTag=(category?:string)=>`<span class="walk-story-category${category==='lore'?' is-lore':''}">${storyCategoryLabel(category)}</span>`;
 export const LORE_NOTE = '此為公開記錄的校園口傳，不代表事件已獲證實。';
@@ -28,10 +33,14 @@ export class CampusUi {
  private readonly map=document.createElement('canvas');private readonly mapScale=.36;
  private readonly landmarkLabels:CampusLabel[]=[];
  private readonly labelCatalog:CampusLabel[]=[];
+ private readonly known: ReadonlySet<string>;
+ private readonly walkable: ReadonlySet<string>;
  private readonly ground:(x:number,z:number)=>number;
  nearStory?:CampusInfo['stories'][number];
  constructor(private readonly host:HTMLElement,private readonly scene:T.Scene,private readonly world:WalkWorld,private readonly structure:CampusStructure,data:WalkBuilding[],private readonly info:CampusInfo,private readonly hooks:Hooks, options:LandmarkUiOptions = {}){
   this.ground=options.ground??(()=>0);
+  this.known=new Set(Object.keys(info.buildings));
+  this.walkable=new Set(world.frames.keys());
   // Labels: the eight walkable buildings first, then OSM landmarks and a few places.
   const list:CampusLabel[]=[];
   for(const b of data){const fs=world.floors.filter(f=>f.buildingId===b.id),top=fs.reduce((a,c)=>c.y>a.y?c:a),g=fs.find(f=>f.data.level===1)??top;
@@ -47,6 +56,8 @@ export class CampusUi {
   // Info card and story card share one dialog layer.
   this.card=document.createElement('div');this.card.className='walk-card';this.card.hidden=true;this.card.setAttribute('role','dialog');host.append(this.card);
   this.card.addEventListener('click',e=>{const a=(e.target as HTMLElement).closest<HTMLElement>('[data-card]')?.dataset;if(!a)return;if(a.card==='close')this.card.hidden=true;if(a.card==='go'){this.card.hidden=true;this.hooks.goToBuilding(a.id!);}if(a.card==='focus'){this.card.hidden=true;this.hooks.focusLandmark?.(a.id!);}if(a.card==='floors'){this.card.hidden=true;this.hooks.inspectBuilding(a.id!);}});
+  // Long cards scroll: flag the card while text lies below the fold so the sticky action bar shows a fade and a hint.
+  this.card.addEventListener('scroll',()=>this.syncMore(),{passive:true});
   this.storyCard=document.createElement('div');this.storyCard.className='walk-card walk-story';this.storyCard.hidden=true;this.storyCard.setAttribute('role','dialog');host.append(this.storyCard);
   this.storyCard.addEventListener('click',e=>{if((e.target as HTMLElement).closest('[data-card=close]'))this.storyCard.hidden=true;});
   this.counter=document.createElement('button');this.counter.className='walk-stories';this.counter.type='button';host.append(this.counter);this.counter.addEventListener('click',()=>this.listStories());this.refreshCounter();
@@ -56,7 +67,7 @@ export class CampusUi {
   this.drawCampusMap();
  }
  focusLandmarkLabel(id?:string){this.labels.setFocused(id);}
- nearbyLandmark(foot:T.Vector3,reach=28){return nearbyLandmarkUi(this.landmarkLabels,foot,this.ground,new Set(Object.keys(this.info.buildings)),new Set(this.world.frames.keys()),reach);}
+ nearbyLandmark(foot:T.Vector3,reach=28){return nearbyLandmarkUi(this.landmarkLabels,foot,this.ground,this.known,this.walkable,reach);}
  get landmarkDiagnostics(){return {labels:this.labelCatalog.map(l=>({id:l.id,name:l.name,position:l.position.toArray()})),footprints:this.structure.context.landmarks.map(l=>({id:l.id,polygon:l.polygon})),mapBounds:[...PLAY_BOUNDS]};}
  updateLandmarkAnchors(anchors:Record<string,T.Vector3>){for(const label of this.landmarkLabels)if(anchors[label.id])label.position.copy(anchors[label.id]);}
  get storyProgress(){return {found:[...this.collected].filter(id=>this.info.stories.some(s=>s.id===id)).length,total:this.info.stories.length};}
@@ -64,13 +75,16 @@ export class CampusUi {
  get collectedStoryIds():ReadonlySet<string>{return this.collected;}
  private refreshCounter(){this.counter.innerHTML=`<span>校史線索</span><strong>${[...this.collected].filter(id=>this.info.stories.some(s=>s.id===id)).length}</strong><small>／${this.info.stories.length}</small>`;}
  openCard(id:string){
-  const b=this.info.buildings[id] ?? (id==='GATE'?{name:'校門・校碑',college:'admin',summary:'校碑位於校門海側，警衛亭在山側。可前往校門附近觀看。',facts:[],links:[]}:undefined);const walkable=this.world.frames.has(id);
+  const b: CampusCard | undefined=this.info.buildings[id] ?? (id==='GATE'?{name:'校門・校碑',college:'admin',summary:'校碑位於校門海側，警衛亭在山側。可前往校門附近觀看。',facts:[],links:[]}:undefined);const walkable=this.world.frames.has(id);
   if(!b){this.hooks.say(id==='TUNNEL'?'西子灣隧道：1928 年貫通的「壽山洞」。':'這裡目前只有外觀。',3500);return;}
-  const fac=FACULTY[b.college]??FACULTY[BUILDING_FACULTY[id]??'admin'];
-  this.card.style.setProperty('--accent',fac.ui);
-  this.card.innerHTML=`<button class="walk-card-close" data-card="close" aria-label="關閉">×</button><div class="walk-card-chip">${safe(fac.name)}${walkable?'・可入內':'・外觀'}</div><h2>${safe(b.name)}</h2><p>${safe(b.summary)}</p>${b.facts.length?`<ul>${b.facts.map(f=>`<li>${safe(f)}</li>`).join('')}</ul>`:''}${walkable?`<div class="walk-card-actions"><button class="walk-button primary" data-card="go" data-id="${safe(id)}">帶我去 1F 入口</button><button class="walk-button" data-card="floors" data-id="${safe(id)}">逐層看</button></div>`:`<div class="walk-card-actions"><button class="walk-button primary" data-card="go" data-id="${safe(id)}">帶我去附近</button>${this.hooks.focusLandmark?`<button class="walk-button" data-card="focus" data-id="${safe(id)}">查看全貌</button>`:''}</div>`}<div class="walk-card-links">${b.links.map(l=>`<a href="${safe(l.url)}" target="_blank" rel="noopener">${safe(l.label)} ↗</a>`).join('')}</div>`;
-  this.card.hidden=false;this.storyCard.hidden=true;
+  const fac=FACULTY[b.college ?? BUILDING_FACULTY[id] ?? 'admin']??FACULTY.admin;
+  const category=b.kind&&b.category ? hamasenCardCategory(b.kind,b.category) : undefined;
+  this.card.style.setProperty('--accent',category ? hamasenMarkerStyle(b.category!).color : fac.ui);
+  if (document.pointerLockElement) document.exitPointerLock();
+  this.card.innerHTML=`<button class="walk-card-close" data-card="close" aria-label="關閉">×</button><div class="walk-card-chip">${safe(category ?? fac.name)}${walkable?'・可入內':'・外觀'}</div><h2>${safe(b.name)}</h2><p>${safe(b.summary)}</p>${b.facts.length?`<ul>${b.facts.map(f=>`<li>${safe(f)}</li>`).join('')}</ul>`:''}${walkable?`<div class="walk-card-actions"><span class="walk-card-more" aria-hidden="true">往下捲動看更多</span><button class="walk-button primary" data-card="go" data-id="${safe(id)}">帶我去 1F 入口</button><button class="walk-button" data-card="floors" data-id="${safe(id)}">逐層看</button></div>`:`<div class="walk-card-actions"><span class="walk-card-more" aria-hidden="true">往下捲動看更多</span><button class="walk-button primary" data-card="go" data-id="${safe(id)}">帶我去附近</button>${!b.poi&&this.hooks.focusLandmark?`<button class="walk-button" data-card="focus" data-id="${safe(id)}">查看全貌</button>`:''}</div>`}<div class="walk-card-links">${b.links.map(l=>`<a href="${safe(l.url)}" target="_blank" rel="noopener">${safe(l.label)}</a>`).join('')}</div>`;
+  this.card.hidden=false;this.storyCard.hidden=true;this.card.scrollTop=0;this.lastAvoid=-Infinity;this.syncMore();
  }
+ private syncMore(){const c=this.card;c.classList.toggle('has-more',!c.hidden&&c.scrollTop+c.clientHeight<c.scrollHeight-6);}
  private listStories(){
   this.storyCard.innerHTML=`<button class="walk-card-close" data-card="close" aria-label="關閉">×</button><div class="walk-card-chip">校園故事收集</div><h2>${this.collected.size} ／ ${this.info.stories.length}</h2><ol class="walk-story-list">${this.info.stories.map(s=>`<li class="${this.collected.has(s.id)?'is-found':''}">${this.collected.has(s.id)?safe(s.title):'？？？（在校園裡找找發光的寶石）'} ${categoryTag(s.category)}</li>`).join('')}</ol><p class="walk-story-note">校園口傳依公開頁面收錄並附出處；查無出處的怪談不收。</p>`;
   this.storyCard.hidden=false;this.card.hidden=true;
@@ -79,7 +93,7 @@ export class CampusUi {
  interact(foot:T.Vector3){
   const s=this.nearStory;if(!s)return false;
   const isNew=!this.collected.has(s.id);this.collected.add(s.id);writeCollected(this.collected);this.refreshCounter();
-  this.storyCard.innerHTML=`<button class="walk-card-close" data-card="close" aria-label="關閉">×</button><div class="walk-card-chip">${isNew?'新收集・':''}校園故事 ${this.collected.size}／${this.info.stories.length}</div><h2>${safe(s.title)} ${categoryTag(s.category)}</h2><p>${safe(s.text)}</p>${s.category==='lore'?`<p class="walk-story-note is-lore">${LORE_NOTE}</p>`:''}<div class="walk-card-links">${s.sources.map(l=>`<a href="${safe(l.url)}" target="_blank" rel="noopener">${safe(l.label)} ↗</a>`).join('')}</div>`;
+  this.storyCard.innerHTML=`<button class="walk-card-close" data-card="close" aria-label="關閉">×</button><div class="walk-card-chip">${isNew?'新收集・':''}校園故事 ${this.collected.size}／${this.info.stories.length}</div><h2>${safe(s.title)} ${categoryTag(s.category)}</h2><p>${safe(s.text)}</p>${s.category==='lore'?`<p class="walk-story-note is-lore">${LORE_NOTE}</p>`:''}<div class="walk-card-links">${s.sources.map(l=>`<a href="${safe(l.url)}" target="_blank" rel="noopener">${safe(l.label)}</a>`).join('')}</div>`;
   this.storyCard.hidden=false;this.card.hidden=true;void foot;return true;
  }
  private readonly dummy=new T.Object3D();private lastAvoid=-1e9;private avoid:DOMRect[]=[];

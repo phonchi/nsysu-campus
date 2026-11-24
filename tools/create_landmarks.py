@@ -1,6 +1,7 @@
 """v3 hand-modelled landmarks (art-direction-v3 §5, spec-v3 §6, ticket T4).
 
 Run:  <blender> --background --python tools/create_landmarks.py -- [--only admin,gate] [--no-render]
+      <blender> --background --python tools/create_landmarks.py -- --hamasen [--only hamasen-wude] [--qa-dir PATH] [--no-render]
 Out:  public/models/landmarks/<id>.glb (meshopt) + <id>.collision.json, artifacts/v3/T4/renders/*.png
 
 Conventions
@@ -41,11 +42,12 @@ P = dict(
 
 def argv():
     a = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
-    only = None; render = True
+    only = qa_dir = None; render = True
     for i, x in enumerate(a):
         if x == '--only': only = set(a[i + 1].split(','))
+        if x == '--qa-dir': qa_dir = Path(a[i + 1])
         if x == '--no-render': render = False
-    return only, render
+    return only, render, qa_dir
 
 
 class LM:
@@ -54,7 +56,7 @@ class LM:
     def __init__(self, lid, title, tri_limit):
         self.id, self.title, self.tri_limit = lid, title, tri_limit
         self.parts = {}; self.tiles = {}; self.free = [[True] * (ATLAS // CELL) for _ in range(ATLAS // CELL)]
-        self.boxes = []; self.M = Matrix.Identity(4); self.views = {}; self.meta = {}
+        self.boxes = []; self.M = Matrix.Identity(4); self.views = {}; self.meta = {}; self.preview_ground = 0
         self.part(lid)
         self.tile('_solid_fallback', 'solid', color=P['wall'])
 
@@ -162,14 +164,14 @@ class LM:
                 self.box(0, y0 + sd / 2, z0, width, sd, sh * (k + 1), tile, top_tile or tile)
                 if col: self.col(0, y0 + sd / 2, z0, width, sd, sh * (k + 1), walk=True)
 
-    def gable(self, cx, cy, z, sx, sy, rise, roof_tile, gable_tile, rot=0., over=0.6, along_x=True):
+    def gable(self, cx, cy, z, sx, sy, rise, roof_tile, gable_tile, rot=0., over=0.6, along_x=True, cells=1):
         """Pitched roof, ridge along local X (along_x) with eaves overhang `over`."""
         with self.at(cx, cy, z, rot):
             if not along_x: sx, sy = sy, sx
             ex, ey = sx / 2 + over, sy / 2 + over; hx = sx / 2
             with self.at(0, 0, 0, 0 if along_x else math.pi / 2):
-                self.quad((-ex, -ey, 0), (ex, -ey, 0), (ex, 0, rise), (-ex, 0, rise), roof_tile)
-                self.quad((ex, ey, 0), (-ex, ey, 0), (-ex, 0, rise), (ex, 0, rise), roof_tile)
+                self.quad((-ex, -ey, 0), (ex, -ey, 0), (ex, 0, rise), (-ex, 0, rise), roof_tile, nx=cells)
+                self.quad((ex, ey, 0), (-ex, ey, 0), (-ex, 0, rise), (ex, 0, rise), roof_tile, nx=cells)
                 self.face([(-hx, sy / 2, 0), (-hx, -sy / 2, 0), (-hx, 0, rise * (sy / 2) / ey)], gable_tile)
                 self.face([(hx, -sy / 2, 0), (hx, sy / 2, 0), (hx, 0, rise * (sy / 2) / ey)], gable_tile)
                 self.face([(-ex, -ey, 0), (-ex, ey, 0), (ex, ey, 0), (ex, -ey, 0)], roof_tile)  # soffit
@@ -508,13 +510,13 @@ def col_poly(lm, poly, z0, h, step=2.0, walk=False):
     for x0, x1, y0, y1 in merged: lm.col((x0 + x1) / 2, (y0 + y1) / 2, z0, x1 - x0, y1 - y0, h, walk=walk)
 
 
-def hip(lm, cx, cy, z, sx, sy, rise, inset, tile, top_tile, rot=0., over=.4):
+def hip(lm, cx, cy, z, sx, sy, rise, inset, tile, top_tile, rot=0., over=.4, cells=1):
     with lm.at(cx, cy, z, rot):
         o = [(-sx / 2 - over, -sy / 2 - over), (sx / 2 + over, -sy / 2 - over), (sx / 2 + over, sy / 2 + over), (-sx / 2 - over, sy / 2 + over)]
         i = [(-sx / 2 + inset, -sy / 2 + inset), (sx / 2 - inset, -sy / 2 + inset), (sx / 2 - inset, sy / 2 - inset), (-sx / 2 + inset, sy / 2 - inset)]
         for k in range(4):
             a, b = o[k], o[(k + 1) % 4]; c, d = i[(k + 1) % 4], i[k]
-            lm.quad((*a, 0), (*b, 0), (*c, rise), (*d, rise), tile)
+            lm.quad((*a, 0), (*b, 0), (*c, rise), (*d, rise), tile, nx=cells)
         lm.face([(x, y, rise) for x, y in i], top_tile)
         lm.face([(x, y, 0) for x, y in o[::-1]], tile)
 
@@ -1126,14 +1128,37 @@ def lm_beach_house():
 
 
 def main():
-    only, render = argv()
+    global TMP, RENDERS
+    only, render, qa_dir = argv()
+    hamasen = '--hamasen' in sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else False
+    if hamasen:
+        sys.path.insert(0, str(ROOT / 'tools'))
+        from hamasen_landmarks import BUILDERS
+
+        qa = qa_dir or ROOT / 'artifacts/v12/qa/hamasen-polish/landmarks/r2'
+        TMP, RENDERS = qa / 'build', qa
+        TMP.mkdir(parents=True, exist_ok=True)
+        builders = {lid: lambda fn=fn: fn(sys.modules[__name__]) for lid, fn in BUILDERS.items()}
+    else:
+        builders = LANDMARKS
+    if only and not only <= builders.keys():
+        raise ValueError(f'Unknown landmarks: {sorted(only - builders.keys())}')
     for o in list(bpy.data.objects): bpy.data.objects.remove(o, do_unlink=True)
-    sc = setup_render(); gcoll = bpy.data.collections.new('ground'); sc.collection.children.link(gcoll); ground(gcoll)
+    sc = setup_render()
+    gcoll = bpy.data.collections.new('ground')
+    sc.collection.children.link(gcoll)
+    ground_obj = ground(gcoll)
+    if hamasen:
+        sc.view_settings.exposure = .85
+        sc.display.shading.show_specular_highlight = False
     built = {}
-    for lid, fn in LANDMARKS.items():
+    for lid, fn in builders.items():
         if only and lid not in only: continue
         if not only and lid == 'smoke': continue
-        lm = fn(); coll = bpy.data.collections.new(lid); sc.collection.children.link(coll)
+        lm = fn()
+        if hamasen and lm.tris() > lm.tri_limit:
+            raise ValueError(f'{lid}: {lm.tris()} triangles exceeds {lm.tri_limit}')
+        coll = bpy.data.collections.new(lid); sc.collection.children.link(coll)
         root, objs = materialise(lm, coll); export(lm, root); built[lid] = (lm, coll)
     if render:
         for lid, (lm, coll) in built.items():  # kits: lay modules out in a row for the review render only
@@ -1143,17 +1168,29 @@ def main():
                     o = bpy.data.objects.new(f'{pname}.preview{k}', src.data); coll.objects.link(o); o.location = (dx, dy, 0)
         for lid, (lm, coll) in built.items():
             for other_id, (_, c2) in built.items(): c2.hide_render = other_id != lid
-            for vname in lm.views: render_view(lm, vname, RENDERS / f'{lid}__{vname}.png')
-    if not only:
+            ground_obj.location.z = lm.preview_ground
+            for vname in lm.views:
+                render_view(lm, vname, RENDERS / f'{lid}__{vname}.png', res=(960, 600) if hamasen else (960, 720))
+    placements_path = OUT / 'placements.json'
+    if hamasen:
+        # Keep the hand-tuned campus placements when rebuilding part or all of Hamasen.
+        placements = json.loads(placements_path.read_text(encoding='utf-8'))
+        placements.update(PLACEMENTS)
+        placements_path.write_text(json.dumps(placements, ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
+    elif not only:
         doc = dict(_doc='Expected world placement of public/models/landmarks/<id>.glb. centroid = [x, z] world metres (x east, z south) '
                         'where the GLB origin goes (y = terrain height there); yaw = radians about three +Y (same sense as '
                         'campus-structure placements.rotation), applied after the translation-free local model. GLB local frame: '
                         'three −Z = north. Kits (path) are instanced along the polyline every `moduleLength` m. '
                         'Generated by tools/create_landmarks.py from campus-structure.json context.landmarks + OSM.',
                    **PLACEMENTS)
-        (OUT / 'placements.json').write_text(json.dumps(doc, ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
+        # A campus rebuild leaves the separately generated district assets seated.
+        if placements_path.exists():
+            doc.update({k: v for k, v in json.loads(placements_path.read_text(encoding='utf-8')).items() if k.startswith('hamasen-')})
+        placements_path.write_text(json.dumps(doc, ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
     (TMP / 'summary.json').write_text(json.dumps({k: dict(tris=v[0].tris(), limit=v[0].tri_limit, views=list(v[0].views), meta=v[0].meta) for k, v in built.items()}, ensure_ascii=False, indent=1))
-    bpy.ops.wm.save_as_mainfile(filepath=str(TMP / 'landmarks.blend'))
+    if not hamasen:
+        bpy.ops.wm.save_as_mainfile(filepath=str(TMP / 'landmarks.blend'))
     print('LANDMARKS_COMPLETE', list(built), flush=True)
 
 

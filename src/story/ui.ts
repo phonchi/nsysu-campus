@@ -6,7 +6,7 @@ import type { Choice, Face, TalkLine } from './dialogue';
 import { portraitSvg, type PortraitSpec } from './portraits';
 import './story.css';
 import { interactionListHtml, type InteractionRow } from '../walk/interaction-list';
-import { clampHint } from './hint-position';
+import { clampHint, type HintRect } from './hint-position';
 
 const esc = (s: unknown) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
 
@@ -377,13 +377,16 @@ ${fact ? `<p class="fact"><b>校史小知識</b>${esc(fact)}${source ? ` <a href
   private npcBadgeEls = new Map<string,HTMLElement>();
   npcBadges(badges:readonly {id:string;x:number;y:number;status:'acceptable'|'deliverable'|'waiting';name:string}[]) {
     const visible=new Set(badges.map(b=>b.id));
-    for(const [id,el] of this.npcBadgeEls) if(!visible.has(id))el.hidden=true;
+    for(const [id,el] of this.npcBadgeEls) if(!el.hidden && !visible.has(id))el.hidden=true;
     for(const b of badges) {
       let el=this.npcBadgeEls.get(b.id);
       if(!el) { el=document.createElement('div');el.className='q-badge q-npc-badge';el.innerHTML='<b></b>';this.root.append(el);this.npcBadgeEls.set(b.id,el); }
-      el.hidden=false;el.dataset.status=b.status;
-      el.setAttribute('aria-label',`${b.name}：${b.status==='deliverable'?'可交付':b.status==='waiting'?'等待可接時段':'可接任務'}`);
-      el.firstElementChild!.textContent=b.status==='deliverable'?'？':'！';
+      if (el.hidden) el.hidden = false;
+      if (el.dataset.status !== b.status) el.dataset.status = b.status;
+      const label = `${b.name}：${b.status==='deliverable'?'可交付':b.status==='waiting'?'等待可接時段':'可接任務'}`;
+      if (el.getAttribute('aria-label') !== label) el.setAttribute('aria-label', label);
+      const icon = b.status === 'deliverable' ? '？' : '！', content = el.firstElementChild!;
+      if (content.textContent !== icon) content.textContent = icon;
       el.style.transform=`translate(${Math.round(b.x)}px,${Math.round(b.y)}px) translate(-50%,-100%)`;
     }
   }
@@ -429,7 +432,20 @@ ${fact ? `<p class="fact"><b>校史小知識</b>${esc(fact)}${source ? ` <a href
   private hintContent = '';
   private hintSelected?: string;
   private hintBox?: { width: number; height: number; rootWidth: number; rootHeight: number; insets: { top: number; right: number; bottom: number; left: number } };
-  private forgetHintBox = () => { this.hintBox = undefined; };
+  private forgetHintBox = () => { this.hintBox = undefined; this.avoidAt = -Infinity; };
+  private avoidAt = -Infinity;
+  private avoidRects: HintRect[] = [];
+  /** Corner buttons, the objective card and the status panel, relative to the layer; re-read twice a second. */
+  private hintAvoid(): HintRect[] {
+    const now = performance.now();
+    if (now - this.avoidAt < 500) return this.avoidRects;
+    this.avoidAt = now;
+    const host = this.root.parentElement, origin = this.root.getBoundingClientRect();
+    this.avoidRects = [...(host?.querySelectorAll<HTMLElement>('.walk-hudbar, .walk-v12-status') ?? []), this.objectiveEl]
+      .filter(e => !e.hidden && e.offsetParent !== null && getComputedStyle(e).visibility !== 'hidden')
+      .map(e => { const r = e.getBoundingClientRect(); return { x: r.left - origin.left, y: r.top - origin.top, width: r.width, height: r.height }; });
+    return this.avoidRects;
+  }
   /** World-anchored interaction hint ("E 交談・阿凱"), or null to hide. */
   hint(p: { x: number; y: number; text: string; choices?:readonly InteractionRow[]; selectedId?:string; onSelect?:(id:string)=>void } | null) {
     const el = this.root.querySelector<HTMLElement>('.q-hint')!;
@@ -462,7 +478,7 @@ ${fact ? `<p class="fact"><b>校史小知識</b>${esc(fact)}${source ? ` <a href
       this.hintBox={width:el.offsetWidth,height:el.offsetHeight,rootWidth:this.root.clientWidth,rootHeight:this.root.clientHeight,insets:{top:parseFloat(safe.paddingTop)||0,right:parseFloat(safe.paddingRight)||0,bottom:parseFloat(safe.paddingBottom)||0,left:parseFloat(safe.paddingLeft)||0}};
     }
     const box=this.hintBox;
-    const bounds=clampHint(p.x,p.y,box.width,box.height,box.rootWidth,box.rootHeight,box.insets);
+    const bounds=clampHint(p.x,p.y,box.width,box.height,box.rootWidth,box.rootHeight,box.insets,8,multi?[]:this.hintAvoid());
     el.style.transform = `translate(${Math.round(bounds.x)}px,${Math.round(bounds.y)}px)`;
   }
 

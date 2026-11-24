@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { BoxGeometry, Group, Mesh, MeshBasicMaterial, Vector3 } from 'three';
 import { RapierController, initPhysics } from '../src/walk/controller';
 
@@ -17,6 +17,26 @@ function trace(p:RapierController,dir:Vector3,n:number,speed=3.6){
 }
 
 describe('Rapier character controller',()=>{
+ it('defers player-only broad phase changes until an NPC sweep needs the new player pose', () => {
+  const p = new RapierController(ground());
+  const step = vi.spyOn(p.world, 'step');
+  const from = new Vector3(3, .87, 0), to = new Vector3(7, .87, 0);
+  expect(p.sweepActor('walker', from, to)).toBeCloseTo(4);
+  p.carry(new Vector3(5, 0, 0));
+  expect(p.supportAt(5, 0, 0)).toBeCloseTo(0);
+  expect(p.sweep(from, to)).toBeCloseTo(4);
+  p.step(idle, DT, false);
+  expect(step).not.toHaveBeenCalled();
+  expect(p.sweepActor('walker', from, to)).toBeLessThan(2);
+  expect(step).toHaveBeenCalledTimes(1);
+  p.setActor({ id: 'other', position: new Vector3(4, 0, 0), radius: .32, height: 1.7 });
+  expect(p.sweep(from, to)).toBeCloseTo(4);
+  expect(step).toHaveBeenCalledTimes(1);
+  expect(p.sweepActor('walker', from, to)).toBeLessThan(1);
+  expect(step).toHaveBeenCalledTimes(2);
+  p.dispose();
+ });
+
  it('lands and stays still without drift',()=>{
   const p=new RapierController(ground());p.teleport(new Vector3(0,2,0));
   for(let i=0;i<120;i++)p.step(idle,DT,false);

@@ -1,6 +1,42 @@
 /** Enrich only the in-memory map catalog; retain the published source data and hashes. */
 import gateCollision from '../../public/models/landmarks/gate.collision.json';
 export type MapPoint = [number,number];
+export interface HamasenPoi {
+  position: MapPoint;
+  approach: [number, number, number];
+  labelHeight: number;
+  street: string;
+  buildingIds: string[];
+}
+export interface HamasenPlace {
+  name: string;
+  kind: 'landmark' | 'shop';
+  category: string;
+  poi: HamasenPoi;
+}
+export interface HamasenMapPlace extends HamasenPlace { id: string }
+export const HAMASEN_MAP_ALIASES: Readonly<Record<string, string>> = {
+  'hamasen-exit-1': 'hamasen-poi-mrt-hamasen-exit-1',
+  'hamasen-exit-2': 'hamasen-poi-mrt-hamasen-exit-2',
+  'hamasen-rail-park': 'hamasen-poi-takao-railway-museum',
+};
+export const SHOP_MAP_SCALE = 1;
+export const hamasenKindLabel = (kind: HamasenPlace['kind']) => kind === 'shop' ? '店家' : '地標';
+export function hamasenCardCategory(kind: HamasenPlace['kind'], category: string) {
+  const label = hamasenKindLabel(kind);
+  return category.startsWith(label + '・') ? category : `${label}・${category}`;
+}
+const POI_STYLES: Record<string, { color: string; glyph: string }> = {
+  '交通・捷運': { color: '#ae4d18', glyph: '捷' },
+  '交通・輕軌': { color: '#376436', glyph: '輕' },
+  '交通・渡輪': { color: '#215b94', glyph: '渡' },
+  早餐: { color: '#a05017', glyph: '早' },
+  正餐: { color: '#a54034', glyph: '餐' },
+  冰品甜點: { color: '#775295', glyph: '冰' },
+  飲料: { color: '#207269', glyph: '飲' },
+  宵夜: { color: '#41456e', glyph: '宵' },
+};
+export const hamasenMarkerStyle = (category: string) => POI_STYLES[category] ?? { color: '#2c7f91', glyph: '地' };
 export interface MapBuilding {id:string;name:string;kind:string;walkable:boolean;polygon:MapPoint[];holes?:MapPoint[][];storeys?:number}
 interface GateMapData {buildings:MapBuilding[];landmarks?:Record<string,{centroid:MapPoint;yaw?:number}>}
 export function withGateMapBuilding<T extends GateMapData>(data:T):Omit<T,'buildings'> & {buildings:MapBuilding[]} {

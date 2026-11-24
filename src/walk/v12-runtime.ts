@@ -21,7 +21,9 @@ import {inside,distance,nearestOnPolygon,SHORE_REACH,validLanding,motionDt} from
 import {safe,makeDoorSign} from './hud';
 import {disposeObject} from '../world/npc';
 export interface V12Action {id:string;label:string;point:T.Vector3;run:()=>void}
-interface Dependencies {host:HTMLElement;scene:T.Scene;data:V12Data;physics:RapierController;avatar:Avatar;asset:(p:string)=>string;say:(s:string)=>void;cue:(id:string)=>void;modeChanged:()=>void;params:URLSearchParams;ground?:(x:number,z:number)=>number}
+interface Dependencies {host:HTMLElement;scene:T.Scene;data:V12Data;physics:RapierController;avatar:Avatar;asset:(p:string)=>string;say:(s:string)=>void;cue:(id:string)=>void;modeChanged:()=>void;params:URLSearchParams;ground?:(x:number,z:number)=>number;
+ /** Inside the 哈瑪星 street district: the Sizihwan beach wave line is not shown there. */
+ inTown?:(x:number,z:number)=>boolean}
 /** Runtime adapter owns optional modes; legacy walking remains the only other position writer. */
 export class V12Runtime {
  readonly group=new T.Group();readonly swim:SwimRuntime;readonly craft=new WatercraftRuntime();readonly bus?:BusService;readonly fitness:FitnessRuntime;readonly timer:TimedSports;readonly policy:SeaPolicyClock;
@@ -164,9 +166,17 @@ export class V12Runtime {
  }
  afterMovement(dt:number,external:MotionMode){this.timer.update(dt,this.swim.water?this.swim.position.toArray():this.d.physics.position.toArray(),this.ownsMotion?this.mode:external);}
  afterAvatar(){const l=this.d.avatar.palm('L'),r=this.d.avatar.palm('R'),p=this.paddleGroup.children[0];if(l&&r&&p&&this.craft.route)attachPaddle(p,l,r,this.paddleGroup,this.craft.route.craft);}
+ private townAt?:{x:number;z:number;inside:boolean};
+ /** District test, re-evaluated only after the player has moved a metre. */
+ private inTown(){
+  const test=this.d.inTown;if(!test)return false;
+  const p=this.d.physics.position,last=this.townAt;
+  if(!last||Math.abs(p.x-last.x)+Math.abs(p.z-last.z)>1)this.townAt={x:p.x,z:p.z,inside:test(p.x,p.z)};
+  return this.townAt!.inside;
+ }
  private ui(){
   const c=this.policy.conditions,water=this.d.data.sea,near=this.d.data.bus?.stops.filter(s=>distance(s.sign,this.d.physics.position.toArray())<12)??[];
-  const lines:string[]=[];if(water?.viewingPoint&&distance(water.viewingPoint,this.d.physics.position.toArray())<25)lines.push('帆船賽（情境重現）・金色旗：中山隊・藍色旗：日本隊');if(water)lines.push(`今日遊戲浪高 ${c.waveHeightM.toFixed(1)} m${c.qaOverride?'（QA）':''}・${evaluateSea('swim',c).allowed?'游泳開放':'游泳關閉'}`);
+  const lines:string[]=[];if(water?.viewingPoint&&distance(water.viewingPoint,this.d.physics.position.toArray())<25)lines.push('帆船賽（情境重現）・金色旗：中山隊・藍色旗：日本隊');if(water&&!this.inTown())lines.push(`今日遊戲浪高 ${c.waveHeightM.toFixed(1)} m${c.qaOverride?'（QA）':''}・${evaluateSea('swim',c).allowed?'游泳開放':'游泳關閉'}`);
   const bus=this.bus;if(bus&&!bus.onBoard&&near.length){const here=near.some(s=>s.id===bus.stop?.id);lines.push(here&&bus.phase==='arriving'?`公車進站中・約 ${Math.ceil(bus.arrivingIn)} 秒`:here&&bus.phase==='boardable'?'公車已到站・靠近站牌按 E 上車':'公車站・隨時可叫車（E），約 3 秒進站');}
   if(this.swim.water)lines.push(this.swim.phase==='rescue'?(this.swim.waitingForReturn?'救援已啟動，等待岸上安全落點；可由選單回到起點':'救生員召回中'):`體力 ${Math.round(this.swim.stamina*100)}%`);
   if(this.craft.route)lines.push('方向鍵／WASD 划行・回到下水點附近按 E 歸還（15 m 內）');

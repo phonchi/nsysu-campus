@@ -1,6 +1,7 @@
 /** Campus art pass. Solid tree trunks and street furniture also export simplified obstacles. */
 import * as T from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { mergeStatic } from './render/batch';
 import type { WalkWorld, WorldFloor } from './walk-world';
 import { CAMPUS_GROUND, drape } from './walk-world';
 import { GROUND_Y, PLAY_BOUNDS, inPolygon, type Terrain } from './world/terrain';
@@ -49,8 +50,8 @@ class Occupancy {
  free(x:number,z:number,r=1.5){for(const [dx,dz] of [[0,0],[r,0],[-r,0],[0,r],[0,-r]])if(this.at(x+dx,z+dz))return false;return true;}
 }
 
-function roadTexture(centre:boolean,markings=true){
- const S=128,data=new Uint8Array(S*S*4),r=rng(41),base=new T.Color(PALETTE.asphalt),white=new T.Color(PALETTE.mark),yellow=new T.Color(PALETTE.markYellow);
+function roadTexture(centre:boolean,markings=true,tone:string=PALETTE.asphalt){
+ const S=128,data=new Uint8Array(S*S*4),r=rng(41),base=new T.Color(tone),white=new T.Color(PALETTE.mark),yellow=new T.Color(PALETTE.markYellow);
  for(let y=0;y<S;y++)for(let x=0;x<S;x++){let c=base.clone().offsetHSL(0,0,(r()-.5)*.03);if(markings&&(x>=5&&x<8||x>=120&&x<123))c=white;if(markings&&centre&&x>=61&&x<67&&y%64<36)c=yellow;const i=(y*S+x)*4;data[i]=c.r*255;data[i+1]=c.g*255;data[i+2]=c.b*255;data[i+3]=255;}
  const t=new T.DataTexture(data,S,S);t.wrapS=T.ClampToEdgeWrapping;t.wrapT=T.RepeatWrapping;t.colorSpace=T.LinearSRGBColorSpace;t.magFilter=T.LinearFilter;t.minFilter=T.LinearMipmapLinearFilter;t.generateMipmaps=true;t.anisotropy=4;t.needsUpdate=true;return t;
 }
@@ -186,9 +187,29 @@ export function decorateCampus(world:WalkWorld,structure:CampusStructure,terrain
  for(const f of world.floors)if(f.data.level===1){const frame=world.frames.get(f.buildingId)!;roadExclusions.push((f.data.access?.walkOutline??f.data.outline).map(([x,z])=>{const p=new T.Vector3(x,0,z).applyMatrix4(frame);return [p.x,p.z] as Point2;}));}
  if(terrain){
   const asphalt=new T.MeshStandardMaterial({map:roadTexture(false,false),roughness:.92});
-  for(const layer of buildRoadLayers(roads,terrain,[bx0,bz0,bx1,bz1],roadExclusions)){
-   const mesh=new T.Mesh(layer.base,layer.foot?roadMats.foot:asphalt);mesh.name=`Road surface ${layer.id}`;mesh.receiveShadow=true;roadGroup.add(mesh);
-   if(layer.markings?.attributes.position.count){const marking=new T.Mesh(layer.markings,roads.find(r=>r.id===layer.id)!.width>=7?roadMats.main:roadMats.side);marking.name=`Road markings ${layer.id}`;marking.receiveShadow=true;roadGroup.add(marking);}
+  const townMats={base:new T.MeshStandardMaterial({map:roadTexture(false,false,'#535654'),roughness:.94}),
+   main:new T.MeshStandardMaterial({map:roadTexture(true,true,'#535654'),roughness:.94}),
+   side:new T.MeshStandardMaterial({map:roadTexture(false,true,'#535654'),roughness:.94})};
+  const roadById=new Map(roads.map(road=>[road.id,road]));
+  const batches=new Map<string,T.Group>();
+  const extent=city?.ferryVisualGround ? Math.max(...city.ferryVisualGround.map(p=>p[1])) : bz1;
+  for(const layer of buildRoadLayers(roads,terrain,[bx0,bz0,bx1,bz1],roadExclusions,extent)){
+   const road=roadById.get(layer.id)!;
+   const town=road.district==='hamasen';
+   const key=town ? '哈瑪星' : '校園與港區';
+   let batch=batches.get(key);
+   if(!batch){batch=new T.Group();batch.name='Campus roads · '+key;batches.set(key,batch);roadGroup.add(batch);}
+   const materials=town?townMats:{base:asphalt,main:roadMats.main,side:roadMats.side};
+   const mesh=new T.Mesh(layer.base,layer.foot?roadMats.foot:materials.base);
+   mesh.name='Road surface '+layer.id;mesh.receiveShadow=true;batch.add(mesh);
+   if(layer.markings?.attributes.position.count){
+    const marking=new T.Mesh(layer.markings,road.width>=7?materials.main:materials.side);
+    marking.name='Road markings '+layer.id;marking.receiveShadow=true;batch.add(marking);
+   }
+  }
+  for(const batch of batches.values()){
+   mergeStatic(batch);
+   for(const mesh of batch.children)mesh.userData.keepSeparate=true;
   }
  }else for(const r of roads){const pts=r.points;if(pts.length<2)continue;const geo=roadRibbon(pts,r.width);geo.translate(0,.006,0);roadGroup.add(new T.Mesh(geo,footKinds.includes(r.kind)?roadMats.foot:roadMats.main));}
  // Crosswalks share the exact same supporting triangles and stop at building/carve boundaries.
@@ -205,7 +226,26 @@ export function decorateCampus(world:WalkWorld,structure:CampusStructure,terrain
  const sea=new T.Mesh(new T.PlaneGeometry(2600,3200,1,1),new T.ShaderMaterial({fog:true,uniforms:{...T.UniformsLib.fog,shallow:{value:new T.Color(PALETTE.seaShallow)},deep:{value:new T.Color(PALETTE.seaDeep)},edge:{value:gx0}},
   vertexShader:'#include <fog_pars_vertex>\nvarying vec3 vW;void main(){vec4 w=modelMatrix*vec4(position,1.);vW=w.xyz;vec4 mvPosition=viewMatrix*w;gl_Position=projectionMatrix*mvPosition;\n#include <fog_vertex>\n}',
   fragmentShader:'#include <fog_pars_fragment>\nuniform vec3 shallow;uniform vec3 deep;uniform float edge;varying vec3 vW;void main(){float d=clamp((edge-vW.x)/180.,0.,1.);vec3 c=mix(shallow,deep,smoothstep(0.,1.,d));float foam=step(edge-3.,vW.x);c=mix(c,vec3(1.),foam*.7);gl_FragColor=vec4(c,1.);\n#include <tonemapping_fragment>\n#include <colorspace_fragment>\n#include <fog_fragment>\n}'}));
- sea.rotation.x=-Math.PI/2;sea.position.set(gx0-1300+2,-.35,80);if(terrain){sea.geometry.dispose();sea.geometry=new T.PlaneGeometry(6000,6000);sea.position.set(0,terrain.seaLevel,0);(sea.material as T.Material).dispose();sea.material=seaMaterial({origin:terrain.meta.origin,cell:terrain.meta.cell,cols:terrain.meta.cols,rows:terrain.meta.rows,heights:terrain.heights,seaLevel:terrain.seaLevel,groundOffset:GROUND_Y});}sea.name='Taiwan Strait · 西子灣';art.add(sea);
+ sea.rotation.x=-Math.PI/2;sea.position.set(gx0-1300+2,-.35,80);
+ if(terrain){
+  sea.geometry.dispose();sea.geometry=new T.PlaneGeometry(6000,6000);sea.position.set(0,terrain.seaLevel,0);
+  (sea.material as T.Material).dispose();
+  const {origin,cell,cols,rows}=terrain.meta,harbor=city?.ferryHarbor;
+  const heights=harbor?terrain.heights.slice():terrain.heights;
+  if(harbor){
+   // The 20 m land DTM bridges this narrow tidal channel. Correct only the
+   // water's render texture to match the shoreline cut in the display mesh.
+   const i0=Math.max(0,Math.floor((Math.min(...harbor.map(p=>p[0]))-origin[0])/cell));
+   const j0=Math.max(0,Math.floor((Math.min(...harbor.map(p=>p[1]))-origin[1])/cell));
+   const i1=Math.min(cols-1,Math.ceil((Math.max(...harbor.map(p=>p[0]))-origin[0])/cell));
+   const j1=Math.min(rows-1,Math.ceil((Math.max(...harbor.map(p=>p[1]))-origin[1])/cell));
+   for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){
+    if(inPolygon([origin[0]+i*cell,origin[1]+j*cell],harbor))heights[j*cols+i]=-1.8;
+   }
+  }
+  sea.material=seaMaterial({origin,cell,cols,rows,heights,seaLevel:terrain.seaLevel,groundOffset:GROUND_Y});
+ }
+ sea.name='Taiwan Strait · 西子灣';art.add(sea);
  // 壽山 terrain: one low-poly height field around the campus ground (display only, never collision).
  const hash=(x:number,z:number)=>{const h=Math.sin(x*127.1+z*311.7)*43758.5453;return h-Math.floor(h);};
  const noise=(x:number,z:number)=>{const ix=Math.floor(x),iz=Math.floor(z),fx=x-ix,fz=z-iz,u=fx*fx*(3-2*fx),v=fz*fz*(3-2*fz);const a=hash(ix,iz),b=hash(ix+1,iz),c=hash(ix,iz+1),d=hash(ix+1,iz+1);return a+(b-a)*u+(c-a)*v+(a-b-c+d)*u*v;};

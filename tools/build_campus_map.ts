@@ -1,15 +1,16 @@
-/** Build public/data/campus-map.json for the 2D campus map from the same world data the 3D walk uses.
- * Run: npm run map:build after changing the campus structure, base map, sea center, or landmark placements. */
+/** Build public/data/campus-map.json from the same geometry and Hamasen places used in the 3D walk.
+ * Run npm run map:build after updating these inputs. */
 import fs from 'node:fs';
 import * as T from 'three';
 import { buildingFrame } from '../src/walk-world';
 import { WALK_BUILDING_IDS } from '../src/walk-nav';
 import type { CampusStructure, WalkBuilding } from '../src/walk-types';
+import type { HamasenPlace, HamasenMapPlace } from '../src/map/map-landmarks';
 
 type P = [number, number];
 const r1 = (v: number) => Math.round(v * 10) / 10;
 const structure = JSON.parse(fs.readFileSync('public/data/walkthrough/campus-structure.json', 'utf8')) as CampusStructure;
-const info = JSON.parse(fs.readFileSync('public/data/campus-info.json', 'utf8')) as { buildings: Record<string, { name: string; college?: string }> };
+const info = JSON.parse(fs.readFileSync('public/data/campus-info.json', 'utf8')) as { buildings: Record<string, { name: string } & Partial<HamasenPlace>> };
 const { seaCenter } = JSON.parse(fs.readFileSync('public/data/sea.json', 'utf8')) as { seaCenter?: { id: string; name: string; footprint?: P[] } };
 const mapPolygon = (polygon: P[]) => polygon.map(([x, z]): P => [r1(x), r1(z)]);
 const placementsPath = 'public/models/landmarks/placements.json';
@@ -45,9 +46,11 @@ if (seaCenter?.footprint) {
 const roads = structure.context.roads.map(r => ({ kind: r.kind, width: r.width, points: r.points.map(([x, z]) => [r1(x), r1(z)] as P) }));
 const water = structure.context.water.map(w => ({ kind: w.kind, points: w.points.map(([x, z]) => [r1(x), r1(z)] as P) }));
 const sport = structure.context.sport.map(s => ({ kind: s.kind, polygon: s.polygon.map(([x, z]) => [r1(x), r1(z)] as P) }));
+const hamasenPlaces: HamasenMapPlace[] = Object.entries(info.buildings).flatMap(([id, { name, kind, category, poi }]) =>
+  kind && category && poi ? [{ id, name, kind, category, poi }] : []);
 const railways = structure.context.hamasen?.rails?.map(r => ({ kind: r.kind, points: mapPolygon(r.points) })) ?? [];
 const basePath = 'public/data/campus-map-base.json';
 const base = fs.existsSync(basePath) ? JSON.parse(fs.readFileSync(basePath, 'utf8')) as { url: string; bounds: [number, number, number, number] } : undefined;
-const out = { generatedBy: 'tools/build_campus_map.ts', base, frame: 'world metres, x east, z south (north = -z)', spawn: [-69, 119], buildings, background, backgroundHoles, roads, railways, water, sport, landmarks: landmarkPlacements };
+const out = { generatedBy: 'tools/build_campus_map.ts', base, frame: 'world metres, x east, z south (north = -z)', spawn: [-69, 119], buildings, background, backgroundHoles, roads, railways, water, sport, hamasenPlaces, landmarks: landmarkPlacements };
 fs.writeFileSync('public/data/campus-map.json', JSON.stringify(out) + '\n');
-console.log(JSON.stringify({ buildings: buildings.length, background: background.length, roads: roads.length, water: water.length, sport: sport.length, landmarks: Object.keys(landmarkPlacements).length, bytes: fs.statSync('public/data/campus-map.json').size }));
+console.log(JSON.stringify({ buildings: buildings.length, background: background.length, roads: roads.length, water: water.length, sport: sport.length, landmarks: Object.keys(landmarkPlacements).length, hamasenPlaces: hamasenPlaces.length, bytes: fs.statSync('public/data/campus-map.json').size }));

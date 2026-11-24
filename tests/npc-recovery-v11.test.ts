@@ -75,3 +75,40 @@ it('simultaneous model loads reserve distinct safe spawn positions',async()=>{
  for(const a of ['a','b','c'])for(const b of ['a','b','c'])if(a!==b)expect(manager.get(a)!.position.distanceTo(manager.get(b)!.position)).toBeGreaterThanOrEqual(.68);
  manager.dispose();
 });
+
+it('ambient walkers have the same chance of starting to wander over one second at different frame rates', async () => {
+  vi.spyOn(GLTFLoader.prototype, 'loadAsync').mockResolvedValue({scene: new Group(), animations: []} as never);
+  const zones: StoryZones = {zones: {}, npcs: {}, ambient: {students: ['student-m'], monkeys: 0}};
+  const routes = new OutdoorRoutes({nodes: [{id: 0, p: [0, 0, 0]}], edges: [], edgeKind: [],
+    anchors: {arcade: {node: 0, label: 'Arcade'}}});
+  const manager = new NpcManager(zones, routes, undefined, path => path);
+  await manager.load();
+  // Count attempts without assigning a path so each random draw starts from idle.
+  const target = vi.spyOn(routes, 'anchor').mockReturnValue(undefined);
+  const random = vi.spyOn(Math, 'random');
+  const player = new Vector3();
+  const chanceInFrame = (dt: number) => {
+    let low = 0, high = 1;
+    for (let i = 0; i < 32; i++) {
+      const trial = (low + high) / 2;
+      random.mockReturnValue(trial);
+      target.mockClear();
+      manager.update(dt, player);
+      if (target.mock.calls.length) low = trial;
+      else high = trial;
+    }
+    return low;
+  };
+  try {
+    expect(chanceInFrame(0)).toBe(0);
+    expect(chanceInFrame(1 / 60)).toBeCloseTo(.004, 8);
+    const chanceInSecond = 1 - (1 - .004) ** 60;
+    for (const fps of [30, 60, 120]) {
+      expect(1 - (1 - chanceInFrame(1 / fps)) ** fps).toBeCloseTo(chanceInSecond, 6);
+    }
+    const survival = (1 - chanceInFrame(.016)) * (1 - chanceInFrame(.033));
+    expect(survival).toBeCloseTo((1 - .004) ** (.049 * 60), 8);
+  } finally {
+    manager.dispose();
+  }
+});

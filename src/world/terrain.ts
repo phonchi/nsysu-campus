@@ -88,11 +88,11 @@ export class Terrain {
   maxUnder(poly: Point2[]) { let m = -Infinity; for (const [x, z] of poly) m = Math.max(m, this.heightAt(x, z)); return m; }
 
   /** Grid mesh for [x0,z0]-[x1,z1], skipping cells entirely inside `exclude` (the flat pad keeps its precise ground). */
-  mesh(bounds: [number, number, number, number], exclude?: (x: number, z: number) => boolean, step = 1) {
+  mesh(bounds: [number, number, number, number], exclude?: (x: number, z: number) => boolean, step = 1, visualCarves:Point2[][]=[]) {
     const { origin, cell, cols, rows } = this.meta, c = cell * step;
     const i0 = Math.max(0, Math.floor((bounds[0] - origin[0]) / cell)), i1 = Math.min(cols - 1, Math.ceil((bounds[2] - origin[0]) / cell));
     const j0 = Math.max(0, Math.floor((bounds[1] - origin[1]) / cell)), j1 = Math.min(rows - 1, Math.ceil((bounds[3] - origin[1]) / cell));
-    const pos: number[] = [], idx: number[] = [], vid = new Map<number, number>(),cutters=surfaceCutters(this.carves);
+    const pos: number[] = [], idx: number[] = [], vid = new Map<number, number>(),cutters=surfaceCutters([...this.carves,...visualCarves]);
     const vert = (i: number, j: number) => {
       const k = j * cols + i; let n = vid.get(k);
       if (n === undefined) {

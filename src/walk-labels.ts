@@ -2,13 +2,23 @@
 import * as T from 'three';
 import { FACULTY, BUILDING_FACULTY } from './walk-materials';
 
-export interface CampusLabel {id:string;name:string;sub?:string;position:T.Vector3;priority:number;faculty?:string;}
+export interface CampusLabel {
+ id:string;name:string;sub?:string;position:T.Vector3;priority:number;faculty?:string;
+ accent?:string; distance?:number; overviewDistance?:number; approach?:T.Vector3; reach?:number;
+}
 export function prioritizeCampusLabels<T extends {l:CampusLabel;d:number}>(candidates:readonly T[],focused?:string):T[]{return [...candidates].sort((a,b)=>Number(b.l.id===focused)-Number(a.l.id===focused)||a.l.priority-b.l.priority||a.d-b.d);}
 const safe=(s:string)=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 
 export class LabelLayer {
  readonly root:HTMLDivElement;
  private readonly nodes=new Map<string,HTMLButtonElement>();
+ private readonly sizes=new Map<string,{width:number;height:number}>();
+ private readonly measure=new ResizeObserver(entries=>{
+  for(const entry of entries){
+   const size=entry.borderBoxSize[0],id=(entry.target as HTMLButtonElement).dataset.label!;
+   if(size?.inlineSize&&size.blockSize)this.sizes.set(id,{width:size.inlineSize,height:size.blockSize});
+  }
+ });
  private readonly v=new T.Vector3();
  private focused?:string;
  setFocused(id?:string){this.focused=id;}
@@ -16,9 +26,9 @@ export class LabelLayer {
   this.root=document.createElement('div');this.root.className='walk-labels';this.root.setAttribute('aria-label','建築名牌');host.append(this.root);
   for(const l of labels){
    const b=document.createElement('button');b.className='walk-label';b.type='button';b.dataset.label=l.id;
-   const fac=FACULTY[l.faculty??BUILDING_FACULTY[l.id]??'admin'];b.style.setProperty('--accent',fac.ui);
+   const fac=FACULTY[l.faculty??BUILDING_FACULTY[l.id]??'admin'];b.style.setProperty('--accent',l.accent??fac.ui);
    b.innerHTML=`<span>${safe(l.name)}</span>${l.sub?`<small>${safe(l.sub)}</small>`:''}`;b.hidden=true;
-   b.addEventListener('click',e=>{e.stopPropagation();onSelect(l.id);});this.root.append(b);this.nodes.set(l.id,b);
+   b.addEventListener('click',e=>{e.stopPropagation();onSelect(l.id);});this.root.append(b);this.nodes.set(l.id,b);this.measure.observe(b);
   }
  }
  /** maxDistance limits labels in first/third-person walking; bird view shows the whole campus. */
@@ -31,7 +41,7 @@ export class LabelLayer {
  }
  update(camera:T.PerspectiveCamera,width:number,height:number,overview:boolean,avoid:DOMRect[]=[],now=performance.now()){
   const max=overview?(width<700?8:14):(width<700?3:5),limit=overview?2600:140,placed:{x0:number;y0:number;x1:number;y1:number}[]=avoid.map(r=>({x0:r.left,y0:r.top,x1:r.right,y1:r.bottom}));
-  const order=prioritizeCampusLabels(this.labels.map(l=>({l,d:camera.position.distanceTo(l.position)})).filter(o=>o.d<(overview?limit:limit*.6)),this.focused);
+  const order=prioritizeCampusLabels(this.labels.map(l=>({l,d:camera.position.distanceTo(l.position)})).filter(({l,d})=>d<(overview?l.overviewDistance??limit:l.distance??limit*.6)),this.focused);
   if(overview)this.occluded.clear();else if(now-this.lastOcclusion>150){this.lastOcclusion=now;this.refreshOcclusion(camera,order.slice(0,10).map(o=>o.l));}
   const shown=new Set<string>();
   for(const {l,d} of order){
@@ -39,11 +49,18 @@ export class LabelLayer {
    if(this.occluded.has(l.id))continue;
    this.v.copy(l.position).project(camera);if(this.v.z>1||this.v.z<-1)continue;
    const x=(this.v.x*.5+.5)*width,y=(-this.v.y*.5+.5)*height;if(x<8||x>width-8||y<70||y>height-40)continue;
-   const node=this.nodes.get(l.id)!,w=node.offsetWidth||l.name.length*15+28,h=node.offsetHeight||30,box={x0:x-w/2-4,y0:y-h-4,x1:x+w/2+4,y1:y+4};
+   const node=this.nodes.get(l.id)!,size=this.sizes.get(l.id),w=size?.width??Math.max(l.name.length*15,(l.sub?.length??0)*13)+28,h=size?.height??(l.sub?51:35);
+   if(w>width-8)continue;
+   const left=T.MathUtils.clamp(x-w/2,4,width-w-4);
+   const box={x0:left-4,y0:y-h-4,x1:left+w+4,y1:y+4};
    if(placed.some(p=>!(box.x1<p.x0||box.x0>p.x1||box.y1<p.y0||box.y0>p.y1)))continue;
-   placed.push(box);shown.add(l.id);node.style.transform=`translate(${Math.round(x-w/2)}px,${Math.round(y-h)}px)`;node.style.opacity=overview?String(T.MathUtils.clamp(1.15-d/limit,.6,1)):'1';
+   placed.push(box);shown.add(l.id);
+   const transform=`translate(${Math.round(left)}px,${Math.round(y-h)}px)`;
+   const opacity=overview?T.MathUtils.clamp(1.15-d/limit,.6,1).toFixed(2):'1';
+   if(node.style.transform!==transform)node.style.transform=transform;
+   if(node.style.opacity!==opacity)node.style.opacity=opacity;
   }
   for(const [id,node] of this.nodes){const on=shown.has(id);if(node.hidden===on)node.hidden=!on;}
  }
- dispose(){this.root.remove();this.nodes.clear();}
+ dispose(){this.measure.disconnect();this.root.remove();this.nodes.clear();this.sizes.clear();}
 }

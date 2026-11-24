@@ -27,7 +27,24 @@
   "yaw": -0.7278,
   "note": "v12：依 NLSC 2024 正射影像描圖重新對位（本機參考，artifacts/v12/reference/sports-trace.json）。中庭式院館群中心 (-564.5,-889.5)、長軸西北—東南 41.7°、外包約 87×42 m，信心中；量體仍為通用院館，拱廊面朝西南（海側）。",
   "elevation": 49.9,
-  "levelPad": [[-35, 7], [35, 7], [35, 26], [-35, 26]],
+  "levelPad": [
+   [
+    -35,
+    7
+   ],
+   [
+    35,
+    7
+   ],
+   [
+    35,
+    26
+   ],
+   [
+    -35,
+    26
+   ]
+  ],
   "levelPadNote": "拱廊平台與四階樓梯的 local X/Z 外包加 2 m；以樓梯前土壤 49.9 m 整平，避免高基座與上坡埋覆",
   "uncertainty_m": 8,
   "basis": "orthophoto-trace"
@@ -185,5 +202,79 @@
   ],
   "yaw": 0.0,
   "note": "OSM 11 點輪廓；入口立面推定朝東；海堤另見 seawall 套件。"
+ },
+ "hamasen-wude": {
+  "osmId": 203315651,
+  "centroid": [
+   606.72,
+   207.02
+  ],
+  "yaw": -0.5622,
+  "note": "高雄武德殿",
+  "elevation": 2.28,
+  "footings": false
+ },
+ "hamasen-temple": {
+  "osmId": 203577798,
+  "centroid": [
+   468.22,
+   434.75
+  ],
+  "yaw": 0.5525,
+  "note": "哈瑪星代天宮"
+ },
+ "hamasen-mrt-exit-1": {
+  "osmId": 310011987,
+  "centroid": [
+   705.73,
+   507.9
+  ],
+  "yaw": -2.1201,
+  "note": "高雄捷運哈瑪星站 1 號出口"
+ },
+ "hamasen-mrt-exit-2": {
+  "osmId": 303165537,
+  "centroid": [
+   910.59,
+   551.21
+  ],
+  "yaw": 2.5931,
+  "note": "高雄捷運哈瑪星站 2 號出口"
+ },
+ "hamasen-light-rail": {
+  "osmId": 1056803932,
+  "centroid": [
+   951.04,
+   549.14
+  ],
+  "yaw": 1.1808,
+  "note": "輕軌哈瑪星站"
+ },
+ "hamasen-railway-museum": {
+  "osmId": 203342621,
+  "centroid": [
+   931.08,
+   527.32
+  ],
+  "yaw": -1.9477,
+  "note": "舊打狗驛故事館／哈瑪星鐵道文化園區"
+ },
+ "hamasen-gushan-school": {
+  "osmId": 310010753,
+  "centroid": [
+   509.23,
+   290.17
+  ],
+  "yaw": -0.5583,
+  "note": "鼓山國小"
+ },
+ "hamasen-gushan-ferry": {
+  "osmId": 205060865,
+  "centroid": [
+   360.97,
+   732.55
+  ],
+  "yaw": 1.5708,
+  "note": "鼓山輪渡站"
  }
 }

@@ -1,9 +1,10 @@
 import './map.css';
 import { normalizeProgress } from '../story/engine';
-import { withGateMapBuilding, type MapBuilding } from './map-landmarks';
+import { HAMASEN_MAP_ALIASES, hamasenCardCategory, hamasenMarkerStyle, SHOP_MAP_SCALE, withGateMapBuilding, type HamasenMapPlace, type MapBuilding } from './map-landmarks';
 
 type P = [number, number];
 interface MapData {
+  hamasenPlaces?: HamasenMapPlace[];
   spawn: P; buildings: MapBuilding[]; background: P[][]; backgroundHoles?: Record<number,P[][]>;
   roads: { kind: string; width: number; points: P[] }[];
   railways?: { points: P[] }[];
@@ -59,6 +60,10 @@ export async function mountCampusMap(root: HTMLElement, base: string, hooks: Map
   ]);
 
   const data=withGateMapBuilding(rawData);
+  const hamasen = data.hamasenPlaces ?? [];
+  const placeById = new Map(hamasen.map(p => [p.id, p]));
+  const namedBuildings = data.buildings.filter(b => !placeById.has(HAMASEN_MAP_ALIASES[b.id]));
+  const searchPlaces = [...namedBuildings, ...hamasen];
   info.buildings.GATE ??= {name:'校門・校碑',summary:'校碑位於校門海側，警衛亭在山側。可在3D校園前往附近觀看。'};
   const mapPois=POIS.filter(p=>p.id!=='gate'||!data.buildings.some(b=>b.id==='GATE'));
 
@@ -76,7 +81,7 @@ export async function mountCampusMap(root: HTMLElement, base: string, hooks: Map
   const minZ = Math.min(...pts.map(p => p[1])) - 140, maxZ = Math.max(...pts.map(p => p[1])) + 140;
   const full = { x: minX, y: minZ, w: maxX - minX, h: maxZ - minZ };
   // First view frames the built-up campus; zooming out reaches the hillside pins.
-  const core = (() => { const q = data.buildings.flatMap(b => b.polygon), xs = q.map(p => p[0]), zs = q.map(p => p[1]); return { x: Math.min(...xs) - 60, y: Math.min(...zs) - 60, w: Math.max(...xs) - Math.min(...xs) + 120, h: Math.max(...zs) - Math.min(...zs) + 120 }; })();
+  const core = (() => { const q = [...data.buildings.flatMap(b => b.polygon), ...hamasen.map(p => p.poi.position)], xs = q.map(p => p[0]), zs = q.map(p => p[1]); return { x: Math.min(...xs) - 60, y: Math.min(...zs) - 60, w: Math.max(...xs) - Math.min(...xs) + 120, h: Math.max(...zs) - Math.min(...zs) + 120 }; })();
   const path = (p: P[], close = true) => p.map(([x, z], i) => `${i ? 'L' : 'M'}${x} ${z}`).join('') + (close ? 'Z' : '');
   const centroid = (p: P[]) => { let a = 0, cx = 0, cz = 0; for (let i = 0; i < p.length; i++) { const [x0, z0] = p[i], [x1, z1] = p[(i + 1) % p.length], f = x0 * z1 - x1 * z0; a += f; cx += (x0 + x1) * f; cz += (z0 + z1) * f; } return a ? [cx / (3 * a), cz / (3 * a)] as P : p[0]; };
   const area = (p: P[]) => Math.abs(p.reduce((s, [x0, z0], i) => { const [x1, z1] = p[(i + 1) % p.length]; return s + x0 * z1 - x1 * z0; }, 0)) / 2;
@@ -96,8 +101,13 @@ ${data.base ? `<image href="${asset(data.base.url)}" x="${data.base.bounds[0]}" 
 <g fill="none" stroke="#78736a" stroke-width="1.15">${(data.railways??[]).map(r=>`<path d="${path(r.points,false)}"/>`).join('')}</g>
 <g class="cm-bg">${data.background.map((p,i)=>`<path fill-rule="evenodd" d="${path(p)}${(data.backgroundHoles?.[i]??[]).map(h=>path(h)).join('')}"/>`).join('')}</g>
 <g class="cm-buildings">${data.buildings.map(b => `<g class="cm-b" data-id="${esc(b.id)}" data-kind="${b.kind}" tabindex="0" role="button" aria-label="${esc(b.name)}"><path fill-rule="evenodd" d="${b.id==='GATE'?'M0 0l-7-12a8 8 0 1 1 14 0z':path(b.polygon)+(b.holes??[]).map(h=>path(h)).join('')}" ${b.id==='GATE'?`transform="translate(${centroid(b.polygon).join(' ')})"`:''} style="--k:${KINDS[b.kind]?.color ?? '#c75f4a'}"/>${b.walkable ? `<path d="${path(b.polygon)}" class="cm-walk"/>` : ''}</g>`).join('')}</g>
-<g class="cm-labels">${[...data.buildings].sort((a, b) => rank(b) - rank(a) || area(b.polygon) - area(a.polygon)).map(b => { const [x, z] = centroid(b.polygon); return `<g class="cm-l" data-id="${esc(b.id)}" transform="translate(${x} ${b.id==='GATE'?z-26:z})"><text>${esc(b.name.replace(/（.*?）/g, ''))}</text></g>`; }).join('')}</g>
+<g class="cm-labels">${namedBuildings.sort((a, b) => rank(b) - rank(a) || area(b.polygon) - area(a.polygon)).map(b => { const [x, z] = centroid(b.polygon); return `<g class="cm-l" data-id="${esc(b.id)}" transform="translate(${x} ${b.id==='GATE'?z-26:z})"><text>${esc(b.name.replace(/（.*?）/g, ''))}</text></g>`; }).join('')}</g>
 ${mapPois.filter(p => data.landmarks?.[p.id]).map(p => { const [x, z] = data.landmarks![p.id].centroid; return `<g class="cm-poi" data-poi="${p.id}" transform="translate(${x} ${z})"><path d="M0 0l-7-12a8 8 0 1 1 14 0z"/><text y="-26">${esc(p.label)}</text></g>`; }).join('')}
+<g class="cm-hamasen">${hamasen.map(p => {
+  const {color,glyph}=hamasenMarkerStyle(p.category);
+  return `<g class="cm-b cm-hamasen-pin" data-id="${esc(p.id)}" data-poi-kind="${p.kind}" role="button" tabindex="0" aria-label="${esc(p.name)}" transform="translate(${p.poi.position.join(' ')})"><path d="M-9 0a9 9 0 1 0 18 0a9 9 0 1 0-18 0" style="--k:${color}"/><text>${glyph}</text></g>`;
+}).join('')}</g>
+<g class="cm-hamasen-labels">${hamasen.map(p=>`<g class="cm-l" data-poi-kind="${p.kind}" transform="translate(${p.poi.position.join(' ')})"><text>${esc(p.name)}</text></g>`).join('')}</g>
 <g class="cm-you" transform="translate(${data.spawn[0]} ${data.spawn[1]})"><circle r="9"/><text y="-14">起點・理工長廊</text></g>`;
 
   // ---- pan / zoom --------------------------------------------------------------------------
@@ -106,6 +116,7 @@ ${mapPois.filter(p => data.landmarks?.[p.id]).map(p => { const [x, z] = data.lan
     svg.setAttribute('viewBox', `${view.x} ${view.y} ${view.w} ${view.h}`);
     const px = svg.clientWidth / view.w || 1;
     svg.style.setProperty('--px', String(1 / px));
+    svg.classList.toggle('shows-shops', px >= SHOP_MAP_SCALE);
     root.querySelector<HTMLElement>('.cm-scale i')!.style.width = `${100 * px}px`;
     svg.classList.toggle('is-near', view.w < full.w * .55);
     declutter();
@@ -113,7 +124,7 @@ ${mapPois.filter(p => data.landmarks?.[p.id]).map(p => { const [x, z] = data.lan
   // Hide labels that would overlap a more important one (landmarks and pins first, then by footprint size).
   const declutter = () => {
     const placed: DOMRect[] = [];
-    const items = [...svg.querySelectorAll<SVGGElement>('.cm-poi, .cm-l')];
+    const items = [...svg.querySelectorAll<SVGGElement>('.cm-hamasen-labels .cm-l, .cm-poi, .cm-labels .cm-l')];
     for (const g of items) g.style.visibility = '';
     for (const g of items) {
       const r = g.getBoundingClientRect();
@@ -157,19 +168,23 @@ ${mapPois.filter(p => data.landmarks?.[p.id]).map(p => { const [x, z] = data.lan
     const b = (e.target as HTMLElement).closest<HTMLElement>('[data-kind]'); if (!b) return;
     const k = b.dataset.kind!; if (active.has(k)) active.delete(k); else active.add(k);
     b.classList.toggle('is-on', active.has(k)); b.setAttribute('aria-pressed', String(active.has(k)));
-    svg.querySelectorAll<SVGGElement>('.cm-b').forEach(g => g.classList.toggle('is-off', !active.has(g.dataset.kind!)));
+    svg.querySelectorAll<SVGGElement>('.cm-b[data-kind]').forEach(g => g.classList.toggle('is-off', !active.has(g.dataset.kind!)));
   });
   const select = (id: string, focus = false) => {
-    const b = data.buildings.find(x => x.id === id); if (!b) return;
+    if (placeById.has(HAMASEN_MAP_ALIASES[id])) id = HAMASEN_MAP_ALIASES[id];
+    const place = placeById.get(id), b = data.buildings.find(x => x.id === id);
+    if (!place && !b) return;
+    const name = place?.name ?? b!.name;
+    const style = place ? { label: hamasenCardCategory(place.kind, place.category), color: hamasenMarkerStyle(place.category).color } : KINDS[b!.kind];
     svg.querySelectorAll('.cm-b.is-sel').forEach(g => g.classList.remove('is-sel'));
     svg.querySelector(`.cm-b[data-id="${CSS.escape(id)}"]`)?.classList.add('is-sel');
-    const c = info.buildings[id] ?? { name: b.name };
+    const c = info.buildings[id] ?? { name };
     card.hidden = false;
-    card.innerHTML = `<button class="cm-close" aria-label="關閉">×</button><p class="cm-eyebrow" style="color:${KINDS[b.kind]?.color}">${KINDS[b.kind]?.label ?? ''}${b.walkable ? '・可走進室內' : ''}</p>
-<h2>${esc(c.name ?? b.name)}</h2>${c.summary ? `<p>${esc(c.summary)}</p>` : ''}${c.facts?.length ? `<ul>${c.facts.map(f => `<li>${esc(f)}</li>`).join('')}</ul>` : ''}
+    card.innerHTML = `<button class="cm-close" aria-label="關閉">×</button><p class="cm-eyebrow" style="color:${style?.color}">${esc(style?.label)}${b?.walkable ? '・可走進室內' : ''}</p>
+<h2>${esc(c.name ?? name)}</h2>${c.summary ? `<p>${esc(c.summary)}</p>` : ''}${c.facts?.length ? `<ul>${c.facts.map(f => `<li>${esc(f)}</li>`).join('')}</ul>` : ''}
 <div class="cm-actions"><button class="primary" data-go="target" data-id="${esc(id)}">在 3D 帶我去 →</button></div>
-${c.links?.length ? `<p class="cm-links">${c.links.map(l => `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join('')}</p>` : ''}`;
-    if (focus) { const [x, z] = centroid(b.polygon); view.w = Math.min(view.w, full.w * .45); view.h = view.w * svg.clientHeight / Math.max(1, svg.clientWidth); view.x = x - view.w / 2; view.y = z - view.h / 2; apply(); }
+${c.links?.length ? `<p class="cm-links">${c.links.map(l => `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join('')}</p>` : ''}`;
+    if (focus) { const [x, z] = place?.poi.position ?? centroid(b!.polygon); view.w = Math.min(view.w, full.w * .45); view.h = view.w * svg.clientHeight / Math.max(1, svg.clientWidth); view.x = x - view.w / 2; view.y = z - view.h / 2; apply(); }
     card.scrollTop = 0;
   };
   // Pointer capture retargets the click to the svg, so hit-test the point instead.
@@ -180,8 +195,8 @@ ${c.links?.length ? `<p class="cm-links">${c.links.map(l => `<a href="${esc(l.ur
   const search = root.querySelector<HTMLInputElement>('.cm-search input')!, results = root.querySelector<HTMLElement>('.cm-results')!;
   search.addEventListener('input', () => {
     const q = search.value.trim(); if (!q) { results.hidden = true; return; }
-    const hits = data.buildings.filter(b => (b.name + b.id + (info.buildings[b.id]?.name ?? '')).includes(q) || b.id.toLowerCase() === q.toLowerCase()).slice(0, 8);
-    results.innerHTML = hits.length ? hits.map(b => `<button data-pick="${esc(b.id)}">${esc(b.name)}<small>${KINDS[b.kind]?.label ?? ''}</small></button>`).join('') : '<p>找不到這棟建築。</p>';
+    const hits = searchPlaces.filter(b => (b.name + b.id + (info.buildings[b.id]?.name ?? '')).includes(q) || b.id.toLowerCase() === q.toLowerCase()).slice(0, 8);
+    results.innerHTML = hits.length ? hits.map(b => `<button data-pick="${esc(b.id)}">${esc(b.name)}<small>${esc('poi' in b ? hamasenCardCategory(b.kind, b.category) : KINDS[b.kind]?.label)}</small></button>`).join('') : '<p>找不到符合的地點。</p>';
     results.hidden = false;
   });
   results.addEventListener('click', e => { const id = (e.target as HTMLElement).closest<HTMLElement>('[data-pick]')?.dataset.pick; if (id) { results.hidden = true; search.value = ''; select(id, true); } });

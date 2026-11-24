@@ -86,11 +86,11 @@ export function geometryFootprints(g:T.BufferGeometry):Point2[][]{
  const p=g.attributes.position,ix=g.index,count=ix?.count??p.count,out:Point2[][]=[];
  for(let k=0;k<count;k+=3){const tri:[number,number][]=[];for(let j=0;j<3;j++){const n=ix?ix.getX(k+j):k+j;tri.push([p.getX(n),p.getZ(n)]);}out.push(tri);}return out;
 }
-export interface SurfaceRoad {id:string;kind:string;width:number;points:Point2[];tunnel?:boolean;bridge?:boolean}
+export interface SurfaceRoad {id:string;kind:string;width:number;points:Point2[];tunnel?:boolean;bridge?:boolean;visualOnly?:true}
 export interface RoadLayer {id:string;foot:boolean;base:T.BufferGeometry;markings?:T.BufferGeometry}
-export function buildRoadLayers(roads:readonly SurfaceRoad[],terrain:Terrain,box:[number,number,number,number],exclude:Point2[][]=[]):RoadLayer[]{
+export function buildRoadLayers(roads:readonly SurfaceRoad[],terrain:Terrain,box:[number,number,number,number],exclude:Point2[][]=[],southVisualLimit=box[3]):RoadLayer[]{
  const foot=(r:SurfaceRoad)=>['footway','path','steps','pedestrian','cycleway'].includes(r.kind);
- const paths=roads.filter(r=>!r.tunnel).sort((a,b)=>Number(foot(a))-Number(foot(b))||b.width-a.width).flatMap(r=>clippedRoadPaths(r.points,box).map(points=>{const source=roadRibbon(points,r.width);return {r,source,polys:geometryFootprints(source)};}));
+ const paths=roads.filter(r=>!r.tunnel).sort((a,b)=>Number(foot(a))-Number(foot(b))||b.width-a.width).flatMap(r=>clippedRoadPaths(r.points,r.visualOnly?[box[0],box[1],box[2],southVisualLimit]:box).map(points=>{const source=roadRibbon(points,r.width);return {r,source,polys:geometryFootprints(source)};}));
  const layers:RoadLayer[]=[],solid=surfaceCutters(exclude),used:Cutter[]=[];
  const all=paths.map(p=>surfaceCutters(p.polys));
  for(let k=0;k<paths.length;k++){
@@ -109,7 +109,9 @@ export function crosswalkStripes(roads:readonly SurfaceRoad[]):CrossingStripe[]{
  for(const f of usable.filter(foot))for(const r of usable.filter(r=>!foot(r)))for(let i=1;i<f.points.length;i++)for(let j=1;j<r.points.length;j++){
   const a=f.points[i-1],b=f.points[i],c=r.points[j-1],d=r.points[j],den=(b[0]-a[0])*(d[1]-c[1])-(b[1]-a[1])*(d[0]-c[0]);if(Math.abs(den)<1e-9)continue;
   const t=((c[0]-a[0])*(d[1]-c[1])-(c[1]-a[1])*(d[0]-c[0]))/den,u=((c[0]-a[0])*(b[1]-a[1])-(c[1]-a[1])*(b[0]-a[0]))/den;if(t<0||t>1||u<0||u>1)continue;
-  const x=a[0]+(b[0]-a[0])*t,z=a[1]+(b[1]-a[1])*t;if(centres.some(p=>Math.hypot(p[0]-x,p[1]-z)<6))continue;centres.push([x,z]);
+  const x=a[0]+(b[0]-a[0])*t,z=a[1]+(b[1]-a[1])*t;
+  if(r.id.startsWith('hamasen-')&&Math.hypot(x-309.93,z-236.77)<12)continue; // East portal uses the photo-informed crossing placement.
+  if(centres.some(p=>Math.hypot(p[0]-x,p[1]-z)<6))continue;centres.push([x,z]);
   const len=Math.hypot(d[0]-c[0],d[1]-c[1]),ux=(d[0]-c[0])/len,uz=(d[1]-c[1])/len;
   for(let k=-2;k<=2;k++){const cx=x+ux*k*.9,cz=z+uz*k*.9;out.push({roadId:r.id,polygon:[[-.225,-r.width*.45],[.225,-r.width*.45],[.225,r.width*.45],[-.225,r.width*.45]].map(([along,across])=>[cx+along*ux-across*uz,cz+along*uz+across*ux])});}
  }

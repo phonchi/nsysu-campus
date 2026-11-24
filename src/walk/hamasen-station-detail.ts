@@ -3,6 +3,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import type { ContextBuilding, Point2 } from '../walk-types';
 import { projectRoadGeometry } from '../world/road-surface';
 import type { Terrain } from '../world/terrain';
+import { isHamasenModelFootprint } from '../world/landmarks';
 
 /** Exterior detail from the Hamasen ground photographs. The data footprint
  * provides the alignment. Architectural depths and heights are modelled. */
@@ -10,10 +11,12 @@ export function hamasenStationDetails(stations: readonly ContextBuilding[], terr
   const group = new T.Group();
   group.name = 'Hamasen station entrance details';
   group.userData.terrainSeated = true;
+  const procedural = stations.filter(station =>
+    (station.stationExit === 1 || station.stationExit === 2) && !isHamasenModelFootprint(station.id));
+  if (!procedural.length) return group;
   const shell = new T.MeshStandardMaterial({ vertexColors: true, roughness: .85, side: T.DoubleSide });
   const glass = new T.MeshStandardMaterial({ vertexColors: true, roughness: .33, metalness: .16, side: T.DoubleSide });
-  for (const station of stations) {
-    if (station.stationExit !== 1 && station.stationExit !== 2) continue;
+  for (const station of procedural) {
     const face = frontage(station, terrain);
     if (!face) continue;
     const batch = stationBatch(face);

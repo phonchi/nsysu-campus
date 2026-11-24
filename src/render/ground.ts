@@ -100,28 +100,57 @@ export function setLawnMask(m: T.Material, mask: GroundMask) {
 
 /** Grass tufts around the player: cross quads with a painted blade texture, rooted on the ground, swaying. */
 export interface GrassPlacement { x: number; z: number; scale: number; yaw: number; seed: number; surface: SoilSurface }
-/** Deterministic candidates are shared by the renderer and the whole-campus audit. */
-export function* grassPlacements(field: GrowableSurfaceField, player: { x: number; z: number }, radius = 55): Generator<GrassPlacement> {
+/** Yield at each cell, even on empty ground, so large stretches of rejected cells can be time-sliced. */
+function* grassCells(field: GrowableSurfaceField, player: { x: number; z: number }, radius: number): Generator<GrassPlacement | undefined, void> {
   const cell = 1.6, i0 = Math.floor((player.x - radius) / cell), i1 = Math.ceil((player.x + radius) / cell), k0 = Math.floor((player.z - radius) / cell), k1 = Math.ceil((player.z + radius) / cell);
   for (let k = k0; k <= k1; k++) for (let i = i0; i <= i1; i++) {
     const h = Math.sin(i * 127.1 + k * 311.7) * 43758.5453, r = h - Math.floor(h);
-    if (r > .55) continue;
+    if (r > .55) { yield undefined; continue; }
     const x = (i + r * 1.7) * cell, z = (k + ((r * 7.3) % 1)) * cell, scale = .7 + r * .9;
-    if (Math.hypot(x - player.x, z - player.z) > radius) continue;
+    if (Math.hypot(x - player.x, z - player.z) > radius) { yield undefined; continue; }
     const surface = field.sample(x, z, scale);
-    if (surface) yield { x, z, scale, yaw: r * 40, seed: r, surface };
+    yield surface ? { x, z, scale, yaw: r * 40, seed: r, surface } : undefined;
   }
 }
+
+/** Deterministic candidates shared by the renderer and the whole-campus audit. */
+export function* grassPlacements(field: GrowableSurfaceField, player: { x: number; z: number }, radius = 55): Generator<GrassPlacement> {
+  for (const placement of grassCells(field, player, radius)) if (placement) yield placement;
+}
+
+interface GrassRefill {
+  centre: T.Vector3;
+  revision: number;
+  scan: ReturnType<typeof grassCells>;
+  placements: GrassPlacement[];
+}
+
+const GRASS_REFILL_DISTANCE = 12;
+const GRASS_REFILL_BUDGET_MS = 2;
 
 export class GrassTufts {
   readonly mesh: T.InstancedMesh;
   private centre = new T.Vector3(1e9, 0, 1e9);
-  private o = new T.Object3D();
+  private readonly transform = new T.Object3D();
+  private readonly up = new T.Vector3(0, 1, 0);
+  private readonly yaw = new T.Quaternion();
+  private readonly color = new T.Color();
+  private readonly stagedMatrices: Float32Array;
+  private readonly stagedColors: Float32Array;
   private revision = -1;
   private placements: GrassPlacement[] = [];
+  private refill?: GrassRefill;
   /** Tier budget (≤ count); changing it refills on the next update. */
   get limit() { return this.max; }
-  set limit(n: number) { this.max = Math.min(this.count, n); this.centre.set(1e9, 0, 1e9); if (!n) { this.mesh.count = 0; this.placements = []; } }
+  set limit(n: number) {
+    const next = Math.min(this.count, n);
+    if (next === this.max) return;
+    this.max = next;
+    this.refill = undefined;
+    this.centre.set(1e9, 0, 1e9);
+    this.mesh.count = Math.min(this.mesh.count, this.max);
+    this.placements.length = this.mesh.count;
+  }
   private max: number;
   constructor(readonly count: number, private field: GrowableSurfaceField, private radius = 55) {
     const g = new T.BufferGeometry(), pos: number[] = [], uv: number[] = [], idx: number[] = [];
@@ -149,26 +178,68 @@ export class GrassTufts {
     m.customProgramCacheKey = () => 'toon-tuft';
     this.mesh = new T.InstancedMesh(g, m, count);
     this.mesh.name = 'Grass tufts'; this.mesh.frustumCulled = false; this.mesh.count = 0; this.mesh.receiveShadow = true;
+    this.mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);
+    // Install the color attribute before shader warmup so the first refill uses the same program.
+    this.mesh.instanceColor = new T.InstancedBufferAttribute(new Float32Array(count * 3), 3).setUsage(T.DynamicDrawUsage);
+    this.stagedMatrices = new Float32Array(count * 16);
+    this.stagedColors = new Float32Array(count * 3);
     this.max = count;
   }
 
   /** Refill when the player has moved more than 12 m from the last fill centre. */
   update(player: T.Vector3) {
-    if (!this.field.ready) { this.mesh.count = 0; this.placements = []; return; }
-    if (!this.max || (this.revision === this.field.revision && Math.hypot(player.x - this.centre.x, player.z - this.centre.z) < 12 && Math.abs(player.y - this.centre.y) < 2)) return;
-    this.centre.copy(player);
-    this.revision = this.field.revision; this.placements = [];
-    const c = new T.Color(), up = new T.Vector3(0, 1, 0), yaw = new T.Quaternion(); let n = 0;
-    for (const placement of grassPlacements(this.field, player, this.radius)) {
-      if (n >= this.max) break;
-      const { x, z, scale, seed: r, surface } = placement;
-      this.o.position.set(x, surface.height, z);
-      this.o.quaternion.setFromUnitVectors(up, surface.normal).multiply(yaw.setFromAxisAngle(up, placement.yaw));
-      this.o.scale.setScalar(scale); this.o.updateMatrix();
-      this.mesh.setMatrixAt(n, this.o.matrix); c.setHSL(.22 + (r - .3) * .06, .25, .82 + r * .16); this.mesh.setColorAt(n, c); n++;
-      this.placements.push(placement);
+    if (!this.field.ready || this.revision !== this.field.revision) {
+      // Changed support or blockers can invalidate visible roots immediately.
+      this.mesh.count = 0;
+      this.placements.length = 0;
     }
-    this.mesh.count = n; this.mesh.instanceMatrix.needsUpdate = true; if (this.mesh.instanceColor) this.mesh.instanceColor.needsUpdate = true;
+    if (!this.field.ready || !this.max) { this.refill = undefined; return; }
+    const distanceTo = (p: T.Vector3) => Math.hypot(player.x - p.x, player.z - p.z);
+    if (!this.refill && this.revision === this.field.revision &&
+        distanceTo(this.centre) < GRASS_REFILL_DISTANCE && Math.abs(player.y - this.centre.y) < 2) return;
+    if (!this.refill || this.refill.revision !== this.field.revision ||
+        distanceTo(this.refill.centre) > GRASS_REFILL_DISTANCE * 2 || Math.abs(player.y - this.refill.centre.y) > 4) {
+      const centre = player.clone();
+      this.refill = { centre, revision: this.field.revision, scan: grassCells(this.field, centre, this.radius), placements: [] };
+    }
+    const refill = this.refill;
+    const deadline = performance.now() + GRASS_REFILL_BUDGET_MS;
+    do {
+      const cell = refill.scan.next();
+      if (cell.done) { this.publish(refill); return; }
+      const placement = cell.value;
+      if (!placement) continue;
+      const { x, z, scale, seed: r, surface } = placement;
+      const index = refill.placements.length;
+      this.transform.position.set(x, surface.height, z);
+      this.transform.quaternion.setFromUnitVectors(this.up, surface.normal).multiply(this.yaw.setFromAxisAngle(this.up, placement.yaw));
+      this.transform.scale.setScalar(scale);
+      this.transform.updateMatrix();
+      this.transform.matrix.toArray(this.stagedMatrices, index * 16);
+      this.color.setHSL(.22 + (r - .3) * .06, .25, .82 + r * .16).toArray(this.stagedColors, index * 3);
+      refill.placements.push(placement);
+      if (refill.placements.length === this.max) { this.publish(refill); return; }
+    } while (performance.now() < deadline);
+  }
+
+  /** Show the previous complete patch during a refill, then upload the new instance prefix once. */
+  private publish(refill: GrassRefill) {
+    const count = refill.placements.length;
+    const { instanceMatrix, instanceColor } = this.mesh;
+    if (count && instanceColor) {
+      for (const [attribute, source, size] of [[instanceMatrix, this.stagedMatrices, 16], [instanceColor, this.stagedColors, 3]] as const) {
+        const length = count * size;
+        (attribute.array as Float32Array).set(source.subarray(0, length));
+        attribute.clearUpdateRanges();
+        attribute.addUpdateRange(0, length);
+        attribute.needsUpdate = true;
+      }
+    }
+    this.mesh.count = count;
+    this.placements = refill.placements;
+    this.centre.copy(refill.centre);
+    this.revision = refill.revision;
+    this.refill = undefined;
   }
   /** Read-only observations of the actual instance transforms, not recomputed ideal roots. */
   get diagnostics() {

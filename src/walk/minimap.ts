@@ -1,22 +1,30 @@
 import type { Vector3 } from 'three';
-import { contentBounds, layoutMapLabels, mapMarkerRadius, graphPathSegments, pathLayerAlpha, pointAt, pointInPolygon, polygonCenter, type MapBounds, type MapPoint, type OutdoorMapGraph } from './campus-map-view';
+import { contentBounds, layoutMapLabels, mapMarkerRadius, graphPathSegments, pathLayerAlpha, pointAt, pointInPolygon, polygonCenter, type MapBounds, type MapPoint, type OutdoorMapGraph, type PlacedMapLabel } from './campus-map-view';
+import { HAMASEN_MAP_ALIASES, hamasenMarkerStyle, SHOP_MAP_SCALE, type HamasenMapPlace } from '../map/map-landmarks';
 
 type P = [number, number];
-export interface MapLabel { id: string; label: string; x: number; z: number; priority: number; minScale?: number }
+export interface MapLabel { id: string; label: string; x: number; z: number; priority: number; minScale?: number; major?: boolean }
 export interface MapBuilding { id: string; name: string; kind: string; walkable: boolean; polygon: P[]; holes?: P[][] }
-interface MapData { base?: { url: string; bounds: [number, number, number, number] }; buildings: MapBuilding[]; background: P[][]; backgroundHoles?: Record<number,P[][]>; roads: { kind: string; width: number; points: P[] }[]; railways?: { points: P[] }[] }
+interface MapData { base?: { url: string; bounds: [number, number, number, number] }; buildings: MapBuilding[]; background: P[][]; backgroundHoles?: Record<number,P[][]>; roads: { kind: string; width: number; points: P[] }[]; railways?: { points: P[] }[]; hamasenPlaces?: HamasenMapPlace[] }
 const KIND: Record<string, string> = { teaching: '#c75f4a', admin: '#e9b949', life: '#4d9a44', scenic: '#2c7f91' };
 
 /** The label sources used by the overview, shared with actual-data uniqueness checks. */
 export function collectMapLabels(buildings: readonly MapBuilding[], places: readonly MapLabel[], markers: readonly MapMarker[], graphLabels: readonly MapLabel[], selected?: string): MapLabel[] {
-  return [...graphLabels, ...places, ...buildings.filter(b => !places.some(p => p.id === `building:${b.id}`)).map(b => {
+  const markerIds = new Set(markers.map(m => m.id));
+  return [...graphLabels, ...places, ...buildings.filter(b => !markerIds.has(HAMASEN_MAP_ALIASES[b.id]) && !places.some(p => p.id === `building:${b.id}`)).map(b => {
     const [x, z] = polygonCenter(b.polygon);
     return { id: `building:${b.id}`, label: b.name, x, z, priority: b.walkable ? 4 : 2, minScale: b.walkable ? .35 : .65 };
-  }), ...markers.map(m => ({ ...m, priority: m.id === selected ? 20 : 1, minScale: m.id === selected ? 0 : .8 }))];
+  }), ...markers.map(m => ({ ...m, major: m.poi?.kind === 'landmark', priority: m.id === selected ? 30 : m.poi?.kind === 'landmark' ? 9 + m.label.length : 1,
+    minScale: m.id === selected ? 0 : m.poi?.kind === 'shop' ? 1.35 : .8 }))];
 }
 
 export type MapMarkerKind = 'quest' | 'bike' | 'stamp' | 'bus' | 'restroom' | 'place' | 'building';
-export interface MapMarker { id: string; kind: MapMarkerKind; x: number; y: number; z: number; label: string; buildingId?: string }
+export interface MapMarker { id: string; kind: MapMarkerKind; x: number; y: number; z: number; label: string; buildingId?: string; poi?: HamasenMapPlace }
+export const hamasenMapMarkers = (places: readonly HamasenMapPlace[]): MapMarker[] => places.map(place => {
+  const [x, z] = place.poi.position;
+  return { id: place.id, kind: 'place', label: place.name, x, y: place.poi.approach[1], z, poi: place };
+});
+export const markerVisible = (marker: MapMarker, scale: number) => marker.poi?.kind !== 'shop' || scale >= SHOP_MAP_SCALE;
 export interface MapFrame { x0: number; z0: number; scale: number; width: number; height: number }
 /** Full base-sheet fallback; the overview derives its initial extent from loaded content. */
 export const CAMPUS_VIEW = { x0: -900, z0: -1100, x1: 1008, z1: 752 };
@@ -34,6 +42,7 @@ export const frameY = (f: MapFrame, z: number) => (z - f.z0) * f.scale;
 export function pickMarker(markers: readonly MapMarker[], frame: MapFrame, px: number, py: number, reach = 24) {
   let best: MapMarker | undefined, bestD = reach;
   for (const m of markers) {
+    if (!markerVisible(m, frame.scale)) continue;
     const d = Math.hypot(frameX(frame, m.x) - px, frameY(frame, m.z) - py);
     if (d <= bestD) { best = m; bestD = d; }
   }
@@ -46,6 +55,7 @@ export class CampusMinimap {
   private sheet?: HTMLCanvasElement;
   private paths?: Path2D;
   private graphLabels: MapLabel[] = [];
+  private overviewLabels: PlacedMapLabel[] = [];
   buildings: readonly MapBuilding[] = [];
   destinationMarkers: readonly MapMarker[] = [];
   private background: readonly MapPoint[] = [];
@@ -55,6 +65,7 @@ export class CampusMinimap {
     const data = await fetch(asset('data/campus-map.json')).then(r => r.json() as Promise<MapData>);
     this.buildings = data.buildings;
     this.background = data.background.flat();
+    this.destinationMarkers = hamasenMapMarkers(data.hamasenPlaces ?? []);
     if (!data.base) return;
     const img = new Image(); img.src = asset(data.base.url); await img.decode();
     const [x0, z0, x1, z1] = this.bounds = data.base.bounds;
@@ -87,7 +98,7 @@ export class CampusMinimap {
       // The marine-sciences building has a graph anchor but no footprint in campus-map.json.
       const marine = graph.nodes.find(node => node.id === graph.anchors?.MA?.node);
       if (marine) this.graphLabels = [{ id: 'building:MA', label: '海洋科學學院', x: marine.p[0], z: marine.p[2], priority: 8 }];
-      this.destinationMarkers = this.buildings.filter(b => /^hamasen-exit-[12]$/.test(b.id) || b.id === 'hamasen-rail-park').flatMap(b => {
+      if (!this.destinationMarkers.length) this.destinationMarkers = this.buildings.filter(b => /^hamasen-exit-[12]$/.test(b.id) || b.id === 'hamasen-rail-park').flatMap(b => {
         const node = graph.nodes.find(n => n.id === graph.anchors?.[b.id]?.node);
         if (!node) return [];
         const [x, y, z] = node.p;
@@ -111,11 +122,17 @@ export class CampusMinimap {
     const point=pointAt(frame,px,py);
     return this.buildings.find(b=>pointInPolygon(point,b.polygon)&&!b.holes?.some(h=>pointInPolygon(point,h)));
   }
+  pickPlaceLabel(px: number, py: number, markers: readonly MapMarker[]) {
+    const hit = this.overviewLabels.find(l => px >= l.x && px <= l.x + l.width && py >= l.y && py <= l.y + l.height);
+    return hit && markers.find(m => m.id === hit.id && m.poi);
+  }
+  get overviewLabelIds() { return this.overviewLabels.map(label => label.id); }
   get ready() { return !!this.sheet; }
 
   /** The menu's full map: drawn on demand from the existing sheet, so it adds one small canvas and no 3D work. */
   drawOverview(ctx: CanvasRenderingContext2D, frame: MapFrame, markers: readonly MapMarker[], selected: string | undefined, foot: Vector3, yaw: number, goal?: Vector3, places: readonly MapLabel[] = []) {
     if (!this.sheet) return false;
+    markers = markers.filter(m => markerVisible(m, frame.scale));
     const [bx, bz] = this.bounds;
     ctx.fillStyle = '#e9e1cc'; ctx.fillRect(0, 0, frame.width, frame.height);
     ctx.drawImage(this.sheet, (bx - frame.x0) * frame.scale, (bz - frame.z0) * frame.scale, this.sheet.width * frame.scale, this.sheet.height * frame.scale);
@@ -140,11 +157,17 @@ export class CampusMinimap {
     const labels = collectMapLabels(this.buildings, places, markers, this.graphLabels, selected);
     for (const m of markers) {
       const x = frameX(frame, m.x), y = frameY(frame, m.z), r = mapMarkerRadius(frame.scale, m.id === selected);
-      ctx.fillStyle = MARKER_STYLE[m.kind].color; ctx.strokeStyle = '#2a2c4a'; ctx.lineWidth = m.id === selected ? 3 : 1.5;
+      const style = m.poi ? hamasenMarkerStyle(m.poi.category) : MARKER_STYLE[m.kind];
+      ctx.fillStyle = style.color; ctx.strokeStyle = '#2a2c4a'; ctx.lineWidth = m.id === selected ? 3 : 1.5;
       ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-      if (frame.scale >= .55) { ctx.fillStyle = m.kind === 'quest' ? '#2a2c4a' : '#fff'; ctx.fillText(MARKER_STYLE[m.kind].glyph, x, y + .5); }
+      if (frame.scale >= .55 || m.poi || m.kind === 'bus') {
+        ctx.font = `700 ${frame.scale < .55 ? 9 : 12}px "Noto Sans TC",sans-serif`;
+        ctx.fillStyle = m.kind === 'quest' ? '#2a2c4a' : '#fff'; ctx.fillText(style.glyph, x, y + .5);
+      }
     }
-    for (const l of layoutMapLabels(labels, frame, text => ctx.measureText(text).width, blocked)) {
+    ctx.font = '700 12px "Noto Sans TC",sans-serif';
+    this.overviewLabels = layoutMapLabels(labels, frame, text => ctx.measureText(text).width, blocked);
+    for (const l of this.overviewLabels) {
       const ex = Math.max(l.x, Math.min(l.x + l.width, l.anchorX)), ey = Math.max(l.y, Math.min(l.y + l.height, l.anchorY));
       ctx.strokeStyle = '#2a2c4a80'; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(l.anchorX, l.anchorY); ctx.lineTo(ex, ey); ctx.stroke();
@@ -165,13 +188,25 @@ export class CampusMinimap {
     return true;
   }
 
-  draw(ctx: CanvasRenderingContext2D, foot: Vector3, yaw: number, goal?: Vector3, W = 280, H = 220) {
+  draw(ctx: CanvasRenderingContext2D, foot: Vector3, yaw: number, goal?: Vector3, W = 280, H = 220, buses: readonly MapMarker[] = []) {
     if (!this.sheet) return false;
     const zoom = 1.4, [x0, z0] = this.bounds;
     ctx.save();
     ctx.fillStyle = '#e9e1cc'; ctx.fillRect(0, 0, W, H);
     ctx.translate(W / 2, H / 2); ctx.scale(zoom, zoom); ctx.translate(-(foot.x - x0), -(foot.z - z0));
     ctx.drawImage(this.sheet, 0, 0);
+    ctx.restore();
+    ctx.save();
+    ctx.font = '700 10px "Noto Sans TC",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    for (const marker of [...this.destinationMarkers, ...buses]) {
+      if (!markerVisible(marker, zoom)) continue;
+      const x = W / 2 + (marker.x - foot.x) * zoom, y = H / 2 + (marker.z - foot.z) * zoom;
+      if (x < 8 || x > W - 8 || y < 8 || y > H - 8) continue;
+      const { color, glyph } = marker.poi ? hamasenMarkerStyle(marker.poi.category) : MARKER_STYLE[marker.kind];
+      ctx.fillStyle = color; ctx.strokeStyle = '#fffdf8'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fff'; ctx.fillText(glyph, x, y);
+    }
     ctx.restore();
     if (goal) {
       // Goal: gold pin, clamped to the edge when far away.

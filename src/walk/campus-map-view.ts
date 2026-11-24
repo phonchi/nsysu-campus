@@ -95,7 +95,7 @@ export interface PlacedMapLabel extends LabelBox { id: string; label: string; an
 export function layoutMapLabels(labels: readonly MapLabel[], frame: MapFrame, measure: (text: string) => number, blocked: readonly LabelBox[]): PlacedMapLabel[] {
   const out: PlacedMapLabel[] = [], occupied = [...blocked];
   const placedIds = new Set<string>(), placedTexts = new Set<string>();
-  const ranked = labels.map(l => MAJOR_MAP_NAMES[l.id] ? { ...l, label: MAJOR_MAP_NAMES[l.id], priority: 100 + l.priority, minScale: 0 } : l).sort((a, b) => b.priority - a.priority);
+  const ranked = labels.map(l => l.major || MAJOR_MAP_NAMES[l.id] ? { ...l, label: MAJOR_MAP_NAMES[l.id] ?? l.label, priority: 100 + l.priority, minScale: 0 } : l).sort((a, b) => b.priority - a.priority);
   for (const l of ranked) {
     if (placedIds.has(l.id) || placedTexts.has(l.label)) continue;
     if (frame.scale < (l.minScale ?? 0)) continue;
@@ -103,10 +103,11 @@ export function layoutMapLabels(labels: readonly MapLabel[], frame: MapFrame, me
     if (ax < 0 || ay < 0 || ax > frame.width || ay > frame.height) continue;
     const width = measure(l.label) + 8, height = 20;
     if (width > frame.width - 8) continue;
-    const candidates = [[ax - width / 2, ay + 12], [ax + 12, ay - height / 2], [ax - width - 12, ay - height / 2], [ax - width / 2, ay - height - 12]];
+    const gap = frame.scale >= .55 ? 19 : 12;
+    const candidates = [[ax - width / 2, ay + gap], [ax + gap, ay - height / 2], [ax - width - gap, ay - height / 2], [ax - width / 2, ay - height - gap]];
     // Use nearby rows and the open space beside the campus, rather than moving a crowded
     // core label far south onto a different building (SC could previously move 168 px).
-    if (MAJOR_MAP_NAMES[l.id]) for (const offset of [12, 36, 60, 84, 108, 132]) for (const dy of [0, -24, 24, -48, 48]) {
+    if (l.major || MAJOR_MAP_NAMES[l.id]) for (const offset of [12, 36, 60, 84, 108, 132]) for (const dy of (l.major ? [0, -24, 24, -48, 48, -72, 72, -96, 96, -120, 120, -144, 144] : [0, -24, 24, -48, 48])) {
       candidates.push([ax + offset, ay + dy - height / 2], [ax - width - offset, ay + dy - height / 2]);
     }
     for (const [x, y] of candidates) {

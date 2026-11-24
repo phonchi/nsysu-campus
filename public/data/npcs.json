@@ -1380,6 +1380,292 @@
    "sourceFiles": [
     "data/sources/sea/sports-venue-rules-20231208.pdf"
    ]
+  },
+  {
+   "id": "hms-temple-auntie",
+   "name": "阿美姨",
+   "role": "代天宮廟口攤販",
+   "model": "npc-clerk",
+   "look": {
+    "hair": "#3a2a24",
+    "top": "#c85a48",
+    "bottom": "#3c4a5c",
+    "shoes": "#2a2c4a"
+   },
+   "portrait": {
+    "skin": "#e9bf98",
+    "hair": "#3a2a24",
+    "hairStyle": "bun",
+    "top": "#c85a48",
+    "topStyle": "apron"
+   },
+   "schedule": {
+    "day": {
+     "at": [
+      477.14,
+      449.32
+     ],
+     "offset": [
+      0,
+      0
+     ],
+     "activity": "Idle"
+    },
+    "sunset": {
+     "at": [
+      477.14,
+      449.32
+     ],
+     "offset": [
+      0,
+      0
+     ],
+     "activity": "Talk"
+    },
+    "night": {
+     "at": [
+      477.14,
+      449.32
+     ],
+     "offset": [
+      0,
+      0
+     ],
+     "activity": "Idle"
+    }
+   },
+   "talk": "hms-temple-auntie",
+   "district": "hamasen"
+  },
+  {
+   "id": "hms-mrt-senior",
+   "name": "承翰學長",
+   "role": "中山大四・通勤達人",
+   "model": "npc-student-3",
+   "look": {
+    "hair": "#1f1a18",
+    "top": "#3a6ea5",
+    "bottom": "#2f3e4e",
+    "bag": "#2a2c4a",
+    "shoes": "#fbf6ea"
+   },
+   "portrait": {
+    "skin": "#e9bf98",
+    "hair": "#1f1a18",
+    "hairStyle": "short",
+    "top": "#3a6ea5",
+    "topStyle": "hoodie",
+    "accessory": "headphones"
+   },
+   "schedule": {
+    "day": {
+     "at": [
+      695.87,
+      493.15
+     ],
+     "offset": [
+      0,
+      0
+     ],
+     "activity": "Idle"
+    },
+    "sunset": {
+     "at": [
+      695.87,
+      493.15
+     ],
+     "offset": [
+      0,
+      0
+     ],
+     "activity": "Wave"
+    },
+    "night": {
+     "at": [
+      695.87,
+      493.15
+     ],
+     "offset": [
+      0,
+      0
+     ],
+     "activity": "Idle"
+    }
+   },
+   "talk": "hms-mrt-senior",
+   "district": "hamasen"
+  },
+  {
+   "id": "hms-ice-boss",
+   "name": "阿雄哥",
+   "role": "渡船頭冰店老闆",
+   "model": "npc-clerk",
+   "look": {
+    "hair": "#2b2622",
+    "top": "#4a9cb8",
+    "bottom": "#3b4754",
+    "shoes": "#6b6f78"
+   },
+   "portrait": {
+    "skin": "#d9a77f",
+    "hair": "#2b2622",
+    "hairStyle": "short",
+    "top": "#4a9cb8",
+    "topStyle": "apron",
+    "accessory": "cap"
+   },
+   "schedule": {
+    "day": {
+     "at": [
+      458.65,
+      724.01
+     ],
+     "offset": [
+      0,
+      0
+     ],
+     "activity": "Wave"
+    },
+    "sunset": {
+     "at": [
+      458.65,
+      724.01
+     ],
+     "offset": [
+      0,
+      0
+     ],
+     "activity": "Idle"
+    },
+    "night": {
+     "at": [
+      458.65,
+      724.01
+     ],
+     "offset": [
+      0,
+      0
+     ],
+     "activity": "Idle"
+    }
+   },
+   "talk": "hms-ice-boss",
+   "district": "hamasen"
+  },
+  {
+   "id": "hms-butokuden-uncle",
+   "name": "添福伯",
+   "role": "鼓山老街散步阿伯",
+   "model": "npc-teacher",
+   "look": {
+    "hair": "#c9c4bb",
+    "top": "#6d8b6b",
+    "bottom": "#5b5247",
+    "shoes": "#3a3530"
+   },
+   "portrait": {
+    "skin": "#d9a77f",
+    "hair": "#c9c4bb",
+    "hairStyle": "grey",
+    "top": "#6d8b6b",
+    "topStyle": "shirt",
+    "accessory": "glasses"
+   },
+   "schedule": {
+    "day": {
+     "at": [
+      590.69,
+      223.28
+     ],
+     "offset": [
+      0,
+      0
+     ],
+     "activity": "Idle"
+    },
+    "sunset": {
+     "at": [
+      590.69,
+      223.28
+     ],
+     "offset": [
+      0,
+      0
+     ],
+     "activity": "Idle"
+    },
+    "night": {
+     "at": [
+      590.69,
+      223.28
+     ],
+     "offset": [
+      0,
+      0
+     ],
+     "activity": "Idle"
+    }
+   },
+   "talk": "hms-butokuden-uncle",
+   "district": "hamasen"
+  },
+  {
+   "id": "hms-rail-volunteer",
+   "name": "雅婷姊",
+   "role": "鐵道園區導覽志工",
+   "model": "npc-volunteer",
+   "look": {
+    "hair": "#3a2a24",
+    "top": "#e09f3e",
+    "bottom": "#3c4a5c",
+    "bag": "#7d5a3b",
+    "shoes": "#fbf6ea"
+   },
+   "portrait": {
+    "skin": "#f2c9a5",
+    "hair": "#3a2a24",
+    "hairStyle": "ponytail",
+    "top": "#e09f3e",
+    "topStyle": "vest",
+    "accessory": "nametag"
+   },
+   "schedule": {
+    "day": {
+     "at": [
+      919.0,
+      530.2
+     ],
+     "offset": [
+      0,
+      0
+     ],
+     "activity": "Wave"
+    },
+    "sunset": {
+     "at": [
+      919.0,
+      530.2
+     ],
+     "offset": [
+      0,
+      0
+     ],
+     "activity": "Idle"
+    },
+    "night": {
+     "at": [
+      919.0,
+      530.2
+     ],
+     "offset": [
+      0,
+      0
+     ],
+     "activity": "Idle"
+    }
+   },
+   "talk": "hms-rail-volunteer",
+   "district": "hamasen"
   }
  ],
  "trees": {
@@ -6840,6 +7126,526 @@
      ]
     }
    }
+  },
+  "hms-temple-auntie": {
+   "entries": [
+    {
+     "if": {
+      "flag": "hms-temple-auntie.met"
+     },
+     "node": "again"
+    },
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "root": {
+     "lines": [
+      {
+       "who": "hms-temple-auntie",
+       "text": "中山的新生喔？呷飽未？廟埕這附近啥米攏有賣。"
+      },
+      {
+       "who": "hms-temple-auntie",
+       "text": "前面這間是哈瑪星代天宮，拜拜兼找吃的來這就對啦！"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "hms-temple-auntie.met"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「廟口附近有什麼好吃的？」",
+       "next": "food"
+      },
+      {
+       "text": "「宵夜跟飲料推薦哪裡？」",
+       "next": "night-food"
+      },
+      {
+       "text": "「這間廟很有歷史嗎？」",
+       "next": "temple"
+      }
+     ]
+    },
+    "again": {
+     "lines": [
+      {
+       "who": "hms-temple-auntie",
+       "text": "又來廟口覓食啦？今天想吃正餐還是喝飲料？"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「廟口附近有什麼好吃的？」",
+       "next": "food"
+      },
+      {
+       "text": "「宵夜跟飲料推薦哪裡？」",
+       "next": "night-food"
+      },
+      {
+       "text": "「這間廟很有歷史嗎？」",
+       "next": "temple"
+      }
+     ]
+    },
+    "food": {
+     "lines": [
+      {
+       "who": "hms-temple-auntie",
+       "text": "往南沿鼓波街走兩步，就是老字號順和排骨。"
+      },
+      {
+       "who": "hms-temple-auntie",
+       "text": "現炸排骨飯厚實又飽足，很多學長姊下課都來買。"
+      }
+     ]
+    },
+    "night-food": {
+     "lines": [
+      {
+       "who": "hms-temple-auntie",
+       "text": "想喝茶去鼓元街御典茶，招牌蒙古鮮奶茶配粉角很受歡迎喔！"
+      },
+      {
+       "who": "hms-temple-auntie",
+       "text": "晚上嘴饞就找代天宮旁的林媽媽香雞排，常賣到深夜喔。"
+      }
+     ]
+    },
+    "temple": {
+     "lines": [
+      {
+       "who": "hms-temple-auntie",
+       "text": "代天宮是歷史建築，主祀五府千歲，門神是潘麗水名作喔。"
+      },
+      {
+       "who": "hms-temple-auntie",
+       "text": "從清早五點開到晚上十點，考前來走走求個心安也讚。"
+      }
+     ]
+    }
+   }
+  },
+  "hms-mrt-senior": {
+   "entries": [
+    {
+     "if": {
+      "flag": "hms-mrt-senior.met"
+     },
+     "node": "again"
+    },
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "root": {
+     "lines": [
+      {
+       "who": "hms-mrt-senior",
+       "text": "嗨新生！這裡是捷運哈瑪星站一號出口，進出市區最常用。"
+      },
+      {
+       "who": "hms-mrt-senior",
+       "text": "想問怎麼搭車回學校，還是臨海二路吃什麼都可以問我。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "hms-mrt-senior.met"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「怎麼搭公車回中山？」",
+       "next": "bus"
+      },
+      {
+       "text": "「捷運橘線能去哪裡？」",
+       "next": "mrt"
+      },
+      {
+       "text": "「這條路有什麼吃的？」",
+       "next": "eat"
+      }
+     ]
+    },
+    "again": {
+     "lines": [
+      {
+       "who": "hms-mrt-senior",
+       "text": "剛搭捷運回來嗎？還是準備要出門去市區？"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「怎麼搭公車回中山？」",
+       "next": "bus"
+      },
+      {
+       "text": "「捷運橘線能去哪裡？」",
+       "next": "mrt"
+      },
+      {
+       "text": "「這條路有什麼吃的？」",
+       "next": "eat"
+      }
+     ]
+    },
+    "bus": {
+     "lines": [
+      {
+       "who": "hms-mrt-senior",
+       "text": "一號出口搭橘一與橘一延，2027 年起改自行付費搭車喔。"
+      },
+      {
+       "who": "hms-mrt-senior",
+       "text": "二號出口搭中山校園公車，出示學生證就能免費搭回學校喔！"
+      }
+     ]
+    },
+    "mrt": {
+     "lines": [
+      {
+       "who": "hms-mrt-senior",
+       "text": "往大寮方向可到鹽埕埔、文化中心跟衛武營看展。"
+      },
+      {
+       "who": "hms-mrt-senior",
+       "text": "到美麗島站轉紅線，就能去高雄車站、高鐵左營或機場。"
+      }
+     ]
+    },
+    "eat": {
+     "lines": [
+      {
+       "who": "hms-mrt-senior",
+       "text": "出口斜對面就是丹丹漢堡，麵線焿配炸雞超經典。"
+      },
+      {
+       "who": "hms-mrt-senior",
+       "text": "旁邊有麻古茶坊，沿臨海二路往西走還有五十嵐跟麥味登。"
+      }
+     ]
+    }
+   }
+  },
+  "hms-ice-boss": {
+   "entries": [
+    {
+     "if": {
+      "flag": "hms-ice-boss.met"
+     },
+     "node": "again"
+    },
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "root": {
+     "lines": [
+      {
+       "who": "hms-ice-boss",
+       "text": "少年仔熱不熱？濱海一路這頭最出名的就是冰店跟渡船頭！"
+      },
+      {
+       "who": "hms-ice-boss",
+       "text": "剛走完哈瑪星街區，要不要順便了解搭船去旗津怎麼走？"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "hms-ice-boss.met"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「渡船頭冰店怎麼點？」",
+       "next": "ice"
+      },
+      {
+       "text": "「怎麼搭渡輪去旗津？」",
+       "next": "ferry"
+      },
+      {
+       "text": "「附近有平價正餐嗎？」",
+       "next": "meal"
+      }
+     ]
+    },
+    "again": {
+     "lines": [
+      {
+       "who": "hms-ice-boss",
+       "text": "又來濱海一路吹海風啦？今天想吃大碗冰還是去旗津？"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「渡船頭冰店怎麼點？」",
+       "next": "ice"
+      },
+      {
+       "text": "「怎麼搭渡輪去旗津？」",
+       "next": "ferry"
+      },
+      {
+       "text": "「附近有平價正餐嗎？」",
+       "next": "meal"
+      }
+     ]
+    },
+    "ice": {
+     "lines": [
+      {
+       "who": "hms-ice-boss",
+       "text": "旁邊渡船頭海之冰是大碗冰創始店，可按人數點倍數。"
+      },
+      {
+       "who": "hms-ice-boss",
+       "text": "迎新找同學合點大碗水果牛奶冰最過癮，先查店休再來喔！"
+      }
+     ]
+    },
+    "ferry": {
+     "lines": [
+      {
+       "who": "hms-ice-boss",
+       "text": "往西走到濱海二路鼓山輪渡站，坐船五分鐘就到旗津。"
+      },
+      {
+       "who": "hms-ice-boss",
+       "text": "行人全票約三十元，學生出示證件有優惠，連假機車會管制。"
+      }
+     ]
+    },
+    "meal": {
+     "lines": [
+      {
+       "who": "hms-ice-boss",
+       "text": "往西幾步的元福燒肉飯，炭香便當平價實在，學生很常買。"
+      },
+      {
+       "who": "hms-ice-boss",
+       "text": "北邊延平街還有阿雪小吃部，炒飯配餛飩湯也是學生愛店。"
+      }
+     ]
+    }
+   }
+  },
+  "hms-butokuden-uncle": {
+   "entries": [
+    {
+     "if": {
+      "flag": "hms-butokuden-uncle.met"
+     },
+     "node": "again"
+    },
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "root": {
+     "lines": [
+      {
+       "who": "hms-butokuden-uncle",
+       "text": "喔，中山的同學來散步喔？這段登山街靠山，走起來真舒服。"
+      },
+      {
+       "who": "hms-butokuden-uncle",
+       "text": "你知影為啥這裡叫哈瑪星無？古早故事講給你聽。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "hms-butokuden-uncle.met"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「哈瑪星地名怎麼來的？」",
+       "next": "origin"
+      },
+      {
+       "text": "「上面那棟紅磚建築是？」",
+       "next": "butokuden"
+      },
+      {
+       "text": "「這邊有推薦吃的嗎？」",
+       "next": "nearby"
+      }
+     ]
+    },
+    "again": {
+     "lines": [
+      {
+       "who": "hms-butokuden-uncle",
+       "text": "又出來透透氣啦？從鼓山國小望上來，武德殿真水對不對？"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「哈瑪星地名怎麼來的？」",
+       "next": "origin"
+      },
+      {
+       "text": "「上面那棟紅磚建築是？」",
+       "next": "butokuden"
+      },
+      {
+       "text": "「這邊有推薦吃的嗎？」",
+       "next": "nearby"
+      }
+     ]
+    },
+    "origin": {
+     "lines": [
+      {
+       "who": "hms-butokuden-uncle",
+       "text": "日治時期鐵路開進港口叫濱線，台語照日語念就變哈瑪星。"
+      },
+      {
+       "who": "hms-butokuden-uncle",
+       "text": "腳下那間百年鼓山國小，就是陪著這片老街區一起長大的。"
+      }
+     ]
+    },
+    "butokuden": {
+     "lines": [
+      {
+       "who": "hms-butokuden-uncle",
+       "text": "半山腰是百年古蹟高雄武德殿，以前練劍道跟柔道用的。"
+      },
+      {
+       "who": "hms-butokuden-uncle",
+       "text": "週二到週日免費參觀，進去要脫鞋，也不可以帶東西進去吃。"
+      }
+     ]
+    },
+    "nearby": {
+     "lines": [
+      {
+       "who": "hms-butokuden-uncle",
+       "text": "武德殿旁登山街有家樓梯腳，老宅裡的義大利麵學生很愛。"
+      },
+      {
+       "who": "hms-butokuden-uncle",
+       "text": "早上穿過隧道出來，臨海二路上有麥味登可以坐著吃早餐。"
+      }
+     ]
+    }
+   }
+  },
+  "hms-rail-volunteer": {
+   "entries": [
+    {
+     "if": {
+      "flag": "hms-rail-volunteer.met"
+     },
+     "node": "again"
+    },
+    {
+     "node": "root"
+    }
+   ],
+   "nodes": {
+    "root": {
+     "lines": [
+      {
+       "who": "hms-rail-volunteer",
+       "text": "歡迎來到哈瑪星鐵道文化園區！這片草坪以前是高雄港車站。"
+      },
+      {
+       "who": "hms-rail-volunteer",
+       "text": "後面就是舊打狗驛故事館，旁邊還能直接轉搭環狀輕軌喔。"
+      }
+     ],
+     "effects": [
+      {
+       "setFlag": "hms-rail-volunteer.met"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「舊打狗驛可以逛什麼？」",
+       "next": "museum"
+      },
+      {
+       "text": "「輕軌往哪邊搭才對？」",
+       "next": "lrt"
+      },
+      {
+       "text": "「從這裡怎麼回學校？」",
+       "next": "back"
+      }
+     ]
+    },
+    "again": {
+     "lines": [
+      {
+       "who": "hms-rail-volunteer",
+       "text": "又來鐵道草坪吹風啦？傍晚在老火車旁邊拍照很好看喔。"
+      }
+     ],
+     "choices": [
+      {
+       "text": "「舊打狗驛可以逛什麼？」",
+       "next": "museum"
+      },
+      {
+       "text": "「輕軌往哪邊搭才對？」",
+       "next": "lrt"
+      },
+      {
+       "text": "「從這裡怎麼回學校？」",
+       "next": "back"
+      }
+     ]
+    },
+    "museum": {
+     "lines": [
+      {
+       "who": "hms-rail-volunteer",
+       "text": "舊打狗驛是高雄最早的火車站遺址，保留老月台與展示列車。"
+      },
+      {
+       "who": "hms-rail-volunteer",
+       "text": "戶外草坪全天免費散步，假日還能遇見哈瑪星號觀光火車。"
+      }
+     ]
+    },
+    "lrt": {
+     "lines": [
+      {
+       "who": "hms-rail-volunteer",
+       "text": "輕軌哈瑪星站搭逆行往駁二跟夢時代，搭順行往美術館方向。"
+      },
+      {
+       "who": "hms-rail-volunteer",
+       "text": "月台沒有閘門，上下車記得在感應機逼卡，才不會被鎖卡喔！"
+      }
+     ]
+    },
+    "back": {
+     "lines": [
+      {
+       "who": "hms-rail-volunteer",
+       "text": "往南走幾步就是捷運二號出口，旁邊就能搭校園公車回中山。"
+      },
+      {
+       "who": "hms-rail-volunteer",
+       "text": "想吃古早味蛋餅，沿鼓山一路往南走也能找到碼頭阿姨蛋餅。"
+      }
+     ]
+    }
+   }
   }
  },
  "events": [
@@ -7334,5 +8140,226 @@
    ]
   },
   "note": "海域、公車、運動區的 NPC。公車司機不站在世界裡（schedule 全為 null），由 bus runtime 放進車內。"
+ },
+ "ambient": {
+  "hamasen": [
+   {
+    "id": "hms-amb-1",
+    "name": "臨海二路採買鄰居",
+    "role": "哈瑪星居民",
+    "model": "npc-desk",
+    "look": {
+     "hair": "#3a2a24",
+     "top": "#d97b59",
+     "bottom": "#4a5568",
+     "bag": "#8c6d46",
+     "shoes": "#2d3748"
+    },
+    "route": [
+     [
+      405.51,
+      286.91
+     ],
+     [
+      569.87,
+      387.77
+     ]
+    ]
+   },
+   {
+    "id": "hms-amb-2",
+    "name": "臨海二路下課學生",
+    "role": "中山大學學生",
+    "model": "npc-student-1",
+    "look": {
+     "hair": "#2b2622",
+     "top": "#5b8c5a",
+     "bottom": "#2f4a6a",
+     "bag": "#2a2c4a",
+     "shoes": "#fbf6ea"
+    },
+    "route": [
+     [
+      582.22,
+      395.45
+     ],
+     [
+      612.18,
+      414.52
+     ],
+     [
+      714.42,
+      476.97
+     ],
+     [
+      738.71,
+      491.18
+     ]
+    ]
+   },
+   {
+    "id": "hms-amb-3",
+    "name": "麗雄街逛巷遊客",
+    "role": "哈瑪星訪客",
+    "model": "npc-student-4",
+    "look": {
+     "hair": "#4a2f22",
+     "top": "#e8c56b",
+     "bottom": "#5c4d42",
+     "bag": "#b5654d",
+     "shoes": "#fbf6ea"
+    },
+    "route": [
+     [
+      627.87,
+      568.32
+     ],
+     [
+      644.45,
+      578.55
+     ],
+     [
+      612.86,
+      628.74
+     ]
+    ]
+   },
+   {
+    "id": "hms-amb-4",
+    "name": "鼓波街散步長輩",
+    "role": "哈瑪星居民",
+    "model": "npc-teacher",
+    "look": {
+     "hair": "#c9c4bb",
+     "top": "#7b6b8d",
+     "bottom": "#4a4e57",
+     "shoes": "#2d3138"
+    },
+    "route": [
+     [
+      460.76,
+      466.18
+     ],
+     [
+      477.32,
+      476.95
+     ],
+     [
+      475.96,
+      479.05
+     ],
+     [
+      501.22,
+      495.22
+     ],
+     [
+      477.45,
+      529.14
+     ],
+     [
+      466.54,
+      545.78
+     ]
+    ]
+   },
+   {
+    "id": "hms-amb-5",
+    "name": "往渡船頭搭船行人",
+    "role": "在地通勤族",
+    "model": "npc-student-5",
+    "look": {
+     "hair": "#1f1a18",
+     "top": "#3e7b8a",
+     "bottom": "#2e3a48",
+     "bag": "#4a5568",
+     "shoes": "#6b6f78"
+    },
+    "route": [
+     [
+      484.64,
+      679.87
+     ],
+     [
+      505.14,
+      645.86
+     ],
+     [
+      486.56,
+      623.33
+     ],
+     [
+      455.99,
+      605.2
+     ],
+     [
+      427.2,
+      599.42
+     ],
+     [
+      405.13,
+      636.46
+     ],
+     [
+      368.26,
+      696.36
+     ]
+    ]
+   },
+   {
+    "id": "hms-amb-6",
+    "name": "鐵道園區賞景旅人",
+    "role": "鐵道迷遊客",
+    "model": "npc-student-2",
+    "look": {
+     "hair": "#3a2a24",
+     "top": "#c96a5b",
+     "bottom": "#f3ebdb",
+     "bag": "#3c4a5c",
+     "shoes": "#fbf6ea"
+    },
+    "route": [
+     [
+      901.18,
+      550.97
+     ],
+     [
+      905.4,
+      543.63
+     ],
+     [
+      909.62,
+      536.28
+     ],
+     [
+      915.55,
+      533.88
+     ],
+     [
+      921.47,
+      531.48
+     ],
+     [
+      924.84,
+      523.84
+     ],
+     [
+      928.2,
+      516.19
+     ],
+     [
+      924.4,
+      511.2
+     ],
+     [
+      931.57,
+      508.54
+     ],
+     [
+      931.23,
+      502.91
+     ]
+    ]
+   }
+  ]
  }
 }

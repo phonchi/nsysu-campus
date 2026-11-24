@@ -9,6 +9,7 @@ import type { WalkBuilding,WalkFloor,WalkRoom,Point2,WalkDestination,CampusStruc
 import { GROUND_Y, PLAY_BOUNDS, inPolygon, type Terrain } from './world/terrain';
 import { projectRoadGeometry } from './world/road-surface';
 import { planScienceInterior, addScienceInterior } from './world/science-interiors';
+import { isHamasenModelFootprint } from './world/landmarks';
 export const FLOOR_HEIGHT=3.7;
 export const floorY=(level:number)=>(level<0?level:level-1)*FLOOR_HEIGHT+.08;
 export interface WorldDoor {id:string;position:T.Vector3;outside:T.Vector3;inside:T.Vector3;group:T.Group;panel:T.Object3D;closedBox:T.Box3;normal?:T.Vector3;open:number;target:number;label:string;buildingId:string;floorId:string;}
@@ -84,13 +85,13 @@ function addDistrictBuilding(group:T.Group,collision:T.Group,building:ContextBui
   geometry.translate(0,0,lo);
   const mesh=new T.Mesh(geometry,mat('#c5c3bc'));
   mesh.rotation.x=-Math.PI/2;mesh.castShadow=true;mesh.receiveShadow=true;
-  group.add(mesh);collision.add(mesh.clone());
+  group.add(mesh);if(!building.visualOnly)collision.add(mesh.clone());
   return mesh;
  };
  const addColumn=(x:number,z:number,start:number,end:number,size:number,yaw:number)=>{
   const column=box(group,size,end-start,size,x,(start+end)/2,z,'#bbb9b0');
   column.rotation.y=yaw;column.userData.hamasenColumn=true;
-  collision.add(column.clone());
+  if(!building.visualOnly)collision.add(column.clone());
  };
  let arcadeDepth=0;
  if(building.facade==='platform'){
@@ -115,9 +116,17 @@ function addDistrictBuilding(group:T.Group,collision:T.Group,building:ContextBui
    const ceiling=baseY+2.85;
    addSolid(arcade.back,lowerY,ceiling);
    addSolid(polygon,ceiling,topY);
-   const {a,tx,tz,nx,nz,length}=arcade,count=Math.max(1,Math.round(length/3.8));
+   const {a,tx,tz,nx,nz,length}=arcade,count=Math.max(1,Math.round(length/4.8));
+   const shops=building.shopfronts?.filter(s=>s.edge===building.frontage?.edge)??[];
+   const columns=new Set<number>();
    for(let i=0;i<=count;i++){
-    const at=T.MathUtils.clamp(length*i/count,.24,length-.24), x=a[0]+tx*at+nx*.23,z=a[1]+tz*at+nz*.23;
+    const along=T.MathUtils.clamp(length*i/count,.24,length-.24);
+    const shop=shops.find(s=>Math.abs(along-s.along)<s.width/2-.27);
+    const side=shop && along<shop.along?-1:1;
+    columns.add(shop?T.MathUtils.clamp(shop.along+side*(shop.width/2+.04),.24,length-.24):along);
+   }
+   for(const at of columns){
+    const x=a[0]+tx*at+nx*.23,z=a[1]+tz*at+nz*.23;
     addColumn(x,z,ground(x,z)-.04,ceiling,.33,-Math.atan2(tz,tx));
    }
   }else addSolid(polygon,lowerY,topY,holes);
@@ -219,10 +228,31 @@ export function buildWalkWorld(data:WalkBuilding[],structure:CampusStructure,ter
   ground.updateMatrix();const planar=ground.geometry.clone().applyMatrix4(ground.matrix),old=ground.geometry;
   ground.geometry=projectRoadGeometry(planar,terrain,{offset:0,cellFilter:(i,j)=>Math.abs(terrain.vertexHeight(i,j)-GROUND_Y)<1e-7&&Math.abs(terrain.vertexHeight(i+1,j)-GROUND_Y)<1e-7&&Math.abs(terrain.vertexHeight(i,j+1)-GROUND_Y)<1e-7&&Math.abs(terrain.vertexHeight(i+1,j+1)-GROUND_Y)<1e-7});
   planar.dispose();old.dispose();ground.position.set(0,0,0);ground.rotation.set(0,0,0);ground.castShadow=false;ground.name='Campus pad ground';out.collision.add(ground.clone());
+  const padGround=new T.Group();padGround.name='DEM campus pad';out.display.add(padGround);padGround.add(ground);
   // The playable display and collision use identical 4 m triangles. Only unreachable far terrain is coarser.
-  const fine=new T.Mesh(terrain.mesh(PLAY_BOUNDS,pad),mat('#8b9d79'));
-  const coarse=new T.Mesh(terrain.mesh([-1e4,-1e4,1e4,1e4],(x,z)=>pad(x,z)||(x>=PLAY_BOUNDS[0]&&x<=PLAY_BOUNDS[2]&&z>=PLAY_BOUNDS[1]&&z<=PLAY_BOUNDS[3]),2),fine.material);
-  for(const [m,n] of [[fine,'DEM terrain'],[coarse,'DEM terrain (far)']] as const){m.name=n;m.receiveShadow=true;out.display.add(m);}
+  const displayGround=new T.Group();displayGround.name='DEM terrain';
+  const displayMaterial=mat('#8b9d79');
+  const harbor=structure.context.hamasen?.ferryHarbor;
+  const displayCarves=harbor?[harbor]:[];
+  const {origin,cell,cols,rows}=terrain.meta;
+  // Use aligned render tiles so off-screen terrain can be culled. Full-resolution
+  // supporting triangles remain in collision and around the terrain-draped roads.
+  const span=80;
+  for(let j=0;j<rows-1;j+=span)for(let i=0;i<cols-1;i+=span){
+   const x=origin[0]+i*cell,z=origin[1]+j*cell;
+   const right=origin[0]+Math.min(i+span,cols-1)*cell,bottom=origin[1]+Math.min(j+span,rows-1)*cell;
+   const play:[number,number,number,number]=[Math.max(x,gx0),Math.max(z,gz0),Math.min(right,gx1),Math.min(bottom,gz1)];
+   const detail=play[2]>play[0]&&play[3]>play[1];
+   const playable=(px:number,pz:number)=>px>=gx0&&px<=gx1&&pz>=gz0&&pz<=gz1;
+   const dry=(px:number,pz:number)=>terrain.heightAt(px,pz)>=terrain.seaLevel-.15;
+   const coarse=terrain.mesh([x,z,right,bottom],(px,pz)=>pad(px,pz)||playable(px,pz)||!dry(px,pz),2,displayCarves);
+   if(detail){
+    const fine=terrain.mesh(play,(px,pz)=>pad(px,pz)||!dry(px,pz),1,displayCarves);
+    if(fine.index?.count){const m=new T.Mesh(fine,displayMaterial);m.name='DEM terrain playable';m.receiveShadow=true;displayGround.add(m);}else fine.dispose();
+   }
+   if(coarse.index?.count){const m=new T.Mesh(coarse,displayMaterial);m.name='DEM terrain far';m.receiveShadow=true;displayGround.add(m);}else coarse.dispose();
+  }
+  out.display.add(displayGround);
   const district=structure.context.hamasen?.polygon;
   const outsidePlay=(x:number,z:number)=>(x>952||z>700)&&(!district||!inPolygon([x,z],district));
   const solid=new T.Mesh(terrain.mesh(PLAY_BOUNDS,(x,z)=>pad(x,z)||outsidePlay(x,z)),mat('#8b9d79'));
@@ -231,7 +261,8 @@ export function buildWalkWorld(data:WalkBuilding[],structure:CampusStructure,ter
   const ground=plane(out.display,rect(gx0,gz0,gx1,gz1),groundHoles,-.055,'#8b9d79');ground.castShadow=false;out.collision.add(ground.clone());
   const sea=box(out.display,900,.4,1400,gx0-450,-.6,75,'#629caa');sea.castShadow=false;
  }
- const inGround=(p:Point2[])=>p.every(([x,z])=>x>gx0+1&&x<gx1-1&&z>gz0+1&&z<gz1-1);
+ const inGround=(p:Point2[],district?:ContextBuilding['district'])=>p.every(([x,z])=>
+  x>gx0+1&&x<gx1-1&&z>gz0+1&&(terrain&&district==='hamasen'?z<=gz1:z<gz1-1));
  // OSM roads are display-only pavement ribbons over the shared ground.
  const roadGroup=new T.Group();roadGroup.name='Campus roads (OSM)';out.display.add(roadGroup);
  // Road overlays are built by decorateCampus from the exact terrain surface.
@@ -243,10 +274,13 @@ export function buildWalkWorld(data:WalkBuilding[],structure:CampusStructure,ter
  const overlapsWalkable=(poly:Point2[])=>walkPolys.some(w=>poly.some(p=>inPoly(p,w))||w.some(p=>inPoly(p,poly)));
  for(const [kind,list] of [['landmark',structure.context.landmarks],['background',structure.context.background]] as const){
   for(const lm of list){
-   if(lm.polygon.length<3||!inGround(lm.polygon)||overlapsWalkable(lm.polygon))continue;const bb=new T.Box2().setFromPoints(lm.polygon.map(([x,z])=>new T.Vector2(x,z)));
+   if(lm.polygon.length<3||(!lm.visualOnly&&!inGround(lm.polygon,lm.district))||overlapsWalkable(lm.polygon))continue;const bb=new T.Box2().setFromPoints(lm.polygon.map(([x,z])=>new T.Vector2(x,z)));
    if(lm.district==='hamasen'){
+    if(isHamasenModelFootprint(lm.id))continue;
     const group=new T.Group();group.name='Campus exterior '+lm.id;out.display.add(group);
-    addDistrictBuilding(group,out.collision,lm,(x,z)=>terrain?.heightAt(x,z)??GROUND_Y);
+    const ground=(x:number,z:number)=>terrain?.heightAt(x,z)??GROUND_Y;
+    const visualFloor=lm.visualOnly&&terrain?terrain.seaLevel+.08:-Infinity;
+    addDistrictBuilding(group,out.collision,lm,(x,z)=>Math.max(ground(x,z),visualFloor));
     continue;
    }
    // On slopes the block is seated on its lowest corner and extended down into the hill.

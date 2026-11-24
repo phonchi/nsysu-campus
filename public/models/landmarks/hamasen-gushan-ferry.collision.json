@@ -1,0 +1,206 @@
+{
+ "id": "hamasen-gushan-ferry",
+ "title": "鼓山輪渡站",
+ "units": "m",
+ "frame": "local three.js: x east, y up, z south; origin = footprint centroid at grade",
+ "boxSchema": "center [x,y,z], size [sx,sy,sz] full extents, yaw radians about +Y; walkable = may stand on top",
+ "boxes": [
+  {
+   "center": [
+    4.266,
+    -0.065,
+    0.02
+   ],
+   "size": [
+    31.429,
+    0.31,
+    7.2
+   ],
+   "yaw": 0.0,
+   "walkable": true
+  },
+  {
+   "center": [
+    -11.249,
+    0.665,
+    0.02
+   ],
+   "size": [
+    0.15,
+    1.15,
+    7.2
+   ],
+   "yaw": 0.0,
+   "walkable": false,
+   "tag": "south-boarding-barrier"
+  },
+  {
+   "center": [
+    -3.095,
+    4.65,
+    0.02
+   ],
+   "size": [
+    16.709,
+    2.88,
+    7.2
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    12.62,
+    3.078,
+    0.02
+   ],
+   "size": [
+    14.72,
+    5.98,
+    7.2
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -8.04,
+    1.675,
+    3.32
+   ],
+   "size": [
+    0.44,
+    3.17,
+    0.44
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -8.04,
+    1.675,
+    -3.21
+   ],
+   "size": [
+    0.44,
+    3.17,
+    0.44
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -1.99,
+    1.675,
+    3.32
+   ],
+   "size": [
+    0.44,
+    3.17,
+    0.44
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -1.99,
+    1.675,
+    -3.21
+   ],
+   "size": [
+    0.44,
+    3.17,
+    0.44
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    4.92,
+    1.675,
+    3.32
+   ],
+   "size": [
+    0.44,
+    3.17,
+    0.44
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    4.92,
+    1.675,
+    -3.21
+   ],
+   "size": [
+    0.44,
+    3.17,
+    0.44
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    4.56,
+    1.33,
+    5.44
+   ],
+   "size": [
+    0.17,
+    2.48,
+    0.17
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    8.96,
+    1.33,
+    5.44
+   ],
+   "size": [
+    0.17,
+    2.48,
+    0.17
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    13.36,
+    1.33,
+    5.44
+   ],
+   "size": [
+    0.17,
+    2.48,
+    0.17
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    17.76,
+    1.33,
+    5.44
+   ],
+   "size": [
+    0.17,
+    2.48,
+    0.17
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  }
+ ]
+}

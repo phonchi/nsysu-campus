@@ -78,10 +78,10 @@ export interface StoryZones { seats?:Record<string,SeatSpec>; zones: Record<stri
 
 /** Include every scheduled/ambient model even if its anchor is missing or its schedule is absent.
  * Player body swaps and EncounterScene's separately loaded macaque are independent of NPC spawning. */
-export function characterWarmupModelIds(zones:StoryZones,data?:Pick<NpcData,'npcs'>):string[] {
+export function characterWarmupModelIds(zones:StoryZones,data?:Pick<NpcData,'npcs'|'ambient'>):string[] {
   return [...new Set([
     ...Object.values(zones.npcs).map(n=>n.model),...(zones.ambient?.students??[]),
-    ...(data?.npcs??[]).map(n=>n.model),modelFor('m'),modelFor('f'),'monkey',
+    ...(data?.npcs??[]).map(n=>n.model),...(data?.ambient?.hamasen??[]).map(n=>n.model),modelFor('m'),modelFor('f'),'monkey',
   ])].sort();
 }
 export interface CharacterWarmupVariant {model:string;shader:'source'|'npc-recolored';transparent:boolean}
@@ -133,8 +133,9 @@ export class CharacterWarmupSamples {
 
 /** `load` supplies the existing toonified GLB source; geometry/textures remain owned by that cache.
  * Palette recoloring changes texture pixels, not map/UV/fog/gradientMap/skinning shader defines. */
-export async function prepareCharacterWarmup(zones:StoryZones,data:Pick<NpcData,'npcs'>|undefined,load:(model:string)=>Promise<T.Object3D>) {
-  const samples=new CharacterWarmupSamples(),recolored=new Set((data?.npcs??[]).filter(n=>n.look).map(n=>n.model));
+export async function prepareCharacterWarmup(zones:StoryZones,data:Pick<NpcData,'npcs'|'ambient'>|undefined,load:(model:string)=>Promise<T.Object3D>) {
+  const samples=new CharacterWarmupSamples();
+  const recolored=new Set([...(data?.npcs??[]),...(data?.ambient?.hamasen??[])].filter(n=>n.look).map(n=>n.model));
   await Promise.all(characterWarmupModelIds(zones,data).map(async model=>{
     try {samples.add(model,await load(model),recolored.has(model));}catch{samples.failedModels.push(model);}
   }));
@@ -145,7 +146,8 @@ export type Placement = { at: string | P2; offset?: P2; activity?: string; seat?
 
 /** NPCs whose position the story owns until the tour is complete (spec-v4 §15.1). */
 /** Ambient walkers head here. The graph anchors for IL and ACTIVITY sit inside those buildings' solid colliders. */
-const AMBIENT_ANCHORS = ['arcade', 'admin', 'library', 'YH', 'SPORT', 'CMSS'];
+export const AMBIENT_ANCHORS = ['arcade', 'admin', 'library', 'YH', 'SPORT', 'CMSS'] as const;
+const WANDER_LOG_SURVIVAL_PER_SECOND = 60 * Math.log1p(-.004);
 export const STORY_NPCS = ['guide', 's1', 's2', 's3', 'm1'];
 
 /** Who stays visible, from a list sorted nearest first: those who must (talking, or named in `always`) count first, the rest fill the cap.
@@ -230,6 +232,8 @@ export class Npc {
     if(!r.left)this.reaction=undefined;
   }
   path: T.Vector3[] = [];
+  patrol?: { points: T.Vector3[]; next: number; direction: 1 | -1 };
+  fixedPost = false;
   speed = 1.4;
   heading = 0;
   talking = false;
@@ -283,7 +287,8 @@ export class Npc {
     const desired = this.root.position.clone();
     if (this.path.length && !this.talking) {
       const next = this.path[0], d = Math.hypot(next.x - this.root.position.x, next.z - this.root.position.z);
-      if (d < (this.seat&&this.path.length===1?.08:.4)) this.path.shift();
+      const arrivalRadius = this.patrol ? .1 : (this.seat && this.path.length === 1 ? .08 : .4);
+      if (d < arrivalRadius) this.path.shift();
       else {
         const step = Math.min(d, this.speed * dt);
         desired.x += (next.x - this.root.position.x) / d * step;
@@ -301,7 +306,7 @@ export class Npc {
       this.play(this.talking ? 'Talk' : near && !this.reaction && this.activity !== 'Sit' ? 'Wave' : this.activity==='Sit'&&!this.monkey?'Idle':this.activity);
     }
     const radius = this.monkey ? .24 : .32, height = this.monkey ? .65 : 1.7;
-    if(!this.talking)this.root.position.copy(moveNpcSafely(this.id, this.root.position, desired, player, dt, radius, height, ground, sweep));
+    if(!this.talking && !this.fixedPost)this.root.position.copy(moveNpcSafely(this.id, this.root.position, desired, player, dt, radius, height, ground, sweep));
     this.root.rotation.y = this.heading;
     this.mixer.update(dt);this.applyReaction(dt);
   }
@@ -379,6 +384,13 @@ export class NpcManager {
     const free=this.landing(n,dest,player);if(!free||n.seat&&!withinSeatApproach(n.seat,free))return false;
     n.root.position.copy(free);n.path=[];this.recovery.delete(n.id);this.reservations.set(n.id,this.body(n));this.actorChanged?.(this.body(n));return true;
   }
+  private campusPath(path: T.Vector3[]) {
+    return path.every(p => p.x < this.hamasenWest) ? path : [];
+  }
+  private recoveryPath(n: Npc, from: T.Vector3, to: T.Vector3) {
+    const path = this.replan?.(n.id, from, to) ?? this.routes?.path(from, to);
+    return path && this.ambient.includes(n) ? this.campusPath(path) : path;
+  }
   private recover(n:Npc,dt:number,player:T.Vector3){
     if(n.talking||this.gameReserved.has(n.id)||n.gesturing)return;
     let r=this.recovery.get(n.id);
@@ -390,7 +402,7 @@ export class NpcManager {
       const y=r.yield,other=this.npcs.get(y.other);
       if(r.cooldown===0&&r.attempts<3&&(!other||other.position.distanceTo(y.back)>1.1&&clear(n.position,y.back))){
         r.attempts++;r.cooldown=3;
-        const path=this.replan?.(n.id,y.back,y.goal)??this.routes?.path(y.back,y.goal)??[y.goal];
+        const path=this.recoveryPath(n,y.back,y.goal)??[y.goal];
         if(!path.length||path.at(-1)!.distanceTo(y.goal)>.4)return;
         n.path=[y.back.clone(),...path.map(p=>p.clone())];r.yield=undefined;r.next=undefined;r.best=Infinity;r.stalled=0;
       }
@@ -415,14 +427,14 @@ export class NpcManager {
         const a=n.position.clone().addScaledVector(away,back),b=a.clone().addScaledVector(side,.85*sign);
         const ay=this.movementGround(a.x,a.z,n.position.y),by=this.movementGround(b.x,b.z,n.position.y);
         if(ay===undefined||by===undefined||Math.abs(ay-n.position.y)>.4||Math.abs(by-n.position.y)>.4)continue;a.y=ay;b.y=by;
-        if(clear(n.position,a)&&clear(a,b)){
+        if((!this.ambient.includes(n) || this.campusPath([a,b]).length) && clear(n.position,a)&&clear(a,b)){
           r.yield={back:a,side:b,goal:goal.clone(),other:other.id};n.path=[a,b];r.next=undefined;return;
         }
       }
     }
     if(r.stalled>=2.5&&r.attempts<3){
       r.attempts++;
-      const path=this.replan?.(n.id,n.position,goal)??this.routes?.path(n.position,goal);
+      const path=this.recoveryPath(n,n.position,goal);
       if(path?.length&&path[0].distanceTo(n.position)<.4)n.path=path.map(p=>p.clone());
     }
   }
@@ -432,7 +444,8 @@ export class NpcManager {
   cap = NPC_CAP.A;
   preset: Preset = 'day';
 
-  constructor(private zones: StoryZones, private routes: OutdoorRoutes | undefined, private terrain: Terrain | undefined, private asset: (p: string) => string, private data?: NpcData) {
+  constructor(private zones: StoryZones, private routes: OutdoorRoutes | undefined, private terrain: Terrain | undefined,
+    private asset: (p: string) => string, private data?: NpcData, private hamasenWest = Infinity) {
     for (const d of data?.npcs ?? []) this.defs.set(d.id, d);
     this.group.name = 'NPCs';
     this.seats=new SeatRegistry(zones.seats??{},(x,z,y)=>this.movementGround(x,z,y),(x,z)=>this.terrain?.heightAt(x,z)??-.055);
@@ -503,6 +516,7 @@ export class NpcManager {
       if (!p) return;
       const npc = await this.spawn(d.id, d.model, p.x, p.z, d.look, p.y);
       npc.activity = first?.activity ?? 'Idle';
+      npc.fixedPost = d.district === 'hamasen';
       npc.monkey = d.model === 'monkey';
       if (npc.monkey) npc.speed = 1.1;
       this.npcs.set(d.id, npc);
@@ -524,6 +538,14 @@ export class NpcManager {
       npc.activity = i % 2 ? 'Sit' : 'Idle';
       this.ambient.push(npc);
     }
+    await Promise.all((this.data?.ambient?.hamasen ?? []).map(async d => {
+      const points = d.route.map(point => this.anchorPoint(point)!);
+      if (points.length < 2) return;
+      const start = points[0];
+      const npc = await this.spawn(d.id, d.model, start.x, start.z, d.look, start.y);
+      npc.patrol = { points, next: 0, direction: 1 };
+      this.ambient.push(npc);
+    }));
   }
 
   seatPropsReady(ready:boolean){this.seats.enabled=ready;this.placed.clear();const s=this.lastSchedule;if(s)this.schedule(s.preset,s.tourDone,s.storyAt,s.player,s.facts);}
@@ -563,6 +585,7 @@ export class NpcManager {
       // Back on campus after being absent: they simply arrive at their spot (unless the player is watching it).
       const returning = npc.absent;
       npc.absent = false; // before the early out below: someone back at the very spot they left was never marked present again
+      if (npc.fixedPost && !returning && dest.distanceToSquared(npc.position) < 1e-8) continue;
       if(returning){if(!this.place(npc,dest,player)){npc.absent=true;this.placed.delete(id);}continue;}
       if (Math.hypot(dest.x - npc.position.x, dest.z - npc.position.z) < 2) { if(!this.place(npc,dest,player))this.placed.delete(id); continue; }
       const far = !player || (npc.position.distanceTo(player) > 60 && dest.distanceTo(player) > 60);
@@ -588,12 +611,22 @@ export class NpcManager {
   }
 
   /** Lets an ambient walker that reached its goal pick a new one. */
-  private wander(npc: Npc) {
-    if (npc.path.length || !this.routes || npc.id.startsWith('mk')) return;
-    if (Math.random() > .004) return;
+  private wander(npc: Npc, dt: number) {
+    if (npc.path.length || dt <= 0) return;
+    const patrol = npc.patrol;
+    if (patrol) {
+      npc.path = [patrol.points[patrol.next]];
+      if (patrol.next === patrol.points.length - 1) patrol.direction = -1;
+      if (patrol.next === 0) patrol.direction = 1;
+      patrol.next += patrol.direction;
+      return;
+    }
+    if (!this.routes || npc.monkey) return;
+    // Preserve the old 60 Hz odds over equal elapsed time, including partial frames.
+    if (Math.random() >= -Math.expm1(WANDER_LOG_SURVIVAL_PER_SECOND * dt)) return;
     const ids = AMBIENT_ANCHORS;
     const goal = this.routes.anchor(ids[Math.floor(Math.random() * ids.length)]);
-    if (goal) npc.path = this.routes.path(npc.position, goal).slice(1, -1);
+    if (goal) npc.path = this.campusPath(this.routes.path(npc.position, goal)).slice(1, -1);
   }
 
   /** Camera fading changes only the visual model, never culling, actors or interaction reach. */
@@ -618,23 +651,30 @@ export class NpcManager {
     this.gestureClock+=dt;
     // Visible cap: nearest people first (talking and story NPCs always count), macaques separately.
     const night = this.preset === 'night', people: [number, Npc][] = [], monkeys: [number, Npc][] = [];
-    for (const n of [...this.npcs.values(), ...this.ambient]) if (!n.absent) (n.monkey ? monkeys : people).push([n.position.distanceTo(player), n]);
+    const visibleRange = 120;
+    const cast = [...this.npcs.values(), ...this.ambient];
+    for (const n of cast) {
+      if (n.absent) continue;
+      const distance = n.position.distanceTo(player);
+      if (distance < visibleRange) (n.monkey ? monkeys : people).push([distance, n]);
+    }
     const keep = new Set<Npc>();
     for (const [list, cap] of [[people, night ? this.cap.night : this.cap.day], [monkeys, this.cap.monkeys]] as const) {
       list.sort((a, b) => a[0] - b[0]);
       for (const n of npcsWithinCap(list.map(([, n]) => n), cap, [...STORY_NPCS,...this.eventFocus,...list.filter(([,n])=>n.root.userData.qaInspected).map(([,n])=>n.id)], this.focusNpc)) keep.add(n);
     }
-    for (const n of [...this.npcs.values(), ...this.ambient]) {
+    for (const n of cast) {
       const d = n.position.distanceTo(player);
       // Far characters freeze (no mixer) and very far ones hide (spec §7).
-      n.root.visible = !n.absent && d < 120 && (keep.has(n) || this.gameReserved.has(n.id) || this.borrowed.has(n.id) || (this.npcs.has(n.id) && d <= 4));
-      // Hidden walkers skip to where they were going, so schedules settle even off screen.
+      n.root.visible = !n.absent && d < visibleRange && (keep.has(n) || this.gameReserved.has(n.id) || this.borrowed.has(n.id) || (!n.fixedPost && this.npcs.has(n.id) && d <= 4));
+      // Settle scheduled travel off screen. Patrols resume from where they paused.
       if(this.gameReserved.has(n.id)){n.animateOnly?.(dt,this.movementGround);this.actorChanged?.(this.body(n));continue;}
       if (this.borrowed.has(n.id) && borrowedPaused) continue;
-      if (!n.root.visible && !this.borrowed.has(n.id) && !this.gameReserved.has(n.id)) { if (n.path.length) this.place(n,n.path[n.path.length-1],player); continue; }
+      if (!n.root.visible && !this.borrowed.has(n.id) && !this.gameReserved.has(n.id)) { if (n.path.length && !n.patrol) this.place(n,n.path[n.path.length-1],player); continue; }
+      if (n.patrol && d > 60) continue;
       if (d > 60 && !n.path.length) continue;
-      if (this.ambient.includes(n)) this.wander(n); // story NPCs only move when the story sends them
-      this.recover(n,dt,player);
+      if (this.ambient.includes(n)) this.wander(n, dt); // story NPCs only move when the story sends them
+      if (!n.patrol && !n.fixedPost) this.recover(n,dt,player);
       const liveSweep:NpcSweep=(id,from,to,radius,height)=>{
         for(const b of this.occupied(player)){
           if(b.id===id||Math.abs(from.y-(b.position.y+b.height/2+.025))>=(height+b.height)/2)continue;
@@ -645,8 +685,11 @@ export class NpcManager {
         }
         return this.sweep?.(id,from,to,radius,height)??from.distanceTo(to);
       };
+      const before = n.patrol && n.position.clone();
       n.update(dt, this.movementGround, player, d < 4, liveSweep);
-      this.reservations.delete(n.id);this.actorChanged?.(this.body(n));
+      this.reservations.delete(n.id);
+      // The frame's setActors call registers newly visible posts and patrols.
+      if (!n.fixedPost && (!before || d < 50 && !before.equals(n.position))) this.actorChanged?.(this.body(n));
     }
   }
 

@@ -1,0 +1,247 @@
+{
+ "id": "hamasen-gushan-school",
+ "title": "鼓山國小",
+ "units": "m",
+ "frame": "local three.js: x east, y up, z south; origin = footprint centroid at grade",
+ "boxSchema": "center [x,y,z], size [sx,sy,sz] full extents, yaw radians about +Y; walkable = may stand on top",
+ "boxes": [
+  {
+   "center": [
+    -30.4,
+    4.825,
+    7.6
+   ],
+   "size": [
+    27.0,
+    9.65,
+    24.7
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -6.5,
+    4.825,
+    -2.2
+   ],
+   "size": [
+    20.3,
+    9.65,
+    21.7
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -41.0,
+    5.63,
+    16.2
+   ],
+   "size": [
+    4.9,
+    11.22,
+    10.2
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -19.5,
+    5.63,
+    15.25
+   ],
+   "size": [
+    4.9,
+    11.22,
+    10.2
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    10.7,
+    8.65,
+    -4.86
+   ],
+   "size": [
+    14.15,
+    6.0,
+    44.08
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    4.54,
+    2.86,
+    -4.86
+   ],
+   "size": [
+    1.85,
+    5.68,
+    44.08
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    4.72,
+    2.88,
+    17.47
+   ],
+   "size": [
+    1.53,
+    5.72,
+    0.81
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    7.75,
+    2.42,
+    14.53
+   ],
+   "size": [
+    0.63,
+    4.64,
+    0.63
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    16.86,
+    2.86,
+    -4.86
+   ],
+   "size": [
+    1.85,
+    5.68,
+    44.08
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    16.68,
+    2.88,
+    17.47
+   ],
+   "size": [
+    1.53,
+    5.72,
+    0.81
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    13.65,
+    2.42,
+    14.53
+   ],
+   "size": [
+    0.63,
+    4.64,
+    0.63
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    10.7,
+    0.09,
+    -4.86
+   ],
+   "size": [
+    10.6,
+    0.16,
+    44.08
+   ],
+   "yaw": 0.0,
+   "walkable": true
+  },
+  {
+   "center": [
+    23.1,
+    1.67,
+    4.7
+   ],
+   "size": [
+    10.4,
+    3.54,
+    15.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    24.0,
+    4.655,
+    0.2
+   ],
+   "size": [
+    7.9,
+    2.21,
+    6.0
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    41.2,
+    2.14,
+    3.7
+   ],
+   "size": [
+    12.3,
+    4.5,
+    17.35
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -5.3,
+    0.6,
+    39.8
+   ],
+   "size": [
+    12.3,
+    1.36,
+    0.68
+   ],
+   "yaw": -0.12,
+   "walkable": false
+  },
+  {
+   "center": [
+    16.328,
+    1.27,
+    39.326
+   ],
+   "size": [
+    11.642,
+    2.68,
+    6.126
+   ],
+   "yaw": 3.1275,
+   "walkable": false
+  }
+ ]
+}

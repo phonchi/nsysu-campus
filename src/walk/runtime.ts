@@ -15,7 +15,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { CampusLod } from '../walk-lod';
 import { decorateCampus, addCampusProps, animateCampus } from '../walk-art';
-import { hamasenEastPortalDetails, hamasenStationBoard, hamasenStreetDetails } from './hamasen-street-details';
+import { hamasenEastPortalDetails, hamasenStationBoard, hamasenStreetDetails, hamasenStreetProps, streetPropsEnabled } from './hamasen-street-details';
 import { hamasenStationDetails } from './hamasen-station-detail';
 import { hamasenRailDetails } from './hamasen-rail-detail';
 import { CampusSky, PRESET_LABEL, type SkyPreset } from '../walk-sky';
@@ -50,12 +50,13 @@ import { AdaptiveQuality, TIERS, initialTier, type Tier } from '../render/qualit
 import { addOutlines, OUTLINE_UNIFORMS } from '../render/outline';
 import { mergeStatic } from '../render/batch';
 import { CampusSound } from '../audio/sound';
-import { CampusMinimap, fitCampusFrame, pickMarker, type MapMarker, type MapMarkerKind, type MapLabel } from './minimap';
+import { CampusMinimap, fitCampusFrame, markerVisible, pickMarker, type MapMarker, type MapMarkerKind, type MapLabel } from './minimap';
+import { HAMASEN_MAP_ALIASES, hamasenCardCategory } from '../map/map-landmarks';
 import { actualPlaceText, coalesceMapDraw, bindMapGestures, bindMinimapOpen, busStopMarkers, clampFrame, pointAt, polygonCenter, zoomFrame, type MapPoint } from './campus-map-view';
 import { Terrain } from '../world/terrain';
 import { GrowableSurfaceField, campusVegetationVolumes } from '../world/growable-surface';
 import { gateBarrierObstacles } from '../world/gate-barriers';
-import { loadPlacements, landmarkCarves, landmarkLevels, landmarkTransforms, loadLandmarks, REPLACES } from '../world/landmarks';
+import { loadPlacements, landmarkCarves, landmarkLevels, landmarkTransforms, loadLandmarks, REPLACES, isHamasenModelFootprint } from '../world/landmarks';
 import { OutdoorRoutes } from './route';
 import { fullTunnelProfile, tunnelBores, type TunnelProfile } from '../world/tunnel-surface';
 import { Campus, clearCampus, type Body } from '../story/collection';
@@ -71,7 +72,7 @@ import { Bike, RIDE_SPEED } from './bike';
 import { Quiz, Chase, judgeSunset, type Question } from '../games/minigames';
 import { TalkDirector, type NpcData, type CollectionData } from '../story/talk';
 import { PALETTES, modelFor, recolor } from './player-look';
-import { planRoute as plan, followRoute, validateRoutes as validatePaths, sightLine } from './autopilot';
+import { crossesHamasenHandoff, planRoute as plan, followRoute, validateRoutes as validatePaths, sightLine } from './autopilot';
 import { NpcManager, disposeObject, NPC_CAP, type CharacterWarmupSamples, type StoryZones, type Preset } from '../world/npc';
 import { StoryDirector, type GuideOverride } from '../story/director';
 import { trackedTarget } from '../story/guide-goal';
@@ -140,12 +141,13 @@ type WarmupRenderer=Pick<T.WebGLRenderer,'compile'|'render'|'getRenderTarget'|'s
 export interface ShaderWarmupTiming {compileMs:number;firstUseMs:number;renderPasses:number}
 /** Run only while normal rendering is stopped. Keep hidden material samples alive afterwards:
  * disposing their last material reference would evict the very programs we just warmed. */
-export async function warmupWalkScene(renderer:WarmupRenderer,scene:T.Scene,camera:T.Camera,postprocessed=true) {
+export async function warmupWalkScene(renderer:WarmupRenderer,scene:T.Scene,camera:T.Camera,postprocessed=true,prepareTierC=false) {
   const target=new T.WebGLRenderTarget(1,1,{stencilBuffer:true}),oldTarget=renderer.getRenderTarget();
   const face=renderer.getActiveCubeFace(),mip=renderer.getActiveMipmapLevel();
   const viewport=renderer.getViewport(new T.Vector4()),scissor=renderer.getScissor(new T.Vector4()),scissorTest=renderer.getScissorTest();
   const restore:(()=>void)[]=[];
   const materials=new Set<T.Material>();
+  const shadowLights: (T.DirectionalLight | T.SpotLight | T.PointLight)[] = [];
   const timing:ShaderWarmupTiming={compileMs:0,firstUseMs:0,renderPasses:0};
   const shadowAuto=renderer.shadowMap.autoUpdate,shadowNeeds=renderer.shadowMap.needsUpdate;
   try {
@@ -160,6 +162,7 @@ export async function warmupWalkScene(renderer:WarmupRenderer,scene:T.Scene,came
         }
       }
       if((object instanceof T.DirectionalLight || object instanceof T.SpotLight || object instanceof T.PointLight) && object.castShadow){
+        shadowLights.push(object);
         const shadow=object.shadow,size=shadow.mapSize.clone(),map=shadow.map,mapPass=shadow.mapPass,auto=shadow.autoUpdate,needs=shadow.needsUpdate;
         restore.push(()=>{shadow.map?.dispose();shadow.mapPass?.dispose();shadow.map=map;shadow.mapPass=mapPass;shadow.mapSize.copy(size);shadow.autoUpdate=auto;shadow.needsUpdate=needs||!map;});
         shadow.map=null;shadow.mapPass=null;shadow.mapSize.set(1,1);shadow.autoUpdate=true;shadow.needsUpdate=true;
@@ -182,11 +185,20 @@ export async function warmupWalkScene(renderer:WarmupRenderer,scene:T.Scene,came
     // Use the full scene: preserve every material group, draw range and instance count.
     // Linear offscreen output matches PostPipeline; rendering also initializes shadow programs.
     await compile();firstUse();
-    if(!postprocessed){
+    if(!postprocessed || prepareTierC){
       // Direct-screen shaders have different output defines. Compiling alone leaves their uniform
       // reflection lazy; draw them into one covered canvas pixel as well, never the full viewport.
       renderer.setRenderTarget(null);renderer.setViewport(new T.Vector4(0,0,1,1));renderer.setScissor(new T.Vector4(0,0,1,1));renderer.setScissorTest(true);
       renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=false;
+      if (prepareTierC) {
+        const enabled = renderer.shadowMap.enabled;
+        restore.push(() => {
+          renderer.shadowMap.enabled = enabled;
+          for (const light of shadowLights) light.castShadow = true;
+        });
+        renderer.shadowMap.enabled = false;
+        for (const light of shadowLights) light.castShadow = false;
+      }
       await compile();firstUse();
     }
     return timing;
@@ -263,7 +275,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   const sky = new CampusSky(scene, sun, renderer);
   // Night fill that travels with the player so characters never turn into silhouettes after dark.
   const fill = new T.PointLight('#d8e2ff', 0, 9, 1.4); // cool moonlit fill (art-direction-v4 §2.2) scene.add(fill);
-  let post = new PostPipeline(renderer, TIERS[tier].samples || 4);
+  let post = TIERS[tier].post ? new PostPipeline(renderer, TIERS[tier].samples) : undefined;
   /** Tier changes touch DPR, post chain, bloom, shadows and outline reach together. */
   let tufts: GrassTufts | undefined, clouds: T.InstancedMesh | undefined;
   let growable: GrowableSurfaceField | undefined;
@@ -273,12 +285,22 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     if (npcs) npcs.cap = NPC_CAP[t];
     if (tufts) tufts.limit = TIERS[t].detail.tufts;
     tier = t; const q = TIERS[t];
-    renderer.setPixelRatio(Math.min(devicePixelRatio, q.dprCap)); renderer.setSize(innerWidth, innerHeight);
-    post.setSize(innerWidth * renderer.getPixelRatio(), innerHeight * renderer.getPixelRatio());
-    // MSAA sample count is fixed per render target: rebuild the chain when the tier changes it.
-    if (q.post && post.samples !== Math.min(q.samples, renderer.capabilities.maxSamples)) { post.dispose(); post = new PostPipeline(renderer, q.samples); }
-    post.setSize(innerWidth * renderer.getPixelRatio(), innerHeight * renderer.getPixelRatio());
-    post.bloomLayers = q.bloomLayers;
+    const dpr = Math.min(devicePixelRatio, q.dprCap);
+    if (dpr !== renderer.getPixelRatio()) renderer.setPixelRatio(dpr); // also resizes the canvas at its current logical size
+    const { x: width, y: height } = renderer.getSize(new T.Vector2());
+    if (width !== innerWidth || height !== innerHeight) renderer.setSize(innerWidth, innerHeight);
+    if (q.post) {
+      // MSAA samples are fixed per target. Size the replacement chain once.
+      if (post?.samples !== Math.min(q.samples, renderer.capabilities.maxSamples)) {
+        post?.dispose();
+        post = new PostPipeline(renderer, q.samples);
+      }
+      post.setSize(innerWidth * dpr, innerHeight * dpr);
+      post.bloomLayers = q.bloomLayers;
+    } else if (post) {
+      post.dispose();
+      post = undefined;
+    }
     renderer.shadowMap.enabled = q.shadows !== 'off'; sun.castShadow = q.shadows !== 'off';
     renderer.shadowMap.type = T.PCFShadowMap; // r186 dropped PCFSoft; soft tiers keep the larger map
     sun.shadow.radius = q.shadows === 'soft' ? 3 : 1;
@@ -637,7 +659,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       },`door:${door.id}`,expected?'close':'open');
     }
     const nearbyLandmark=campusUi?.nearbyLandmark(p);
-    if(nearbyLandmark) add(`landmark:${nearbyLandmark.id}`,`${nearbyLandmark.name}資訊`,40,nearbyLandmark.position,()=>campusUi?.openCard(nearbyLandmark.id));
+    if(nearbyLandmark) add(`landmark:${nearbyLandmark.id}`,`${nearbyLandmark.name}資訊`,40,nearbyLandmark.position,()=>{campusUi?.openCard(nearbyLandmark.id);faceCardSubject(nearbyLandmark.id,true);});
     if(campusUi?.nearStory) { const story=campusUi.nearStory; add('history','校園故事',45,p,()=>{if(campusUi.nearStory?.id===story.id)campusUi.interact(p);},`history:${story.id}`,'read'); }
     return orderInteractions(out);
   }
@@ -824,7 +846,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     zoom(d) { if(v12?.locked||passenger.carried||gestures.open)return; if (photo.active) photo.zoom(d); else rig.zoom(d); },
     canLook: () => !overview && !v12?.locked && !passenger.carried && !gestures.open,
   });
-  v12=new V12Runtime({host,scene,data:v12Data,physics,avatar,asset,say,ground:(x,z)=>terrainRef!.heightAt(x,z),cue:id=>sound.cue(id),params:new URLSearchParams(location.search),modeChanged:()=>{
+  v12=new V12Runtime({host,scene,data:v12Data,physics,avatar,asset,say,ground:(x,z)=>terrainRef!.heightAt(x,z),cue:id=>sound.cue(id),params:new URLSearchParams(location.search),inTown:(x,z)=>{const d=structure.context.hamasen?.polygon;return !!d&&insideWater([x,z],d);},modeChanged:()=>{
     if(document.pointerLockElement)document.exitPointerLock();if(campusEvents?.activity)cancelCampusActivity();clearAuto(true);input.release();bike.riding=false;avatar.riding=false;avatar.setSeated(false);physics.setRiding(false);passenger.clear();rig.snap(physics.position);rig.protect();
   }});
   startupJobs.push(v12.load());
@@ -920,7 +942,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   // ---- HUD refresh (7 Hz) ----------------------------------------------------------------
   const minimap = get<HTMLCanvasElement>('.walk-minimap'), ctx = minimap.getContext('2d')!;
   const minimapSheet = new CampusMinimap();
-  const mapCanvas = get<HTMLCanvasElement>('.walk-map-canvas'), mapPick = get('.walk-map-pick'), mapGo = get('[data-map-go]');
+  const mapCanvas = get<HTMLCanvasElement>('.walk-map-canvas'), mapPick = get('.walk-map-pick'), mapGo = get('[data-map-go]'), mapInfo = get('[data-map-info]');
   const mapHidden = new Set<MapMarkerKind>();
   let collectionData: CollectionData | undefined;
   let mapMarkers: MapMarker[] = [], mapSelected: MapMarker | undefined, mapFrame = fitCampusFrame(1, 1);
@@ -1011,10 +1033,12 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       const center = pointAt(mapFrame, mapFrame.width / 2, mapFrame.height / 2);
       mapFrame = clampFrame({ ...mapFrame, width: box.width, height: box.height, x0: center[0] - box.width / mapFrame.scale / 2, z0: center[1] - box.height / mapFrame.scale / 2 }, minimapSheet.sheetBounds);
     }
-    mapMarkers = collectMarkers().filter(m => !mapHidden.has(m.kind));
+    mapMarkers = collectMarkers().filter(m => !mapHidden.has(m.kind) && markerVisible(m, mapFrame.scale));
     if (mapSelected && mapSelected.kind !== 'building' && !mapMarkers.some(m => m.id === mapSelected!.id)) { mapSelected = undefined; mapNotice = ''; }
     minimapSheet.drawOverview(ctx, mapFrame, mapMarkers, mapSelected?.id, physics.position, rig.yaw, guideOverride?.point ?? director?.goal(), mapPlaces.map(p => ({ ...p, label: minimapSheet.buildings.find(b => `building:${b.id}` === p.id)?.name ?? p.label })));
-    mapPick.querySelector('span')!.textContent = mapNotice || mapSelected?.label || (mapLoadFailed ? '地圖暫時無法載入，請重新進入校園。' : minimapSheet.ready ? '點選標記或建築，再按「帶我去」。' : '地圖載入中…');
+    const selectionText = mapSelected?.poi ? `${mapSelected.label}・${hamasenCardCategory(mapSelected.poi.kind, mapSelected.poi.category)}` : mapSelected?.label;
+    setText(mapPick.querySelector('span')!, mapNotice || selectionText || (mapLoadFailed ? '地圖暫時無法載入，請重新進入校園。' : minimapSheet.ready ? '點選標記或建築，再按「帶我去」。' : '地圖載入中…'));
+    mapInfo.hidden = !mapSelected?.poi || !campusUi;
     get('[data-map-place]').textContent = `你在：${currentPlaceText}`;
     get('[data-map-place]').title = `你在：${currentPlaceText}`;
     mapGo.hidden = !mapSelected;
@@ -1031,10 +1055,14 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     change: frame => { mapFrame = frame; renderMap(); },
     pick: (x, y) => {
       mapNotice = '';
-      mapSelected = pickMarker(mapMarkers, mapFrame, x, y, 16);
+      mapSelected = minimapSheet.pickPlaceLabel(x, y, mapMarkers) ?? pickMarker(mapMarkers, mapFrame, x, y, 16);
       if (!mapSelected) {
         const b = minimapSheet.pickBuilding(mapFrame, x, y);
-        if (b) { const [x, z] = polygonCenter(b.polygon); mapSelected = { id: `building:${b.id}`, kind: 'building', buildingId: b.id, label: b.name, x, y: 0, z }; }
+        if (b) {
+          const [x, z] = polygonCenter(b.polygon);
+          mapSelected = mapMarkers.find(m => m.id === HAMASEN_MAP_ALIASES[b.id]) ??
+            { id: `building:${b.id}`, kind: 'building', buildingId: b.id, label: b.name, x, y: 0, z };
+        }
       }
       renderMap();
     },
@@ -1051,9 +1079,15 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     if (show) mapHidden.delete(kind); else mapHidden.add(kind);
     button.setAttribute('aria-pressed', String(show)); renderMap();
   }));
+  mapInfo.addEventListener('click', () => {
+    if (!mapSelected?.poi) return;
+    setMenu(false);
+    campusUi?.openCard(mapSelected.id);
+  });
   mapGo.addEventListener('click', () => {
     const picked = mapSelected;
     if (!picked) return;
+    if (picked.poi) { setMenu(false); walkOutdoor(picked.id); return; }
     if (picked.kind === 'restroom') {
       // Reuse the route-aware restroom search, restricted to the building the player picked.
       const destination = searchDestinations(world.destinations.filter(d => d.buildingId === picked.buildingId), '廁所', d => {
@@ -1084,9 +1118,21 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   });
   let currentFloor = world.floors.find(f => f.buildingId === 'SC' && f.data.level === 1)!;
   const inverseFrames = new Map([...world.frames].map(([id, m]) => [id, m.clone().invert()]));
+  const floorById = new Map(world.floors.map(f => [f.data.id, f]));
   const signWalls = buildDoorSignWalls(world, campusData, structure);
   const signs = new Map<string, T.Mesh>();
   let placeIndoors = false;
+  const hamasenStreets = structure.context.roads.filter(r => r.id.startsWith('hamasen-') && r.name && !r.tunnel);
+  function hamasenPlaceText(foot: T.Vector3) {
+    let street: string | undefined, distance = 45 ** 2;
+    for (const road of hamasenStreets) for (let i = 1; i < road.points.length; i++) {
+      const [x, z] = road.points[i-1], dx = road.points[i][0] - x, dz = road.points[i][1] - z;
+      const t = T.MathUtils.clamp(((foot.x-x)*dx + (foot.z-z)*dz) / (dx*dx + dz*dz || 1), 0, 1);
+      const squared = (foot.x-x-t*dx)**2 + (foot.z-z-t*dz)**2;
+      if (squared < distance) { distance = squared; street = road.name ?? undefined; }
+    }
+    return street?.startsWith('哈瑪星') ? street : street ? `哈瑪星・${street}` : '哈瑪星';
+  }
   function updateUi() {
     const foot = physics.position; let nearestBuilding = 'SC', best = Infinity;
     for (const b of campusData) {
@@ -1096,32 +1142,39 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       if (score < best) { best = score; nearestBuilding = b.id; }
     }
     currentFloor = world.floors.filter(f => f.buildingId === nearestBuilding && f.y <= foot.y + .65).sort((a, b) => b.y - a.y)[0] ?? world.floors.find(f => f.buildingId === nearestBuilding)!;
-    const selected = world.floors.find(f => f.data.id === floorSelect.value), floorRecord = overview && selected ? selected : currentFloor;
+    const selected = floorById.get(floorSelect.value), floorRecord = overview && selected ? selected : currentFloor;
     const buildingName = campusData.find(b => b.id === nearestBuilding)!.name;
     placeIndoors = best < .5;
     const district=structure.context.hamasen?.polygon;
     const inHamasen = district ? insideWater([foot.x,foot.z],district) : hamasenEast !== undefined && foot.x >= hamasenEast && foot.z >= 100;
-    currentPlaceText = actualPlaceText(buildingName, currentFloor.data.label, best, inHamasen ? '哈瑪星' : director?.zoneLabel);
+    currentPlaceText = actualPlaceText(buildingName, currentFloor.data.label, best, inHamasen ? hamasenPlaceText(foot) : director?.zoneLabel);
     setText(get('#walk-place'), autoDestination ? `前往 ${autoDestination.label}` : currentPlaceText);
     lod.update(foot, { overview, buildingId: inspectedBuilding, floorId: floorSelect.value });
     const runBtn = get('[data-action=run]'); runBtn.classList.toggle('is-running', input.running); runBtn.setAttribute('aria-pressed', String(input.running));
     for (const door of world.doors) {
-      const distance = door.position.distanceTo(foot), floorVisible = world.floors.find(f => f.data.id === door.floorId)?.group.visible !== false;
-      door.group.visible = distance < 75 && floorVisible;
+      const distanceSq = door.position.distanceToSquared(foot);
+      const visible = distanceSq < 75 ** 2 && floorById.get(door.floorId)?.group.visible !== false;
+      door.group.visible = visible;
       let sign = signs.get(door.id);
-      if (distance < 19 && floorVisible) {
+      if (distanceSq < 19 ** 2 && visible) {
         if (!sign) { sign = placeSign(door); if (sign) signs.set(door.id, sign); }
         if (sign) sign.visible = true;
       } else if (sign) {
         sign.visible = false;
-        if (distance > 65) { scene.remove(sign); disposeTree(sign); signs.delete(door.id); }
+        if (distanceSq > 65 ** 2) { scene.remove(sign); disposeTree(sign); signs.delete(door.id); }
       }
     }
-    drawFloorMinimap(ctx, world, floorRecord, foot, rig.yaw, autoPath, inverseFrames.get(floorRecord.buildingId)!, guideOverride ? guideOverride.point : director?.goal());
+    const minimapGoal = (autoPath.length ? autoPath.at(-1) : undefined) ?? guideOverride?.point ?? director?.goal();
+    let drewCampusMap = false;
     if ((overview && floorSelect.value === 'all') || (!overview && best >= 4)) {
       const center = overview ? orbit.target : foot, heading = overview ? Math.atan2(camera.position.x - orbit.target.x, camera.position.z - orbit.target.z) : rig.yaw;
-      if (!minimapSheet.draw(ctx, center, heading, guideOverride ? guideOverride.point : director?.goal())) campusUi?.drawMinimap(ctx, center, heading);
+      drewCampusMap = minimapSheet.draw(ctx, center, heading, minimapGoal, undefined, undefined, busMarkers);
+      if (!drewCampusMap && campusUi) {
+        campusUi.drawMinimap(ctx, center, heading);
+        drewCampusMap = true;
+      }
     }
+    if (!drewCampusMap) drawFloorMinimap(ctx, world, floorRecord, foot, rig.yaw, autoPath, inverseFrames.get(floorRecord.buildingId)!, minimapGoal);
     const lift=cabinLift();if(lift&&!photo.active&&!gestures.open)showLift(lift);else {liftPanel.hidden=true;panelLift=undefined;}
   }
   function placeSign(door: WorldDoor) {
@@ -1138,7 +1191,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     eventQueue.clear(); npcs?.releaseAllBorrowed(); eventInvite.remove();
     encounterScene.dispose();
     notebook?.dispose(); director?.dispose(); characterWarmup?.dispose();npcs?.dispose(); photo.dispose(); spotField?.dispose();
-    lod.dispose(); physics.dispose(); avatar.dispose(); post.dispose(); sound.dispose(); renderer.dispose();
+    lod.dispose(); physics.dispose(); avatar.dispose(); post?.dispose(); sound.dispose(); renderer.dispose();
     for (const sign of signs.values()) disposeTree(sign); signs.clear();
     Reflect.deleteProperty(window, 'campusWalk'); sky.dispose();
     const seen = new Set<unknown>();
@@ -1546,7 +1599,9 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     if (!routesValidated) return [];
     const clear = sightLine((a, b, r) => physics.sweep(a, b, r)), around = (path: T.Vector3[]) => obstacleField.route(path, bike.riding ? {radius:.38,halfLength:.57} : .30, clear, (x,z,referenceY) => physics.supportAt(x,z,referenceY));
     const direct = around(plan(physics.position, to, navigation, routes, clear));
-    if (direct.length) return direct;
+    // Cross-district walks require the tunnel. The general fallbacks use the
+    // outdoor graph across the hill and cannot replace the bore.
+    if (direct.length || crossesHamasenHandoff(physics.position, to, hamasenEast)) return direct;
     // A long navmesh leg across a planted plaza can exhaust the local detour; the path network has shorter legs.
     const outdoor = routes?.path(physics.position, to) ?? [];
     const network = outdoor.length ? around(outdoor) : [];
@@ -1635,6 +1690,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       for (const station of structure.context.background) {
         const exit=station.stationExit;
         if(exit!==1&&exit!==2)continue;
+        if (isHamasenModelFootprint(station.id)) continue; // The landmark GLB already carries its station sign.
         const entrance = graph.anchor(`hamasen-exit-${exit}`);
         if (!entrance) continue;
         const ring=station.polygon,center=polygonCenter(ring);
@@ -1659,7 +1715,9 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       }
       zoneLabels = Object.fromEntries(Object.entries(zones.zones).map(([id,z]) => [id,z.label]));
       validateRoutes();
-      npcs = new NpcManager(zones, routes, terrainRef, asset, npcData);npcs.seatPropsReady(false); scene.add(npcs.group);
+      const hamasenWest = Math.min(...(structure.context.hamasen?.polygon ?? []).map(([x]) => x));
+      npcs = new NpcManager(zones, routes, terrainRef, asset, npcData, hamasenWest);npcs.seatPropsReady(false); scene.add(npcs.group);
+      if(structure.context.hamasen&&terrainRef&&streetPropsEnabled())world.display.add(hamasenStreetProps(structure.context,terrainRef,{npcData,stops:v12Data.bus?.stops,tier:()=>quality.tier,portal:world.display.userData.hamasenTunnelProfile,isLandmark:isHamasenModelFootprint,pathDistance:(x,z)=>graph.edgeDistance(x,z),views:hamasenCardViews(campusInfo)}));
       startupJobs.push(addSeatProps(world.display.getObjectByName('Campus art')??scene,npcs.seats,asset,()=>alive).then(group=>{
         if(!alive)return;seatProps=group;const specs=group.userData.obstacles as Obstacle[];physics.addObstacles(specs);obstacleField.add(specs);npcs?.seatPropsReady(specs.length>0);
       }));
@@ -1817,6 +1875,24 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   const atAutoPerson = () => { if (!autoTarget?.startsWith('npc:')) return false; const n = npcs?.get(autoTarget.slice(4)); return !!n && Math.hypot(n.position.x - physics.position.x, n.position.z - physics.position.z) < NPC_ARRIVE && Math.abs(n.position.y - physics.position.y) < 1.2; };
   /** At the end of a walk, turn to what the walk was for, so it is in the picture without the player hunting for it. */
   function cameraBlocked(){return !!v12?.locked || passenger.carried || gestures.open || !walking || overview || !!notebook?.open || menuOpen() || !!director?.blocking || photo.active || !!quiz?.open || guide.open || chase.active || recoveryFailed;}
+  /** A 哈瑪星 card opened at its landing, or a walk that ends there: turn to the shop or landmark itself.
+   * The desktop card covers the left of the view and the phone sheet the lower half, so the subject is
+   * set right of centre or a little higher. Free, locked and first-person cameras keep their own view. */
+  function faceCardSubject(id: string, cardOpen: boolean) {
+    const at = campusInfo?.buildings[id]?.poi?.position;
+    if (!at) return;
+    const p = physics.position, dx = at[0] - p.x, dz = at[1] - p.z, sheet = innerWidth <= 700;
+    const yaw = Math.atan2(-dx, -dz) + Math.max(Math.hypot(dx, dz) < 6 ? ARRIVAL_OFFSET : 0, cardOpen && !sheet ? .2 : 0);
+    avatar.face(yaw);
+    const turned = !cameraBlocked() && rig.faceRoute(yaw);
+    if (turned && cardOpen) rig.pitch = sheet ? 0 : -.06;
+    lastCardFace = { id, yaw, turned };
+  }
+  let lastCardFace: { id: string; yaw: number; turned: boolean } | undefined;
+  /** Card subjects and landings for the street furniture's sightlines; landmarks also keep their street open. */
+  function hamasenCardViews(info: CampusInfo | undefined) {
+    return Object.values(info?.buildings ?? {}).flatMap(b => b.poi ? [{ x: b.poi.position[0], z: b.poi.position[1], vx: b.poi.approach[0], vz: b.poi.approach[2], street: b.kind === 'landmark' ? b.poi.street : undefined }] : []);
+  }
   function faceTarget(target: string | undefined) {
     if (!target) return;
     const [kind, id] = target.split(':'), door = kind === 'dest' ? world.doors.find(d => d.id === findDestination(world.destinations, id)?.doorId) : undefined;
@@ -1838,6 +1914,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
         if (trackedQuest()?.step?.kind === 'photo') autoFollow = false; // the walk ends at the viewpoint: the shot is the player's
         const arrivalId=autoDestination?.id;
         faceTarget(autoTarget);
+        if (arrivalId?.startsWith('hamasen-poi-')) faceCardSubject(arrivalId, false);
         const label = autoDestination?.label, indoor = !['quest', 'outdoor'].includes(autoDestination?.floorId ?? ''); clearAuto(); direction.set(0, 0, 0);
         if ((arrivalId==='tunnel-west'||arrivalId==='TUNNEL'||arrivalId==='tunnel-east') && uiPlacements?.tunnel && terrainRef) {
           const profile=fullTunnelProfile(uiPlacements.tunnel,(x,z)=>terrainRef!.heightAt(x,z));
@@ -1871,6 +1948,8 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     if(document.hidden){lastTime=time;return;}
     // rAF time can precede a lastTime reset (resume, QA stepping); never pass a negative dt
     const rawDt = time - lastTime, realDt=Math.max(0,rawDt/1000),dt = Math.min(realDt, maxFrame); lastTime = time;
+    // Resize the drawing buffer before submitting this frame's draw commands.
+    quality.frame(rawDt, time);
     renderer.info.reset();
     previous.copy(physics.position); direction.set(0, 0, 0); jumped = false;
     guide.update();
@@ -2018,7 +2097,10 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     else if (!overview) {
       rig.poseView=avatar.seatView;
       rig.update(dt, { foot: physics.position, running: input.running, moving: speed > .25, gait:bike.riding?'ride':input.running?'run':'walk', blocked:cameraBlocked(), follow:cameraFollowTarget({mode:rig.mode,axes:input.axes,speed,heading:avatar.heading,route:autoPath.length>0,blocked:cameraBlocked()}) });
-      avatar.setOpacity(rig.firstPerson ? 0 : rig.avatarOpacity);
+      // The centered avatar covers the speaker in a narrow portrait view.
+      const portraitPhone = innerWidth < 760 && innerWidth < innerHeight && (coarse || host.classList.contains('has-touch'));
+      const dialogue = !!director?.ui.dialogueOpen && (portraitPhone || rig.avatarOpacity < 1);
+      avatar.setOpacity(rig.firstPerson || dialogue ? 0 : rig.avatarOpacity);
     } else { avatar.setOpacity(1); orbit.update(); }
     characterQa.update();
     npcs?.updateCamera(camera.position);
@@ -2037,11 +2119,10 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     fill.intensity += ((sky.preset === 'night' ? 6 : sky.preset === 'sunset' ? 1.2 : 0) - fill.intensity) * Math.min(1, dt * 2);
     animateCampus(world, time);
     campusUi?.update(camera, overview, physics.position, time);
-    post.look = lerpLook(POST_LOOKS[sky.fromPreset], POST_LOOKS[sky.preset], sky.progress);
-    if (TIERS[tier].post) post.render(scene, camera);
-    else { renderer.toneMappingExposure = post.look.exposure; renderer.setRenderTarget(null); renderer.render(scene, camera); }
+    const look = lerpLook(POST_LOOKS[sky.fromPreset], POST_LOOKS[sky.preset], sky.progress);
+    if (post) { post.look = look; post.render(scene, camera); }
+    else { renderer.toneMappingExposure = look.exposure; renderer.setRenderTarget(null); renderer.render(scene, camera); }
     photo.afterRender();
-    quality.frame(rawDt, time);
   }
 
   applyTier(tier);
@@ -2065,7 +2146,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     get footContact() { return QA ? avatar.footDiagnostics : undefined; },
     surfaceAt: (x: number, z: number, referenceY: number) => QA ? { soil: terrainRef?.surfaceAt(x, z), support: physics.supportAt(x, z, referenceY), surfaceVersion: terrainRef?.surfaceVersion } : undefined,
     get routeSurfaces() { return QA ? { story: director?.routeDiagnostics, automatic: routeLine.children.filter((o): o is T.Line => o instanceof T.Line).map(line => Array.from(line.geometry.attributes.position.array)) } : undefined; },
-    get camera() { return { position: camera.position.toArray(), arm: rig.arm, distance: rig.distance, yaw: rig.yaw, pitch: rig.pitch, locked: rig.locked }; },
+    get camera() { return { position: camera.position.toArray(), arm: rig.arm, distance: rig.distance, yaw: rig.yaw, pitch: rig.pitch, locked: rig.locked, blocked: cameraBlocked(), autoTurn: rig.canAutoTurn('route'), cardFace: lastCardFace }; },
     get physicsStats() { return physics.stats; },
     probe: (dx: number, dz: number) => physics.probe(dx, dz),
     /** Diagnostics only, and only with ?qa=1: place the player (never used by acceptance runs). */
@@ -2099,6 +2180,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     qaObstacles: (x: number, z: number, r: number) => QA ? obstacleField.obstacles.filter(o => Math.hypot(o.center[0] - x, o.center[2] - z) < r + Math.max(o.half[0], o.half[2])).map(o => ({ id: o.id, shape: o.shape, center: o.center, half: o.half, yaw: o.yaw ?? 0 })) : [],
     /** QA only: the navmesh path between two points, as [x, y, z] triples. */
     qaNavPath: (a: number[], b: number[]) => QA && navigation ? navigation.findPath(new T.Vector3(a[0], a[1], a[2]), new T.Vector3(b[0], b[1], b[2])).map(p => p.toArray()) : [],
+    get qaMap() { return QA ? { frame: mapFrame, markers: mapMarkers.map(m => ({id:m.id,x:m.x,z:m.z})), labels: minimapSheet.overviewLabelIds, selected: mapSelected?.id } : undefined; },
     qaPlace: (x: number, z: number, y?: number, face?: [number, number]) => QA ? teleportTo(new T.Vector3(x, y ?? 0, z), face && new T.Vector3(face[0], y ?? 0, face[1]), y !== undefined) : false,
     plan(to?: string) {
       const g = to ? walkGoal(to) : director?.goal(); const nav = g && navigation ? navigation.findPath(physics.position, g).length : -1; const out = g && routes ? routes.path(physics.position, g).length : -1;
@@ -2200,10 +2282,10 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     lod.update(physics.position,{overview,buildingId:inspectedBuilding,floorId:floorSelect.value});
     scene.add(warmupSamples());
     if(characterWarmup)scene.add(characterWarmup.group);
-    shaderWarmupStages=await warmupWalkScene(renderer,scene,camera,TIERS[tier].post);
+    shaderWarmupStages=await warmupWalkScene(renderer,scene,camera,!!post,!!post&&!quality.locked);
     characterWarmup?.removeFromScene();
     if(!alive)return;
-    if(TIERS[tier].post){
+    if(post){
       // Warm the small post-processing shader set as well, behind the loading cover.
       post.setSize(1,1);const postAt=performance.now();
       try {post.render(scene,camera);} finally {shaderWarmupPostMs=performance.now()-postAt;post.setSize(innerWidth*renderer.getPixelRatio(),innerHeight*renderer.getPixelRatio());}

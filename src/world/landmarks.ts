@@ -9,12 +9,25 @@ import type { Terrain } from './terrain';
 import { fullTunnelProfile,fullTunnelGeometry,tunnelGroundCuts,tunnelVegetationVolumes } from './tunnel-surface';
 
 type P2 = [number, number];
-export interface Placement { osmId?: number | null; centroid: P2; yaw: number; elevation?: number | null; levelPad?: P2[]; path?: P2[]; moduleLength?: number; parts?: string[]; walkableLength?: number; seaOffset?: number; centerline?: P2[]; eastPortal?: P2 }
+export interface Placement { osmId?: number | null; centroid: P2; yaw: number; elevation?: number | null; footings?: boolean; levelPad?: P2[]; path?: P2[]; moduleLength?: number; parts?: string[]; walkableLength?: number; seaOffset?: number; centerline?: P2[]; eastPortal?: P2 }
 export interface Box { center: [number, number, number]; size: [number, number, number]; yaw: number; walkable?: boolean }
 
 /** Hand-modelled landmarks (T4, tools/create_landmarks.py) and the OSM blocks / v2 features they replace. */
-export const LANDMARK_IDS = ['admin', 'library', 'liberal-arts', 'tunnel', 'gate', 'seawall', 'yatsen-hall', 'gym', 'marine', 'activity-center', 'beach-house'] as const;
+const HAMASEN_MODELS = {
+  'hamasen-wude': ['osm-203315651'],
+  'hamasen-temple': ['osm-203577798'],
+  'hamasen-mrt-exit-1': ['hamasen-osm-310011987'],
+  'hamasen-mrt-exit-2': ['hamasen-osm-303165537'],
+  'hamasen-light-rail': ['hamasen-osm-1056803932', 'hamasen-osm-1247688196'],
+  'hamasen-railway-museum': ['hamasen-osm-203342621', 'hamasen-osm-435657348'],
+  'hamasen-gushan-school': ['osm-310010753', 'osm-1388408941'],
+  'hamasen-gushan-ferry': ['hamasen-osm-205060865', 'osm-205060865'],
+} as const;
+export const LANDMARK_IDS = ['admin', 'library', 'liberal-arts', 'tunnel', 'gate', 'seawall', 'yatsen-hall', 'gym', 'marine', 'activity-center', 'beach-house',
+  ...Object.keys(HAMASEN_MODELS)] as const;
 export const REPLACES: Record<string, string> = { admin: 'AD', library: 'IL', 'yatsen-hall': 'YH', gym: 'SPORT', marine: 'ME', 'activity-center': 'ACTIVITY', 'beach-house': 'BEACH' };
+const hamasenModelFootprints = new Set<string>(Object.values(HAMASEN_MODELS).flat());
+export const isHamasenModelFootprint = (id: string) => hamasenModelFootprints.has(id);
 
 export async function loadPlacements(asset: (p: string) => string) {
   const r = await fetch(asset('models/landmarks/placements.json'));
@@ -115,7 +128,7 @@ export function landmarkFootings(placements: Record<string, Placement>, collisio
   const out: Box[] = [];
   for (const id of LANDMARK_IDS) {
     const p = placements[id], col = collisions[id];
-    if (!p || !col || id === 'tunnel' || p.path) continue;
+    if (!p || !col || id === 'tunnel' || p.path || p.footings === false) continue;
     const seat = new T.Vector3().setFromMatrixPosition(landmarkTransforms(id, p, ground)[0]).y, c = Math.cos(p.yaw), s = Math.sin(p.yaw);
     for (const b of col.boxes) {
       if (b.center[1] - b.size[1] / 2 > .1) continue;

@@ -3,6 +3,8 @@ import { Vector2, Vector3 } from 'three';
 
 const MOVE_KEYS = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
 const STICK_RUN_THRESHOLD = .85;
+const STICK_WALK_THRESHOLD = .80;
+
 /** Keys the walkthrough owns while focus is not in a text field. */
 const OWNED = [...MOVE_KEYS, ' ', 'e', 'g', 'v', 'm', 'k', 'n', 'l', 'p', 'b', 'j', 'r', 'h', 't', 'q', 'shift', '/', 'escape', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
@@ -58,6 +60,7 @@ export class WalkInput {
   jump = false;
   private lookId = -1;
   private stickId = -1;
+  private stickRunning = false;
   private lastX = 0;
   private lastY = 0;
   private lockSettleUntil = 0;
@@ -129,6 +132,9 @@ export class WalkInput {
       const v = new Vector2(e.clientX - r.left - r.width / 2, e.clientY - r.top - r.height / 2).divideScalar(38);
       if (v.length() > 1) v.normalize();
       this.stick.copy(v);
+      // Keep the run trigger at 85%, with room for touch noise before returning to a walk.
+      const threshold = this.stickRunning ? STICK_WALK_THRESHOLD : STICK_RUN_THRESHOLD;
+      this.stickRunning = v.lengthSq() >= threshold ** 2;
       joystick.classList.toggle('is-stick-running', this.stickRunning);
       knob.style.transform = `translate(${v.x * 30}px,${v.y * 30}px)`;
     };
@@ -144,13 +150,13 @@ export class WalkInput {
     joystick.addEventListener('lostpointercapture', endStick, { signal });
   }
 
-  private get stickRunning() { return this.stick.lengthSq() >= STICK_RUN_THRESHOLD ** 2; }
   get running() { return this.runToggle || this.keys.has('shift') || this.stickRunning; }
 
   private releaseStick() {
     const id = this.stickId;
     this.stickId = -1;
     this.stick.set(0, 0);
+    this.stickRunning = false;
     this.knob.style.transform = '';
     this.joystick.classList.remove('is-stick-running');
     if (id !== -1 && this.joystick.hasPointerCapture(id)) this.joystick.releasePointerCapture(id);

@@ -38,6 +38,9 @@ for n in N['npcs']:
         if not v: continue
         a = anchor(v['at'])
         if a: o = v.get('offset', [0, 0]); spots.append((f"npc {n['id']} {preset} at={v['at']}", a[0] + o[0], a[1] + o[1]))
+for n in N.get('ambient', {}).get('hamasen', []):
+    for i, (x, z) in enumerate(n['route']):
+        spots.append((f"ambient {n['id']} route[{i}]", x, z))
 for sid, v in Z.get('npcs', {}).items():
     a = anchor(v['at'])
     if a: o = v.get('offset', [0, 0]); spots.append((f"story {sid} at={v['at']}", a[0] + o[0], a[1] + o[1]))

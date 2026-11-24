@@ -83,3 +83,9 @@
 .cm-zoom .cm-zoom-all{font-size:13px}
 .cm-poi path{fill:var(--ui-brick);stroke:var(--ui-line);stroke-width:1.5;transform:scale(var(--px))}
 .cm-poi text{font-size:13px;transform:scale(var(--px));font-weight:700;text-anchor:middle;fill:var(--ui-ink);paint-order:stroke;stroke:var(--ui-paper);stroke-width:4;stroke-linejoin:round}
+.cm-svg:not(.shows-shops) [data-poi-kind=shop]{display:none}
+.cm-hamasen-pin path,.cm-hamasen-pin text{transform:scale(var(--px))}
+.cm-hamasen-pin path{stroke-width:1.5}
+.cm-hamasen-pin text{font-size:11px;font-weight:700;text-anchor:middle;dominant-baseline:central;fill:#fff;pointer-events:none}
+.cm-hamasen-labels text{transform:translateY(calc(var(--px) * -17px))}
+.cm-links a::after{content:' ↗'}

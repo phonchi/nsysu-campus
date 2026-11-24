@@ -26,3 +26,35 @@ it('dialogue link Tab and Enter remain native while other dialogue keys still ro
  expect(key('Tab').defaultPrevented).toBe(false);focusedLink=true;expect(key('Enter').defaultPrevented).toBe(false);expect(modal).not.toHaveBeenCalled();
  expect(key('e').defaultPrevented).toBe(true);expect(modal).toHaveBeenCalledWith('e','dialogue');input.dispose();
 });
+
+it('holds a touch run across threshold noise and releases it on a shorter pull or touch end', () => {
+  vi.stubGlobal('window', new EventTarget());
+  vi.stubGlobal('document', Object.assign(new EventTarget(), { pointerLockElement: null }));
+  const joystick = element();
+  Object.assign(joystick, {
+    classList: { toggle() {}, remove() {} },
+    getBoundingClientRect: () => ({ left: 0, top: 0, width: 100, height: 100 }),
+    hasPointerCapture: () => false,
+  });
+  const input = new WalkInput(element(), joystick, element(), {
+    press() {}, moveStarted() {}, look() {}, zoom() {}, canLook: () => false,
+  });
+  const touch = (type: string, offset: number) => {
+    joystick.dispatchEvent(Object.assign(new Event(type), { pointerId: 1, clientX: 50, clientY: 50 - offset }));
+  };
+  touch('pointerdown', 32);
+  expect(input.running).toBe(false);
+  touch('pointermove', 33);
+  expect(input.running).toBe(true);
+  touch('pointermove', 32);
+  expect(input.running).toBe(true);
+  expect(input.axes.forward).toBeCloseTo(32 / 38);
+  touch('pointermove', 30);
+  expect(input.running).toBe(false);
+  touch('pointermove', 38);
+  expect(input.running).toBe(true);
+  touch('pointerup', 38);
+  expect(input.running).toBe(false);
+  expect(input.axes.forward).toBe(0);
+  input.dispose();
+});

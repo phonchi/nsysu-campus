@@ -22,15 +22,17 @@ def mix(a, b, t):
     return tuple(int(round(a[i] + (b[i] - a[i]) * t)) for i in range(3))
 
 
-def font(size, serif=True):
+def font(size, serif=True, traditional=False):
     try:
-        return ImageFont.truetype(FONT_SERIF if serif else FONT_SANS, size, index=2 if serif else 0)  # index 2 = TC in the .ttc
+        index = (3 if traditional else 2) if serif else 0
+        return ImageFont.truetype(FONT_SERIF if serif else FONT_SANS, size, index=index)
     except Exception:
         return ImageFont.load_default()
 
 
 class Ctx:
     def __init__(self, al, em, rect, rng):
+        self.albedo, self.emissive = al, em
         self.a, self.e = ImageDraw.Draw(al), ImageDraw.Draw(em); self.x, self.y, self.w, self.h = rect; self.rng = rng
 
     def R(self, fx0, fy0, fx1, fy1):  # fractional rect (0..1, y down) -> px box
@@ -73,16 +75,20 @@ def p_stone(c, color, dark='#8d8677', rows=4, cols=3, **_):
             c.a.rectangle([int(x0), int(c.y + r * rh), int(x1), int(c.y + (r + 1) * rh - 2)], fill=col)
 
 
-def glass(c, box, top='#dcedf4', bottom='#3e6572', base='#86b7c8', lit='lit', mull=0, frame='#3b3a36', transom=None):
+def glass(c, box, top='#dcedf4', bottom='#3e6572', base='#86b7c8', lit='lit', mull=0, frame='#3b3a36', transom=None, glint=True, rails=0):
     x0, y0, x1, y1 = box; h = max(1, y1 - y0)
     for i in range(h + 1):  # sky reflection in the top 40 %, dark interior below (art-direction §1.2 glass.day)
         t = i / h; col = mix(top, base, t / .4) if t < .4 else mix(base, bottom, (t - .4) / .6)
         c.a.line([x0, y0 + i, x1, y0 + i], fill=col)
-    c.a.polygon([(x0, y1), (x0 + (x1 - x0) * .55, y0), (x0 + (x1 - x0) * .7, y0), (x0 + (x1 - x0) * .15, y1)], fill=mix(top, base, .35))  # diagonal glint
+    if glint:
+        c.a.polygon([(x0, y1), (x0 + (x1 - x0) * .55, y0), (x0 + (x1 - x0) * .7, y0), (x0 + (x1 - x0) * .15, y1)], fill=mix(top, base, .35))
     c.a.rectangle(box, outline=rgb(frame), width=1)
     for k in range(1, mull + 1):
         xm = x0 + (x1 - x0) * k // (mull + 1); c.a.line([xm, y0, xm, y1], fill=rgb(frame))
     if transom: c.a.line([x0, y0 + int(h * transom), x1, y0 + int(h * transom)], fill=rgb(frame))
+    for k in range(1, rails + 1):
+        y = y0 + k * h // (rails + 1)
+        c.a.line([x0, y, x1, y], fill=rgb(frame))
     ec = LIT.get(lit, (0, 0, 0))
     c.e.rectangle([x0 + 1, y0 + 1, x1 - 1, y1 - 1], fill=ec)
     if lit != 'off':
@@ -96,12 +102,12 @@ def wall_bg(c, wall, wall_kind):
     else: c.fill(wall)
 
 
-def p_window(c, wall='#c75f4a', wall_kind='brick', win=(.2, .25, .8, .78), lit='lit', mull=1, sill='#f3ebdb', frame='#3b3a36', head=None, transom=None, **_):
+def p_window(c, wall='#c75f4a', wall_kind='brick', win=(.2, .25, .8, .78), lit='lit', mull=1, sill='#f3ebdb', frame='#3b3a36', head=None, transom=None, glazing=None, **_):
     """One bay × one storey: wall + window opening (fractions, y down) + cream sill/head."""
     wall_bg(c, wall, wall_kind)
     x0, y0, x1, y1 = win
     if head: c.fill(head, c.R(x0 - .04, y0 - .07, x1 + .04, y0))
-    glass(c, c.R(x0, y0, x1, y1), lit=lit, mull=mull, frame=frame, transom=transom)
+    glass(c, c.R(x0, y0, x1, y1), lit=lit, mull=mull, frame=frame, transom=transom, **(glazing or {}))
     if sill: c.fill(sill, c.R(x0 - .05, y1, x1 + .05, min(1, y1 + .06)))
 
 
@@ -123,18 +129,36 @@ def p_louvre(c, color='#efe6d1', line='#b9ab8f', n=8, vertical=False, **_):
         else: y = c.y + c.h * (k + .5) / n; c.a.line([c.x, y, c.x + c.w, y], fill=rgb(line), width=2)
 
 
-def p_text(c, text, bg='#f3ebdb', fg='#1d2a3a', vertical=True, serif=True, em=None, border=None, **_):
+def p_text(c, text, bg='#f3ebdb', fg='#1d2a3a', vertical=True, serif=True, em=None, border=None,
+           traditional=False, outline=None, aspect=None, **_):
     c.fill(bg)
+    if aspect is not None:
+        # Compose at the physical aspect ratio before packing into the atlas rectangle.
+        height = max(c.h, round(c.w / aspect))
+        width = round(height * aspect)
+        patch = Image.new('RGB', (width, height))
+        ink = Image.new('RGB', (width, height))
+        p_text(Ctx(patch, ink, (0, 0, width, height), c.rng), text, bg, fg, vertical,
+               serif, em, border, traditional, outline)
+        c.albedo.paste(patch.resize((c.w, c.h), Image.Resampling.LANCZOS), (c.x, c.y))
+        c.emissive.paste(ink.resize((c.w, c.h), Image.Resampling.LANCZOS), (c.x, c.y))
+        return
     if border: c.a.rectangle([c.x + 2, c.y + 2, c.x + c.w - 3, c.y + c.h - 3], outline=rgb(border), width=2)
     if vertical:
-        step = c.h / (len(text) + .4); f = font(int(min(step * .86, c.w * .86)), serif)
+        step = c.h / (len(text) + .4); f = font(int(min(step * .86, c.w * .86)), serif, traditional)
         for i, ch in enumerate(text):
             cx, cy = c.x + c.w / 2, c.y + step * (i + .7)
             c.a.text((cx, cy), ch, font=f, fill=rgb(fg), anchor='mm')
             if em: c.e.text((cx, cy), ch, font=f, fill=rgb(em), anchor='mm')
     else:
-        f = font(int(min(c.h * .7, c.w / max(1, len(text)) * .92)), serif)
-        c.a.text((c.x + c.w / 2, c.y + c.h / 2), text, font=f, fill=rgb(fg), anchor='mm')
+        size = int(min(c.h * .7, c.w / max(1, len(text)) * .92))
+        if outline:
+            while size > 1 and font(size, serif, traditional).getlength(text) > c.w * .88:
+                size -= 1
+        f = font(max(1, size), serif, traditional)
+        c.a.text((c.x + c.w / 2, c.y + c.h / 2), text, font=f, fill=rgb(fg), anchor='mm',
+                 stroke_width=max(1, size // 12) if outline else 0,
+                 stroke_fill=rgb(outline) if outline else None)
         if em: c.e.text((c.x + c.w / 2, c.y + c.h / 2), text, font=f, fill=rgb(em), anchor='mm')
 
 
@@ -192,17 +216,81 @@ def p_sign(c, bg='#2a8c99', fg='#fbf6ea', blocks=3, em='#ffd37a', **_):
         c.e.rectangle(c.R(x0, .3, x0 + .84 / blocks - .06, .7), fill=rgb(em))
 
 
-def p_arch(c, wall='#c75f4a', wall_kind='brick', box=(.1, .15, .9, .95), shape='segment', lit='lit', rail=None, frame='#3b3a36', **_):
+def p_arch(c, wall='#c75f4a', wall_kind='brick', box=(.1, .15, .9, .95), shape='segment', lit='lit',
+           rail=None, frame='#f3ebdb', parapet=None, mullions=False, **_):
     """Wall with an arched opening (segmental or semicircular) — dark glass / shadow inside."""
     wall_bg(c, wall, wall_kind)
     x0, y0, x1, y1 = c.R(*box); w = x1 - x0
     rise = w * (.5 if shape == 'semi' else .22)
     c.a.rectangle([x0, y0 + rise, x1, y1], fill=rgb('#3e4f58')); c.a.pieslice([x0, y0, x1, y0 + 2 * rise], 180, 360, fill=rgb('#5d7884'))
-    c.a.arc([x0, y0, x1, y0 + 2 * rise], 180, 360, fill=rgb('#f3ebdb'), width=2)
+    c.a.arc([x0, y0, x1, y0 + 2 * rise], 180, 360, fill=rgb(frame), width=2)
     c.e.rectangle([x0 + 2, y0 + rise, x1 - 2, y1 - 2], fill=LIT.get(lit, (0, 0, 0)))
+    if mullions:
+        for x in [x0 + w / 3, x0 + w * 2 / 3]:
+            c.a.line((x, y0 + rise * .16, x, y1), fill=rgb('#fff8e9'), width=max(2, w // 12))
+        for y in [y0 + rise, y0 + (y1 - y0) * .72]:
+            c.a.line((x0, y, x1, y), fill=rgb('#fff8e9'), width=max(2, w // 12))
+    if parapet:
+        c.a.rectangle((x0, y0 + (y1 - y0) * .64, x1, y1), fill=rgb(parapet))
     if rail:
         ry = y1 - (y1 - y0) // 4; c.a.line([x0, ry, x1, ry], fill=rgb(rail), width=2)
         for x in range(x0, x1, 4): c.a.line([x, ry, x, y1], fill=rgb(rail))
+
+
+def p_station_mark(c, text, color, bg='#f4f5ef', number=False, **_):
+    c.fill(bg)
+    if number:
+        c.a.rounded_rectangle(c.R(.15, .12, .85, .88), radius=3, outline=rgb(color), width=2)
+        size = int(c.h * .77)
+    else:
+        c.a.ellipse(c.R(.06, .06, .94, .94), fill=rgb(color))
+        size = int(c.h * (.51 if len(text) == 2 else .38))
+    c.a.text((c.x + c.w / 2, c.y + c.h / 2), text, font=font(size, False),
+             fill=rgb(color if number else '#ffffff'), anchor='mm')
+
+
+def p_ferry_wave(c, profile, **_):
+    # The station lettering is part of the wave rather than a rectangular overlay.
+    xmin, xmax = profile[0][0], profile[-1][0]
+    width = c.w * 3
+    height = round(width * 6.4 / (xmax - xmin))
+    patch = Image.new('RGB', (width, height), rgb('#279ddd'))
+    draw = ImageDraw.Draw(patch)
+
+    def point(p, fraction):
+        x, low, high = p
+        return ((x-xmin)/(xmax-xmin)*(width-1), (1-(low+(high-low)*fraction)/6.4)*(height-1))
+
+    def stripe(low, high, color):
+        draw.polygon([point(p,low) for p in profile] + [point(p,high) for p in reversed(profile)], fill=rgb(color))
+
+    stripe(0, .33, '#1978ca')
+    stripe(.33, .46, '#f4fbff')
+    draw.polygon([point(p,.68 + .15 * (i%4)/3) for i,p in enumerate(profile[6:])]
+                 + [point(p,1) for p in reversed(profile[6:])], fill=rgb('#3aafef'))
+    for x,z,text,size in [(10.85,5.04,'鼓山輪渡站',.95),(10.85,4.51,'Gushan Ferry Pier',.37)]:
+        draw.text(((x-xmin)/(xmax-xmin)*width,(1-z/6.4)*height),text,
+                  font=font(round(height*size/6.4),False),fill=rgb('#193f6a'),anchor='mm',
+                  stroke_width=max(1,round(height*size/47)),stroke_fill=rgb('#f8fcff'))
+    c.albedo.paste(patch.resize((c.w,c.h), Image.Resampling.LANCZOS), (c.x,c.y))
+
+
+def p_relief(c, bg, stone, subject, **_):
+    c.fill(bg)
+    if subject == 'target':
+        c.a.ellipse(c.R(.21, .07, .79, .49), fill=rgb(stone))
+        c.a.ellipse(c.R(.33, .16, .67, .40), outline=rgb(bg), width=2)
+        for x in [.37, .50, .63]:
+            c.a.line((c.x + x*c.w, c.y + .38*c.h, c.x + x*c.w, c.y + .90*c.h), fill=rgb(stone), width=2)
+        for y in [.65, .75, .85]:
+            c.a.line((c.x + .28*c.w, c.y + y*c.h, c.x + .70*c.w, c.y + (y+.06)*c.h), fill=rgb(stone), width=2)
+    else:
+        box = c.R(.16, .22, .84, .78)
+        c.a.regular_polygon((c.x + .5*c.w, c.y + .5*c.h, min(c.w,c.h)*.31), 8,
+                            rotation=22.5, fill=rgb(stone), outline=rgb('#888e8f'))
+        for f in [.40, .50, .60]:
+            x = c.x + f*c.w
+            c.a.line((x, box[1]+.12*c.h, x, box[3]-.12*c.h), fill=rgb('#888e8f'), width=2)
 
 
 def p_tiles(c, color='#6e2f2c', line='#b98a7d', n=6, m=10, **_):
@@ -210,6 +298,18 @@ def p_tiles(c, color='#6e2f2c', line='#b98a7d', n=6, m=10, **_):
     c.fill(color)
     for k in range(1, n): x = c.x + c.w * k // n; c.a.line([x, c.y, x, c.y + c.h], fill=rgb(line))
     for k in range(1, m): y = c.y + c.h * k // m; c.a.line([c.x, y, c.x + c.w, y], fill=rgb(line))
+
+
+def p_roof_channels(c, color, shadow, highlight, channels=8, courses=9, **_):
+    """Longitudinal cap tiles or folded metal seams, with shallow lap shadows."""
+    c.fill(color)
+    for k in range(channels):
+        x = c.x + k * c.w // channels
+        c.a.line([x, c.y, x, c.y + c.h - 1], fill=rgb(shadow), width=2)
+        c.a.line([x + 2, c.y, x + 2, c.y + c.h - 1], fill=rgb(highlight))
+    for k in range(courses):
+        y = c.y + k * c.h // courses
+        c.a.line([c.x, y, c.x + c.w - 1, y], fill=mix(color, shadow, .40))
 
 
 def p_lattice(c, bg='#f3ebdb', bar='#6e2f2c', n=5, **_):

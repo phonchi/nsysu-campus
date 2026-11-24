@@ -1,15 +1,25 @@
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import fs from 'node:fs';
 import { Vector3 } from 'three';
+import { importNavMesh, init } from 'recast-navigation';
 import { OutdoorRoutes } from '../src/walk/route';
-import { followRoute } from '../src/walk/autopilot';
+import { followRoute, planRoute } from '../src/walk/autopilot';
 import { RIDE_SPEED } from '../src/walk/bike';
+import { WalkNavigation } from '../src/walk-nav';
 
 const graph = JSON.parse(fs.readFileSync('public/data/walkthrough/outdoor-graph.json', 'utf8'));
 const routes = new OutdoorRoutes(graph);
 const length = (p: Vector3[]) => p.slice(1).reduce((s, q, i) => s + Math.hypot(q.x - p[i].x, q.z - p[i].z), 0);
 
 describe('outdoor routes', () => {
+  it('stays on the street graph when both ends are east of the tunnel handoff', () => {
+    const east = routes.anchor('hamasen-east-link')!, arcade = routes.anchor('arcade')!;
+    const from = east.clone().add(new Vector3(4,0,2)), goal = routes.anchor('hamasen-poi-my-warm-day')!;
+    const nav = { findPath: (a: Vector3, b: Vector3) => b.equals(arcade) ? [a, b] : [] };
+    expect(planRoute(from,goal,nav,routes)).toEqual(routes.path(from,goal));
+    const atPortal = east.clone().add(new Vector3(-.5,0,0));
+    expect(planRoute(atPortal,goal,nav,routes,()=>true)).toEqual(routes.path(atPortal,goal));
+  });
   it('keeps stops on the main network when validation cuts a piece of it off', () => {
     const cut = new OutdoorRoutes(graph), at = new Vector3(-53, 0, -61.5), near = cut.stopsNear(at, 1)[0];
     // Sever everything within 15 m of the place: what is left near it must still join the rest of the campus.
@@ -39,6 +49,39 @@ describe('outdoor routes', () => {
     const p = routes.path(routes.anchor('tunnel-west')!, 'tunnel-east');
     expect(p.length).toBeGreaterThan(2);
     expect(length(p)).toBeGreaterThan(277 * 1.3);
+  });
+});
+
+describe('Hamasen–campus routes on the baked surfaces', () => {
+  let nav: WalkNavigation;
+  beforeAll(async () => {
+    await init();
+    const binary = fs.readFileSync('public/data/walkthrough/navmesh.bin');
+    nav = new WalkNavigation(importNavMesh(binary).navMesh);
+  });
+  afterAll(() => nav?.dispose());
+
+  const insideBore = (a: Vector3, b: Vector3) => {
+    // Sample a cross-section halfway through the western straight leg.
+    const x = 140;
+    if ((a.x - x) * (b.x - x) > 0 || a.x === b.x) return false;
+    const p = a.clone().lerp(b, (x - a.x) / (b.x - a.x));
+    const z = 148.5 + (x - 19.9) * (214.71 - 148.5) / (260.39 - 19.9);
+    return Math.abs(p.z - z) < 3.3 && p.y > -1 && p.y < 2;
+  };
+
+  it.each(routes.anchorIds.filter(id => id.startsWith('hamasen-poi-')))('uses the tunnel both ways for %s', id => {
+    const street = routes.anchor(id)!;
+    for (const campusId of ['gate', 'admin', 'YH']) {
+      const campus = routes.anchor(campusId)!;
+      for (const [direction, from, to] of [['return', street, campus], ['outbound', campus, street]] as const) {
+        const path = planRoute(from, to, nav, routes);
+        const label = `${campusId} ${direction}`;
+        expect(path.some((p, i) => i > 0 && insideBore(path[i - 1], p)), label).toBe(true);
+        expect(Math.max(...path.map(p => p.y)), label).toBeLessThan(15);
+        expect(path.at(-1)!.distanceTo(to), label).toBeLessThan(.5);
+      }
+    }
   });
 });
 

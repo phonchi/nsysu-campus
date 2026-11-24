@@ -1,0 +1,359 @@
+{
+ "id": "hamasen-temple",
+ "title": "哈瑪星代天宮",
+ "units": "m",
+ "frame": "local three.js: x east, y up, z south; origin = footprint centroid at grade",
+ "boxSchema": "center [x,y,z], size [sx,sy,sz] full extents, yaw radians about +Y; walkable = may stand on top",
+ "boxes": [
+  {
+   "center": [
+    0.2,
+    0.185,
+    -1.0
+   ],
+   "size": [
+    24.773,
+    0.87,
+    27
+   ],
+   "yaw": 0.0,
+   "walkable": true
+  },
+  {
+   "center": [
+    -1.2,
+    2.935,
+    -3.0
+   ],
+   "size": [
+    23.273,
+    4.63,
+    19.5
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -1.6,
+    2.655,
+    -13.05
+   ],
+   "size": [
+    9.5,
+    4.09,
+    8.16
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -10.15,
+    2.295,
+    10.38
+   ],
+   "size": [
+    0.7,
+    3.35,
+    0.84
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -6.52,
+    2.295,
+    10.38
+   ],
+   "size": [
+    0.7,
+    3.35,
+    0.84
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    6.52,
+    2.295,
+    10.38
+   ],
+   "size": [
+    0.7,
+    3.35,
+    0.84
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    10.15,
+    2.295,
+    10.38
+   ],
+   "size": [
+    0.7,
+    3.35,
+    0.84
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -3.06,
+    2.285,
+    11.04
+   ],
+   "size": [
+    1.02,
+    3.33,
+    1.02
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    3.06,
+    2.285,
+    11.04
+   ],
+   "size": [
+    1.02,
+    3.33,
+    1.02
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    -8.55,
+    2.23,
+    10.31
+   ],
+   "size": [
+    3.24,
+    3.22,
+    0.62
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    8.55,
+    2.23,
+    10.31
+   ],
+   "size": [
+    3.24,
+    3.22,
+    0.62
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    0.0,
+    0.14,
+    15.665
+   ],
+   "size": [
+    9.1,
+    0.14,
+    0.91
+   ],
+   "yaw": 0.0,
+   "walkable": true
+  },
+  {
+   "center": [
+    0.0,
+    0.21,
+    14.755
+   ],
+   "size": [
+    9.1,
+    0.28,
+    0.91
+   ],
+   "yaw": 0.0,
+   "walkable": true
+  },
+  {
+   "center": [
+    0.0,
+    0.28,
+    13.845
+   ],
+   "size": [
+    9.1,
+    0.42,
+    0.91
+   ],
+   "yaw": 0.0,
+   "walkable": true
+  },
+  {
+   "center": [
+    0.0,
+    0.35,
+    12.935
+   ],
+   "size": [
+    9.1,
+    0.56,
+    0.91
+   ],
+   "yaw": 0.0,
+   "walkable": true
+  },
+  {
+   "center": [
+    -6.25,
+    0.35,
+    15.44
+   ],
+   "size": [
+    1.03,
+    0.5,
+    1.36
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    6.25,
+    0.35,
+    15.44
+   ],
+   "size": [
+    1.03,
+    0.5,
+    1.36
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    0.7,
+    2.06,
+    49.0
+   ],
+   "size": [
+    0.7,
+    4.08,
+    0.87
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    0.7,
+    0.31,
+    49.0
+   ],
+   "size": [
+    1.08,
+    0.58,
+    1.14
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    4.2,
+    2.06,
+    49.0
+   ],
+   "size": [
+    0.7,
+    4.08,
+    0.87
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    4.2,
+    0.31,
+    49.0
+   ],
+   "size": [
+    1.08,
+    0.58,
+    1.14
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    11.8,
+    2.06,
+    49.0
+   ],
+   "size": [
+    0.7,
+    4.08,
+    0.87
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    11.8,
+    0.31,
+    49.0
+   ],
+   "size": [
+    1.08,
+    0.58,
+    1.14
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    15.3,
+    2.06,
+    49.0
+   ],
+   "size": [
+    0.7,
+    4.08,
+    0.87
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  },
+  {
+   "center": [
+    15.3,
+    0.31,
+    49.0
+   ],
+   "size": [
+    1.08,
+    0.58,
+    1.14
+   ],
+   "yaw": 0.0,
+   "walkable": false
+  }
+ ]
+}

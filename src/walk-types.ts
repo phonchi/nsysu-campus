@@ -20,13 +20,19 @@ export interface ContextBuilding {
  id:string;name:string|null;polygon:Point2[];storeys:number;tone?:string;heightM?:number;stationExit?:number;
  district?:'hamasen';holes?:Point2[][];roofTone?:string;roofShape?:'flat'|'gable'|'hip'|'shed';signText?:string;
  facade?:'shophouse'|'residential'|'commercial'|'civic'|'warehouse'|'temple'|'station'|'platform';
- frontage?:{edge:number;arcadeDepth?:number};
+ frontage?:{edge:number;arcadeDepth?:number;cornerEdge?:number;commercial?:boolean};
+ synthetic?:true;street?:string;sharedWalls?:Record<string,number>;visualOnly?:true;
+ shopfronts?:ContextShopfront[];
 }
-export interface ContextRoad {id:string;kind:string;name?:string|null;width:number;tunnel?:boolean;bridge?:boolean;points:Point2[];sidewalk?:string;district?:'hamasen';}
+export interface ContextShopfront {id:string;name:string;category:string;edge:number;along:number;width:number;approach:Point2;}
+export interface ContextRoad {id:string;kind:string;name?:string|null;width:number;tunnel?:boolean;bridge?:boolean;points:Point2[];sidewalk?:string;district?:'hamasen';visualOnly?:true;}
 export interface HamasenContext {
  polygon:Point2[];
  rails?:{id:string;kind:string;points:Point2[]}[];
- ground?:{kind:'paving'|'yard'|'grass';polygon:Point2[]}[];
+ ground?:{kind:'paving'|'yard'|'grass'|'parking';polygon:Point2[]}[];
+ ferryVisualGround?:Point2[];
+ ferryHarbor?:Point2[];
+ ferryLand?:Point2[];
  trees?:Point2[];
  streetLights?:Point2[];
 }

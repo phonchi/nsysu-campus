@@ -29,7 +29,9 @@ describe('map camera', () => {
   });
   it.each([[920, 340], [370, 500]])('fits the campus, sea and Hamasen street blocks at %s × %s', (w, h) => {
     expect(campus.buildings.filter(b => b.id.startsWith('hamasen-exit-')).map(b => b.id).sort()).toEqual(['hamasen-exit-1', 'hamasen-exit-2']);
-    const points: [number, number][] = [...campus.background.flat(), ...campus.buildings.flatMap(b => b.polygon), ...sports.facilities.flatMap(f => f.polygon), ...sea.waterBodies.flatMap(b => b.polygon), ...sea.waterRoutes.flatMap(r => r.corridor), ...bus.stops.map(s => [s.boardingPoint[0], s.boardingPoint[2]]), placements['liberal-arts'].centroid, placements.gate.centroid, placements.tunnel.centroid] as [number, number][];
+    // Visual-only waterfront buildings extend south of the map sheet.
+    const background = campus.background.flat().filter(([x,z]) => x >= bounds.x0 && x <= bounds.x1 && z >= bounds.z0 && z <= bounds.z1);
+    const points: [number, number][] = [...background, ...campus.buildings.flatMap(b => b.polygon), ...campus.hamasenPlaces.map(p => p.poi.position), ...sports.facilities.flatMap(f => f.polygon), ...sea.waterBodies.flatMap(b => b.polygon), ...sea.waterRoutes.flatMap(r => r.corridor), ...bus.stops.map(s => [s.boardingPoint[0], s.boardingPoint[2]]), placements['liberal-arts'].centroid, placements.gate.centroid, placements.tunnel.centroid] as [number, number][];
     const view = contentBounds(points, CAMPUS_VIEW), f = clampFrame(fitCampusFrame(w, h, view), bounds);
     for (const [x, z] of points) {
       expect(frameX(f, x)).toBeGreaterThanOrEqual(-1e-6); expect(frameX(f, x)).toBeLessThanOrEqual(w + 1e-6);
