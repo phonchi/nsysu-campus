@@ -42,13 +42,13 @@ ORIGINAL_DISTRICT = Polygon([(272,188), (347,153), (540,146), (660,163), (825,20
                     (994,389), (994,677), (915,708), (795,735), (570,735), (385,720),
                     (323,634), (298,492), (256,410), (258,301)])
 # The ferry frontage is on the east side of the pier. Include the existing
-# waterfront footway and shore approach inside the southern play limit.
-SOUTH_EXTENSION = Polygon([(323,634), (351,686), (356,744), (795,744), (795,735), (570,735), (385,720)])
+# waterfront footway and shore approach right up to the ferryHarbor seawall.
+SOUTH_EXTENSION = Polygon([(323,634), (346,686), (346,744), (795,744), (795,735), (570,735), (385,720)])
 DISTRICT = ORIGINAL_DISTRICT.union(SOUTH_EXTENSION)
 INNER_PLAY = PLAY_AREA.buffer(-1.01)
 SOUTH_BUILDING_CLIP = box(191.01,101.01,998.99,744)
 MAIN_STREETS = {'臨海一路', '臨海二路', '鼓山一路', '濱海一路', '濱海二路'}
-ARCADE_STREETS = {'臨海二路', '鼓山一路', '濱海一路', '濱海二路', '麗雄街', '鼓元街', '鼓波街'}
+ARCADE_STREETS = {'臨海一路', '臨海二路', '鼓山一路', '濱海一路', '濱海二路', '麗雄街', '鼓元街', '鼓波街'}
 TEMPLE_PLAZA = 203577800
 EXIT_WAYS = {310011987: 1, 303165537: 2}
 STOP_WAYS = {'hamasen-orange-stop': 249154068, 'hamasen-campus-stop': 239205291}
@@ -320,38 +320,47 @@ def frontage_frame(model, edge):
     return length, lambda along, inward: (a[0]+tx*along+nx*inward, a[1]+tz*along+nz*inward)
 
 
-def arcade_strip(model, edge, depth, *, start=0, far=None):
+def arcade_strip(model, edge, depth, *, start=0, far=None, pad_u=0.0):
     length, at = frontage_frame(model, edge)
-    return Polygon([at(0, start), at(length, start), at(length, far or depth), at(0, far or depth)])
+    return Polygon([at(-pad_u, start), at(length+pad_u, start), at(length+pad_u, far or depth), at(-pad_u, far or depth)])
 
 
 def arcade_edges(model):
     front = model.get('frontage', {})
-    return [(front[edge], front[depth]) for edge, depth in
-            (('edge', 'arcadeDepth'), ('cornerEdge', 'cornerArcadeDepth')) if front.get(depth)]
+    edges = [(front[edge], front[depth]) for edge, depth in
+             (('edge', 'arcadeDepth'), ('cornerEdge', 'cornerArcadeDepth')) if front.get(depth)]
+    seen = {e for e, _ in edges}
+    for item in front.get('extraArcadeEdges', ()):
+        if item.get('depth') and item['edge'] not in seen:
+            edges.append((item['edge'], item['depth']))
+            seen.add(item['edge'])
+    return edges
 
 
-def arcade_depth(model, edge, road, existing=()):
+def arcade_depth(model, edge, road, existing=(), *, min_length=2.8, min_back_ratio=.34, depths=None):
     ice_corner = model['id'] == 'hamasen-osm-310901110' and road['name'] == '延平街' and existing
     if (road['name'] not in ARCADE_STREETS and not ice_corner) or model['storeys'] < 2:
         return None
     length, at = frontage_frame(model, edge)
-    if length < 3:
+    if length < min_length:
         return None
     footprint = Polygon(model['polygon'], model.get('holes', []))
-    previous = [arcade_strip(model, e, d) for e, d in existing]
+    previous = [arcade_strip(model, e, d, pad_u=.08) for e, d in existing]
     preferred = 2.40 if road['name'] in MAIN_STREETS else 2.20
-    for depth in (preferred, 2.10, 1.95, 1.80):
-        end = min(1.20, length*.18)
+    candidates = depths or (preferred, 2.10, 1.95, 1.80)
+    for depth in candidates:
+        end = min(1.0, length*.20)
         centre = LineString([at(end, depth*.55), at(length-end, depth*.55)])
-        if not footprint.buffer(-.10).covers(centre):
+        if not footprint.buffer(-.06).covers(centre):
             continue
-        strip = arcade_strip(model, edge, depth)
+        strip = arcade_strip(model, edge, depth, pad_u=.08)
         back = footprint.difference(unary_union([strip, *previous]))
-        behind = arcade_strip(model, edge, depth, start=depth, far=depth+2.20)
-        if back.area < footprint.area*.38 or back.intersection(behind).area < behind.area*.58:
+        behind = arcade_strip(model, edge, depth, start=depth, far=depth+2.0)
+        if back.area < footprint.area*min_back_ratio:
             continue
-        if max((p.area for p in parts(back, 'Polygon')), default=0) < back.area*.85:
+        if not existing and back.intersection(behind).area < behind.area*.48:
+            continue
+        if max((p.area for p in parts(back, 'Polygon')), default=0) < back.area*.80:
             continue
         return depth
     return None
@@ -365,19 +374,164 @@ def style_frontage(model, options, preferred_edge=None):
     _, edge, _, _, _, normal, road, _ = options[0]
     front = model['frontage'] = {'edge':edge, 'commercial':road['name'] in (MAIN_STREETS | SHOP_STREETS)}
     primary = arcade_depth(model, edge, road)
+    active = []
     if primary:
         front['arcadeDepth'] = primary
         front['arcadeStyle'] = 'arched' if road['name'] in {'臨海二路', '鼓山一路'} else 'flat'
+        active.append((edge, primary))
+    # Corner edge: allow cutting an arcade on a cross-street even when the primary edge faces a non-arcade alley.
     candidates = [option for option in options
-                  if option[1] != edge and option[3] >= 3 and option[6]['name']
+                  if option[1] != edge and option[3] >= 2.6 and option[6]['name']
                   and option[6]['name'] != road['name']
                   and abs(sum(a*b for a,b in zip(normal,option[5]))) < .55]
     for _, side, _, _, _, _, side_road, _ in candidates:
         front.setdefault('cornerEdge', side)
-        if (primary and (side-edge) % len(model['polygon']) in {1, len(model['polygon'])-1}
-                and (depth := arcade_depth(model, side, side_road, [(edge, primary)]))):
-            front.update(cornerEdge=side, cornerArcadeDepth=depth)
+        if (side-edge) % len(model['polygon']) in {1, len(model['polygon'])-1}:
+            if depth := arcade_depth(model, side, side_road, active, min_length=2.4, min_back_ratio=.26):
+                front.update(cornerEdge=side, cornerArcadeDepth=depth)
+                if 'arcadeStyle' not in front:
+                    front['arcadeStyle'] = 'arched' if side_road['name'] in {'臨海二路', '鼓山一路'} else 'flat'
+                active.append((side, depth))
+                break
+    # Multi-edge / stepped facades: also cut additional street-facing edges along ARCADE_STREETS.
+    seen_edges = {e for e, _ in active} | {edge}
+    if 'cornerEdge' in front and 'cornerArcadeDepth' in front:
+        seen_edges.add(front['cornerEdge'])
+    extras = []
+    for _, ex_edge, _, _, _, _, ex_road, _ in options:
+        if ex_edge in seen_edges or ex_road['name'] not in ARCADE_STREETS:
+            continue
+        if depth := arcade_depth(model, ex_edge, ex_road, active, min_length=2.0, min_back_ratio=.24):
+            extras.append({'edge': ex_edge, 'depth': depth})
+            active.append((ex_edge, depth))
+            seen_edges.add(ex_edge)
+    if extras:
+        front['extraArcadeEdges'] = extras
+
+
+def _set_arcade_edge_depth(model, edge, depth):
+    front = model.setdefault('frontage', {'edge': edge, 'commercial': True})
+    if front.get('edge') == edge:
+        front['arcadeDepth'] = depth
+    elif front.get('cornerEdge') == edge:
+        front['cornerArcadeDepth'] = depth
+    else:
+        extras = front.setdefault('extraArcadeEdges', [])
+        for item in extras:
+            if item['edge'] == edge:
+                item['depth'] = depth
+                return
+        extras.append({'edge': edge, 'depth': depth})
+    front.setdefault('arcadeStyle', 'flat')
+
+
+def _try_clear_point(model, probe_pt):
+    """Deepen or add an arcade cut on `model` so `probe_pt` is clear of its ground-floor solid."""
+    if model.get('visualOnly') or model.get('osmId') in MODEL_WAYS:
+        return False
+    if model.get('facade') not in {'residential', 'commercial', 'shophouse'}:
+        return False
+    poly = model['polygon']
+    footprint = Polygon(poly, model.get('holes', []))
+    if not ground_footprint(model).buffer(.02).covers(probe_pt):
+        return False
+    orig_storeys = model['storeys']
+    orig_height = model.get('heightM')
+    if model['storeys'] < 2:
+        model['storeys'] = 2
+        model['heightM'] = max(model.get('heightM') or 0, 6.5)
+    # Candidate polygon edges sorted by proximity to the blocked probe point.
+    scored = []
+    for i in range(len(poly)):
+        a, b = poly[i], poly[(i+1) % len(poly)]
+        if math.dist(a, b) < 1.85:
+            continue
+        scored.append((LineString([a, b]).distance(probe_pt), i))
+    scored.sort()
+    existing = dict(arcade_edges(model))
+    for dist, edge in scored[:4]:
+        if dist > 4.2:
             break
+        cur = existing.get(edge, 0)
+        for depth in (2.2, 2.4, 2.8, 3.2, 3.6, 4.0):
+            if depth <= cur + .05:
+                continue
+            trial = {**existing, edge: depth}
+            cuts = unary_union([arcade_strip(model, e, d, pad_u=.08) for e, d in trial.items()])
+            back = footprint.difference(cuts)
+            if back.area < footprint.area * .22:
+                continue
+            if max((p.area for p in parts(back, 'Polygon')), default=0) < back.area * .72:
+                continue
+            if not back.buffer(.02).covers(probe_pt):
+                _set_arcade_edge_depth(model, edge, depth)
+                return True
+    if orig_storeys < 2:
+        model['storeys'] = orig_storeys
+        if orig_height is None:
+            model.pop('heightM', None)
+        else:
+            model['heightM'] = orig_height
+    return False
+
+
+def align_block_arcades(buildings, street_records):
+    """Eliminate self non-convex wings and misaligned neighbor walls blocking continuous arcades."""
+    eligible = [b for b in buildings if not b.get('visualOnly') and b.get('osmId') not in MODEL_WAYS
+                and b.get('facade') in {'residential', 'commercial', 'shophouse'}]
+    footprints = [Polygon(b['polygon'], b.get('holes', [])) for b in eligible]
+    tree = STRtree(footprints)
+    # 1. Promote 1-storey gap buildings sitting directly beside arcade buildings on ARCADE_STREETS.
+    arcade_lines = [line for road, line in street_records if road['name'] in ARCADE_STREETS]
+    arcade_road_tree = STRtree(arcade_lines) if arcade_lines else None
+    if arcade_road_tree:
+        for idx, b in enumerate(eligible):
+            if b['storeys'] >= 2 or arcade_edges(b):
+                continue
+            fp = footprints[idx]
+            near_arcade_road = any(arcade_lines[int(j)].distance(fp) < 12 for j in arcade_road_tree.query(fp.buffer(12)))
+            near_arcade_bldg = any(int(j) != idx and arcade_edges(eligible[int(j)]) for j in tree.query(fp.buffer(4.5)))
+            if near_arcade_road and near_arcade_bldg and fp.area >= 24:
+                b['storeys'] = 2
+                b['heightM'] = max(b.get('heightM') or 0, 6.5)
+                fr = b.get('frontage')
+                if fr and 'edge' in fr:
+                    fake_road = {'name': '臨海二路'}
+                    if depth := arcade_depth(b, fr['edge'], fake_road, min_length=2.4, min_back_ratio=.26):
+                        fr['arcadeDepth'] = depth
+                        fr.setdefault('arcadeStyle', 'flat')
+    # 2. Iteratively clear both self non-convex wings and misaligned neighbor solid walls at arcade ends.
+    cleared = 0
+    for _ in range(2):
+        progress = 0
+        for idx, b in enumerate(eligible):
+            cuts = list(arcade_edges(b))
+            if not cuts:
+                continue
+            for face, depth in cuts:
+                length, at = frontage_frame(b, face)
+                mid_v = min(depth * .55, max(1.0, depth - .8))
+                for u in (-1.6, -.55, length + .55, length + 1.6):
+                    pt = Point(at(u, mid_v))
+                    # Check own non-convex wing first.
+                    if ground_footprint(b).buffer(.02).covers(pt):
+                        if _try_clear_point(b, pt):
+                            cleared += 1
+                            progress += 1
+                        continue
+                    # Check adjacent buildings along the corridor.
+                    for j in tree.query(pt.buffer(.2)):
+                        j = int(j)
+                        if j == idx:
+                            continue
+                        if ground_footprint(eligible[j]).buffer(.02).covers(pt):
+                            if _try_clear_point(eligible[j], pt):
+                                cleared += 1
+                                progress += 1
+                            break
+        if not progress:
+            break
+    return cleared
 
 
 def style_streets(buildings, road_segments, evidence):
@@ -393,7 +547,7 @@ def style_streets(buildings, road_segments, evidence):
         record = evidence.get(str(b.get('osmId', b.get('gersId'))), {})
         seed = int.from_bytes(hashlib.sha256(b['id'].encode()).digest()[:4], 'big')
         options = sorted(frontage_options(b, street_tree, street_records, occupied_tree, footprints),
-                         key=lambda option:option[0] - (5 if option[6]['name'] in ARCADE_STREETS else 0))
+                         key=lambda option:option[0] - (8 if option[6]['name'] in ARCADE_STREETS else 0))
         prefer_known = b.get('synthetic') or 'frontageFacing' in record
         preferred = b.get('frontage', {}).get('edge') if prefer_known else None
         if b.get('synthetic'):
@@ -408,6 +562,8 @@ def style_streets(buildings, road_segments, evidence):
                 b['storeys'] = 2 if seed % 11 < 3 else 4
             if 'heightM' not in b:
                 b['heightM'] = round(b['storeys']*3.25 + (seed % 17-8)*.06, 2)
+    cleared = align_block_arcades(buildings, street_records)
+    print(f'Arcade alignment cleared {cleared} blocking wall probes')
     return street_tree, street_records, occupied_tree, footprints
 
 
@@ -748,14 +904,23 @@ def add_context(structure, data, buildings, road_segments, infill):
 
 def ground_footprint(model):
     footprint = Polygon(model['polygon'], model.get('holes', []))
-    return footprint.difference(unary_union([arcade_strip(model, edge, depth) for edge, depth in arcade_edges(model)]))
+    return footprint.difference(unary_union([arcade_strip(model, edge, depth, start=-.06, pad_u=.08) for edge, depth in arcade_edges(model)]))
 
 
 def arcade_piers(model):
     """Reserve the column envelopes used by the district collision builder."""
     placed = []
-    for edge, _ in arcade_edges(model):
-        length, at = frontage_frame(model, edge)
+    cuts = arcade_edges(model)
+    cut_frames = [(e, d, *frontage_frame(model, e)) for e, d in cuts]
+    ring = model['polygon']
+    winding = 1 if Polygon(ring).exterior.is_ccw else -1
+    cut_axes = []
+    for e, d, length, _ in cut_frames:
+        a, b = ring[e], ring[(e+1) % len(ring)]
+        tx, tz = (b[0]-a[0])/length, (b[1]-a[1])/length
+        nx, nz = -winding*tz, winding*tx
+        cut_axes.append((e, d, a, tx, tz, nx, nz, length))
+    for edge, _, length, at in cut_frames:
         count = max(1, math.floor(length/4.6+.5))
         shops = [s for s in model.get('shopfronts', []) if s['edge'] == edge]
         for i in range(count+1):
@@ -765,7 +930,12 @@ def arcade_piers(model):
                 side = -1 if along < shop['along'] else 1
                 along = max(.26, min(length-.26, shop['along']+side*(shop['width']/2+.06)))
             centre = at(along, .25)
-            if any(math.dist(centre, p) < .82 for p in placed):
+            if any(math.dist(centre, p) < .85 for p in placed):
+                continue
+            # Mirror walk-world.ts: never drop a pier inside another cut's walking lane on the same building.
+            if any(oe != edge and .2 < (centre[0]-oa[0])*otx+(centre[1]-oa[1])*otz < ol-.2
+                   and .55 < (centre[0]-oa[0])*onx+(centre[1]-oa[1])*onz < od-.15
+                   for oe, od, oa, otx, otz, onx, onz, ol in cut_axes):
                 continue
             placed.append(centre)
             yield Polygon([at(along+u, .25+v) for u,v in [(-.225,-.225),(.225,-.225),(.225,.225),(-.225,.225)]])
@@ -822,11 +992,11 @@ def add_arcade_network(buildings, road_segments, nodes, street_nodes, node_at, e
         i = k//2
         a, street, _, (p0, p1), _ = spans[i]
         options = []
-        for j in index.query(Point(p).buffer(3)):
+        for j in index.query(Point(p).buffer(4.2)):
             j = int(j)
             b, other_street, _, (q0, q1), _ = spans[j//2]
             q = endpoints[j]
-            if i == j//2 or (a != b and street != other_street):
+            if i == j//2 or (a != b and (street != other_street or math.dist(p, q) > 3)):
                 continue
             dx, dz = p1[0]-p0[0], p1[1]-p0[1]
             ex, ez = q1[0]-q0[0], q1[1]-q0[1]
@@ -871,9 +1041,9 @@ def add_arcade_network(buildings, road_segments, nodes, street_nodes, node_at, e
             length = math.dist(p, q)
             options = []
             # End piers and corner splays can block a diagonal from the
-            # centreline endpoint. Try the adjacent opening within the span.
-            for offset in (0, .85, 1.50, 2.15, 3.0, 4.0):
-                if offset > length*.45:
+            # centreline endpoint. Try adjacent openings within the span.
+            for offset in (0, .85, 1.50, 2.15, 3.0, 4.0, 6.0, 9.0, 12.0, 16.0, 22.0):
+                if offset > length*.75:
                     break
                 fraction = offset/length
                 approach = tuple(a+(b-a)*fraction for a,b in zip(p,q))

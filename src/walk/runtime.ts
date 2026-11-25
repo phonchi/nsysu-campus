@@ -16,6 +16,7 @@ import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { CampusLod } from '../walk-lod';
 import { decorateCampus, addCampusProps, animateCampus } from '../walk-art';
 import { hamasenEastPortalDetails, hamasenStationBoard, hamasenStreetDetails, hamasenStreetProps, streetPropsEnabled } from './hamasen-street-details';
+import { campusLifeSigns } from '../world/campus-life-signs';
 import { hamasenStationDetails } from './hamasen-station-detail';
 import { hamasenRailDetails } from './hamasen-rail-detail';
 import { CampusSky, PRESET_LABEL, type SkyPreset } from '../walk-sky';
@@ -1718,6 +1719,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
       const hamasenWest = Math.min(...(structure.context.hamasen?.polygon ?? []).map(([x]) => x));
       npcs = new NpcManager(zones, routes, terrainRef, asset, npcData, hamasenWest);npcs.seatPropsReady(false); scene.add(npcs.group);
       if(structure.context.hamasen&&terrainRef&&streetPropsEnabled())world.display.add(hamasenStreetProps(structure.context,terrainRef,{npcData,stops:v12Data.bus?.stops,tier:()=>quality.tier,portal:world.display.userData.hamasenTunnelProfile,isLandmark:isHamasenModelFootprint,pathDistance:(x,z)=>graph.edgeDistance(x,z),views:hamasenCardViews(campusInfo)}));
+      world.display.add(campusLifeSigns(terrainRef));
       startupJobs.push(addSeatProps(world.display.getObjectByName('Campus art')??scene,npcs.seats,asset,()=>alive).then(group=>{
         if(!alive)return;seatProps=group;const specs=group.userData.obstacles as Obstacle[];physics.addObstacles(specs);obstacleField.add(specs);npcs?.seatPropsReady(specs.length>0);
       }));
@@ -1891,7 +1893,7 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
   let lastCardFace: { id: string; yaw: number; turned: boolean } | undefined;
   /** Card subjects and landings for the street furniture's sightlines; landmarks also keep their street open. */
   function hamasenCardViews(info: CampusInfo | undefined) {
-    return Object.values(info?.buildings ?? {}).flatMap(b => b.poi ? [{ x: b.poi.position[0], z: b.poi.position[1], vx: b.poi.approach[0], vz: b.poi.approach[2], street: b.kind === 'landmark' ? b.poi.street : undefined }] : []);
+    return Object.entries(info?.buildings ?? {}).flatMap(([id, b]) => id.startsWith('hamasen-poi-') && b.poi ? [{ x: b.poi.position[0], z: b.poi.position[1], vx: b.poi.approach[0], vz: b.poi.approach[2], street: b.kind === 'landmark' ? b.poi.street : undefined }] : []);
   }
   function faceTarget(target: string | undefined) {
     if (!target) return;

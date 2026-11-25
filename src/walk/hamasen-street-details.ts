@@ -238,11 +238,33 @@ function plateGeometry(){
 }
 /** Lamp lens: a downward face under the lamp head, unlit grey by day and warm at night. */
 function lampLensGeometry(){const g=new T.PlaneGeometry(.56,.24);g.rotateX(Math.PI/2);g.translate(1.66,7.275,0);return g;}
-/** Light pool on the road under the lamp head (additive, shown only at night). */
-function lampPoolGeometry(){const g=new T.CircleGeometry(2.6,16);g.rotateX(-Math.PI/2);g.translate(1.66,.06,0);return g;}
-const LAMP_ON=new T.Color('#ffe2a2');
+/** Soft radial-gradient light pool texture so streetlamps cast a smooth warm wash instead of a hard disc. */
+let cachedPoolTex:T.CanvasTexture|undefined;
+function lampPoolTexture(){
+ if(cachedPoolTex)return cachedPoolTex;
+ if(typeof document==='undefined')return undefined;
+ const c=document.createElement('canvas');c.width=c.height=128;
+ const ctx=c.getContext('2d');if(!ctx)return undefined;
+ const g=ctx.createRadialGradient(64,64,4,64,64,62);
+ g.addColorStop(0,'rgba(255,232,175,1)');
+ g.addColorStop(.38,'rgba(255,212,136,.52)');
+ g.addColorStop(.74,'rgba(255,190,104,.16)');
+ g.addColorStop(1,'rgba(255,180,90,0)');
+ ctx.fillStyle=g;ctx.fillRect(0,0,128,128);
+ cachedPoolTex=new T.CanvasTexture(c);cachedPoolTex.colorSpace=T.SRGBColorSpace;
+ return cachedPoolTex;
+}
+/** Light pool on the road under the lamp head (additive radial glow, shown only at night). */
+function lampPoolGeometry(){const g=new T.PlaneGeometry(8.8,8.8);g.rotateX(-Math.PI/2);g.translate(1.66,.06,0);return g;}
+const LAMP_ON=new T.Color('#ffe5a8');
 /** 0 by day, 1 at night: read from the sky's leaf tint (day white, night #8090c0), so no new hook is needed. */
 const nightness=()=>T.MathUtils.clamp((1-FOLIAGE.uLeafTint.value.r)*2.1,0,1);
+interface NightLightRig {
+ lens:T.MeshBasicMaterial;pool:T.InstancedMesh;poolMaterial:T.MeshBasicMaterial;level:number;
+ /** Pooled roving warm PointLights snapped to the nearest lamps/plazas around the camera at night. */
+ lights:T.PointLight[];
+ anchors:[number,number,number][];
+}
 /**
  * Root of the street furniture. The renderer calls `update(camera)` on LOD objects
  * before projecting their children, so this compacts the instances near the camera
@@ -251,19 +273,40 @@ const nightness=()=>T.MathUtils.clamp((1-FOLIAGE.uLeafTint.value.r)*2.1,0,1);
  */
 class StreetPropRoot extends T.LOD {
  private lastX=Infinity;private lastZ=Infinity;private lastTier:Tier|undefined;
+ private lastLightX=Infinity;private lastLightZ=Infinity;private lastLightLevel=-1;
  /** Overhead wires: one line batch, shown only while some pole is in range. */
  wires?:T.LineSegments;
- /** Lamp lenses and road light pools follow the sky. */
- night?:{lens:T.MeshBasicMaterial;pool:T.InstancedMesh;poolMaterial:T.MeshBasicMaterial;level:number};
+ /** Lamp lenses, road light pools, and pooled warm PointLights follow the sky. */
+ night?:NightLightRig;
  constructor(private kinds:Map<string,KindBuffers>,private tier:()=>Tier){super();this.autoUpdate=true;}
  override update(camera:T.Camera){
   if(!(camera as T.PerspectiveCamera).isPerspectiveCamera)return;
+  const e=camera.matrixWorld.elements,x=e[12],z=e[14],tier=this.tier();
   if(this.night){
    const level=Math.round(nightness()*20)/20,n=this.night;
-   if(level!==n.level){n.level=level;n.lens.color.set('#70777a').lerp(LAMP_ON,level);n.poolMaterial.opacity=.22*level;}
+   if(level!==n.level){n.level=level;n.lens.color.set('#70777a').lerp(LAMP_ON,level);n.poolMaterial.opacity=.44*level;}
    n.pool.visible=level>.05;
+   const moved=(x-this.lastLightX)**2+(z-this.lastLightZ)**2>9;
+   if(level!==this.lastLightLevel||moved){
+    this.lastLightX=x;this.lastLightZ=z;this.lastLightLevel=level;
+    const budget=level>.05&&x>210?(tier==='C'?2:n.lights.length):0;
+    const picked:{d2:number;p:[number,number,number]}[]=[];
+    if(budget>0){
+     for(const p of n.anchors){
+      const d2=(p[0]-x)**2+(p[2]-z)**2;
+      if(d2>46*46)continue;
+      if(picked.length<budget){picked.push({d2,p});picked.sort((a,b)=>a.d2-b.d2);}
+      else if(d2<picked[budget-1].d2){picked[budget-1]={d2,p};picked.sort((a,b)=>a.d2-b.d2);}
+     }
+    }
+    const power=(tier==='C'?16:22)*level;
+    for(let i=0;i<n.lights.length;i++){
+     const L=n.lights[i],slot=picked[i];
+     if(slot){L.position.set(slot.p[0],slot.p[1],slot.p[2]);L.intensity=power;L.visible=true;}
+     else {L.intensity=0;L.visible=false;}
+    }
+   }
   }
-  const e=camera.matrixWorld.elements,x=e[12],z=e[14],tier=this.tier();
   if(tier===this.lastTier&&(x-this.lastX)**2+(z-this.lastZ)**2<9)return;
   this.lastX=x;this.lastZ=z;this.lastTier=tier;
   this.refresh(x,z,tier);
@@ -377,21 +420,42 @@ export function hamasenStreetProps(context:CampusStructure['context'],terrain:Te
   plates.extra={attribute,data,size:1};
   plates.mesh.userData.names=names;
  }
- // Night: lamp lenses glow and a soft pool lights the road under each lamp (no real light sources).
+ // Night: lamp lenses glow, soft radial light pools wash the road, and 2-4 pooled PointLights illuminate nearby streets.
  const lamps=groups.get('lamp');
  let night:StreetPropRoot['night'];
+ const anchors:[number,number,number][]=[];
+ for(const p of lamps??[]){
+  const lx=p.x+Math.cos(p.yaw)*1.66,lz=p.z-Math.sin(p.yaw)*1.66;
+  anchors.push([lx,terrain.heightAt(lx,lz)+6.4,lz]);
+ }
+ // Add fixed plaza & canal waterfront lighting anchors (Daitian Temple forecourt & Gushan 1st Canal promenade).
+ for(const [ax,az,h] of [
+  [474,448,5.6],[492,442,5.6],[466,464,5.6],[484,462,5.6],[502,456,5.6],
+  [355,732,5.2],[352,704,5.2],[351,668,5.2],[350,624,5.2],[350,580,5.2],
+  [349,536,5.2],[347,492,5.2],[344,448,5.2],[341,404,5.2],[338,360,5.2],[336,326,5.2],
+  [316,242,5.4],[328,256,5.4],
+ ] as const){
+  anchors.push([ax,terrain.heightAt(ax,az)+h,az]);
+ }
+ const lights:T.PointLight[]=Array.from({length:4},(_,i)=>{
+  const L=new T.PointLight('#ffd08a',0,28,1.45);
+  L.name=`Hamasen night pool light ${i}`;L.visible=false;
+  return L;
+ });
  if(lamps?.length){
   const lens=new T.MeshBasicMaterial({name:'Hamasen lamp lens',color:'#70777a',side:T.DoubleSide});
-  const poolMaterial=new T.MeshBasicMaterial({name:'Hamasen lamp light pool',color:'#ffd58a',transparent:true,opacity:0,depthWrite:false,blending:T.AdditiveBlending,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
+  const poolTex=lampPoolTexture();
+  const poolMaterial=new T.MeshBasicMaterial({name:'Hamasen lamp light pool',color:'#ffd894',map:poolTex,transparent:true,opacity:0,depthWrite:false,blending:T.AdditiveBlending,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
   instanced('lamp lens','lamp',lampLensGeometry(),lens,lamps);
   const pool=instanced('lamp pool','lamp',lampPoolGeometry(),poolMaterial,lamps);
   pool.mesh.receiveShadow=false;pool.mesh.renderOrder=1;pool.mesh.visible=false;
   // Pools tint by their own colour, not the street-furniture palette.
   pool.colors.fill(1);
-  night={lens,pool:pool.mesh,poolMaterial,level:-1};
+  night={lens,pool:pool.mesh,poolMaterial,level:-1,lights,anchors};
  }
  for(const [kind,g] of Object.entries(kits))if(!groups.has(kind as StreetPropKind)||kind==='tree')g.dispose();
  const root=new StreetPropRoot(kinds,options.tier);root.night=night;
+ for(const L of lights)root.add(L);
  root.name='Hamasen street furniture';root.userData.visualOnly=true;root.userData.terrainSeated=true;
  for(const k of kinds.values())root.add(k.mesh);
  // Overhead wires: three power conductors from the crossarm and a sagging telecom cable below.

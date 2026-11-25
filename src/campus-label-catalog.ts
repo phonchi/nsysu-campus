@@ -16,9 +16,11 @@ export function hamasenUiLabels(places: Record<string,{name:string;poi?:HamasenP
     if (!place.poi) return [];
     const { position: [x,z], labelHeight, approach: [ax,y,az] } = place.poi;
     const shop = place.kind === 'shop';
+    const dining = place.kind === 'dining';
+    const dorm = place.kind === 'dorm';
     return [{ id, name: place.name, position: new Vector3(x,(options.ground?.(x,z) ?? y)+labelHeight,z),
-      approach: new Vector3(ax,y,az), priority: shop ? 2 : 1, reach: shop ? 6 : 10,
-      distance: shop ? 25 : 95, overviewDistance: shop ? 42 : 240,
+      approach: new Vector3(ax,y,az), priority: shop ? 2 : 1, reach: shop ? 6 : (dining || dorm) ? 14 : 10,
+      distance: shop ? 25 : dining ? 75 : dorm ? 120 : 95, overviewDistance: shop ? 42 : 260,
       accent: hamasenMarkerStyle(place.category ?? '').color }];
   });
 }

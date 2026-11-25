@@ -10,7 +10,7 @@ export interface HamasenPoi {
 }
 export interface HamasenPlace {
   name: string;
-  kind: 'landmark' | 'shop';
+  kind: 'landmark' | 'shop' | 'dining' | 'dorm';
   category: string;
   poi: HamasenPoi;
 }
@@ -19,12 +19,19 @@ export const HAMASEN_MAP_ALIASES: Readonly<Record<string, string>> = {
   'hamasen-exit-1': 'hamasen-poi-mrt-hamasen-exit-1',
   'hamasen-exit-2': 'hamasen-poi-mrt-hamasen-exit-2',
   'hamasen-rail-park': 'hamasen-poi-takao-railway-museum',
+  'dorm-wuling-1': 'campus-dorm-wuling-1',
+  'dorm-wuling-2': 'campus-dorm-wuling-2',
+  'dorm-wuling-3': 'campus-dorm-wuling-3',
+  'dorm-wuling-4': 'campus-dorm-wuling-4',
+  'dorm-cuiheng-h': 'campus-dorm-cuiheng-h',
+  'dorm-cuiheng-l': 'campus-dorm-cuiheng-l',
 };
 export const SHOP_MAP_SCALE = 1;
-export const hamasenKindLabel = (kind: HamasenPlace['kind']) => kind === 'shop' ? '店家' : '地標';
+export const hamasenKindLabel = (kind: HamasenPlace['kind']) =>
+  kind === 'shop' ? '店家' : kind === 'dining' ? '校內餐飲' : kind === 'dorm' ? '學生宿舍' : '地標';
 export function hamasenCardCategory(kind: HamasenPlace['kind'], category: string) {
   const label = hamasenKindLabel(kind);
-  return category.startsWith(label + '・') ? category : `${label}・${category}`;
+  return category === label || category.startsWith(label + '・') ? category : `${label}・${category}`;
 }
 const POI_STYLES: Record<string, { color: string; glyph: string }> = {
   '交通・捷運': { color: '#ae4d18', glyph: '捷' },
@@ -35,6 +42,10 @@ const POI_STYLES: Record<string, { color: string; glyph: string }> = {
   冰品甜點: { color: '#775295', glyph: '冰' },
   飲料: { color: '#207269', glyph: '飲' },
   宵夜: { color: '#41456e', glyph: '宵' },
+  校內餐飲: { color: '#c44b2c', glyph: '餐' },
+  福利社: { color: '#287659', glyph: '福' },
+  咖啡輕食: { color: '#6b4630', glyph: '咖' },
+  學生宿舍: { color: '#5f4c94', glyph: '宿' },
 };
 export const hamasenMarkerStyle = (category: string) => POI_STYLES[category] ?? { color: '#2c7f91', glyph: '地' };
 export interface MapBuilding {id:string;name:string;kind:string;walkable:boolean;polygon:MapPoint[];holes?:MapPoint[][];storeys?:number}

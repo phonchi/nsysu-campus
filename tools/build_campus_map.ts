@@ -29,12 +29,22 @@ for (const l of structure.context.landmarks)
   buildings.push({ id: l.id, name: info.buildings[l.id]?.name ?? l.name, kind: KIND[l.id] ?? 'teaching', walkable: false, polygon: mapPolygon(l.polygon), storeys: l.storeys });
 const background: P[][] = [];
 const backgroundHoles: Record<number, P[][]> = {};
+const DORM_OSM: Record<string, { id: string; name: string }> = {
+  'osm-270012147': { id: 'dorm-wuling-1', name: '武嶺一村' },
+  'osm-270012146': { id: 'dorm-wuling-2', name: '武嶺二村' },
+  'osm-270012148': { id: 'dorm-wuling-3', name: '武嶺三村' },
+  'osm-118591189': { id: 'dorm-wuling-4', name: '武嶺四村' },
+  'osm-269874272': { id: 'dorm-cuiheng-h', name: '翠亨山莊H棟' },
+  'osm-269874270': { id: 'dorm-cuiheng-l', name: '翠亨山莊L棟' },
+};
 for (const b of structure.context.background) {
   const polygon = mapPolygon(b.polygon);
   if (b.stationExit === 1 || b.stationExit === 2) {
     buildings.push({ id: `hamasen-exit-${b.stationExit}`, name: `哈瑪星站 ${b.stationExit} 號出口`, kind: 'life', walkable: false, polygon, holes: b.holes?.map(mapPolygon), storeys: b.storeys });
   } else if (/^(hamasen-)?osm-435657348$/.test(b.id)) {
     buildings.push({ id: 'hamasen-rail-park', name: '哈瑪星鐵道園區前場', kind: 'scenic', walkable: false, polygon, holes: b.holes?.map(mapPolygon) });
+  } else if (DORM_OSM[b.id]) {
+    buildings.push({ id: DORM_OSM[b.id].id, name: DORM_OSM[b.id].name, kind: 'dorm', walkable: false, polygon, holes: b.holes?.map(mapPolygon), storeys: b.storeys });
   } else {
     if (b.holes?.length) backgroundHoles[background.length] = b.holes.map(mapPolygon);
     background.push(polygon);
@@ -47,10 +57,12 @@ const roads = structure.context.roads.map(r => ({ kind: r.kind, width: r.width, 
 const water = structure.context.water.map(w => ({ kind: w.kind, points: w.points.map(([x, z]) => [r1(x), r1(z)] as P) }));
 const sport = structure.context.sport.map(s => ({ kind: s.kind, polygon: s.polygon.map(([x, z]) => [r1(x), r1(z)] as P) }));
 const hamasenPlaces: HamasenMapPlace[] = Object.entries(info.buildings).flatMap(([id, { name, kind, category, poi }]) =>
-  kind && category && poi ? [{ id, name, kind, category, poi }] : []);
+  id.startsWith('hamasen-poi-') && kind && category && poi ? [{ id, name, kind, category, poi }] : []);
+const campusPlaces: HamasenMapPlace[] = Object.entries(info.buildings).flatMap(([id, { name, kind, category, poi }]) =>
+  (id.startsWith('campus-poi-') || id.startsWith('campus-dorm-')) && kind && category && poi ? [{ id, name, kind, category, poi }] : []);
 const railways = structure.context.hamasen?.rails?.map(r => ({ kind: r.kind, points: mapPolygon(r.points) })) ?? [];
 const basePath = 'public/data/campus-map-base.json';
 const base = fs.existsSync(basePath) ? JSON.parse(fs.readFileSync(basePath, 'utf8')) as { url: string; bounds: [number, number, number, number] } : undefined;
-const out = { generatedBy: 'tools/build_campus_map.ts', base, frame: 'world metres, x east, z south (north = -z)', spawn: [-69, 119], buildings, background, backgroundHoles, roads, railways, water, sport, hamasenPlaces, landmarks: landmarkPlacements };
+const out = { generatedBy: 'tools/build_campus_map.ts', base, frame: 'world metres, x east, z south (north = -z)', spawn: [-69, 119], buildings, background, backgroundHoles, roads, railways, water, sport, hamasenPlaces, campusPlaces, landmarks: landmarkPlacements };
 fs.writeFileSync('public/data/campus-map.json', JSON.stringify(out) + '\n');
-console.log(JSON.stringify({ buildings: buildings.length, background: background.length, roads: roads.length, water: water.length, sport: sport.length, landmarks: Object.keys(landmarkPlacements).length, hamasenPlaces: hamasenPlaces.length, bytes: fs.statSync('public/data/campus-map.json').size }));
+console.log(JSON.stringify({ buildings: buildings.length, background: background.length, roads: roads.length, water: water.length, sport: sport.length, landmarks: Object.keys(landmarkPlacements).length, hamasenPlaces: hamasenPlaces.length, campusPlaces: campusPlaces.length, bytes: fs.statSync('public/data/campus-map.json').size }));

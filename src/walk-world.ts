@@ -70,14 +70,14 @@ function edgeFrame(polygon:Point2[],index:number,signed:number){
  const a=polygon[index],b=polygon[(index+1)%polygon.length];
  if(!a||!b)return;
  const length=Math.hypot(b[0]-a[0],b[1]-a[1]);
- if(length<2.9)return;
+ if(length<1.8)return;
  const tx=(b[0]-a[0])/length,tz=(b[1]-a[1])/length;
  const nx=-tz*Math.sign(signed),nz=tx*Math.sign(signed);
  return {edge:index,a,tx,tz,nx,nz,length};
 }
-function arcadeStripRect(cut:ArcadeEdgeCut,pad=.06):Point2[]{
+function arcadeStripRect(cut:ArcadeEdgeCut,pad=.06,padU=.08):Point2[]{
  const at=(u:number,v:number):Point2=>[cut.a[0]+cut.tx*u+cut.nx*v,cut.a[1]+cut.tz*u+cut.nz*v];
- return [at(0,-pad),at(cut.length,-pad),at(cut.length,cut.depth),at(0,cut.depth)];
+ return [at(-padU,-pad),at(cut.length+padU,-pad),at(cut.length+padU,cut.depth),at(-padU,cut.depth)];
 }
 function polyAreaVerts(v:readonly SurfaceVertex[]){
  return Math.abs(v.reduce((s,a,i)=>{const b=v[(i+1)%v.length];return s+a.x*b.z-b.x*a.z;},0)/2);
@@ -133,39 +133,45 @@ function buildPrismFromPieces(pieces:readonly SurfaceVertex[][],rings:readonly P
 }
 function districtArcade(building:ContextBuilding) {
  const {polygon,frontage,holes}=building;
- const depth=frontage?.arcadeDepth ?? 0;
- if(depth<1 || depth>4 || !frontage)return;
+ if(!frontage)return;
  const signed=polygon.reduce((sum,p,i)=>sum+p[0]*polygon[(i+1)%polygon.length][1]-p[1]*polygon[(i+1)%polygon.length][0],0);
  if(Math.abs(signed)<1e-3)return;
  const totalArea=area(polygon)-(holes??[]).reduce((s,h)=>s+area(h),0);
- const primary=edgeFrame(polygon,frontage.edge,signed);
- if(!primary)return;
- const cuts:ArcadeEdgeCut[]=[{...primary,depth}];
+ const cuts:ArcadeEdgeCut[]=[];
+ const seen=new Set<number>();
+ const addCut=(edge:number|undefined,depth:number|undefined)=>{
+  if(edge===undefined||depth===undefined||depth<1||depth>4.2||seen.has(edge))return;
+  const frame=edgeFrame(polygon,edge,signed);
+  if(frame){cuts.push({...frame,depth});seen.add(edge);}
+ };
+ addCut(frontage.edge,frontage.arcadeDepth);
  if(frontage.cornerEdge!==undefined&&frontage.cornerEdge!==frontage.edge){
-  const cornerDepth=frontage.cornerArcadeDepth ?? Math.min(depth,2.05);
-  const corner=cornerDepth>=1&&cornerDepth<=4?edgeFrame(polygon,frontage.cornerEdge,signed):undefined;
-  if(corner)cuts.push({...corner,depth:cornerDepth});
+  addCut(frontage.cornerEdge,frontage.cornerArcadeDepth);
  }
- if(!holes?.length){
-  const back1=clipHalfPlane(polygon,primary.a,primary.nx,primary.nz,depth);
-  if(back1&&area(back1)>=totalArea*.34){
+ for(const extra of frontage.extraArcadeEdges??[])addCut(extra.edge,extra.depth);
+ if(!cuts.length)return;
+ const primaryDepth=frontage.arcadeDepth??cuts[0].depth;
+ const cornerDepth=frontage.cornerEdge!==undefined&&seen.has(frontage.cornerEdge)?(frontage.cornerArcadeDepth??0):0;
+ if(!holes?.length&&cuts.length<=2){
+  const back1=clipHalfPlane(polygon,cuts[0].a,cuts[0].nx,cuts[0].nz,cuts[0].depth);
+  if(back1&&area(back1)>=totalArea*.24){
    let back=back1;
    const activeCuts=[cuts[0]];
    if(cuts[1]){
     const back2=clipHalfPlane(back,cuts[1].a,cuts[1].nx,cuts[1].nz,cuts[1].depth);
-    if(back2&&area(back2)>=totalArea*.28){back=back2;activeCuts.push(cuts[1]);}
+    if(back2&&area(back2)>=totalArea*.20){back=back2;activeCuts.push(cuts[1]);}
    }
-   if(activeCuts.length===cuts.length)return {cuts:activeCuts,depth,cornerDepth:activeCuts[1]?.depth??0,back};
+   if(activeCuts.length===cuts.length)return {cuts:activeCuts,depth:primaryDepth,cornerDepth,back};
   }
  }
- // Non-convex or holed footprints (e.g. L-shaped shared shophouses): subtract bounded arcade strips directly.
+ // Non-convex, holed, or multi-edge footprints: subtract bounded arcade strips directly.
  const pieces=subtractArcadePieces(polygon,holes,cuts);
  const remArea=pieces?.reduce((s,p)=>s+polyAreaVerts(p),0)??0;
- if(pieces&&remArea>=totalArea*.28)return {cuts,depth,cornerDepth:cuts[1]?.depth??0,pieces};
+ if(pieces&&remArea>=totalArea*.20)return {cuts,depth:primaryDepth,cornerDepth,pieces};
  if(cuts.length>1){
   const single=subtractArcadePieces(polygon,holes,[cuts[0]]);
   const singleArea=single?.reduce((s,p)=>s+polyAreaVerts(p),0)??0;
-  if(single&&singleArea>=totalArea*.32)return {cuts:[cuts[0]],depth,cornerDepth:0,pieces:single};
+  if(single&&singleArea>=totalArea*.24)return {cuts:[cuts[0]],depth:cuts[0].depth,cornerDepth:0,pieces:single};
  }
 }
 
@@ -233,7 +239,14 @@ function addDistrictBuilding(group:T.Group,collision:T.Group,building:ContextBui
     const yaw=-Math.atan2(tz,tx);
     for(const at of columns){
      const x=a[0]+tx*at+nx*inset,z=a[1]+tz*at+nz*inset;
-     if(placedColumns.some(c=>Math.hypot(c.x-x,c.z-z)<.82))continue;
+     if(placedColumns.some(c=>Math.hypot(c.x-x,c.z-z)<.85))continue;
+     // Never drop a column inside the walking lane of another arcade cut on the same building.
+     const blocksOtherCut=arcade.cuts.some(o=>{
+      if(o.edge===cut.edge)return false;
+      const ou=(x-o.a[0])*o.tx+(z-o.a[1])*o.tz,ov=(x-o.a[0])*o.nx+(z-o.a[1])*o.nz;
+      return ou>.2&&ou<o.length-.2&&ov>.55&&ov<o.depth-.15;
+     });
+     if(blocksOtherCut)continue;
      const colBottom=ground(x,z)-.04;
      addColumn(x,z,colBottom,ceiling,pierSize,yaw);
      placedColumns.push({x,z,yaw,size:pierSize,bottom:colBottom,top:ceiling});
@@ -364,18 +377,33 @@ export function buildWalkWorld(data:WalkBuilding[],structure:CampusStructure,ter
   }
   out.display.add(displayGround);
   const district=structure.context.hamasen?.polygon;
-  const outsidePlay=(x:number,z:number)=>(x>952||z>700)&&(!district||!inPolygon([x,z],district));
+  // Keep every dry metre of the ferry promenade & southern waterfront inside PLAY_BOUNDS solid
+  // so no visual ground strip between ferryHarbor (x=349) and hamasen.polygon ever drops the player.
+  const ferryShore=(x:number,z:number)=>x>=276&&x<=804&&z>=676&&z<=PLAY_BOUNDS[3]&&(!harbor||!inPolygon([x,z],harbor));
+  const outsidePlay=(x:number,z:number)=>(x>952||z>700)&&(!district||!inPolygon([x,z],district))&&!ferryShore(x,z);
   const solid=new T.Mesh(terrain.mesh(PLAY_BOUNDS,(x,z)=>pad(x,z)||outsidePlay(x,z)),mat('#8b9d79'));
   solid.name='DEM terrain collision';out.collision.add(solid);
   if(harbor&&harbor.length>=3){
-   // Keep players safely on the waterfront promenades along Gushan 1st Canal without walking onto water.
+   // Keep players safely on the waterfront promenades along Gushan 1st Canal and along the southern
+   // PLAY_BOUNDS harbour edge without walking into water or stepping off the collision boundary.
    const quayGuards=new T.Group();quayGuards.name='Hamasen canal quay guardrails';
+   const maxZ=PLAY_BOUNDS[3]-.25;
+   const clipSouth=(a:Point2,b:Point2):[Point2,Point2]|undefined=>{
+    if(a[1]>maxZ&&b[1]>maxZ)return;
+    const lerpAt=(p:Point2,q:Point2):Point2=>{const t=(maxZ-p[1])/(q[1]-p[1]);return [p[0]+(q[0]-p[0])*t,maxZ];};
+    return [a[1]>maxZ?lerpAt(a,b):a,b[1]>maxZ?lerpAt(b,a):b];
+   };
    for(let i=0;i<harbor.length;i++){
-    const a=harbor[i],b=harbor[(i+1)%harbor.length];
-    if(Math.min(a[1],b[1])>=744||Math.max(a[0],b[0])<284)continue;
-    const mx=(a[0]+b[0])/2,mz=(a[1]+b[1])/2;
+    const rawA=harbor[i],rawB=harbor[(i+1)%harbor.length];
+    if(Math.max(rawA[0],rawB[0])<284)continue;
+    const clipped=clipSouth(rawA,rawB);
+    if(!clipped)continue;
+    const [a,b]=clipped,mx=(a[0]+b[0])/2,mz=(a[1]+b[1])/2;
     wall(quayGuards,a,b,terrain.heightAt(mx,mz)-.15,1.35,'#888',.28);
    }
+   // Seal the southern play edge along the ferry promenade & Binhai 2nd Rd (strictly inside PLAY_BOUNDS[3]).
+   const southZ=PLAY_BOUNDS[3]-.18;
+   wall(quayGuards,[346,southZ],[796,southZ],terrain.heightAt(420,southZ)-.2,1.35,'#888',.24);
    out.collision.add(quayGuards);
   }
  }else{

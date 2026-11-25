@@ -378,11 +378,20 @@ function facadeAtlas(boards:ReadonlyMap<string,SignBoard>, shopTiles:ReadonlyMap
     else if(store)paintStorefront(ctx,store);
     else paintFacadeTile(ctx,key);
     ctx.restore();
-    if(store&&store.style!=='heritage'||key==='front:stall'||key==='front:clinic'||key==='front:grocery'){
-      light.fillStyle=store?'#151515':'#080808';
+    if(board){
+      // Illuminated Taiwanese fascia & blade sign lightboxes at night (kept <90 to avoid bloom blowout).
+      light.fillStyle='#565656';
+      light.fillRect(x+8,y+8,368,80);
+    }else if(store&&store.style!=='heritage'||key.startsWith('front:')&&key!=='front:shutter'){
+      light.fillStyle=store?'#444444':'#2e2e2e';
       light.fillRect(x+24,y+18,336,66);
-      light.fillStyle=store?'#4b4b4b':'#292929';
-      for(const px of [39,130,221,312])light.fillRect(x+px,y+14,28,3);
+      light.fillStyle=store?'#565656':'#424242';
+      for(const px of [39,130,221,312])light.fillRect(x+px,y+14,32,4);
+    }else if(key==='sliding'||key==='grille'){
+      // Subtle lived-in apartment window glow on one sash so upper floors read warmly at night.
+      light.fillStyle='#2e2e2e';
+      if(key==='sliding')light.fillRect(x+24,y+18,156,60);
+      else light.fillRect(x+198,y+22,160,54);
     }
     uvs.set(key,[(x+.5)/canvas.width,1-(y+95.5)/canvas.height,(x+383.5)/canvas.width,1-(y+.5)/canvas.height]);
   });
@@ -403,7 +412,7 @@ export function hamasenExteriors(exteriors:readonly HamasenExterior[], terrain?:
   const nearDetail = shortDetail ? 84 : 155;
   const chunk=168;
   const shell=new T.MeshStandardMaterial({name:'Hamasen masonry, metal and glazing',map:masonryGrain(),vertexColors:true,roughness:.87,side:T.DoubleSide});
-  const warm=new T.MeshStandardMaterial({name:'Hamasen shop lights',vertexColors:true,emissive:'#e8bf84',emissiveIntensity:0,roughness:.8});
+  const warm=new T.MeshStandardMaterial({name:'Hamasen shop lights',vertexColors:true,emissive:'#ffd089',emissiveIntensity:0,roughness:.75});
   NIGHT_MATERIALS.add(warm);
   const signName=(building:ContextBuilding)=>building.stationExit?undefined:building.signText??(building.facade==='platform'?building.name??undefined:undefined);
   const boards=new Map<string,SignBoard>(), shopTiles=new Map<string,ShopTheme>();
@@ -678,9 +687,9 @@ export function hamasenExteriors(exteriors:readonly HamasenExterior[], terrain?:
       const primary=edge===street;
       const corner=edge.index===building.frontage?.cornerEdge;
       const shops=named.filter(shop=>shop.edge===edge.index);
-      const front=primary||corner||shops.length>0;
-      const commercial=front&&(building.frontage?.commercial??(use==='commercial'||isRowBalconies));
       const depth=arcadeEdges[edge.index]??0;
+      const front=primary||corner||depth>0||shops.length>0;
+      const commercial=front&&(building.frontage?.commercial??(use==='commercial'||isRowBalconies));
       const hidden=building.sharedWalls?.[edge.index]??0;
       const localFloor=(along:number,outside:number)=>terrain?.heightAt(...around(edge,along,outside))??bottom;
       const streetY=localFloor(edge.length/2,0);
@@ -1215,10 +1224,11 @@ export function hamasenStreetGround(context:HamasenContext, roads:readonly Conte
   const bounds:[number,number,number,number]=[Math.min(...xs),Math.min(...zs),Math.max(...xs),shore?Math.max(...shore.map(p=>p[1])):Math.max(...zs)];
   const built:T.BufferGeometry[]=[];
   const threeD:T.BufferGeometry[]=[];
+  const glow3D:T.BufferGeometry[]=[];
   const unitCyl=new T.CylinderGeometry(.5,.5,1,8);
-  const addBox3D=(x:number,y:number,z:number,w:number,h:number,d:number,yaw:number,color:string,shape:T.BufferGeometry=box)=>{
+  const addBox3D=(x:number,y:number,z:number,w:number,h:number,d:number,yaw:number,color:string,shape:T.BufferGeometry=box,target=threeD)=>{
     const m=new T.Matrix4().compose(new T.Vector3(x,y,z),new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),yaw),new T.Vector3(w,h,d));
-    threeD.push(batchGeometry(shape,m,new T.Color(color)));
+    target.push(batchGeometry(shape,m,new T.Color(color)));
   };
   if(context.ferryLand){
     // The surveyed quay continues beyond the DTM's last row.
@@ -1264,7 +1274,7 @@ export function hamasenStreetGround(context:HamasenContext, roads:readonly Conte
       const mx=midX+lx*.20,mz=midZ+lz*.20;
       const my=Math.max(terrain.seaLevel+.12,terrain.heightAt(mx,mz));
       addBox3D(mx,my+.06,mz,segLen,.12,.36,yaw,'#c7c3b8');
-      if(Math.min(z0,z1)<705&&segLen>4){
+      if(Math.min(z0,z1)<743&&segLen>4){
         addBox3D(mx+lx*.14,my+.96,mz+lz*.14,segLen,.06,.06,yaw,'#556062');
         addBox3D(mx+lx*.14,my+.52,mz+lz*.14,segLen,.04,.04,yaw,'#6c7678');
         for(let d=1;d<segLen-1;d+=6){
@@ -1272,11 +1282,45 @@ export function hamasenStreetGround(context:HamasenContext, roads:readonly Conte
           const py=Math.max(terrain.seaLevel+.12,terrain.heightAt(px,pz));
           addBox3D(px,py+.50,pz,.06,.96,.06,yaw,'#556062');
         }
+        // Waterfront promenade lamp posts along the east bank of Gushan 1st Canal.
+        if(lx>.35&&segLen>12){
+          for(let d=8;d<segLen-6;d+=20){
+            const t=d/segLen,px=T.MathUtils.lerp(x0,x1,t)+lx*.55,pz=T.MathUtils.lerp(z0,z1,t)+lz*.55;
+            const py=Math.max(terrain.seaLevel+.12,terrain.heightAt(px,pz));
+            addBox3D(px,py+2.15,pz,.12,4.3,.12,yaw,'#4c5659',unitCyl);
+            addBox3D(px,py+4.36,pz,.34,.38,.34,yaw,'#3a4245',unitCyl);
+            addBox3D(px,py+4.36,pz,.36,.26,.36,yaw,'#ffd892',unitCyl,glow3D);
+          }
+        }
       }
     }
+    // South ferry promenade safety railing (visual companion to the PLAY_BOUNDS[3] south guardrail).
+    const southY=Math.max(terrain.seaLevel+.14,terrain.heightAt(368,743.4));
+    addBox3D(369.5,southY+.96,743.4,41,.06,.06,0,'#556062');
+    addBox3D(369.5,southY+.52,743.4,41,.04,.04,0,'#6c7678');
+    for(let px=350;px<=390;px+=6)addBox3D(px,southY+.50,743.4,.06,.96,.06,0,'#556062');
     const geometry=geometryFromTriangles(sides);
     if(geometry.attributes.position.count)built.push(batchGeometry(geometry,new T.Matrix4(),new T.Color('#928f86')));
     geometry.dispose();
+  }
+  // Daitian Temple forecourt (代天宮廟埕) warm red/amber perimeter lantern posts so the plaza glows at night.
+  const templePoles:[number,number][]=[[462,448],[478,438],[496,434],[508,450],[498,468],[474,470],[458,462]];
+  for(let i=0;i<templePoles.length;i++){
+    const [px,pz]=templePoles[i],py=terrain.heightAt(px,pz);
+    addBox3D(px,py+2.4,pz,.12,4.8,.12,0,'#5a342e',unitCyl);
+    addBox3D(px,py+4.92,pz,.38,.44,.38,0,'#f26a48',unitCyl,glow3D);
+    // Warm lantern string between perimeter poles flanking the forecourt.
+    if(i<templePoles.length-1){
+      const [qx,qz]=templePoles[i+1],dist=Math.hypot(qx-px,qz-pz);
+      if(dist<26){
+        const count=Math.max(3,Math.round(dist/3.6));
+        for(let k=1;k<count;k++){
+          const t=k/count,lx=T.MathUtils.lerp(px,qx,t),lz=T.MathUtils.lerp(pz,qz,t);
+          const sag=Math.sin(t*Math.PI)*.42,ly=terrain.heightAt(lx,lz)+4.65-sag;
+          addBox3D(lx,ly,lz,.26,.32,.26,0,k%2?'#ff8652':'#ffd076',unitCyl,glow3D);
+        }
+      }
+    }
   }
   const add=(ribbon:T.BufferGeometry,raise:number,tint:string,cutters?:ReturnType<typeof surfaceCutters>)=>{
     const surface=projectRoadGeometry(ribbon,terrain,{offset:raise,accept:urban,cutters});
@@ -1469,6 +1513,15 @@ export function hamasenStreetGround(context:HamasenContext, roads:readonly Conte
     if(geometry){
       const mesh=new T.Mesh(geometry,new T.MeshStandardMaterial({vertexColors:true,roughness:.86}));
       mesh.name='Hamasen quay bollards, fenders and coping';mesh.castShadow=true;mesh.receiveShadow=true;group.add(mesh);
+    }
+  }
+  if(glow3D.length){
+    const geometry=mergeGeometries(glow3D,false);glow3D.forEach(g=>g.dispose());
+    if(geometry){
+      const glowMat=new T.MeshStandardMaterial({vertexColors:true,emissive:'#ffba6b',emissiveIntensity:0,roughness:.45});
+      NIGHT_MATERIALS.add(glowMat);
+      const mesh=new T.Mesh(geometry,glowMat);
+      mesh.name='Hamasen plaza lanterns and canal lamps';group.add(mesh);
     }
   }
   return group;

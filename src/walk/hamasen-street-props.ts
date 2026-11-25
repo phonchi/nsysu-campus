@@ -326,13 +326,17 @@ export function planHamasenStreetProps(input:StreetPropInput):StreetPropPlan {
   }
  }
 
- // 2. Street lamps on the main roads, staggered; the arm reaches over the carriageway.
- for(const road of vehicular.filter(r=>r.kind==='tertiary')){
-  for(const side of [-1,1])for(const s of stations(road.points,34,side*(road.width/2+.3),side<0?8:25)){
+ // 2. Street lamps on arterials (22 m staggered) and main commercial/residential streets (26 m single-side).
+ for(const road of vehicular){
+  const main=road.kind==='tertiary';
+  if(!main&&road.width<5.4)continue;
+  const sides=main?[-1,1]:[hash01(`${road.id}:lamp-side`)<.5?-1:1];
+  const step=main?22:26;
+  for(const side of sides)for(const s of stations(road.points,step,side*(road.width/2+.3),side<0?6:17)){
    if(blocksView(s.x,s.z,PROP_RADIUS.lamp))continue;
    if(!free(s.x,s.z,{radius:PROP_RADIUS.lamp,road,buildingClear:.25,junction:1.2,kerb:true})||!walkClear(s.x,s.z,PROP_RADIUS.lamp))continue;
-   props.push({kind:'lamp',x:s.x,z:s.z,yaw:yawOf(-s.nx*side,-s.nz*side),color:0,rank:0});
-   if(hash01(`${road.id}:${side}:${s.index}:tb`)<.4){
+   props.push({kind:'lamp',x:s.x,z:s.z,yaw:yawOf(-s.nx*side,-s.nz*side),color:0,rank:main?0:hash01(`${road.id}:${s.index}:lr`)});
+   if(main&&hash01(`${road.id}:${side}:${s.index}:tb`)<.35){
     const bx=s.x+s.tx*3.4+s.nx*side*.25,bz=s.z+s.tz*3.4+s.nz*side*.25;
     if(free(bx,bz,{radius:.65,road,buildingClear:.3,junction:1.5})&&walkClear(bx,bz,.65))box(bx,bz,yawOf(s.tx,s.tz),1.15,1.25,.6,0,BOX.green,hash01(`${s.index}tb`));
    }

@@ -17547,7 +17547,9 @@
         "frontage": {
           "edge": 2,
           "commercial": false,
-          "cornerEdge": 1
+          "cornerEdge": 1,
+          "cornerArcadeDepth": 2.4,
+          "arcadeStyle": "flat"
         }
       },
       {
@@ -17870,7 +17872,9 @@
         "frontage": {
           "edge": 2,
           "commercial": false,
-          "cornerEdge": 3
+          "cornerEdge": 3,
+          "cornerArcadeDepth": 2.2,
+          "arcadeStyle": "flat"
         }
       },
       {
@@ -17907,7 +17911,19 @@
         "frontage": {
           "edge": 0,
           "commercial": true,
-          "cornerEdge": 2
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "flat",
+          "cornerEdge": 2,
+          "extraArcadeEdges": [
+            {
+              "edge": 1,
+              "depth": 2.4
+            },
+            {
+              "edge": 2,
+              "depth": 2.4
+            }
+          ]
         },
         "heightM": 13.18
       },
@@ -17977,7 +17993,23 @@
         "frontage": {
           "edge": 0,
           "commercial": true,
-          "cornerEdge": 2
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "flat",
+          "cornerEdge": 2,
+          "extraArcadeEdges": [
+            {
+              "edge": 12,
+              "depth": 2.4
+            },
+            {
+              "edge": 1,
+              "depth": 2.4
+            },
+            {
+              "edge": 2,
+              "depth": 2.4
+            }
+          ]
         },
         "heightM": 13.36
       },
@@ -18048,7 +18080,9 @@
         "frontage": {
           "edge": 0,
           "commercial": false,
-          "cornerEdge": 3
+          "cornerEdge": 3,
+          "cornerArcadeDepth": 2.2,
+          "arcadeStyle": "flat"
         }
       },
       {
@@ -18099,7 +18133,17 @@
           "commercial": true,
           "arcadeDepth": 2.2,
           "arcadeStyle": "flat",
-          "cornerEdge": 6
+          "cornerEdge": 6,
+          "extraArcadeEdges": [
+            {
+              "edge": 5,
+              "depth": 2.2
+            },
+            {
+              "edge": 3,
+              "depth": 2.2
+            }
+          ]
         }
       },
       {
@@ -18368,7 +18412,14 @@
           "commercial": true,
           "arcadeDepth": 2.4,
           "arcadeStyle": "arched",
-          "cornerEdge": 2
+          "cornerEdge": 2,
+          "extraArcadeEdges": [
+            {
+              "edge": 3,
+              "depth": 2.2
+            }
+          ],
+          "cornerArcadeDepth": 2.2
         }
       },
       {
@@ -18407,7 +18458,17 @@
           "commercial": true,
           "arcadeDepth": 2.2,
           "arcadeStyle": "flat",
-          "cornerEdge": 4
+          "cornerEdge": 4,
+          "extraArcadeEdges": [
+            {
+              "edge": 3,
+              "depth": 2.2
+            },
+            {
+              "edge": 4,
+              "depth": 2.2
+            }
+          ]
         },
         "heightM": 9.57,
         "shopfronts": [
@@ -18463,8 +18524,15 @@
         "roofTone": "#9a8d77",
         "frontage": {
           "edge": 5,
-          "commercial": false,
-          "cornerEdge": 0
+          "commercial": true,
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "flat",
+          "extraArcadeEdges": [
+            {
+              "edge": 0,
+              "depth": 2.4
+            }
+          ]
         },
         "signText": "舊三和銀行"
       },
@@ -18631,7 +18699,13 @@
         "osmId": 588119541,
         "frontage": {
           "edge": 4,
-          "commercial": false
+          "commercial": false,
+          "extraArcadeEdges": [
+            {
+              "edge": 2,
+              "depth": 2.4
+            }
+          ]
         },
         "heightM": 6.62,
         "shopfronts": [
@@ -18682,7 +18756,13 @@
           "arcadeDepth": 2.4,
           "arcadeStyle": "flat",
           "cornerEdge": 2,
-          "cornerArcadeDepth": 2.2
+          "cornerArcadeDepth": 2.2,
+          "extraArcadeEdges": [
+            {
+              "edge": 0,
+              "depth": 2.4
+            }
+          ]
         },
         "heightM": 12.64
       },
@@ -18721,7 +18801,13 @@
           "edge": 2,
           "commercial": true,
           "arcadeDepth": 2.2,
-          "arcadeStyle": "flat"
+          "arcadeStyle": "flat",
+          "extraArcadeEdges": [
+            {
+              "edge": 3,
+              "depth": 2.4
+            }
+          ]
         },
         "heightM": 13.42
       },
@@ -18768,7 +18854,13 @@
           "edge": 0,
           "commercial": true,
           "arcadeDepth": 2.2,
-          "arcadeStyle": "flat"
+          "arcadeStyle": "flat",
+          "extraArcadeEdges": [
+            {
+              "edge": 6,
+              "depth": 2.2
+            }
+          ]
         },
         "heightM": 9.33
       },
@@ -18937,7 +19029,13 @@
           "edge": 3,
           "commercial": true,
           "arcadeDepth": 2.4,
-          "arcadeStyle": "flat"
+          "arcadeStyle": "flat",
+          "extraArcadeEdges": [
+            {
+              "edge": 2,
+              "depth": 2.2
+            }
+          ]
         },
         "heightM": 9.51
       },
@@ -19113,9 +19211,12 @@
         "roofShape": "flat",
         "osmId": 1059400288,
         "frontage": {
-          "edge": 1,
-          "commercial": false,
-          "cornerEdge": 0
+          "edge": 0,
+          "commercial": true,
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "flat",
+          "cornerEdge": 1,
+          "cornerArcadeDepth": 2.4
         },
         "heightM": 13.3
       },
@@ -19148,7 +19249,9 @@
         "osmId": 1059400289,
         "frontage": {
           "edge": 0,
-          "commercial": true
+          "commercial": true,
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "flat"
         },
         "heightM": 12.52
       },
@@ -19181,7 +19284,9 @@
         "osmId": 1059400290,
         "frontage": {
           "edge": 3,
-          "commercial": true
+          "commercial": true,
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "flat"
         },
         "heightM": 12.88
       },
@@ -19340,7 +19445,14 @@
           "commercial": true,
           "arcadeDepth": 2.4,
           "arcadeStyle": "arched",
-          "cornerEdge": 1
+          "cornerEdge": 1,
+          "extraArcadeEdges": [
+            {
+              "edge": 0,
+              "depth": 2.4
+            }
+          ],
+          "cornerArcadeDepth": 2.2
         }
       },
       {
@@ -19384,7 +19496,13 @@
           "commercial": true,
           "arcadeDepth": 2.4,
           "arcadeStyle": "arched",
-          "cornerEdge": 4
+          "cornerEdge": 4,
+          "extraArcadeEdges": [
+            {
+              "edge": 2,
+              "depth": 2.4
+            }
+          ]
         }
       },
       {
@@ -19792,7 +19910,13 @@
         "frontage": {
           "edge": 0,
           "commercial": false,
-          "cornerEdge": 1
+          "cornerEdge": 1,
+          "extraArcadeEdges": [
+            {
+              "edge": 2,
+              "depth": 2.2
+            }
+          ]
         },
         "heightM": 10.17
       },
@@ -19976,7 +20100,13 @@
           "arcadeDepth": 2.4,
           "arcadeStyle": "arched",
           "cornerEdge": 0,
-          "cornerArcadeDepth": 2.2
+          "cornerArcadeDepth": 2.2,
+          "extraArcadeEdges": [
+            {
+              "edge": 3,
+              "depth": 2.4
+            }
+          ]
         },
         "heightM": 13.3
       },
@@ -20078,7 +20208,9 @@
         "gersId": "06c499f1-2966-4e3a-86ef-98fe59664210",
         "frontage": {
           "edge": 0,
-          "commercial": true
+          "commercial": true,
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "flat"
         },
         "heightM": 12.88
       },
@@ -20172,11 +20304,21 @@
         "roofShape": "flat",
         "gersId": "07486a59-ecac-4bfb-8d3b-f8aebafe0add",
         "frontage": {
-          "edge": 6,
+          "edge": 4,
           "commercial": true,
-          "arcadeDepth": 2.2,
+          "arcadeDepth": 2.4,
           "arcadeStyle": "flat",
-          "cornerEdge": 4
+          "cornerEdge": 6,
+          "extraArcadeEdges": [
+            {
+              "edge": 6,
+              "depth": 2.2
+            },
+            {
+              "edge": 5,
+              "depth": 2.4
+            }
+          ]
         },
         "heightM": 12.76
       },
@@ -20312,7 +20454,9 @@
         "gersId": "0ccfd51a-a153-4660-b890-a86948c18ce2",
         "frontage": {
           "edge": 2,
-          "commercial": true
+          "commercial": true,
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "flat"
         },
         "heightM": 9.45
       },
@@ -20384,7 +20528,8 @@
           "commercial": true,
           "arcadeDepth": 2.2,
           "arcadeStyle": "flat",
-          "cornerEdge": 3
+          "cornerEdge": 3,
+          "cornerArcadeDepth": 2.2
         },
         "heightM": 10.23
       },
@@ -20417,7 +20562,13 @@
         "gersId": "0ce20b3e-dc43-4aec-95c3-89c87934407d",
         "frontage": {
           "edge": 2,
-          "commercial": false
+          "commercial": false,
+          "extraArcadeEdges": [
+            {
+              "edge": 0,
+              "depth": 2.2
+            }
+          ]
         },
         "heightM": 9.81
       },
@@ -20458,7 +20609,13 @@
           "arcadeDepth": 2.2,
           "arcadeStyle": "flat",
           "cornerEdge": 2,
-          "cornerArcadeDepth": 2.2
+          "cornerArcadeDepth": 2.2,
+          "extraArcadeEdges": [
+            {
+              "edge": 0,
+              "depth": 2.2
+            }
+          ]
         },
         "heightM": 13.48
       },
@@ -20523,9 +20680,11 @@
         "roofShape": "flat",
         "gersId": "0ee60de2-4ce4-4673-91ba-57837ee1904d",
         "frontage": {
-          "edge": 2,
-          "commercial": false,
-          "cornerEdge": 1
+          "edge": 1,
+          "commercial": true,
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "arched",
+          "cornerEdge": 2
         },
         "heightM": 9.93
       },
@@ -21006,7 +21165,13 @@
           "commercial": true,
           "arcadeDepth": 2.2,
           "arcadeStyle": "flat",
-          "cornerEdge": 4
+          "cornerEdge": 4,
+          "extraArcadeEdges": [
+            {
+              "edge": 3,
+              "depth": 2.2
+            }
+          ]
         },
         "heightM": 6.14
       },
@@ -21088,7 +21253,9 @@
         "gersId": "19472a6c-88a5-47f7-8c7e-fab8744b7e71",
         "frontage": {
           "edge": 1,
-          "commercial": false
+          "commercial": true,
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "flat"
         },
         "heightM": 6.2
       },
@@ -21169,7 +21336,17 @@
           "commercial": true,
           "arcadeDepth": 2.4,
           "arcadeStyle": "flat",
-          "cornerEdge": 2
+          "cornerEdge": 2,
+          "extraArcadeEdges": [
+            {
+              "edge": 1,
+              "depth": 2.4
+            },
+            {
+              "edge": 0,
+              "depth": 4.0
+            }
+          ]
         },
         "heightM": 13.24
       },
@@ -21346,7 +21523,14 @@
           "commercial": true,
           "arcadeDepth": 2.2,
           "arcadeStyle": "flat",
-          "cornerEdge": 8
+          "cornerEdge": 8,
+          "extraArcadeEdges": [
+            {
+              "edge": 5,
+              "depth": 2.2
+            }
+          ],
+          "cornerArcadeDepth": 4.0
         },
         "heightM": 13.06
       },
@@ -21456,7 +21640,17 @@
           "arcadeDepth": 2.2,
           "arcadeStyle": "flat",
           "cornerEdge": 6,
-          "cornerArcadeDepth": 2.2
+          "cornerArcadeDepth": 2.2,
+          "extraArcadeEdges": [
+            {
+              "edge": 3,
+              "depth": 2.2
+            },
+            {
+              "edge": 13,
+              "depth": 2.2
+            }
+          ]
         },
         "heightM": 12.76,
         "shopfronts": [
@@ -21551,7 +21745,9 @@
         "frontage": {
           "edge": 3,
           "commercial": false,
-          "cornerEdge": 2
+          "cornerEdge": 2,
+          "cornerArcadeDepth": 2.4,
+          "arcadeStyle": "flat"
         },
         "heightM": 6.26
       },
@@ -21784,7 +21980,18 @@
         "frontage": {
           "edge": 4,
           "commercial": false,
-          "cornerEdge": 3
+          "cornerEdge": 3,
+          "extraArcadeEdges": [
+            {
+              "edge": 2,
+              "depth": 2.4
+            },
+            {
+              "edge": 1,
+              "depth": 2.2
+            }
+          ],
+          "arcadeStyle": "flat"
         },
         "heightM": 12.82
       },
@@ -21817,7 +22024,13 @@
         "gersId": "284dfa92-12f6-44b2-ba89-5cca638659dd",
         "frontage": {
           "edge": 3,
-          "commercial": false
+          "commercial": false,
+          "extraArcadeEdges": [
+            {
+              "edge": 1,
+              "depth": 2.2
+            }
+          ]
         },
         "heightM": 10.23
       },
@@ -22158,7 +22371,41 @@
           "edge": 12,
           "commercial": true,
           "arcadeDepth": 2.2,
-          "arcadeStyle": "flat"
+          "arcadeStyle": "flat",
+          "extraArcadeEdges": [
+            {
+              "edge": 14,
+              "depth": 2.2
+            },
+            {
+              "edge": 11,
+              "depth": 2.2
+            },
+            {
+              "edge": 7,
+              "depth": 2.4
+            },
+            {
+              "edge": 10,
+              "depth": 2.4
+            },
+            {
+              "edge": 8,
+              "depth": 2.4
+            },
+            {
+              "edge": 9,
+              "depth": 2.4
+            },
+            {
+              "edge": 15,
+              "depth": 2.2
+            },
+            {
+              "edge": 13,
+              "depth": 2.2
+            }
+          ]
         },
         "heightM": 13.18
       },
@@ -22291,7 +22538,7 @@
           "arcadeDepth": 2.2,
           "arcadeStyle": "flat",
           "cornerEdge": 3,
-          "cornerArcadeDepth": 2.1
+          "cornerArcadeDepth": 2.4
         },
         "heightM": 13.18
       },
@@ -22357,7 +22604,13 @@
         "frontage": {
           "edge": 6,
           "commercial": false,
-          "cornerEdge": 7
+          "cornerEdge": 7,
+          "extraArcadeEdges": [
+            {
+              "edge": 9,
+              "depth": 2.2
+            }
+          ]
         },
         "heightM": 13.18
       },
@@ -22495,8 +22748,10 @@
         "roofShape": "flat",
         "gersId": "38c348d8-c9e1-4fcc-9312-b1fa0cdb8da3",
         "frontage": {
-          "edge": 0,
-          "commercial": false
+          "edge": 2,
+          "commercial": true,
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "flat"
         },
         "heightM": 6.26
       },
@@ -22605,7 +22860,8 @@
           "commercial": true,
           "arcadeDepth": 2.4,
           "arcadeStyle": "flat",
-          "cornerEdge": 0
+          "cornerEdge": 0,
+          "cornerArcadeDepth": 2.2
         },
         "heightM": 9.87
       },
@@ -22637,9 +22893,11 @@
         "roofShape": "flat",
         "gersId": "3c5142f3-c549-49d3-a929-e0af21793d10",
         "frontage": {
-          "edge": 0,
-          "commercial": false,
-          "cornerEdge": 1
+          "edge": 1,
+          "commercial": true,
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "flat",
+          "cornerEdge": 0
         },
         "heightM": 9.63
       },
@@ -22865,8 +23123,11 @@
         "roofShape": "flat",
         "gersId": "3f1776b4-be63-48a0-a16e-bdb6175f29ad",
         "frontage": {
-          "edge": 0,
-          "commercial": false
+          "edge": 2,
+          "commercial": true,
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "flat",
+          "cornerEdge": 3
         },
         "heightM": 10.11
       },
@@ -22918,9 +23179,17 @@
         "roofShape": "flat",
         "gersId": "3faf149f-4db1-4e20-9af7-0442e730073f",
         "frontage": {
-          "edge": 2,
+          "edge": 7,
           "commercial": true,
-          "cornerEdge": 7
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "arched",
+          "cornerEdge": 2,
+          "extraArcadeEdges": [
+            {
+              "edge": 8,
+              "depth": 2.4
+            }
+          ]
         },
         "heightM": 12.52
       },
@@ -23159,7 +23428,13 @@
         "frontage": {
           "edge": 2,
           "commercial": false,
-          "cornerEdge": 0
+          "cornerEdge": 0,
+          "extraArcadeEdges": [
+            {
+              "edge": 0,
+              "depth": 2.2
+            }
+          ]
         },
         "heightM": 13.18
       },
@@ -23406,8 +23681,10 @@
         "roofShape": "flat",
         "gersId": "49182a6b-a74b-4fb9-9a29-bfe3c4a8f158",
         "frontage": {
-          "edge": 0,
-          "commercial": true
+          "edge": 2,
+          "commercial": true,
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "flat"
         },
         "heightM": 13.18
       },
@@ -23508,7 +23785,9 @@
         "frontage": {
           "edge": 3,
           "commercial": true,
-          "cornerEdge": 0
+          "cornerEdge": 0,
+          "cornerArcadeDepth": 2.2,
+          "arcadeStyle": "flat"
         },
         "heightM": 10.23
       },
@@ -23649,7 +23928,10 @@
         "frontage": {
           "edge": 1,
           "commercial": true,
-          "cornerEdge": 0
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "flat",
+          "cornerEdge": 0,
+          "cornerArcadeDepth": 1.95
         },
         "heightM": 10.23
       },
@@ -24038,7 +24320,19 @@
         "gersId": "56423ec7-f271-4a23-aabe-fbf53f1c3409",
         "frontage": {
           "edge": 2,
-          "commercial": false
+          "commercial": true,
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "flat",
+          "extraArcadeEdges": [
+            {
+              "edge": 3,
+              "depth": 2.4
+            },
+            {
+              "edge": 1,
+              "depth": 2.2
+            }
+          ]
         },
         "heightM": 6.5
       },
@@ -24326,7 +24620,7 @@
           "commercial": true,
           "arcadeDepth": 2.2,
           "arcadeStyle": "flat",
-          "cornerEdge": 4
+          "cornerEdge": 0
         },
         "heightM": 9.45
       },
@@ -24437,7 +24731,9 @@
         "gersId": "633955d6-6981-42a5-8aa4-f695b48bf3df",
         "frontage": {
           "edge": 1,
-          "commercial": true
+          "commercial": true,
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "flat"
         },
         "heightM": 9.45
       },
@@ -24471,7 +24767,9 @@
         "frontage": {
           "edge": 0,
           "commercial": false,
-          "cornerEdge": 1
+          "cornerEdge": 1,
+          "cornerArcadeDepth": 2.2,
+          "arcadeStyle": "flat"
         },
         "heightM": 9.93
       },
@@ -25030,7 +25328,13 @@
           "edge": 0,
           "commercial": true,
           "arcadeDepth": 2.2,
-          "arcadeStyle": "flat"
+          "arcadeStyle": "flat",
+          "extraArcadeEdges": [
+            {
+              "edge": 3,
+              "depth": 2.2
+            }
+          ]
         },
         "heightM": 6.74
       },
@@ -25154,7 +25458,17 @@
           "commercial": true,
           "arcadeDepth": 2.2,
           "arcadeStyle": "flat",
-          "cornerEdge": 11
+          "cornerEdge": 11,
+          "extraArcadeEdges": [
+            {
+              "edge": 11,
+              "depth": 2.4
+            },
+            {
+              "edge": 12,
+              "depth": 2.4
+            }
+          ]
         },
         "heightM": 13.06
       },
@@ -25649,7 +25963,9 @@
         "gersId": "845fae80-ea99-41a4-9d68-dd26c72bccf5",
         "frontage": {
           "edge": 3,
-          "commercial": false
+          "commercial": true,
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "flat"
         },
         "heightM": 9.99
       },
@@ -25714,8 +26030,10 @@
         "roofShape": "flat",
         "gersId": "87ed1ea7-2d42-478d-8dd3-02aec122ad39",
         "frontage": {
-          "edge": 3,
-          "commercial": false
+          "edge": 1,
+          "commercial": true,
+          "arcadeDepth": 2.2,
+          "arcadeStyle": "flat"
         },
         "heightM": 6.44
       },
@@ -25750,7 +26068,13 @@
           "edge": 2,
           "commercial": true,
           "arcadeDepth": 2.2,
-          "arcadeStyle": "flat"
+          "arcadeStyle": "flat",
+          "extraArcadeEdges": [
+            {
+              "edge": 0,
+              "depth": 2.4
+            }
+          ]
         },
         "heightM": 10.23
       },
@@ -25818,7 +26142,13 @@
           "edge": 1,
           "commercial": true,
           "arcadeDepth": 2.2,
-          "arcadeStyle": "flat"
+          "arcadeStyle": "flat",
+          "extraArcadeEdges": [
+            {
+              "edge": 2,
+              "depth": 2.2
+            }
+          ]
         },
         "heightM": 13.42
       },
@@ -25944,7 +26274,25 @@
           "commercial": true,
           "arcadeDepth": 2.4,
           "arcadeStyle": "flat",
-          "cornerEdge": 10
+          "cornerEdge": 10,
+          "extraArcadeEdges": [
+            {
+              "edge": 3,
+              "depth": 3.6
+            },
+            {
+              "edge": 7,
+              "depth": 2.4
+            },
+            {
+              "edge": 5,
+              "depth": 2.4
+            },
+            {
+              "edge": 13,
+              "depth": 2.2
+            }
+          ]
         },
         "heightM": 12.94
       },
@@ -26110,7 +26458,8 @@
           "edge": 2,
           "commercial": true,
           "arcadeDepth": 2.2,
-          "arcadeStyle": "flat"
+          "arcadeStyle": "flat",
+          "cornerEdge": 1
         },
         "heightM": 9.99
       },
@@ -26321,7 +26670,13 @@
         "frontage": {
           "edge": 0,
           "commercial": false,
-          "cornerEdge": 3
+          "cornerEdge": 3,
+          "extraArcadeEdges": [
+            {
+              "edge": 3,
+              "depth": 2.4
+            }
+          ]
         },
         "heightM": 9.45
       },
@@ -26364,7 +26719,13 @@
           "edge": 2,
           "commercial": true,
           "arcadeDepth": 2.2,
-          "arcadeStyle": "flat"
+          "arcadeStyle": "flat",
+          "extraArcadeEdges": [
+            {
+              "edge": 0,
+              "depth": 2.2
+            }
+          ]
         },
         "heightM": 12.52
       },
@@ -26398,7 +26759,9 @@
         "frontage": {
           "edge": 2,
           "commercial": false,
-          "cornerEdge": 3
+          "cornerEdge": 3,
+          "cornerArcadeDepth": 2.4,
+          "arcadeStyle": "arched"
         },
         "heightM": 9.69
       },
@@ -26567,7 +26930,13 @@
         "gersId": "9c9f61df-0f00-4dd6-bead-41955e6cc13a",
         "frontage": {
           "edge": 2,
-          "commercial": false
+          "commercial": false,
+          "extraArcadeEdges": [
+            {
+              "edge": 0,
+              "depth": 2.4
+            }
+          ]
         },
         "heightM": 6.8
       },
@@ -26678,11 +27047,21 @@
         "roofShape": "flat",
         "gersId": "9f528255-de4b-4330-964a-d5c42d82e799",
         "frontage": {
-          "edge": 5,
+          "edge": 1,
           "commercial": true,
           "arcadeDepth": 2.4,
-          "arcadeStyle": "arched",
-          "cornerEdge": 1
+          "arcadeStyle": "flat",
+          "cornerEdge": 5,
+          "extraArcadeEdges": [
+            {
+              "edge": 0,
+              "depth": 2.4
+            },
+            {
+              "edge": 5,
+              "depth": 2.4
+            }
+          ]
         },
         "heightM": 13.24
       },
@@ -27363,9 +27742,30 @@
         "roofShape": "flat",
         "gersId": "adcf3f86-e471-4a80-91c3-d1da6fb9168b",
         "frontage": {
-          "edge": 5,
-          "commercial": false,
-          "cornerEdge": 6
+          "edge": 6,
+          "commercial": true,
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "arched",
+          "cornerEdge": 5,
+          "cornerArcadeDepth": 2.4,
+          "extraArcadeEdges": [
+            {
+              "edge": 7,
+              "depth": 2.4
+            },
+            {
+              "edge": 8,
+              "depth": 2.4
+            },
+            {
+              "edge": 9,
+              "depth": 2.4
+            },
+            {
+              "edge": 10,
+              "depth": 2.4
+            }
+          ]
         },
         "heightM": 12.82
       },
@@ -27665,8 +28065,10 @@
         "roofShape": "flat",
         "gersId": "b457eb79-064e-4a0e-9721-6256891e7a2e",
         "frontage": {
-          "edge": 1,
-          "commercial": false
+          "edge": 3,
+          "commercial": true,
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "flat"
         },
         "heightM": 9.51
       },
@@ -27799,7 +28201,9 @@
         "gersId": "b6d64117-e361-411f-bc7e-2d209423675b",
         "frontage": {
           "edge": 3,
-          "commercial": true
+          "commercial": true,
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "flat"
         },
         "heightM": 9.63
       },
@@ -27918,7 +28322,8 @@
           "commercial": true,
           "arcadeDepth": 2.2,
           "arcadeStyle": "flat",
-          "cornerEdge": 1
+          "cornerEdge": 3,
+          "cornerArcadeDepth": 2.4
         },
         "heightM": 12.76
       },
@@ -27951,7 +28356,9 @@
         "gersId": "ba164045-ca8a-433c-b148-02d95318bbbb",
         "frontage": {
           "edge": 1,
-          "commercial": true
+          "commercial": true,
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "flat"
         },
         "heightM": 6.02
       },
@@ -28294,9 +28701,22 @@
         "roofShape": "flat",
         "gersId": "bfb0faa7-aa67-4941-955e-44c6fc7f6956",
         "frontage": {
-          "edge": 4,
-          "commercial": false,
-          "cornerEdge": 5
+          "edge": 5,
+          "commercial": true,
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "arched",
+          "cornerEdge": 6,
+          "cornerArcadeDepth": 2.4,
+          "extraArcadeEdges": [
+            {
+              "edge": 7,
+              "depth": 2.2
+            },
+            {
+              "edge": 0,
+              "depth": 2.2
+            }
+          ]
         },
         "heightM": 13.36
       },
@@ -28330,7 +28750,9 @@
         "frontage": {
           "edge": 0,
           "commercial": true,
-          "cornerEdge": 1
+          "cornerEdge": 1,
+          "cornerArcadeDepth": 2.2,
+          "arcadeStyle": "flat"
         },
         "heightM": 9.27
       },
@@ -28365,7 +28787,13 @@
           "edge": 3,
           "commercial": true,
           "arcadeDepth": 2.2,
-          "arcadeStyle": "flat"
+          "arcadeStyle": "flat",
+          "extraArcadeEdges": [
+            {
+              "edge": 2,
+              "depth": 2.2
+            }
+          ]
         },
         "heightM": 6.26
       },
@@ -28560,7 +28988,13 @@
           "edge": 2,
           "commercial": true,
           "arcadeDepth": 2.2,
-          "arcadeStyle": "flat"
+          "arcadeStyle": "flat",
+          "extraArcadeEdges": [
+            {
+              "edge": 4,
+              "depth": 2.2
+            }
+          ]
         },
         "heightM": 12.64
       },
@@ -28785,7 +29219,9 @@
         "frontage": {
           "edge": 0,
           "commercial": false,
-          "cornerEdge": 1
+          "cornerEdge": 1,
+          "cornerArcadeDepth": 2.4,
+          "arcadeStyle": "arched"
         },
         "heightM": 9.57
       },
@@ -28893,7 +29329,33 @@
           "commercial": true,
           "arcadeDepth": 2.4,
           "arcadeStyle": "flat",
-          "cornerEdge": 19
+          "cornerEdge": 19,
+          "extraArcadeEdges": [
+            {
+              "edge": 19,
+              "depth": 2.2
+            },
+            {
+              "edge": 5,
+              "depth": 2.4
+            },
+            {
+              "edge": 6,
+              "depth": 2.4
+            },
+            {
+              "edge": 7,
+              "depth": 3.6
+            },
+            {
+              "edge": 21,
+              "depth": 2.2
+            },
+            {
+              "edge": 17,
+              "depth": 2.2
+            }
+          ]
         },
         "heightM": 13.12
       },
@@ -29058,7 +29520,15 @@
         "gersId": "ce0693c2-e8b5-47ce-9f9e-65cbe6f178b0",
         "frontage": {
           "edge": 1,
-          "commercial": true
+          "commercial": true,
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "flat",
+          "extraArcadeEdges": [
+            {
+              "edge": 4,
+              "depth": 2.2
+            }
+          ]
         },
         "heightM": 9.51
       },
@@ -29139,7 +29609,13 @@
           "commercial": true,
           "arcadeDepth": 2.4,
           "arcadeStyle": "arched",
-          "cornerEdge": 4
+          "cornerEdge": 4,
+          "extraArcadeEdges": [
+            {
+              "edge": 5,
+              "depth": 2.4
+            }
+          ]
         },
         "heightM": 13.42
       },
@@ -29944,7 +30420,9 @@
         "gersId": "e1d39a3a-0df2-4de0-b47d-6860b93efa04",
         "frontage": {
           "edge": 1,
-          "commercial": true
+          "commercial": true,
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "flat"
         },
         "heightM": 12.52
       },
@@ -30202,7 +30680,9 @@
         "gersId": "e6c8c88c-1148-4562-8b7b-0749864c0dce",
         "frontage": {
           "edge": 0,
-          "commercial": true
+          "commercial": true,
+          "arcadeDepth": 1.95,
+          "arcadeStyle": "flat"
         },
         "heightM": 9.93
       },
@@ -30410,9 +30890,11 @@
         "roofShape": "flat",
         "gersId": "efd0da6d-22fd-4eed-86ec-5f56b4038d52",
         "frontage": {
-          "edge": 1,
-          "commercial": false,
-          "cornerEdge": 2
+          "edge": 2,
+          "commercial": true,
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "flat",
+          "cornerEdge": 1
         },
         "heightM": 6.92
       },
@@ -30660,7 +31142,9 @@
         "gersId": "f7c9126d-7c83-4592-94f0-2f11c66cab2e",
         "frontage": {
           "edge": 2,
-          "commercial": false
+          "commercial": true,
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "flat"
         },
         "heightM": 9.63
       },
@@ -30834,9 +31318,17 @@
         "roofShape": "flat",
         "gersId": "f983f8fa-d630-44b4-bf42-a94b46cca0a0",
         "frontage": {
-          "edge": 0,
-          "commercial": false,
-          "cornerEdge": 5
+          "edge": 5,
+          "commercial": true,
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "arched",
+          "cornerEdge": 0,
+          "extraArcadeEdges": [
+            {
+              "edge": 6,
+              "depth": 2.4
+            }
+          ]
         },
         "heightM": 12.7
       },
@@ -31006,7 +31498,8 @@
           "commercial": true,
           "arcadeDepth": 2.4,
           "arcadeStyle": "flat",
-          "cornerEdge": 3
+          "cornerEdge": 3,
+          "cornerArcadeDepth": 2.2
         },
         "heightM": 9.93
       },
@@ -31064,7 +31557,15 @@
         "frontage": {
           "edge": 5,
           "commercial": true,
-          "cornerEdge": 7
+          "cornerEdge": 7,
+          "extraArcadeEdges": [
+            {
+              "edge": 4,
+              "depth": 2.4
+            }
+          ],
+          "arcadeDepth": 2.2,
+          "arcadeStyle": "flat"
         },
         "heightM": 9.75
       },
@@ -31153,7 +31654,17 @@
           "commercial": true,
           "arcadeDepth": 2.2,
           "arcadeStyle": "flat",
-          "cornerEdge": 5
+          "cornerEdge": 5,
+          "extraArcadeEdges": [
+            {
+              "edge": 6,
+              "depth": 2.2
+            },
+            {
+              "edge": 8,
+              "depth": 2.2
+            }
+          ]
         },
         "heightM": 6.14
       },
@@ -31278,15 +31789,18 @@
         ],
         "synthetic": true,
         "street": "濱海一路",
-        "storeys": 1,
-        "heightM": 3.3,
+        "storeys": 2,
+        "heightM": 6.5,
         "facade": "shophouse",
         "tone": "tile",
         "roofShape": "shed",
         "frontage": {
           "edge": 0,
           "commercial": true,
-          "cornerEdge": 1
+          "arcadeDepth": 2.4,
+          "arcadeStyle": "flat",
+          "cornerEdge": 1,
+          "cornerArcadeDepth": 2.4
         },
         "shopfronts": [
           {
@@ -31548,7 +32062,8 @@
           "commercial": true,
           "arcadeDepth": 2.4,
           "arcadeStyle": "arched",
-          "cornerEdge": 3
+          "cornerEdge": 3,
+          "cornerArcadeDepth": 2.4
         }
       },
       {
@@ -31584,7 +32099,13 @@
           "edge": 0,
           "commercial": true,
           "arcadeDepth": 2.4,
-          "arcadeStyle": "arched"
+          "arcadeStyle": "arched",
+          "extraArcadeEdges": [
+            {
+              "edge": 1,
+              "depth": 2.2
+            }
+          ]
         }
       },
       {
@@ -31778,7 +32299,7 @@
           "arcadeDepth": 2.2,
           "arcadeStyle": "flat",
           "cornerEdge": 3,
-          "cornerArcadeDepth": 2.1
+          "cornerArcadeDepth": 2.2
         }
       },
       {
@@ -31852,7 +32373,7 @@
           "arcadeDepth": 2.4,
           "arcadeStyle": "flat",
           "cornerEdge": 3,
-          "cornerArcadeDepth": 1.95
+          "cornerArcadeDepth": 2.2
         }
       },
       {
@@ -31888,7 +32409,13 @@
           "edge": 0,
           "commercial": true,
           "arcadeDepth": 2.4,
-          "arcadeStyle": "flat"
+          "arcadeStyle": "flat",
+          "extraArcadeEdges": [
+            {
+              "edge": 1,
+              "depth": 2.2
+            }
+          ]
         }
       },
       {
@@ -32922,7 +33449,9 @@
         "frontage": {
           "edge": 0,
           "commercial": true,
-          "cornerEdge": 1
+          "cornerEdge": 1,
+          "cornerArcadeDepth": 2.4,
+          "arcadeStyle": "arched"
         },
         "sharedWalls": {
           "3": 6.81
@@ -33073,7 +33602,9 @@
         "frontage": {
           "edge": 0,
           "commercial": true,
-          "cornerEdge": 1
+          "cornerEdge": 1,
+          "cornerArcadeDepth": 2.4,
+          "arcadeStyle": "arched"
         },
         "sharedWalls": {
           "3": 6.81
@@ -33114,7 +33645,7 @@
           "arcadeDepth": 2.4,
           "arcadeStyle": "flat",
           "cornerEdge": 3,
-          "cornerArcadeDepth": 1.95
+          "cornerArcadeDepth": 2.2
         }
       },
       {
@@ -33150,7 +33681,13 @@
           "edge": 0,
           "commercial": true,
           "arcadeDepth": 2.4,
-          "arcadeStyle": "flat"
+          "arcadeStyle": "flat",
+          "extraArcadeEdges": [
+            {
+              "edge": 3,
+              "depth": 2.4
+            }
+          ]
         },
         "sharedWalls": {
           "1": 9.93
@@ -33623,7 +34160,13 @@
           "edge": 0,
           "commercial": true,
           "arcadeDepth": 2.2,
-          "arcadeStyle": "flat"
+          "arcadeStyle": "flat",
+          "extraArcadeEdges": [
+            {
+              "edge": 3,
+              "depth": 2.2
+            }
+          ]
         },
         "sharedWalls": {
           "1": 6.39
@@ -33897,7 +34440,13 @@
           "commercial": true,
           "arcadeDepth": 2.2,
           "arcadeStyle": "flat",
-          "cornerEdge": 1
+          "cornerEdge": 1,
+          "extraArcadeEdges": [
+            {
+              "edge": 3,
+              "depth": 2.2
+            }
+          ]
         }
       },
       {
@@ -34095,7 +34644,13 @@
           "commercial": true,
           "arcadeDepth": 2.2,
           "arcadeStyle": "flat",
-          "cornerEdge": 1
+          "cornerEdge": 1,
+          "extraArcadeEdges": [
+            {
+              "edge": 3,
+              "depth": 2.2
+            }
+          ]
         }
       },
       {
@@ -35031,7 +35586,8 @@
           "commercial": true,
           "arcadeDepth": 2.2,
           "arcadeStyle": "flat",
-          "cornerEdge": 1
+          "cornerEdge": 1,
+          "cornerArcadeDepth": 2.4
         },
         "sharedWalls": {
           "3": 6.39
@@ -35071,7 +35627,8 @@
           "commercial": true,
           "arcadeDepth": 2.2,
           "arcadeStyle": "flat",
-          "cornerEdge": 1
+          "cornerEdge": 1,
+          "cornerArcadeDepth": 2.4
         }
       },
       {
@@ -35107,7 +35664,13 @@
           "edge": 0,
           "commercial": true,
           "arcadeDepth": 2.2,
-          "arcadeStyle": "flat"
+          "arcadeStyle": "flat",
+          "extraArcadeEdges": [
+            {
+              "edge": 3,
+              "depth": 2.2
+            }
+          ]
         },
         "sharedWalls": {
           "1": 6.53
@@ -35268,7 +35831,7 @@
           "arcadeDepth": 2.2,
           "arcadeStyle": "flat",
           "cornerEdge": 1,
-          "cornerArcadeDepth": 2.1
+          "cornerArcadeDepth": 2.4
         },
         "sharedWalls": {
           "3": 6.67
@@ -35306,7 +35869,9 @@
         "frontage": {
           "edge": 0,
           "commercial": true,
-          "cornerEdge": 1
+          "cornerEdge": 1,
+          "cornerArcadeDepth": 2.4,
+          "arcadeStyle": "arched"
         }
       },
       {
@@ -35654,7 +36219,13 @@
           "edge": 0,
           "commercial": true,
           "arcadeDepth": 2.4,
-          "arcadeStyle": "arched"
+          "arcadeStyle": "arched",
+          "extraArcadeEdges": [
+            {
+              "edge": 3,
+              "depth": 2.2
+            }
+          ]
         }
       },
       {
@@ -35768,7 +36339,13 @@
           "edge": 0,
           "commercial": true,
           "arcadeDepth": 2.4,
-          "arcadeStyle": "arched"
+          "arcadeStyle": "arched",
+          "extraArcadeEdges": [
+            {
+              "edge": 3,
+              "depth": 2.2
+            }
+          ]
         },
         "sharedWalls": {
           "1": 6.39
@@ -35927,7 +36504,13 @@
           "edge": 0,
           "commercial": true,
           "arcadeDepth": 2.4,
-          "arcadeStyle": "arched"
+          "arcadeStyle": "arched",
+          "extraArcadeEdges": [
+            {
+              "edge": 1,
+              "depth": 2.2
+            }
+          ]
         },
         "sharedWalls": {
           "3": 9.79
@@ -36166,7 +36749,13 @@
           "commercial": true,
           "arcadeDepth": 2.4,
           "arcadeStyle": "arched",
-          "cornerEdge": 3
+          "cornerEdge": 3,
+          "extraArcadeEdges": [
+            {
+              "edge": 1,
+              "depth": 2.2
+            }
+          ]
         }
       },
       {
@@ -36639,7 +37228,13 @@
           "edge": 0,
           "commercial": true,
           "arcadeDepth": 2.4,
-          "arcadeStyle": "arched"
+          "arcadeStyle": "arched",
+          "extraArcadeEdges": [
+            {
+              "edge": 1,
+              "depth": 2.2
+            }
+          ]
         }
       },
       {
@@ -36785,7 +37380,13 @@
           "edge": 0,
           "commercial": true,
           "arcadeDepth": 2.2,
-          "arcadeStyle": "flat"
+          "arcadeStyle": "flat",
+          "extraArcadeEdges": [
+            {
+              "edge": 3,
+              "depth": 2.2
+            }
+          ]
         }
       },
       {
@@ -37247,7 +37848,13 @@
           "edge": 0,
           "commercial": true,
           "arcadeDepth": 2.2,
-          "arcadeStyle": "flat"
+          "arcadeStyle": "flat",
+          "extraArcadeEdges": [
+            {
+              "edge": 3,
+              "depth": 2.2
+            }
+          ]
         }
       },
       {
@@ -37758,7 +38365,13 @@
           "edge": 0,
           "commercial": true,
           "arcadeDepth": 2.2,
-          "arcadeStyle": "flat"
+          "arcadeStyle": "flat",
+          "extraArcadeEdges": [
+            {
+              "edge": 1,
+              "depth": 2.2
+            }
+          ]
         },
         "sharedWalls": {
           "3": 6.39
@@ -37984,7 +38597,9 @@
         "frontage": {
           "edge": 0,
           "commercial": true,
-          "cornerEdge": 3
+          "cornerEdge": 3,
+          "cornerArcadeDepth": 2.4,
+          "arcadeStyle": "flat"
         },
         "sharedWalls": {
           "1": 9.79
@@ -38389,7 +39004,9 @@
         "frontage": {
           "edge": 0,
           "commercial": true,
-          "cornerEdge": 3
+          "cornerEdge": 3,
+          "cornerArcadeDepth": 2.2,
+          "arcadeStyle": "flat"
         }
       },
       {
@@ -39366,7 +39983,7 @@
           "arcadeDepth": 2.4,
           "arcadeStyle": "flat",
           "cornerEdge": 1,
-          "cornerArcadeDepth": 2.1
+          "cornerArcadeDepth": 2.4
         }
       },
       {
@@ -39403,7 +40020,8 @@
           "commercial": true,
           "arcadeDepth": 2.4,
           "arcadeStyle": "arched",
-          "cornerEdge": 3
+          "cornerEdge": 3,
+          "cornerArcadeDepth": 2.4
         }
       },
       {
@@ -39595,7 +40213,13 @@
           "edge": 0,
           "commercial": true,
           "arcadeDepth": 2.4,
-          "arcadeStyle": "arched"
+          "arcadeStyle": "arched",
+          "extraArcadeEdges": [
+            {
+              "edge": 3,
+              "depth": 2.2
+            }
+          ]
         }
       },
       {
@@ -39631,7 +40255,13 @@
           "edge": 0,
           "commercial": true,
           "arcadeDepth": 2.4,
-          "arcadeStyle": "arched"
+          "arcadeStyle": "arched",
+          "extraArcadeEdges": [
+            {
+              "edge": 3,
+              "depth": 2.2
+            }
+          ]
         }
       },
       {
@@ -39747,7 +40377,7 @@
           "arcadeDepth": 2.4,
           "arcadeStyle": "arched",
           "cornerEdge": 1,
-          "cornerArcadeDepth": 2.1
+          "cornerArcadeDepth": 2.2
         }
       },
       {
@@ -39783,7 +40413,13 @@
           "edge": 0,
           "commercial": true,
           "arcadeDepth": 2.4,
-          "arcadeStyle": "arched"
+          "arcadeStyle": "arched",
+          "extraArcadeEdges": [
+            {
+              "edge": 3,
+              "depth": 2.2
+            }
+          ]
         },
         "sharedWalls": {
           "1": 9.51
@@ -39864,7 +40500,13 @@
           "commercial": true,
           "arcadeDepth": 2.4,
           "arcadeStyle": "arched",
-          "cornerEdge": 1
+          "cornerEdge": 1,
+          "extraArcadeEdges": [
+            {
+              "edge": 1,
+              "depth": 2.4
+            }
+          ]
         }
       },
       {
@@ -39902,7 +40544,7 @@
           "arcadeDepth": 2.4,
           "arcadeStyle": "arched",
           "cornerEdge": 3,
-          "cornerArcadeDepth": 1.8
+          "cornerArcadeDepth": 2.2
         }
       },
       {
@@ -40098,7 +40740,7 @@
           "arcadeDepth": 2.4,
           "arcadeStyle": "flat",
           "cornerEdge": 1,
-          "cornerArcadeDepth": 2.1
+          "cornerArcadeDepth": 2.4
         },
         "sharedWalls": {
           "3": 9.65
@@ -40137,7 +40779,13 @@
           "edge": 0,
           "commercial": true,
           "arcadeDepth": 2.4,
-          "arcadeStyle": "flat"
+          "arcadeStyle": "flat",
+          "extraArcadeEdges": [
+            {
+              "edge": 2,
+              "depth": 2.2
+            }
+          ]
         },
         "sharedWalls": {
           "1": 9.65
@@ -40176,7 +40824,13 @@
           "edge": 0,
           "commercial": true,
           "arcadeDepth": 2.4,
-          "arcadeStyle": "flat"
+          "arcadeStyle": "flat",
+          "extraArcadeEdges": [
+            {
+              "edge": 2,
+              "depth": 2.2
+            }
+          ]
         },
         "sharedWalls": {
           "3": 9.65,
@@ -40216,7 +40870,13 @@
           "edge": 0,
           "commercial": true,
           "arcadeDepth": 2.4,
-          "arcadeStyle": "flat"
+          "arcadeStyle": "flat",
+          "extraArcadeEdges": [
+            {
+              "edge": 2,
+              "depth": 2.2
+            }
+          ]
         },
         "sharedWalls": {
           "3": 6.67,
@@ -40256,7 +40916,13 @@
           "edge": 0,
           "commercial": true,
           "arcadeDepth": 2.4,
-          "arcadeStyle": "flat"
+          "arcadeStyle": "flat",
+          "extraArcadeEdges": [
+            {
+              "edge": 2,
+              "depth": 2.2
+            }
+          ]
         },
         "sharedWalls": {
           "3": 6.67,
@@ -40296,7 +40962,13 @@
           "edge": 0,
           "commercial": true,
           "arcadeDepth": 2.4,
-          "arcadeStyle": "flat"
+          "arcadeStyle": "flat",
+          "extraArcadeEdges": [
+            {
+              "edge": 2,
+              "depth": 2.2
+            }
+          ]
         },
         "sharedWalls": {
           "3": 9.51
@@ -40408,7 +41080,9 @@
         "frontage": {
           "edge": 0,
           "commercial": true,
-          "cornerEdge": 3
+          "cornerEdge": 3,
+          "cornerArcadeDepth": 2.4,
+          "arcadeStyle": "flat"
         }
       },
       {
@@ -52255,8 +52929,8 @@
         "width": 2.4,
         "points": [
           [
-            351.08,
-            686.96
+            346.0,
+            687.03
           ],
           [
             359.52,
@@ -55862,11 +56536,11 @@
           634.0
         ],
         [
-          351.0,
+          346.0,
           686.0
         ],
         [
-          356.0,
+          346.0,
           744.0
         ],
         [

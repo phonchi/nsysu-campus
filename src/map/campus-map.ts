@@ -5,6 +5,7 @@ import { HAMASEN_MAP_ALIASES, hamasenCardCategory, hamasenMarkerStyle, SHOP_MAP_
 type P = [number, number];
 interface MapData {
   hamasenPlaces?: HamasenMapPlace[];
+  campusPlaces?: HamasenMapPlace[];
   spawn: P; buildings: MapBuilding[]; background: P[][]; backgroundHoles?: Record<number,P[][]>;
   roads: { kind: string; width: number; points: P[] }[];
   railways?: { points: P[] }[];
@@ -26,6 +27,7 @@ const KINDS: Record<string, { label: string; color: string }> = {
   teaching: { label: '教學', color: '#c75f4a' },
   admin: { label: '行政・圖書', color: '#e9b949' },
   life: { label: '生活・運動', color: '#4d9a44' },
+  dorm: { label: '學生宿舍', color: '#6b57a6' },
   scenic: { label: '海景・藝文', color: '#2c7f91' },
 };
 const STORY_KEY = 'nsysu-story-v3';
@@ -60,7 +62,7 @@ export async function mountCampusMap(root: HTMLElement, base: string, hooks: Map
   ]);
 
   const data=withGateMapBuilding(rawData);
-  const hamasen = data.hamasenPlaces ?? [];
+  const hamasen = [...(data.hamasenPlaces ?? []), ...(data.campusPlaces ?? [])];
   const placeById = new Map(hamasen.map(p => [p.id, p]));
   const namedBuildings = data.buildings.filter(b => !placeById.has(HAMASEN_MAP_ALIASES[b.id]));
   const searchPlaces = [...namedBuildings, ...hamasen];

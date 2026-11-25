@@ -20,7 +20,7 @@ export interface ContextBuilding {
  id:string;name:string|null;polygon:Point2[];storeys:number;tone?:string;heightM?:number;stationExit?:number;
  district?:'hamasen';holes?:Point2[][];roofTone?:string;roofShape?:'flat'|'gable'|'hip'|'shed';signText?:string;
  facade?:'shophouse'|'residential'|'commercial'|'civic'|'warehouse'|'temple'|'station'|'platform';
- frontage?:{edge:number;arcadeDepth?:number;cornerEdge?:number;cornerArcadeDepth?:number;arcadeStyle?:'flat'|'arched';commercial?:boolean};
+ frontage?:{edge:number;arcadeDepth?:number;cornerEdge?:number;cornerArcadeDepth?:number;extraArcadeEdges?:{edge:number;depth:number}[];arcadeStyle?:'flat'|'arched';commercial?:boolean};
  synthetic?:true;street?:string;sharedWalls?:Record<string,number>;visualOnly?:true;
  shopfronts?:ContextShopfront[];
 }

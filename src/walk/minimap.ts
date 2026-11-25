@@ -5,8 +5,8 @@ import { HAMASEN_MAP_ALIASES, hamasenMarkerStyle, SHOP_MAP_SCALE, type HamasenMa
 type P = [number, number];
 export interface MapLabel { id: string; label: string; x: number; z: number; priority: number; minScale?: number; major?: boolean }
 export interface MapBuilding { id: string; name: string; kind: string; walkable: boolean; polygon: P[]; holes?: P[][] }
-interface MapData { base?: { url: string; bounds: [number, number, number, number] }; buildings: MapBuilding[]; background: P[][]; backgroundHoles?: Record<number,P[][]>; roads: { kind: string; width: number; points: P[] }[]; railways?: { points: P[] }[]; hamasenPlaces?: HamasenMapPlace[] }
-const KIND: Record<string, string> = { teaching: '#c75f4a', admin: '#e9b949', life: '#4d9a44', scenic: '#2c7f91' };
+interface MapData { base?: { url: string; bounds: [number, number, number, number] }; buildings: MapBuilding[]; background: P[][]; backgroundHoles?: Record<number,P[][]>; roads: { kind: string; width: number; points: P[] }[]; railways?: { points: P[] }[]; hamasenPlaces?: HamasenMapPlace[]; campusPlaces?: HamasenMapPlace[] }
+const KIND: Record<string, string> = { teaching: '#c75f4a', admin: '#e9b949', life: '#4d9a44', scenic: '#2c7f91', dorm: '#6b57a6' };
 
 /** The label sources used by the overview, shared with actual-data uniqueness checks. */
 export function collectMapLabels(buildings: readonly MapBuilding[], places: readonly MapLabel[], markers: readonly MapMarker[], graphLabels: readonly MapLabel[], selected?: string): MapLabel[] {
@@ -14,8 +14,8 @@ export function collectMapLabels(buildings: readonly MapBuilding[], places: read
   return [...graphLabels, ...places, ...buildings.filter(b => !markerIds.has(HAMASEN_MAP_ALIASES[b.id]) && !places.some(p => p.id === `building:${b.id}`)).map(b => {
     const [x, z] = polygonCenter(b.polygon);
     return { id: `building:${b.id}`, label: b.name, x, z, priority: b.walkable ? 4 : 2, minScale: b.walkable ? .35 : .65 };
-  }), ...markers.map(m => ({ ...m, major: m.poi?.kind === 'landmark', priority: m.id === selected ? 30 : m.poi?.kind === 'landmark' ? 9 + m.label.length : 1,
-    minScale: m.id === selected ? 0 : m.poi?.kind === 'shop' ? 1.35 : .8 }))];
+  }), ...markers.map(m => ({ ...m, major: m.poi?.kind === 'landmark', priority: m.id === selected ? 30 : m.poi?.kind === 'landmark' ? 9 + m.label.length : (m.poi?.kind === 'dining' || m.poi?.kind === 'dorm') ? 6 : 1,
+    minScale: m.id === selected ? 0 : m.poi?.kind === 'shop' ? 1.35 : (m.poi?.kind === 'dining' || m.poi?.kind === 'dorm') ? .48 : .8 }))];
 }
 
 export type MapMarkerKind = 'quest' | 'bike' | 'stamp' | 'bus' | 'restroom' | 'place' | 'building';
@@ -65,7 +65,7 @@ export class CampusMinimap {
     const data = await fetch(asset('data/campus-map.json')).then(r => r.json() as Promise<MapData>);
     this.buildings = data.buildings;
     this.background = data.background.flat();
-    this.destinationMarkers = hamasenMapMarkers(data.hamasenPlaces ?? []);
+    this.destinationMarkers = hamasenMapMarkers([...(data.hamasenPlaces ?? []), ...(data.campusPlaces ?? [])]);
     if (!data.base) return;
     const img = new Image(); img.src = asset(data.base.url); await img.decode();
     const [x0, z0, x1, z1] = this.bounds = data.base.bounds;
