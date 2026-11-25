@@ -16,7 +16,8 @@ from shapely.affinity import rotate, translate
 from shapely.geometry import LineString, Point, Polygon, box
 from shapely.ops import unary_union
 
-from apply_hamasen import DISTRICT, GRAPH, PLAY_AREA, POIS, ROOT, SHOPFRONTS, STRUCTURE, VEHICLE_KINDS, Terrain
+from apply_hamasen import (DISTRICT, GRAPH, MODEL_WAYS, PLAY_AREA, POIS, ROOT, SHOPFRONTS, STRUCTURE,
+                           VEHICLE_KINDS, Terrain, arcade_piers, ground_footprint)
 
 INFO = ROOT / 'public/data/campus-info.json'
 CONTENT = POIS.with_name('content-final.json')
@@ -89,7 +90,11 @@ def add_pois(graph):
     placements = read(MODELS / 'placements.json')
     terrain = Terrain()
     buildings = [b for kind in ('background', 'landmarks') for b in context[kind]]
-    footprints = [Polygon(b['polygon'], b.get('holes', [])) for b in buildings]
+    footprints = [ground_footprint(b) for b in buildings if not b.get('visualOnly')
+                  and b.get('osmId') not in MODEL_WAYS
+                  and not (b['id'].startswith('osm-') and b['id'].split('-')[1].isdigit()
+                           and int(b['id'].split('-')[1]) in MODEL_WAYS)]
+    footprints.extend(pier for b in buildings for pier in arcade_piers(b))
     footprints.extend(model_footprints(placements))
     solid = unary_union(footprints).buffer(.34)
     usable = DISTRICT.intersection(PLAY_AREA.buffer(-.38))
@@ -187,6 +192,7 @@ def info_text(original, cards):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--check', action='store_true')
+    parser.add_argument('--graph-only', action='store_true', help='Rebuild approaches without rewriting campus-info.json.')
     parser.add_argument('--graph', type=type(GRAPH), default=GRAPH)
     args = parser.parse_args()
     graph = read(args.graph)
@@ -199,8 +205,8 @@ def main():
         strip_v12(graph)
         graph_before = graph_text(graph)
     cards = add_pois(graph)
-    original = INFO.read_text(encoding='utf-8')
-    info = info_text(original, cards)
+    original = INFO.read_text(encoding='utf-8') if not args.graph_only else None
+    info = info_text(original, cards) if original is not None else None
     graph_stale = graph_text(graph) != graph_before
     if ((args.check or bus) and graph_stale) or (args.check and info != original):
         parser.exit(1, 'Hamasen POIs are stale. Regenerate the graph, POIs and bus layer in order.\n')

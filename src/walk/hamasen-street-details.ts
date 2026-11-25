@@ -1,8 +1,7 @@
 import * as T from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import type { CampusStructure, Point2 } from '../walk-types';
-import { geometryFootprints, projectRoadGeometry, roadRibbon, surfaceCutters } from '../world/road-surface';
-import { inPolygon, type Terrain } from '../world/terrain';
+import { type Terrain } from '../world/terrain';
 import type { TunnelProfile } from '../world/tunnel-surface';
 import { planHamasenStreetProps, streetPropKeepClear, type SightView, type StreetProp, type StreetPropKind } from './hamasen-street-props';
 import { FOLIAGE, leafMaterial, treeGeometry, type Family } from '../render/foliage';
@@ -73,40 +72,8 @@ export function hamasenStreetDetails(context:CampusStructure['context'],terrain:
  const group=new T.Group();group.name='Hamasen Linhai curb details';group.userData.terrainSeated=true;
  const district=context.hamasen?.polygon;
  if(!district)return group;
- const streets=context.roads.filter(road=>road.district==='hamasen'&&!road.bridge&&!road.tunnel);
- const frontages=streets.filter(road=>road.name==='臨海二路'&&!road.sidewalk);
- const pavementCuts=streets.flatMap(road=>{
-  const ribbon=roadRibbon(road.points,road.width);
-  const ring=geometryFootprints(ribbon);ribbon.dispose();return ring;
- });
- const cutters=surfaceCutters([...pavementCuts,...context.background.filter(b=>b.district==='hamasen').map(b=>b.polygon)]);
- const offset=(points:Point2[],amount:number)=>points.map((p,i):Point2=>{
-  const before=points[Math.max(0,i-1)],after=points[Math.min(points.length-1,i+1)];
-  const dx=after[0]-before[0],dz=after[1]-before[1],length=Math.hypot(dx,dz)||1;
-  return [p[0]-dz/length*amount,p[1]+dx/length*amount];
- });
- const stripe=(lines:Point2[][],width:number,height:number,color:string)=>{
-  const geometry=lines.map(points=>{
-   const flat=roadRibbon(points,width);
-   const mesh=projectRoadGeometry(flat,terrain,{offset:height,cutters,accept:(x,z)=>inPolygon([x,z],district)});
-   flat.dispose();return mesh;
-  });
-  const visible=geometry.filter(g=>g.getAttribute('position').count>0);
-  if(visible.length){
-   const merged=mergeGeometries(visible);
-   if(merged){
-    const mesh=new T.Mesh(merged,new T.MeshStandardMaterial({color,roughness:.96}));
-    mesh.receiveShadow=true;group.add(mesh);
-   }
-  }
-  for(const part of geometry)part.dispose();
- };
- const roadEdges=(margin:number)=>frontages.flatMap(r=>[-1,1].map(side=>offset(r.points,side*(r.width/2+margin))));
- stripe(roadEdges(.92),1.8,.009,'#b6b3a9');
- stripe(roadEdges(.105),.19,.015,'#888b86');
-
- // Signal and luminaires photographed at Linhai 2nd Road × Shoushan Street. The
- // street-furniture pass replaces them with instanced junction signals and lamps.
+ // Sidewalk, bevelled curb, drainage grates and markings are unified in hamasenStreetGround
+ // so they never coplanar-overlap or cut out recessed arcade floors.
  if(streetPropsEnabled())return group;
  const corner:Point2=[417.85,306.68];
  const ground=terrain.heightAt(...corner);

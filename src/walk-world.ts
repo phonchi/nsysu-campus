@@ -7,7 +7,7 @@ import * as T from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import type { WalkBuilding,WalkFloor,WalkRoom,Point2,WalkDestination,CampusStructure,ContextBuilding,StairCore,LiftSpec } from './walk-types';
 import { GROUND_Y, PLAY_BOUNDS, inPolygon, type Terrain } from './world/terrain';
-import { projectRoadGeometry } from './world/road-surface';
+import { projectRoadGeometry, subtractSurfacePolygon, surfaceCutters, type SurfaceVertex } from './world/road-surface';
 import { planScienceInterior, addScienceInterior } from './world/science-interiors';
 import { isHamasenModelFootprint } from './world/landmarks';
 export const FLOOR_HEIGHT=3.7;
@@ -46,25 +46,16 @@ function batchVisual(group:T.Group){
 const unitBox=new T.BoxGeometry(1,1,1);
 const area=(p:Point2[])=>Math.abs(p.reduce((s,a,i)=>{const b=p[(i+1)%p.length];return s+a[0]*b[1]-b[0]*a[1];},0)/2);
 
-function districtArcade(building:ContextBuilding) {
- const {polygon,frontage,holes}=building;
- const depth=frontage?.arcadeDepth ?? 0;
- if(depth<1 || depth>4 || !frontage || holes?.length)return;
- const a=polygon[frontage.edge], b=polygon[(frontage.edge+1)%polygon.length];
- if(!a||!b)return;
- const length=Math.hypot(b[0]-a[0],b[1]-a[1]);
- if(length<3)return;
- const tx=(b[0]-a[0])/length,tz=(b[1]-a[1])/length;
- const signed=polygon.reduce((sum,p,i)=>sum+p[0]*polygon[(i+1)%polygon.length][1]-p[1]*polygon[(i+1)%polygon.length][0],0);
- const nx=-tz*Math.sign(signed),nz=tx*Math.sign(signed);
+export interface ArcadeEdgeCut {
+ edge:number;a:Point2;tx:number;tz:number;nx:number;nz:number;length:number;depth:number;
+}
+function clipHalfPlane(poly:Point2[],a:Point2,nx:number,nz:number,depth:number){
  const inward=([x,z]:Point2)=>(x-a[0])*nx+(z-a[1])*nz;
- // Restrict a recess to a single straight frontage. This avoids spanning a side
- // wing or cutting through more than one connected piece of the building.
- if(polygon.some(p=>inward(p)<-.05))return;
+ if(poly.some(p=>inward(p)<-1.25))return;
  const back:Point2[]=[];
  let crossings=0;
- for(let i=0;i<polygon.length;i++){
-  const p=polygon[i],q=polygon[(i+1)%polygon.length],dp=inward(p)-depth,dq=inward(q)-depth;
+ for(let i=0;i<poly.length;i++){
+  const p=poly[i],q=poly[(i+1)%poly.length],dp=inward(p)-depth,dq=inward(q)-depth;
   if(dp>=0)back.push(p);
   if((dp>=0)!==(dq>=0)){
    const t=dp/(dp-dq);
@@ -72,8 +63,110 @@ function districtArcade(building:ContextBuilding) {
    crossings++;
   }
  }
- if(crossings!==2 || back.length<3 || area(back)<area(polygon)*.4)return;
- return {a,tx,tz,nx,nz,length,depth,back};
+ if(crossings!==2||back.length<3)return;
+ return back;
+}
+function edgeFrame(polygon:Point2[],index:number,signed:number){
+ const a=polygon[index],b=polygon[(index+1)%polygon.length];
+ if(!a||!b)return;
+ const length=Math.hypot(b[0]-a[0],b[1]-a[1]);
+ if(length<2.9)return;
+ const tx=(b[0]-a[0])/length,tz=(b[1]-a[1])/length;
+ const nx=-tz*Math.sign(signed),nz=tx*Math.sign(signed);
+ return {edge:index,a,tx,tz,nx,nz,length};
+}
+function arcadeStripRect(cut:ArcadeEdgeCut,pad=.06):Point2[]{
+ const at=(u:number,v:number):Point2=>[cut.a[0]+cut.tx*u+cut.nx*v,cut.a[1]+cut.tz*u+cut.nz*v];
+ return [at(0,-pad),at(cut.length,-pad),at(cut.length,cut.depth),at(0,cut.depth)];
+}
+function polyAreaVerts(v:readonly SurfaceVertex[]){
+ return Math.abs(v.reduce((s,a,i)=>{const b=v[(i+1)%v.length];return s+a.x*b.z-b.x*a.z;},0)/2);
+}
+function segDist2D(px:number,pz:number,ax:number,az:number,bx:number,bz:number){
+ const dx=bx-ax,dz=bz-az,l2=dx*dx+dz*dz;
+ const t=l2?T.MathUtils.clamp(((px-ax)*dx+(pz-az)*dz)/l2,0,1):0;
+ return Math.hypot(px-ax-dx*t,pz-az-dz*t);
+}
+function subtractArcadePieces(polygon:Point2[],holes:Point2[][]|undefined,cuts:readonly ArcadeEdgeCut[]){
+ const allPts=[...polygon,...(holes??[]).flat()];
+ const tris=T.ShapeUtils.triangulateShape(polygon.map(([x,z])=>new T.Vector2(x,z)),(holes??[]).map(h=>h.map(([x,z])=>new T.Vector2(x,z))));
+ if(!tris.length)return;
+ const cutters=surfaceCutters(cuts.map(c=>arcadeStripRect(c)));
+ let pieces:SurfaceVertex[][]=tris.map(ix=>ix.map(i=>({x:allPts[i][0],z:allPts[i][1],u:0,v:0})));
+ for(const cutter of cutters)pieces=pieces.flatMap(p=>subtractSurfacePolygon(p,cutter));
+ pieces=pieces.filter(p=>p.length>=3&&polyAreaVerts(p)>1e-4);
+ return pieces.length?pieces:undefined;
+}
+function buildPrismFromPieces(pieces:readonly SurfaceVertex[][],rings:readonly Point2[][],cuts:readonly ArcadeEdgeCut[],lo:number,hi:number){
+ const boundarySegs:[Point2,Point2][]=[];
+ for(const r of rings)for(let i=0;i<r.length;i++)boundarySegs.push([r[i],r[(i+1)%r.length]]);
+ for(const c of cuts){const rect=arcadeStripRect(c,0);for(let i=0;i<rect.length;i++)boundarySegs.push([rect[i],rect[(i+1)%rect.length]]);}
+ const isBoundary=(mx:number,mz:number)=>boundarySegs.some(([a,b])=>segDist2D(mx,mz,a[0],a[1],b[0],b[1])<.025);
+ const pos:number[]=[];
+ const pushTri=(a:T.Vector3,b:T.Vector3,c:T.Vector3,dir:T.Vector3)=>{
+  const n=b.clone().sub(a).cross(c.clone().sub(a));
+  if(n.lengthSq()<1e-10)return;
+  for(const v of n.dot(dir)<0?[a,c,b]:[a,b,c])pos.push(v.x,v.y,v.z);
+ };
+ const up=new T.Vector3(0,1,0),down=new T.Vector3(0,-1,0);
+ for(const p of pieces){
+  const cx=p.reduce((s,v)=>s+v.x,0)/p.length,cz=p.reduce((s,v)=>s+v.z,0)/p.length;
+  for(let i=1;i<p.length-1;i++){
+   pushTri(new T.Vector3(p[0].x,hi,p[0].z),new T.Vector3(p[i].x,hi,p[i].z),new T.Vector3(p[i+1].x,hi,p[i+1].z),up);
+   pushTri(new T.Vector3(p[0].x,lo,p[0].z),new T.Vector3(p[i].x,lo,p[i].z),new T.Vector3(p[i+1].x,lo,p[i+1].z),down);
+  }
+  for(let i=0;i<p.length;i++){
+   const a=p[i],b=p[(i+1)%p.length],mx=(a.x+b.x)/2,mz=(a.z+b.z)/2;
+   if(!isBoundary(mx,mz))continue;
+   const dx=b.x-a.x,dz=b.z-a.z;
+   let nx=-dz,nz=dx;
+   if(nx*(cx-mx)+nz*(cz-mz)>0){nx=-nx;nz=-nz;}
+   const out=new T.Vector3(nx,0,nz);
+   const a0=new T.Vector3(a.x,lo,a.z),b0=new T.Vector3(b.x,lo,b.z),b1=new T.Vector3(b.x,hi,b.z),a1=new T.Vector3(a.x,hi,a.z);
+   pushTri(a0,b0,b1,out);pushTri(a0,b1,a1,out);
+  }
+ }
+ const g=new T.BufferGeometry();
+ g.setAttribute('position',new T.Float32BufferAttribute(pos,3));
+ g.computeVertexNormals();
+ return g;
+}
+function districtArcade(building:ContextBuilding) {
+ const {polygon,frontage,holes}=building;
+ const depth=frontage?.arcadeDepth ?? 0;
+ if(depth<1 || depth>4 || !frontage)return;
+ const signed=polygon.reduce((sum,p,i)=>sum+p[0]*polygon[(i+1)%polygon.length][1]-p[1]*polygon[(i+1)%polygon.length][0],0);
+ if(Math.abs(signed)<1e-3)return;
+ const totalArea=area(polygon)-(holes??[]).reduce((s,h)=>s+area(h),0);
+ const primary=edgeFrame(polygon,frontage.edge,signed);
+ if(!primary)return;
+ const cuts:ArcadeEdgeCut[]=[{...primary,depth}];
+ if(frontage.cornerEdge!==undefined&&frontage.cornerEdge!==frontage.edge){
+  const cornerDepth=frontage.cornerArcadeDepth ?? Math.min(depth,2.05);
+  const corner=cornerDepth>=1&&cornerDepth<=4?edgeFrame(polygon,frontage.cornerEdge,signed):undefined;
+  if(corner)cuts.push({...corner,depth:cornerDepth});
+ }
+ if(!holes?.length){
+  const back1=clipHalfPlane(polygon,primary.a,primary.nx,primary.nz,depth);
+  if(back1&&area(back1)>=totalArea*.34){
+   let back=back1;
+   const activeCuts=[cuts[0]];
+   if(cuts[1]){
+    const back2=clipHalfPlane(back,cuts[1].a,cuts[1].nx,cuts[1].nz,cuts[1].depth);
+    if(back2&&area(back2)>=totalArea*.28){back=back2;activeCuts.push(cuts[1]);}
+   }
+   if(activeCuts.length===cuts.length)return {cuts:activeCuts,depth,cornerDepth:activeCuts[1]?.depth??0,back};
+  }
+ }
+ // Non-convex or holed footprints (e.g. L-shaped shared shophouses): subtract bounded arcade strips directly.
+ const pieces=subtractArcadePieces(polygon,holes,cuts);
+ const remArea=pieces?.reduce((s,p)=>s+polyAreaVerts(p),0)??0;
+ if(pieces&&remArea>=totalArea*.28)return {cuts,depth,cornerDepth:cuts[1]?.depth??0,pieces};
+ if(cuts.length>1){
+  const single=subtractArcadePieces(polygon,holes,[cuts[0]]);
+  const singleArea=single?.reduce((s,p)=>s+polyAreaVerts(p),0)??0;
+  if(single&&singleArea>=totalArea*.32)return {cuts:[cuts[0]],depth,cornerDepth:0,pieces:single};
+ }
 }
 
 function addDistrictBuilding(group:T.Group,collision:T.Group,building:ContextBuilding,ground:(x:number,z:number)=>number){
@@ -93,7 +186,9 @@ function addDistrictBuilding(group:T.Group,collision:T.Group,building:ContextBui
   column.rotation.y=yaw;column.userData.hamasenColumn=true;
   if(!building.visualOnly)collision.add(column.clone());
  };
- let arcadeDepth=0;
+ let arcadeDepth=0,cornerArcadeDepth=0;
+ const arcadeEdges:Record<number,number>={};
+ const placedColumns:{x:number;z:number;yaw:number;size:number;bottom:number;top:number}[]=[];
  if(building.facade==='platform'){
   const deck=baseY+.16,eave=topY-.24;
   addSolid(polygon,lowerY,deck,holes).userData.hamasenPlatformDeck=true;
@@ -110,28 +205,43 @@ function addDistrictBuilding(group:T.Group,collision:T.Group,building:ContextBui
    }
   }
  }else{
-  const arcade=topY-baseY>3.6?districtArcade(building):undefined;
+  const arcade=topY-baseY>3.55?districtArcade(building):undefined;
   if(arcade){
    arcadeDepth=arcade.depth;
-   const ceiling=baseY+2.85;
-   addSolid(arcade.back,lowerY,ceiling);
-   addSolid(polygon,ceiling,topY);
-   const {a,tx,tz,nx,nz,length}=arcade,count=Math.max(1,Math.round(length/4.8));
-   const shops=building.shopfronts?.filter(s=>s.edge===building.frontage?.edge)??[];
-   const columns=new Set<number>();
-   for(let i=0;i<=count;i++){
-    const along=T.MathUtils.clamp(length*i/count,.24,length-.24);
-    const shop=shops.find(s=>Math.abs(along-s.along)<s.width/2-.27);
-    const side=shop && along<shop.along?-1:1;
-    columns.add(shop?T.MathUtils.clamp(shop.along+side*(shop.width/2+.04),.24,length-.24):along);
+   cornerArcadeDepth=arcade.cornerDepth;
+   const ceiling=Math.min(topY-.35,baseY+3.02);
+   if(arcade.back)addSolid(arcade.back,lowerY,ceiling);
+   else if(arcade.pieces){
+    const geometry=buildPrismFromPieces(arcade.pieces,[polygon,...(holes??[])],arcade.cuts,lowerY,ceiling);
+    const mesh=new T.Mesh(geometry,mat('#c5c3bc'));
+    mesh.castShadow=true;mesh.receiveShadow=true;
+    group.add(mesh);if(!building.visualOnly)collision.add(mesh.clone());
    }
-   for(const at of columns){
-    const x=a[0]+tx*at+nx*.23,z=a[1]+tz*at+nz*.23;
-    addColumn(x,z,ground(x,z)-.04,ceiling,.33,-Math.atan2(tz,tx));
+   addSolid(polygon,ceiling,topY,holes);
+   const pierSize=.45,inset=.25;
+   for(const cut of arcade.cuts){
+    arcadeEdges[cut.edge]=cut.depth;
+    const {a,tx,tz,nx,nz,length}=cut,count=Math.max(1,Math.round(length/4.6));
+    const shops=building.shopfronts?.filter(s=>s.edge===cut.edge)??[];
+    const columns=new Set<number>();
+    for(let i=0;i<=count;i++){
+     const along=T.MathUtils.clamp(length*i/count,.26,length-.26);
+     const shop=shops.find(s=>Math.abs(along-s.along)<Math.min(s.width/2-.28,1.35));
+     const side=shop && along<shop.along?-1:1;
+     columns.add(shop?T.MathUtils.clamp(shop.along+side*(shop.width/2+.06),.26,length-.26):along);
+    }
+    const yaw=-Math.atan2(tz,tx);
+    for(const at of columns){
+     const x=a[0]+tx*at+nx*inset,z=a[1]+tz*at+nz*inset;
+     if(placedColumns.some(c=>Math.hypot(c.x-x,c.z-z)<.82))continue;
+     const colBottom=ground(x,z)-.04;
+     addColumn(x,z,colBottom,ceiling,pierSize,yaw);
+     placedColumns.push({x,z,yaw,size:pierSize,bottom:colBottom,top:ceiling});
+    }
    }
   }else addSolid(polygon,lowerY,topY,holes);
  }
- group.userData.hamasenVolume={baseY,topY,arcadeDepth};
+ group.userData.hamasenVolume={baseY,topY,arcadeDepth,cornerArcadeDepth,arcadeEdges,columns:placedColumns};
 }
 
 export const storey=(f:WalkFloor,maxLevel=4)=>f.storeyIndex??(f.level===99?maxLevel+1:f.level);
@@ -257,6 +367,17 @@ export function buildWalkWorld(data:WalkBuilding[],structure:CampusStructure,ter
   const outsidePlay=(x:number,z:number)=>(x>952||z>700)&&(!district||!inPolygon([x,z],district));
   const solid=new T.Mesh(terrain.mesh(PLAY_BOUNDS,(x,z)=>pad(x,z)||outsidePlay(x,z)),mat('#8b9d79'));
   solid.name='DEM terrain collision';out.collision.add(solid);
+  if(harbor&&harbor.length>=3){
+   // Keep players safely on the waterfront promenades along Gushan 1st Canal without walking onto water.
+   const quayGuards=new T.Group();quayGuards.name='Hamasen canal quay guardrails';
+   for(let i=0;i<harbor.length;i++){
+    const a=harbor[i],b=harbor[(i+1)%harbor.length];
+    if(Math.min(a[1],b[1])>=744||Math.max(a[0],b[0])<284)continue;
+    const mx=(a[0]+b[0])/2,mz=(a[1]+b[1])/2;
+    wall(quayGuards,a,b,terrain.heightAt(mx,mz)-.15,1.35,'#888',.28);
+   }
+   out.collision.add(quayGuards);
+  }
  }else{
   const ground=plane(out.display,rect(gx0,gz0,gx1,gz1),groundHoles,-.055,'#8b9d79');ground.castShadow=false;out.collision.add(ground.clone());
   const sea=box(out.display,900,.4,1400,gx0-450,-.6,75,'#629caa');sea.castShadow=false;

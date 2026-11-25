@@ -7,10 +7,14 @@ export interface SignBoard {
   vertical?:boolean;
   cloth?:boolean;
   subtitle?:string;
+  badge?:'pelican'|'ice'|'tea'|'sun'|'bowl';
+  targetAspect?:number;
+  accent?:string;
 }
 
 /** Logical canvas aspect. The atlas cell is stretched on upload and restored by the panel. */
 export function signAspect(board:SignBoard) {
+  if(board.targetAspect&&board.targetAspect>0)return board.targetAspect;
   if(board.vertical)return .52;
   if(board.subtitle)return 4.5;
   return Math.max(1.9,Array.from(board.text).length*.79+.62);
@@ -25,10 +29,10 @@ export function fitSign(board:SignBoard, maxWidth:number, maxHeight:number) {
 /** Local façade offsets measured from the forward wall, even for recessed arcades. */
 export function fasciaSign(ceiling:number, wallTop:number, shelter:number){
   if(shelter){
-    const canopyY=Math.min(wallTop-.44,ceiling-.27);
-    return {canopyY, signY:canopyY+.25, signOffset:shelter+.018};
+    const canopyY=Math.min(wallTop-.48,ceiling-.31);
+    return {canopyY, signY:canopyY+.31, signOffset:Math.max(.22,shelter*.42)};
   }
-  return {canopyY:0, signY:Math.min(wallTop-.29,ceiling+.04), signOffset:.16};
+  return {canopyY:0, signY:Math.min(wallTop-.29,ceiling+.05), signOffset:.18};
 }
 
 export function paintSign(ctx:CanvasRenderingContext2D, board:SignBoard) {
@@ -37,11 +41,56 @@ export function paintSign(ctx:CanvasRenderingContext2D, board:SignBoard) {
   ctx.fillStyle=board.background;
   ctx.fillRect(0,0,width,96);
   if(board.cloth){
-    ctx.fillStyle='#dddac330';
-    for(let i=1;i<3;i++)ctx.fillRect(i*width/3-1,2,2,94);
-    for(let i=1;i<3;i++)ctx.clearRect(i*width/3-1,50,2,46);
+    ctx.fillStyle='#1b273d';
+    ctx.fillRect(0,0,width,12);
+    const flaps=Math.max(3,Math.min(6,Math.round(width/115)));
+    ctx.fillStyle='#dddac338';
+    for(let i=1;i<flaps;i++)ctx.fillRect(i*width/flaps-1.5,8,3,88);
+    for(let i=1;i<flaps;i++)ctx.clearRect(i*width/flaps-2,44,4,52);
+    if(width>260&&ctx.strokeRect){
+      ctx.strokeStyle=board.ink;ctx.lineWidth=2;
+      ctx.strokeRect(24,20,52,52);
+      ctx.fillStyle=board.ink;ctx.fillRect(36,34,28,4);ctx.fillRect(36,46,28,4);ctx.fillRect(48,28,4,36);
+    }
   }else{
-    ctx.strokeStyle=board.ink;ctx.lineWidth=1.5;ctx.strokeRect(5,5,width-10,86);
+    if(board.accent){
+      ctx.fillStyle=board.accent;
+      ctx.fillRect(0,78,width,18);
+    }
+    ctx.strokeStyle=board.ink;ctx.lineWidth=2;ctx.strokeRect(5,5,width-10,86);
+    if(width>340){
+      ctx.fillStyle=board.accent??board.ink;
+      ctx.fillRect(14,14,10,68);
+      ctx.fillRect(width-24,14,10,68);
+    }
+  }
+  let textCenterX=width/2, textAvailable=width-32;
+  if(board.badge&&!board.vertical&&width>=260){
+    const bx=42;
+    if(board.badge==='pelican'){
+      // Dandan Burger style chef-hat pelican emblem on left side of fascia.
+      ctx.fillStyle='#d63830';ctx.fillRect(14,11,76,74);
+      ctx.fillStyle='#fff9ee';ctx.fillRect(26,15,32,16);ctx.fillRect(30,29,26,38);
+      ctx.fillStyle='#f4a62a';ctx.fillRect(52,36,28,13);ctx.fillRect(54,50,22,5);
+      ctx.fillStyle='#232629';ctx.fillRect(44,34,5,5);
+    }else if(board.badge==='ice'){
+      ctx.fillStyle='#f7d86a';ctx.fillRect(18,14,68,68);
+      ctx.fillStyle='#fffaf0';ctx.fillRect(28,24,48,26);
+      ctx.fillStyle='#c8433a';ctx.fillRect(34,20,36,12);
+      ctx.fillStyle='#3b6c8c';ctx.fillRect(24,50,56,18);
+    }else if(board.badge==='tea'){
+      ctx.fillStyle=board.ink;ctx.fillRect(20,16,58,64);
+      ctx.fillStyle=board.background;ctx.fillRect(28,24,42,48);
+      ctx.fillStyle=board.ink;ctx.fillRect(46,12,6,18);
+    }else if(board.badge==='sun'){
+      ctx.fillStyle='#e89a3c';ctx.fillRect(20,18,60,60);
+      ctx.fillStyle='#faf3dd';ctx.fillRect(30,34,40,28);
+    }else{
+      ctx.fillStyle=board.ink;ctx.fillRect(20,22,56,52);
+      ctx.fillStyle=board.background;ctx.fillRect(26,28,44,26);
+    }
+    textCenterX=bx+44+(width-(bx+64))/2;
+    textAvailable=width-(bx+82);
   }
   ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=board.ink;
   const font=(size:number)=>`700 ${size}px "Noto Sans TC", "Noto Sans CJK TC", sans-serif`;
@@ -52,12 +101,12 @@ export function paintSign(ctx:CanvasRenderingContext2D, board:SignBoard) {
   };
   if(board.vertical){
     const glyphs=Array.from(board.text), interval=80/glyphs.length;
-    glyphs.forEach((glyph,i)=>line(glyph,width/2,8+interval*(i+.5),Math.min(32,interval*.87),width-15));
+    glyphs.forEach((glyph,i)=>line(glyph,width/2,8+interval*(i+.5),Math.min(34,interval*.88),width-14));
   }else if(board.subtitle){
-    line(board.text,width*.26,49,61,width*.46-12);
-    line('燒肉飯',width*.71,32,29,width*.42-12);
-    line(board.subtitle,width*.71,67,29,width*.42-12);
-  }else line(board.text,width/2,50,65,width-25);
+    line(board.text,width*.30,48,62,width*.46-14);
+    line('燒肉飯',width*.72,31,30,width*.42-14);
+    line(board.subtitle,width*.72,66,30,width*.42-14);
+  }else line(board.text,textCenterX,board.accent?43:49,64,Math.max(48,textAvailable));
 }
 
 const shopLabels = {
