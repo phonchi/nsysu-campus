@@ -196,8 +196,8 @@ ${c.links?.length ? `<p class="cm-links">${c.links.map(l => `<a href="${esc(l.ur
 
   const search = root.querySelector<HTMLInputElement>('.cm-search input')!, results = root.querySelector<HTMLElement>('.cm-results')!;
   search.addEventListener('input', () => {
-    const q = search.value.trim(); if (!q) { results.hidden = true; return; }
-    const hits = searchPlaces.filter(b => (b.name + b.id + (info.buildings[b.id]?.name ?? '')).includes(q) || b.id.toLowerCase() === q.toLowerCase()).slice(0, 8);
+    const q = search.value.trim().normalize('NFKC').replace(/露易莎/g, '路易莎').replace(/山海婁/g, '山海樓'); if (!q) { results.hidden = true; return; }
+    const hits = searchPlaces.filter(b => (b.name + b.id + (info.buildings[b.id]?.name ?? '')).toLowerCase().includes(q.toLowerCase())).slice(0, 8);
     results.innerHTML = hits.length ? hits.map(b => `<button data-pick="${esc(b.id)}">${esc(b.name)}<small>${esc('poi' in b ? hamasenCardCategory(b.kind, b.category) : KINDS[b.kind]?.label)}</small></button>`).join('') : '<p>找不到符合的地點。</p>';
     results.hidden = false;
   });

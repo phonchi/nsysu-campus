@@ -869,12 +869,14 @@ export async function openWalkthrough(opts: WalkOptions = {}) {
     const path=planRoute(new T.Vector3(...d.position));
     return path.length?path.reduce((sum,p,i)=>sum+(i?p.distanceTo(path[i-1]):physics.position.distanceTo(p)),0):Infinity;
   })}).matches;
-  searchInput.addEventListener('keydown',e=>{if(e.key!=='Enter')return;e.preventDefault();const first=searchMatches(searchInput.value.normalize('NFKC').toUpperCase().replace(/\s/g, ''))[0];lastSearch=undefined;if(first){setMenu(false);goTo(first);}});
+  const normQuery=(s:string)=>s.normalize('NFKC').toUpperCase().replace(/\s/g,'').replace(/露易莎/g,'路易莎').replace(/山海婁/g,'山海樓');
+  const placeMatches=(term:string)=>(routes?.anchorIds ?? []).filter(id => normQuery(routes!.label(id)).includes(term)).slice(0, 8);
+  searchInput.addEventListener('keydown',e=>{if(e.key!=='Enter')return;e.preventDefault();const term=normQuery(searchInput.value);const first=searchMatches(term)[0];const firstPlace=placeMatches(term)[0];lastSearch=undefined;if(firstPlace&&!first){setMenu(false);walkOutdoor(firstPlace);}else if(first){setMenu(false);goTo(first);}});
   searchInput.addEventListener('input', () => {
-    const term = searchInput.value.normalize('NFKC').toUpperCase().replace(/\s/g, ''), results = get('.walk-results');
+    const term = normQuery(searchInput.value), results = get('.walk-results');
     if (!term) { results.hidden = true; return; }
     lastSearch = undefined; const matches = searchMatches(term);
-    const places = (routes?.anchorIds ?? []).filter(id => routes!.label(id).normalize('NFKC').toUpperCase().includes(term)).slice(0, 6);
+    const places = placeMatches(term);
     results.innerHTML = matches.length || places.length ? places.map(id => `<button data-place="${safe(id)}"><strong>${safe(routes!.label(id))}</strong><small>校園步道 · 帶我走過去 →</small></button>`).join('') + matches.map(d => `<button data-destination="${safe(d.id)}"><strong>${safe(d.displayName && d.displayName !== d.label ? `${d.label} ${d.displayName}` : d.label)}</strong><small>${safe(d.floorId)} · 帶我走到門口 →</small></button>`).join('')
       : '<div class="walk-empty">找不到這個名稱。可試房號前綴，或選擇上方大樓與樓層探索。</div>';
     results.hidden = false;
