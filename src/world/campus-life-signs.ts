@@ -21,7 +21,7 @@ const CAMPUS_SIGNS: readonly CampusSignSpec[] = [
   { id: 'sc-coop', title: '理院福利社（B1）', sub: '週一至五 07:30–17:30', color: '#287659', x: 10.6, z: 108.5, yaw: Math.PI * .5, width: 2.2, height: .88 },
   { id: 'cuiheng-e', title: '翠亨 E 餐廳（E 餐）', sub: '翠亨 E 棟 1F・三餐麵食', color: '#c25232', x: 196.8, z: -186.5, yaw: Math.PI * .15, width: 2.3, height: .92 },
   { id: 'wuling-milo', title: '武嶺米羅餐廳', sub: '武嶺一村・三餐與宵夜', color: '#a8442a', x: -267.2, z: -305.5, yaw: -Math.PI * .5, width: 2.3, height: .92 },
-  { id: 'louisa-360', title: 'LOUISA COFFEE 路易莎', sub: '360 藝文空間 1F・07:00–21:00', color: '#6b4630', x: -176.5, z: -70.5, yaw: 0, width: 2.4, height: .92 },
+  { id: 'louisa-360', title: '路易莎', sub: '360 藝文空間 1F・07:00–21:00', color: '#6b4630', x: -176.5, z: -70.5, yaw: 0, width: 2.2, height: .92 },
   { id: 'wuling-dorm', title: '武嶺宿舍區（一～四村）', sub: '武嶺服務站・聽濤堂・宿服中心', color: '#5f4c94', x: -268.2, z: -396.5, yaw: Math.PI * .5, width: 2.4, height: .92 },
   { id: 'cuiheng-h', title: '翠亨山莊 H 棟', sub: '1F 萊爾富超商・交誼廳', color: '#5f4c94', x: 169.4, z: -97.6, yaw: 0, width: 2.2, height: .88 },
   { id: 'cuiheng-l', title: '翠亨山莊 L 棟（雨樹）', sub: '雨樹服務站・公共廚房・雨豆屋', color: '#5f4c94', x: 212.5, z: -185.6, yaw: Math.PI, width: 2.4, height: .92 },
